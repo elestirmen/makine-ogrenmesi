@@ -10,7 +10,9 @@ const TOK={'--ink':'#12181A','--ink-soft':'#5C6A6B','--surface':'#FFFFFF','--sur
  '--b':'#B85C15','--c':'#6D4AA8','--d':'#4C7A21','--good':'#2E7D46','--warn':'#B4610F','--bad':'#B02020',
  '--on-accent':'#FFFFFF','--on-accent-soft':'rgba(255,255,255,.88)','--r':'10px'};
 
-const W=930,H=520;
+/* Referans genişlik 930 px = 1280x720 projeksiyonda tuvale kalan yer.
+   ML_W/ML_H ile dar yerleşim dalları da sınanabilir (bkz. CLAUDE.md · Doğrulama). */
+const W=+(process.env.ML_W||930), H=+(process.env.ML_H||520);
 let warnings=[];
 function ctx2d(){
   const nan=(...a)=>{for(const v of a) if(typeof v==='number'&&!Number.isFinite(v)) warnings.push('canvas çizimine NaN/Infinity geldi: '+a.join(','));};
@@ -48,6 +50,10 @@ function mkEl(tag,id){
     get offsetWidth(){return W;},
     classList:{add(){},remove(){},contains(){return false;},toggle(){}},
   };
+  /* "bu gösterge draw() sonrası hiç yazıldı mı" denetimi için yazımları işaretle */
+  el.__written=false;
+  { let _tc=''; Object.defineProperty(el,'textContent',
+      {get:()=>_tc, set:(v)=>{_tc=String(v); el.__written=true;}, configurable:true}); }
   el.width=W; el.height=H;
   { const c=ctx2d(); c.__cv=el; el.getContext=()=>c; }
   return el;
@@ -57,6 +63,11 @@ const REG=new Map();
 for(const m of html.matchAll(/id="([^"]+)"/g)){ REG.set(m[1], mkEl(m[1].startsWith('c-')?'canvas':'div', m[1])); }
 for(const m of html.matchAll(/<(input|button|output|section|canvas|nav|main|aside)[^>]*id="([^"]+)"/g)){
   REG.set(m[2], mkEl(m[1], m[2]));
+}
+/* her modülün .stats değer kutuları: <span class="v" id="..."> */
+const STATS=new Map();
+for(const m of html.matchAll(/<section id="(m-[\w-]+)"[^>]*>([\s\S]*?)<\/section>/g)){
+  STATS.set(m[1], [...m[2].matchAll(/class="v" id="([\w-]+)"/g)].map(x=>x[1]));
 }
 const doc={
   documentElement:mkEl('html'),
@@ -82,6 +93,14 @@ const sandbox={
   Math,JSON,Number,String,Array,Object,Float64Array,Float32Array,Uint8ClampedArray,Set,Map,Date,isNaN,parseFloat,parseInt,Infinity,NaN,undefined,
 };
 sandbox.window=sandbox; sandbox.globalThis=sandbox;
+/* adres çubuğu taklidi: uygulama hash yönlendirmesi kullanıyor */
+sandbox.location={hash:'',pathname:'/',search:'',href:'/'};
+sandbox.history={
+  pushState(_a,_b,url){ const u=String(url==null?'':url);
+    sandbox.location.hash = u.startsWith('#') ? u : ''; },
+  replaceState(_a,_b,url){ sandbox.history.pushState(_a,_b,url); },
+  back(){}, forward(){}, go(){},
+};
 vm.createContext(sandbox);
 try{
   vm.runInContext(script+"\n;globalThis.__M=MODULES;globalThis.__SEQ=SEQ;globalThis.__META=META;",sandbox,{timeout:20000});
@@ -92,11 +111,16 @@ const tick=(n)=>{ for(let i=0;i<n;i++){ let alive=false;
   for(const f of TIMERS){ if(f){ alive=true; try{f();}catch(e){warnings.push('timer: '+e.message);} } }
   if(!alive) break; } };
 const el=(id)=>REG.get(id);
-return {sandbox,M,SEQ,META,tick,el,REG,warnings,TIMERS};
+return {sandbox,M,SEQ,META,tick,el,REG,warnings,TIMERS,STATS,W,H};
 }
 if(require.main!==module){ module.exports={boot}; } else {
-const {M,SEQ,META,warnings:warn2}=boot(process.argv[2]);
-console.log(`yüklendi · MODULES=${M.length} SEQ=${SEQ.length} META=${META.length}\n`);
+const {M,SEQ,META,warnings:warn2,STATS,el:EL,W:BW,H:BH}=boot(process.argv[2]);
+console.log(`yüklendi · MODULES=${M.length} SEQ=${SEQ.length} META=${META.length} · tuval ${BW}×${BH}\n`);
+/* Yalnız imleç hareketiyle ya da eğitim sırasında yazılan göstergeler: draw()
+   bunlara dokunmaz, bu beklenen davranıştır. Listeye ekleme yapmadan önce
+   göstergenin GERÇEKTEN olaya bağlı olduğundan emin ol — dar yerleşimde donan
+   bir gösterge de burada "hiç yazılmadı" diye görünür ve asıl yakalanmak istenen o. */
+const OLAYA_BAGLI=new Set(['knn-p','knn-v','cn-val','cn-par','sc-ch','sc-flip','mlp-st']);
 const warnings=warn2;
 let fail=0;
 for(let i=0;i<SEQ.length;i++){
@@ -114,13 +138,17 @@ for(let i=0;i<SEQ.length;i++){
   if(!err && mod.scenarios) for(const sc of mod.scenarios){
     try{ sc.apply(); mod.draw(); }catch(e){ scErr=scErr||`"${sc.name}": ${e.message}`; }
   }
+  /* draw() bu modülün hangi göstergesine hiç dokunmadı? (dar yerleşim dalında
+     unutulan gösterge derste son geniş çizimin değerinde donup kalıyor) */
+  const sessiz=(STATS.get(mod.id)||[]).filter(id=>!OLAYA_BAGLI.has(id)&&!EL(id).__written);
   const w=warnings.slice(before);
-  const bad=err||stepErr||scErr||w.length;
+  const bad=err||stepErr||scErr||w.length||sessiz.length;
   if(bad) fail++;
   console.log(`${bad?'HATA ':'OK   '} ${no} ${name}`);
   if(err) console.log(`        draw(): ${err.message}`);
   if(stepErr) console.log(`        adım ${stepErr}`);
   if(scErr) console.log(`        senaryo ${scErr}`);
+  if(sessiz.length) console.log(`        draw() hiç yazmadı: ${sessiz.join(', ')}`);
   [...new Set(w)].slice(0,3).forEach(x=>console.log(`        ${x}`));
 }
 console.log(`\n${SEQ.length-fail}/${SEQ.length} modül temiz`);

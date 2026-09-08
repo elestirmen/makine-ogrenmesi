@@ -9,9 +9,33 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
 - **Tek dosya, sıfır bağımlılık.** `index.html` içinde HTML + CSS + JS. Build adımı yok,
   npm yok, framework yok. Amaç: dosyayı sunucuya kopyala, çalışsın.
 - **Vanilla JS + Canvas 2D.** Grafik kütüphanesi eklenmez; her modül kendi çizimini yapar.
-- **Arayüz dili Türkçe.** Değişken/fonksiyon adları İngilizce olabilir, kullanıcıya
-  görünen her metin Türkçedir. Terimler: eşik, kesinlik, duyarlılık, aşırı öğrenme,
-  yanlılık–varyans, öznitelik haritası, çekirdek.
+- **Arayüz dili Türkçe, terimler İngilizce.** Cümlenin dili Türkçedir; *adlandırılmış*
+  yöntem, metrik ve olgu adları İngilizce yazılır ve modül başına **bir kez**,
+  `.head` paragrafında `<b>English</b> (Türkçe)` biçiminde açılır. Sonraki geçişlerde
+  yalnız İngilizcesi kullanılır. Motamot çeviri yasak: öğrenci o terimi kütüphane
+  belgesinde, sınavda ve makalede İngilizce görecek.
+
+  | İngilizce (birincil) | parantezdeki Türkçe |
+  |---|---|
+  | bagging · bootstrap · out-of-bag (OOB) · random forest | torbalama · yerine koyarak örnekleme · torba dışı · rastgele orman |
+  | overfitting · underfitting · bias–variance | aşırı öğrenme · yetersiz öğrenme · yanlılık–varyans |
+  | regularization · ridge · lasso · sparsity | düzenlileştirme · L2 · L1 · seyreklik |
+  | gradient descent · learning rate · epoch | gradyan inişi · öğrenme oranı · devir |
+  | precision · recall · confusion matrix · log loss | kesinlik · duyarlılık · konfüzyon matrisi · log-kayıp |
+  | cross-validation (k-fold) · least squares | çapraz doğrulama · en küçük kareler |
+  | k-means · WCSS · elbow · silhouette · PCA | k-ortalamalar · küme içi kareli hata · dirsek · siluet · ana bileşen analizi |
+  | k-NN · decision tree · logistic/linear regression | k-en yakın komşu · karar ağacı · lojistik/doğrusal regresyon |
+  | perceptron · hidden layer · MLP · backpropagation | — · gizli katman · çok katmanlı ağ · geri yayılım |
+  | convolution · kernel · feature map · pooling · ReLU | konvolüsyon · çekirdek · öznitelik haritası · havuzlama · — |
+  | decision boundary · linearly separable · z-score · min–max | karar sınırı · doğrusal ayrılabilir · z-skoru · min–maks |
+
+  **Türkçe kalan sözcükler** (calque değil, cümlenin dokusu): eşik, öznitelik, katsayı,
+  eğim, kesişim, ağırlık, artık, hata, doğruluk, küme, merkez, ağaç, derinlik, yaprak,
+  bölme, nokta, sınıf, olasılık, varyans, gürültü, veri. Bunlar İngilizceye çevrilirse
+  metin Türkçe–İngilizce karışımına döner.
+
+  `META`'nın 6. alanı (arama etiketleri) **her iki dili de** içerir — öğrenci "bagging"
+  yazınca da "torbalama" yazınca da modülü bulmalı. `aria-label` görünür metin sayılır.
 - **Tema token'ları.** Bütün renkler `:root` içindeki CSS değişkenlerinden gelir
   (`--ink`, `--surface`, `--accent`, `--a`, `--b`, `--good`, `--warn`, `--bad`).
   Canvas içinde renk `css("--token")` ile okunur, asla sabit hex yazılmaz.
@@ -30,7 +54,7 @@ deploy/nginx.conf.example    konteyner içi nginx — yalnız index.html'i yayı
 deploy/deploy.sh             rsync ile sunucuya yükleme
 tools/lint.py                bütünlük denetimi (id, sözleşme, META, renk)
 tools/harness.js             tarayıcısız çalıştırma (DOM/Canvas taklidi)
-tools/behaviour.js           pedagojik iddiaların sayısal sınaması
+tools/behaviour.js           17 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
 tools/contrast.js            tuval etiketlerinin iki temada WCAG kontrastı
 ```
 
@@ -83,6 +107,20 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
 4. `TH["m-XXX"]=(c,w,h)=>{...}` ile giriş sayfası kartı için küçük bir önizleme çiz.
    `thumbBase(c,w,h)` zemini hazırlar, `tdot(c,x,y,r,renk)` nokta koyar. Burada da
    renkler token'dan gelir.
+5. `tools/behaviour.js`'e o modül için bir blok ekle. **Kural: her `chk()` bir METİN
+   cümlesinden türetilir** — `.ask` kutusu ya da bir `steps[].d` ne vaat ediyorsa
+   gösterge onu doğrulamalı. Bu araç olmadığı için "%50 der" yazıp %95 gösteren,
+   "ıraksar" deyip global minimuma inen beş modül derse kadar fark edilmedi.
+   - Eşiği **ölçerek** koy, tahminle değil; rastgele veri üreten modülde tek örneklem
+     değil **ortalama** al (`mean`, 12–20 tur), yoksa sınama kırılgan olur.
+   - Tek `boot()` üzerinde döngü kur (her tur yeniden `boot()` yavaş), ama
+     `aria-pressed` anahtarlarını `P(el,id,true/false)` ile **mutlak konuma** getir —
+     `click()` tekrarı anahtarı geri çevirir ve iki koşul birbirine karışır.
+   - Kaydırıcıyı bir tarama döngüsünde sürdüysen turun sonunda **eski değere döndür**.
+   - Çalıştır düğmeleri de anahtardır: eğitim koşarken tekrar basmak onu DURDURUR.
+     `tick(n)` yeterli değilse ölçüm yarı eğitilmiş modelden okunur. Bitişi düğme
+     metninden doğrula (`"Eğit"`e döndü mü) ve dönmediyse sürmeye devam et —
+     Modül 04'ün iç sayacı 400 tık, `tick(400)` tam sınırda kalıp kırılganlık üretti.
 
 ## Doğrulama
 
@@ -96,12 +134,15 @@ sed -n '/^<script>/,/^<\/script>/p' index.html | sed '1d;$d' > /tmp/check.js && 
 # tutarlılığı, canvas'ta sabit renk, setInterval↔stop eşleşmesi, önizleme kapsaması
 python3 tools/lint.py index.html
 
-# 17 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar —
-# null referans, istisna ve canvas'a giden NaN yakalar
-node tools/harness.js index.html
+# 17 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
+# istisna, canvas'a giden NaN ve "draw() bu göstergeye hiç dokunmadı" durumu.
+# ML_W ile DAR yerleşim dalları da sınanır: 930 tek başına yetmez, çünkü panel
+# gizleme eşiklerinin altındaki kod yolu hiç çalıştırılmamış olur.
+for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; done
 
-# ajanların/yeni modüllerin pedagojik iddialarını sına (h=1 XOR'u çözemez,
-# L1 katsayıyı sıfırlar, orman tek ağacı geçer …)
+# 17 modülün pedagojik iddialarını sına — ".ask/adım metni ne vaat ediyor,
+# gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
+# lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
 node tools/behaviour.js index.html
 
 # tuvale yazılan her etiket rengini açık VE koyu temada zemine karşı ölç
@@ -122,6 +163,18 @@ taşma olmaması, konsolda hata olmaması.
 1280×720'de tuval **930 px** kalır (1280 − 280 rail − 68 kenar boşluğu). Çok
 panelli modüllerde yerleşim eşiği bunun altında olmalı; aksi halde panel derste
 hiç görünmez (Modül 07'nin ROC eğrisi bir süre böyle kayıptı).
+
+Eşiği 930'un hemen altına koymak da yetmez: tek kademe tarayıcı zoom'u (%110 →
+~815 px, Chrome bunu alan adı başına hatırlıyor) paneli yine götürür. Modül 10'un
+üç panel eşiği bu yüzden 900'den **780**'e indirildi. Kural iki parçalı:
+
+- Yerleşim eşiği ≤ **780**; dar dalda küçülen metin varsa boyutu eşiğe bağla
+  (Modül 10'un matris alt yazısı 930 px'te 10.5, dar hücrede 9.5 — projeksiyon
+  çözünürlüğünde yazı KÜÇÜLMEMELİ, yalnız zoom'lu/dar durumda küçülür).
+- Bir gösterge yalnız geniş dalda yazılıyorsa dar yerleşimde son geniş çizimin
+  değerinde **donar**. Hesabı çizimden ayır, göstergeyi daldan çıkar.
+  `harness.js` bunu artık yakalıyor ("draw() hiç yazmadı: …"); yalnız imleçle
+  yazılan göstergeler `OLAYA_BAGLI` listesinde muaf tutulur.
 
 ## Yapılmayacaklar
 

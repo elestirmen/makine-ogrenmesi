@@ -1,10 +1,22 @@
-/* Ajanların yazdığı 4 modülün PEDAGOJİK İDDİALARINI sına.
-   Çökme değil, matematik doğru mu — göstergelerden okuyarak. */
+/* 17 modülün PEDAGOJİK İDDİALARINI sına: çökme değil, ".ask kutusu ve rehberli
+   adım metni ne vaat ediyor, gösterge ne diyor" karşılaştırması.
+   Kural: her chk() bir METİN cümlesinden türetilir. Metin değişirse sınama da değişir.
+   Eşikler ölçülerek konmuştur; rastgele veri üreten modüllerde ORTALAMA alınır
+   (tek örneklem gürültüsü yanlış alarm veriyordu). */
 const {boot}=require('./harness.js');
 const F=process.argv[2];
 let fail=0;
 const chk=(ok,msg,extra)=>{ console.log(`  ${ok?'OK   ':'HATA '} ${msg}${extra?'  ['+extra+']':''}`); if(!ok)fail++; };
 const num=(s)=>{const m=/(-?[\d.]+)/.exec(String(s));return m?parseFloat(m[1]):NaN;};
+/* kısayollar: kaydırıcı sür, gösterge oku, N örneklemin ortalaması */
+const S=(el,id,v)=>{const e=el(id);e.value=String(v);e.dispatchEvent({type:'input'});};
+const T=(el,id)=>el(id).textContent;
+const V=(el,id)=>num(T(el,id));
+const mean=(a)=>a.reduce((x,y)=>x+y,0)/a.length;
+const head=(t)=>console.log(`\n=== ${t} ===`);
+/* aria-pressed ANAHTARLARINI mutlak konuma getir — tekrar tekrar click() etmek
+   düğmeyi her turda geri çeviriyor ve iki koşul birbirine karışıyor */
+const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true')!==on) e.click();};
 
 /* ── 16 · Çok katmanlı ağ: h=1 XOR'u çözemez, h≥2 çözer ── */
 {
@@ -30,19 +42,28 @@ const num=(s)=>{const m=/(-?[\d.]+)/.exec(String(s));return m?parseFloat(m[1]):N
 {
   console.log("\n=== Modül 06 · Kırk ağaç (torbalama / OOB) ===");
   const {el,tick}=boot(F);
-  const out=[];
-  for(const k of [1,40]){
-    const ks=el('ens-k'); ks.value=String(k); ks.dispatchEvent({type:'input'});
-    tick(200);
-    out.push({k, oob:num(el('ens-oob').textContent), tr:num(el('ens-tr').textContent),
-              one:num(el('ens-one').textContent), cnt:el('ens-cnt').textContent});
+  /* TEK veri kümesiyle ölçmek kırılgandı: özgün sürümde de 40 kümenin ~1'inde
+     fark 1.5 puanın altına düşüyordu (ort 5.0, min 0.8). Ortalama alınıyor. */
+  const N=10, k1=[], k40=[], one40=[], tr40=[];
+  for(let t=0;t<N;t++){
+    el('ens-new').click();
+    const ks=el('ens-k');
+    ks.value='1';  ks.dispatchEvent({type:'input'}); tick(200);
+    k1.push(num(el('ens-oob').textContent));
+    ks.value='40'; ks.dispatchEvent({type:'input'}); tick(200);
+    k40.push(num(el('ens-oob').textContent));
+    one40.push(num(el('ens-one').textContent));
+    tr40.push(num(el('ens-tr').textContent));
   }
-  out.forEach(x=>console.log(`       ${x.k} ağaç: eğitim=%${x.tr} OOB=%${x.oob} tek ağaç OOB=%${x.one}`));
+  const out=[{k:1, oob:mean(k1)}, {k:40, oob:mean(k40), one:mean(one40), tr:mean(tr40)}];
+  console.log(`       ${N} veri kümesi ortalaması`);
+  console.log(`       1 ağaç : OOB=%${out[0].oob.toFixed(1)}`);
+  console.log(`       40 ağaç: eğitim=%${out[1].tr.toFixed(1)} OOB=%${out[1].oob.toFixed(1)} tek ağaç OOB=%${out[1].one.toFixed(1)}`);
   chk(Number.isFinite(out[1].oob), "40 ağaçta OOB doğruluğu hesaplanıyor");
   /* k=1'in OOB'si tek bir ağacın torba dışı örneklerinden gelir, yüksek varyanslı:
      40 ağaçla doğrudan karşılaştırmak %8 oranında yanlış alarm veriyordu. Modülün
      kendi "Tek ağaç (OOB)" göstergesi (ağaçlar üzerinden ortalama) kararlı referans. */
-  chk(out[1].oob>out[1].one-1, "orman OOB'si tek ağaç OOB'sini geçiyor", `orman %${out[1].oob} vs tek %${out[1].one}`);
+  chk(out[1].oob>out[1].one, "orman OOB'si tek ağaç OOB'sini geçiyor", `orman %${out[1].oob.toFixed(1)} vs tek %${out[1].one.toFixed(1)}`);
   chk(out[1].oob-out[1].one>1.5, "fark anlamlı (>1.5 puan)", `+${(out[1].oob-out[1].one).toFixed(1)} puan`);
 }
 
@@ -83,6 +104,258 @@ const num=(s)=>{const m=/(-?[\d.]+)/.exec(String(s));return m?parseFloat(m[1]):N
   chk(a.mean>0&&b.mean>0, "hata değerleri pozitif ve anlamlı");
   chk(Math.abs(a.mean-b.mean)/Math.max(a.mean,b.mean)<0.6, "iki k benzer ortalamaya yakınsıyor",
       `k=2 → ${a.mean}, k=10 → ${b.mean}`);
+}
+
+/* ── 01 · Doğrusal regresyon: kapalı formül gerçekten en iyisini buluyor ── */
+{
+  head("Modül 01 · En iyi doğru (least squares)");
+  const {el}=boot(F); const r=[];
+  for(let t=0;t<20;t++){
+    el('lin-new').click();
+    S(el,'lin-a',-100); S(el,'lin-b',120);            // bilerek kötü doğru
+    const bad=V(el,'lin-sse');
+    el('lin-fit').click();                             // "Least squares çözümü"
+    r.push({bad, got:V(el,'lin-sse'), best:V(el,'lin-best'), st:T(el,'lin-st')});
+  }
+  const worse=r.filter(x=>x.got>x.best+1e-3).length;
+  const notBest=r.filter(x=>!/En iyi/.test(x.st)).length;
+  console.log(`       kötü doğru SSE ort ${mean(r.map(x=>x.bad)).toFixed(3)} → çözümden sonra ${mean(r.map(x=>x.got)).toFixed(3)} (en iyi ${mean(r.map(x=>x.best)).toFixed(3)})`);
+  chk(worse===0, "kapalı formül en küçük SSE'yi buluyor (adım: 'tek bir dip nokta')", `${worse}/20 sapma`);
+  chk(notBest===0, "durum göstergesi 'En iyi' diyor", `${notBest}/20 değil`);
+  chk(mean(r.map(x=>x.bad))>mean(r.map(x=>x.got))*3, "elle konan kötü doğru belirgin daha kötü");
+}
+
+/* ── 02 · Ölçekleme: ".ask: aralığı 400'e çekin, maaş uzaklığın %99'unu belirliyor" ── */
+{
+  head("Modül 02 · Metre ile kilometre (ölçekleme)");
+  const {el}=boot(F);
+  const read=(r)=>{S(el,'sc-r',r);return {r, boy:V(el,'sc-d1'), maas:V(el,'sc-d2')};};
+  const a=read(1), b=read(400);
+  console.log(`       aralık=1  : boy %${a.boy} · maaş %${a.maas}`);
+  console.log(`       aralık=400: boy %${b.boy} · maaş %${b.maas}`);
+  chk(b.maas>=95, "aralık 400'de maaş uzaklığın neredeyse tamamını belirliyor", `%${b.maas}`);
+  chk(b.boy<=5, "boy özniteliği hesaba fiilen girmiyor", `%${b.boy}`);
+  chk(a.boy>b.boy+50, "küçük aralıkta tablo tersine dönüyor (ölçek sorunu, veri sorunu değil)",
+      `%${a.boy} → %${b.boy}`);
+}
+
+/* ── 03 · kNN: ".ask: k=1'de eğitim hatası tam olarak sıfır" ── */
+{
+  head("Modül 03 · Komşuna bak (k-NN)");
+  const {el}=boot(F); const e1=[], e21=[];
+  for(let t=0;t<20;t++){ el('knn-demo').click();
+    S(el,'knn-k',1);  e1.push(V(el,'knn-e'));
+    S(el,'knn-k',21); e21.push(V(el,'knn-e')); }
+  console.log(`       k=1 : eğitim hatası ort %${mean(e1).toFixed(1)} (max %${Math.max(...e1)})`);
+  console.log(`       k=21: eğitim hatası ort %${mean(e21).toFixed(1)} (max %${Math.max(...e21)})`);
+  chk(e1.every(x=>x===0), "k=1'de eğitim hatası TAM olarak sıfır", `max %${Math.max(...e1)}`);
+  chk(mean(e21)>1.5, "k=21'de artık sıfır değil (.ask: '%0'dan %4–5'e çıkıyor')", `ort %${mean(e21).toFixed(1)}`);
+  chk(mean(e21)<15, "ama modeli körleştirmiyor — metin 'çoğunluk sınıfı' DEMEMELİ", `ort %${mean(e21).toFixed(1)}`);
+}
+
+/* ── 04 · Lojistik: ayrılabilir veride log loss sıfıra yaklaşır, karışıkta yaklaşamaz ── */
+{
+  head("Modül 04 · Yüzde kaç? (logistic regression)");
+  const {el,tick}=boot(F); const E=[], H=[], EA=[], HA=[];
+  /* DİKKAT: lg-fit bir ANAHTAR (koşarken tekrar basmak durdurur) ve iç sayacı
+     400 tık. Eğitim bitmeden bir sonraki tura girilirse o tıklama eğitimi
+     durduruyor, ölçüm yarı eğitilmiş modelden okunuyordu. Bitene kadar sür. */
+  let yarim=0;
+  const egit=()=>{ el('lg-fit').click(); tick(600);
+    if(T(el,'lg-fit')!=='Eğit'){ tick(600); if(T(el,'lg-fit')!=='Eğit') yarim++; } };
+  for(let t=0;t<10;t++){
+    P(el,'lg-hard',false); el('lg-new').click(); egit();
+    E.push(V(el,'lg-loss')); EA.push(V(el,'lg-acc'));
+    P(el,'lg-hard',true);                        // anahtar demo()'yu kendisi çağırıyor
+    egit();
+    H.push(V(el,'lg-loss')); HA.push(V(el,'lg-acc'));
+  }
+  chk(yarim===0, "her eğitim sonuna kadar koştu (yarım ölçüm yok)", `${yarim} yarım`);
+  console.log(`       kolay veri  : log loss ort ${mean(E).toFixed(3)} · doğruluk ort %${mean(EA).toFixed(1)}`);
+  console.log(`       karışık veri: log loss ort ${mean(H).toFixed(3)} · doğruluk ort %${mean(HA).toFixed(1)}`);
+  chk(Math.min(...E)>0, "log loss sıfıra yaklaşır ama HİÇ ulaşmaz (.ask'in sorusu)", `min ${Math.min(...E).toFixed(3)}`);
+  /* 6 koşuda ölçülen: kolay 0.207–0.333, karışık 0.611–0.837, oran 2.40–3.39,
+     doğruluk farkı 20.4–27.8 puan. Eşikler ölçülen en düşüğün altına konuldu. */
+  chk(mean(H)>mean(E)*1.8, "karışık veride hiçbir w kaybı sıfırlayamıyor", `${mean(E).toFixed(3)} → ${mean(H).toFixed(3)}`);
+  chk(mean(HA)<mean(EA)-10, "karışık veride doğruluk da düşüyor", `%${mean(EA).toFixed(1)} → %${mean(HA).toFixed(1)}`);
+}
+
+/* ── 05 · Karar ağacı: düğme kaydırıcının ulaşabildiği en iyi bölmeyi buluyor ── */
+{
+  head("Modül 05 · Bölerek karar ver (decision tree)");
+  const {el}=boot(F);
+  let lost=0; const leaves=[], accs=[], d1=[];
+  for(let t=0;t<8;t++){
+    el('dt-demo').click(); el('dt-best').click();
+    const g=V(el,'dt-g1');
+    let gmin=Infinity;
+    for(let i=2;i<=98;i++){ S(el,'dt-t',i); const x=V(el,'dt-g1'); if(x<gmin) gmin=x; }
+    if(gmin<g-1e-9) lost++;
+    el('dt-best').click();                              // tarama eşiği bozdu, geri koy
+    S(el,'dt-d',1); d1.push(V(el,'dt-acc'));
+    S(el,'dt-d',5); leaves.push(V(el,'dt-leaf')); accs.push(V(el,'dt-acc'));
+  }
+  console.log(`       derinlik 1: doğruluk ort %${mean(d1).toFixed(1)}`);
+  console.log(`       derinlik 5: yaprak ort ${mean(leaves).toFixed(1)} [${Math.min(...leaves)}–${Math.max(...leaves)}] · doğruluk ort %${mean(accs).toFixed(1)}`);
+  chk(lost===0, "'En iyi bölmeyi bul' kaydırıcı ızgarasında yenilmiyor", `${lost}/8 yenildi`);
+  chk(mean(accs)>96, "derinlik 5 ezberliyor (.ask: '%99'a çıkarıyor')", `%${mean(accs).toFixed(1)}`);
+  chk(mean(leaves)>=3 && mean(leaves)<=6, "yaprak sayısı metindeki dört-beş civarında", `ort ${mean(leaves).toFixed(1)}`);
+  chk(mean(accs)>mean(d1), "derinlik artınca eğitim doğruluğu yükseliyor", `%${mean(d1).toFixed(1)} → %${mean(accs).toFixed(1)}`);
+}
+
+/* ── 07 · Aşırı öğrenme: Durum göstergesi en iyi derecede uyarı VERMEMELİ ── */
+{
+  head("Modül 07 · Ezber mi, öğrenme mi (overfitting)");
+  const {el}=boot(F);
+  let bad4=0, ok14=0; const t14=[], t40=[];
+  for(let t=0;t<20;t++){
+    S(el,'fit-m',14); el('fit-new').click();     // önceki turun 40'ı sızmasın
+    S(el,'fit-d',4);  if(/Aşırı/.test(T(el,'fit-vs'))) bad4++;
+    S(el,'fit-d',14); if(/Aşırı/.test(T(el,'fit-vs'))) ok14++;
+    S(el,'fit-m',14); t14.push(V(el,'fit-vte'));
+    S(el,'fit-m',40); t40.push(V(el,'fit-vte'));
+  }
+  console.log(`       derece 4'te "Aşırı öğrenme": ${bad4}/20 · derece 14'te: ${ok14}/20`);
+  console.log(`       derece 14 test hatası: veri 14 → ort ${mean(t14).toFixed(2)} · veri 40 → ort ${mean(t40).toFixed(2)}`);
+  chk(bad4<=2, "en iyiye yakın derecede yanlış uyarı yok (adım 2: 'dengede')", `${bad4}/20`);
+  chk(ok14>=18, "14. derecede uyarı korunuyor (adım 3: 'model gürültüyü ezberledi')", `${ok14}/20`);
+  chk(mean(t40)<mean(t14)/3, "adım 4: aynı derece, daha çok veri → test hatası düşüyor",
+      `${mean(t14).toFixed(2)} → ${mean(t40).toFixed(2)}`);
+  /* B1: 15 katsayı / 14 nokta ile interpolasyon MÜMKÜN. Normal denklemler bunu
+     kaçırıyordu (eğitim RMSE ~0.044, noktalardan ~19 px ıska); QR ile sıfıra iniyor.
+     ".ask ve adım 3: bütün eğitim noktalarından geçiyor" cümlesinin karşılığı budur. */
+  const trQ=[];
+  for(let t=0;t<10;t++){ S(el,'fit-m',14); el('fit-new').click(); S(el,'fit-d',14);
+    trQ.push(V(el,'fit-vtr')); }
+  console.log(`       derece 14 eğitim RMSE ort ${mean(trQ).toExponential(2)} (max ${Math.max(...trQ).toExponential(2)})`);
+  chk(Math.max(...trQ)<0.005, "14. derece eğri bütün eğitim noktalarından geçiyor (QR)",
+      `max ${Math.max(...trQ).toExponential(2)}`);
+}
+
+/* ── 09 · Gradyan inişi: kaydırıcının ULAŞABİLDİĞİ bir değerde ıraksamalı ── */
+{
+  head("Modül 09 · Yamaçtan aşağı (gradient descent)");
+  const run=(lr,x0)=>{const {el,tick}=boot(F);S(el,'gd-lr',lr);S(el,'gd-x0',x0);
+    el('gd-run').click();tick(400);
+    return {st:T(el,'gd-s'), i:V(el,'gd-i'), x:V(el,'gd-x'), L:V(el,'gd-l')};};
+  const big=run(600,-230), okr=run(60,-230), tiny=run(5,-230);
+  console.log(`       lr=0.600: durum="${big.st}" adım=${big.i}`);
+  console.log(`       lr=0.060: durum="${okr.st}" konum=${okr.x} adım=${okr.i}`);
+  console.log(`       lr=0.005: durum="${tiny.st}" konum=${tiny.x} adım=${tiny.i}`);
+  chk(/raksad/.test(big.st), "adım 3: kaydırıcının içindeki bir lr GERÇEKTEN ıraksıyor", big.st);
+  chk(!/raksad/.test(okr.st), "makul lr'de ıraksamıyor", okr.st);
+  chk(tiny.i>okr.i*5, "adım 2: küçük adım aynı yere ÇOK daha fazla adımda varıyor ('adım sayacına bakın')",
+      `${tiny.i} adım vs ${okr.i} adım`);
+  chk(/[Yy]erel/.test(okr.st), "adım 4: soldan başlayınca yerel minimuma takılıyor", okr.st);
+}
+
+/* ── 10 · Eşik: precision ↑ recall ↓, AUC eşikten bağımsız ── */
+{
+  head("Modül 10 · Eşiği nereye koyalım (precision / recall)");
+  const {el}=boot(F);
+  const rows=[20,50,80].map(t=>{S(el,'cm-t',t);
+    return {t, pre:V(el,'cm-pre'), rec:V(el,'cm-rec'), auc:V(el,'cm-auc'), acc:V(el,'cm-acc')};});
+  rows.forEach(r=>console.log(`       eşik=${(r.t/100).toFixed(2)}: precision %${r.pre} · recall %${r.rec} · AUC ${r.auc}`));
+  chk(rows[0].pre<rows[1].pre && rows[1].pre<rows[2].pre, "eşik sağa gidince precision yükseliyor");
+  chk(rows[0].rec>rows[1].rec && rows[1].rec>rows[2].rec, "aynı anda recall düşüyor (.ask: ikisi birden yükselmiyor)");
+  chk(Math.abs(rows[0].auc-rows[2].auc)<1e-9, "AUC eşikten bağımsız — eşik modelin değil bizim kararımız",
+      `${rows[0].auc} / ${rows[2].auc}`);
+  S(el,'cm-pr',3); S(el,'cm-t',95);
+  const trap={acc:V(el,'cm-acc'), rec:V(el,'cm-rec')};
+  console.log(`       pozitif oranı %3 + eşik 0.95: doğruluk %${trap.acc} · recall %${trap.rec}`);
+  chk(trap.acc>90 && trap.rec<25, "dengesiz sınıf tuzağı: doğruluk yüksek ama model hiçbir şeyi bulmuyor",
+      `doğruluk %${trap.acc}, recall %${trap.rec}`);
+}
+
+/* ── 12 · k-ortalamalar: WCSS atama öncesi yalan söylememeli, sonra hep azalmalı ── */
+{
+  head("Modül 12 · Etiketsiz gruplama (k-means)");
+  const {el}=boot(F);
+  chk(T(el,'km-j')==="—", "atama yapılmadan WCSS '—' (0.0000 'mümkün en iyi' yalanıydı)", T(el,'km-j'));
+  const seq=[];
+  for(let i=0;i<12;i++){ el('km-step').click(); const j=V(el,'km-j'); if(Number.isFinite(j)) seq.push(j); }
+  console.log(`       WCSS dizisi: ${seq.map(x=>x.toFixed(3)).join(' → ')}`);
+  const rise=seq.filter((v,i)=>i&&v>seq[i-1]+1e-9).length;
+  chk(seq.length>2, "adımlar WCSS üretiyor");
+  chk(rise===0, "algoritmanın küçülttüğü nicelik hiçbir adımda artmıyor", `${rise} artış`);
+  el('km-seed').click();
+  chk(T(el,'km-j')==="—", "merkezler yeniden atılınca gösterge tekrar '—'", T(el,'km-j'));
+}
+
+/* ── 13 · Kaç küme: ayrık veride her iki ölçüt de gerçek k'yı bulmalı ── */
+{
+  head("Modül 13 · Kaç küme var? (elbow / silhouette)");
+  const {el}=boot(F); const r=[];
+  S(el,'kch-true',4); S(el,'kch-sep',100);
+  for(let t=0;t<12;t++){ el('kch-new').click();
+    r.push({elb:V(el,'kch-elb'), sil:V(el,'kch-sug'), s:V(el,'kch-sil')}); }
+  const silOk=r.filter(x=>x.sil===4).length, elbOk=r.filter(x=>x.elb===4).length;
+  console.log(`       gerçek k=4, ayrıklık 100: silhouette ${silOk}/12 doğru · elbow ${elbOk}/12 doğru`);
+  chk(silOk>=11, "silhouette ayrık veride gerçek küme sayısını buluyor (.ask)", `${silOk}/12`);
+  chk(elbOk>=10, "elbow da aynı sayıyı söylüyor (adım 1: 'iki ölçüt de aynı sayıyı')", `${elbOk}/12`);
+  chk(mean(r.map(x=>x.s))>0.45, "ayrık veride silhouette skoru yüksek", mean(r.map(x=>x.s)).toFixed(3));
+  /* B2: dirsek log(WCSS) üzerinde hesaplanıyor. Ham WCSS'te gerçek küme 5 ya da 6
+     iken ayrıklık %100'de bile 0/15 doğru çıkıyordu — ".ask: iki ölçüt de gerçek
+     küme sayısını buluyor" cümlesi kaydırıcının yarısında yalandı. */
+  S(el,'kch-sep',100);
+  const perK=[];
+  for(const tk of [2,3,4,5,6]){
+    S(el,'kch-true',tk);
+    let hit=0;
+    for(let t=0;t<8;t++){ el('kch-new').click(); if(V(el,'kch-elb')===tk) hit++; }
+    perK.push(`k=${tk}:${hit}/8`);
+    chk(hit>=7, `ayrık veride elbow gerçek k=${tk}'yı buluyor`, `${hit}/8`);
+  }
+  console.log(`       ayrıklık 100'de elbow isabeti: ${perK.join(' · ')}`);
+}
+
+/* ── 14 · PCA: uzama kaydırıcısı yuvarlak ↔ uzun karşıtlığını KURMALI ── */
+{
+  head("Modül 14 · İki sayı yerine bir (PCA)");
+  const {el}=boot(F);
+  /* pca-cor her input'ta yeniden örnekliyor: aynı değeri 12 kez sürüp ortalıyoruz */
+  const at=(c)=>{const v=[];for(let i=0;i<12;i++){S(el,'pca-cor',c);v.push(V(el,'pca-v1'));}return mean(v);};
+  const p0=at(0), p50=at(50), p90=at(90);
+  console.log(`       uzama=0 → 1. bileşen %${p0.toFixed(1)} · uzama=50 → %${p50.toFixed(1)} · uzama=90 → %${p90.toFixed(1)}`);
+  chk(p0<70, "uzama=0'da bulut yuvarlak: iki bileşen kabaca yarı yarıya (.ask '%60 civarı')", `%${p0.toFixed(1)}`);
+  chk(p90>85, "uzama=90'da 1. bileşen varyansın %85'inden fazlasını açıklıyor (adım 1)", `%${p90.toFixed(1)}`);
+  chk(p0<p50 && p50<p90, "kaydırıcı monoton: yuvarlaktan uzuna tek yönde gidiyor",
+      `%${p0.toFixed(1)} → %${p50.toFixed(1)} → %${p90.toFixed(1)}`);
+}
+
+/* ── 15 · Perceptron: ayrılabilirde durur, XOR'da durmaz ── */
+{
+  head("Modül 15 · Tek nöron (perceptron)");
+  const go=(btn)=>{const {el,tick}=boot(F); el(btn).click(); el('per-run').click(); tick(900);
+    return {m:V(el,'per-m'), u:V(el,'per-u'), raw:T(el,'per-m')};};
+  const sep=go('per-sep'), xor=go('per-xor');
+  console.log(`       ayrılabilir: yanlış=${sep.raw} güncelleme=${sep.u}`);
+  console.log(`       XOR        : yanlış=${xor.raw} güncelleme=${xor.u}`);
+  chk(sep.m===0, "ayrılabilir veride yanlış sınıflanan sıfıra düşüyor (yakınsama teoremi)", sep.raw);
+  chk(xor.m>0, "XOR'da hiç duramıyor — tek katman düz çizgiden başkasını çizemez", xor.raw);
+  chk(xor.u>sep.u*10, "XOR'da güncellemeler bitmiyor", `${sep.u} vs ${xor.u}`);
+}
+
+/* ── 17 · Konvolüsyon: birim çekirdek kimliktir, pooling boyutu yarıya indirir ── */
+{
+  head("Modül 17 · Filtre gezdirmek (convolution)");
+  const {el,M}=boot(F);
+  const cn=M.find(m=>m.id==='m-cn'); cn.init(); cn.draw();
+  /* çekirdek ön ayar düğmelerinin id'si yok; rehberli adımların kendisini sürüyoruz */
+  cn.steps[0].run();                                        // "Birim kernel"
+  const base=T(el,'cn-size'), sum0=V(el,'cn-sum');
+  cn.steps[1].run();                                        // "Kenar bulucu"
+  const sumEdge=V(el,'cn-sum');
+  cn.steps[3].run();                                        // "ReLU ve pooling"
+  const pooled=T(el,'cn-size');
+  console.log(`       birim kernel : çıktı ${base} · kernel toplamı ${sum0}`);
+  console.log(`       kenar bulucu : kernel toplamı ${sumEdge}`);
+  console.log(`       ReLU+pooling : çıktı ${pooled}`);
+  const dim=(x)=>num(String(x).split('×')[0]);
+  chk(sum0===1, "birim kernel toplamı 1 — 'çıktı girdinin aynısı' (adım 1)", String(sum0));
+  chk(sumEdge===0, "kenar bulucunun toplamı 0 — 'düz alanlar sıfırlanıyor' (adım 2)", String(sumEdge));
+  chk(Number.isFinite(dim(base)) && dim(pooled)===dim(base)/2,
+      "2×2 max pooling boyutu tam yarıya indiriyor (adım 4)", `${base} → ${pooled}`);
 }
 
 console.log(`\n${fail?fail+" DENETİM DÜŞTÜ":"tüm davranış denetimleri geçti"}`);
