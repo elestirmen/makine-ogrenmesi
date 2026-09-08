@@ -1,0 +1,33 @@
+# Makine Öğrenmesi Oyun Alanı — statik yayın konteyneri.
+#
+# Sunucudaki desen: her site nginx:alpine ile npm-net ağında durur, dışarıya
+# port açmaz; 80/443'ü Nginx Proxy Manager karşılar ve isme göre yönlendirir.
+#
+#   docker compose -f /opt/ml/deploy/docker-compose.yml up -d
+#
+# NPM tarafında proxy host: ml.perinet.org + ml.urgup.keenetic.link -> ml-web:80
+
+name: ml
+
+services:
+  ml:
+    image: nginx:alpine
+    container_name: ml-web
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - /opt/ml:/usr/share/nginx/html:ro
+      - /opt/ml/deploy/nginx.conf.example:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - npm-net
+
+networks:
+  npm-net:
+    external: true

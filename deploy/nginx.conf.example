@@ -1,0 +1,25 @@
+# ml-web konteynerinin içindeki nginx yapılandırması.
+# /opt/ml salt-okunur bağlandığı için depo dosyaları (CLAUDE.md, README.md,
+# deploy/) dizinde durur ama dışarı yalnızca index.html açılır.
+
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # derste dosyayı düzenleyip yenileyince anında görünsün
+    add_header Cache-Control "no-cache, must-revalidate" always;
+
+    gzip on;
+    gzip_min_length 1024;
+    gzip_types text/html text/css application/javascript image/svg+xml;
+
+    location = /            { try_files /index.html =404; }
+    location = /index.html  { }
+    location = /favicon.ico { access_log off; return 204; }
+
+    # geri kalan her şey kapalı
+    location / { return 404; }
+}

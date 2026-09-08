@@ -1,0 +1,128 @@
+/* Minimal DOM/Canvas taklidi — 17 modülü gerçekten çalıştırıp hata avlar. */
+const fs=require('fs'), vm=require('vm');
+function boot(FILE){
+const src=fs.readFileSync(FILE,'utf8');
+const script=src.slice(src.indexOf('<script>')+8, src.lastIndexOf('</script>'));
+const html=src.slice(0,src.indexOf('<script>'));
+
+const TOK={'--ink':'#12181A','--ink-soft':'#5C6A6B','--surface':'#FFFFFF','--surface-2':'#EAEEEA',
+ '--bg':'#F3F5F2','--line':'#D8DED8','--grid':'#E6EBE6','--accent':'#C4186B','--a':'#12707A',
+ '--b':'#B85C15','--c':'#6D4AA8','--d':'#4C7A21','--good':'#2E7D46','--warn':'#B4610F','--bad':'#B02020',
+ '--on-accent':'#FFFFFF','--on-accent-soft':'rgba(255,255,255,.88)','--r':'10px'};
+
+const W=930,H=520;
+let warnings=[];
+function ctx2d(){
+  const nan=(...a)=>{for(const v of a) if(typeof v==='number'&&!Number.isFinite(v)) warnings.push('canvas çizimine NaN/Infinity geldi: '+a.join(','));};
+  const h={get(t,k){
+    if(k==='canvas') return t.__cv;
+    if(k==='createImageData') return (w,hh)=>({width:w,height:hh,data:new Uint8ClampedArray(w*hh*4)});
+    if(k==='getImageData') return (x,y,w,hh)=>({width:w,height:hh,data:new Uint8ClampedArray(w*hh*4)});
+    if(k==='measureText') return ()=>({width:10});
+    if(typeof k==='string'&&['fillRect','strokeRect','clearRect','moveTo','lineTo','arc','ellipse','rect','fillText','strokeText','translate','rotate','scale','setTransform','drawImage','putImageData','beginPath','closePath','stroke','fill','save','restore','clip','setLineDash','quadraticCurveTo','bezierCurveTo','createLinearGradient','roundRect'].includes(k))
+      return (...a)=>{nan(...a.filter(v=>typeof v==='number')); if(k==='createLinearGradient') return {addColorStop(){}}; };
+    return t[k];
+  },set(t,k,v){ if(typeof v==='number') nan(v); t[k]=v; return true; }};
+  return new Proxy({__cv:null},h);
+}
+function mkEl(tag,id){
+  const el={tagName:(tag||'div').toUpperCase(),id:id||'',value:'',textContent:'',innerHTML:'',
+    className:'',style:{},dataset:{},hidden:false,children:[],disabled:false,checked:false,
+    __attrs:{},
+    setAttribute(k,v){this.__attrs[k]=String(v); if(k==='id')this.id=v;},
+    getAttribute(k){return this.__attrs[k]??null;},
+    removeAttribute(k){delete this.__attrs[k];},
+    addEventListener(){},removeEventListener(){},
+    appendChild(c){this.children.push(c);return c;},
+    insertBefore(c){this.children.unshift(c);return c;},
+    removeChild(){},
+    querySelector(){return mkEl('div');},
+    querySelectorAll(){return [mkEl('div'),mkEl('div'),mkEl('div')];},
+    click(){ if(this.onclick) this.onclick({currentTarget:this,target:this,preventDefault(){}}); },
+    dispatchEvent(e){ if(e&&e.type==='input'&&this.oninput) this.oninput({target:this,currentTarget:this}); return true; },
+    focus(){},scrollIntoView(){},setPointerCapture(){},releasePointerCapture(){},
+    getBoundingClientRect(){return {left:0,top:0,width:W,height:H,right:W,bottom:H};},
+    get firstChild(){return this.children[0]||null;},
+    get firstElementChild(){return this.children[0]||null;},
+    get nextElementSibling(){return null;},
+    get offsetWidth(){return W;},
+    classList:{add(){},remove(){},contains(){return false;},toggle(){}},
+  };
+  el.width=W; el.height=H;
+  { const c=ctx2d(); c.__cv=el; el.getContext=()=>c; }
+  return el;
+}
+const TIMERS=[];
+const REG=new Map();
+for(const m of html.matchAll(/id="([^"]+)"/g)){ REG.set(m[1], mkEl(m[1].startsWith('c-')?'canvas':'div', m[1])); }
+for(const m of html.matchAll(/<(input|button|output|section|canvas|nav|main|aside)[^>]*id="([^"]+)"/g)){
+  REG.set(m[2], mkEl(m[1], m[2]));
+}
+const doc={
+  documentElement:mkEl('html'),
+  body:mkEl('body'),
+  getElementById:(i)=>REG.get(i)||mkEl('div',i),
+  querySelector:(s)=>{ const m=/^#([\w-]+)$/.exec(s); if(m) return REG.get(m[1])||null;
+    if(s==='main') return mkEl('main'); return mkEl('div'); },
+  querySelectorAll:(s)=>{ if(/section/.test(s)) return [...REG.values()].filter(e=>e.tagName==='SECTION');
+    return [mkEl('div'),mkEl('div'),mkEl('div')]; },
+  createElement:(t)=>mkEl(t),
+  addEventListener(){},
+};
+const sandbox={
+  console:{log(){},warn(...a){warnings.push('console.warn: '+a.join(' '));},error(...a){warnings.push('console.error: '+a.join(' '));}},
+  document:doc, devicePixelRatio:1,
+  getComputedStyle:()=>({getPropertyValue:(n)=>TOK[n]??'#888888'}),
+  requestAnimationFrame:(f)=>{try{f(0);}catch(e){warnings.push('rAF: '+e.message);}return 1;},
+  cancelAnimationFrame(){}, setTimeout:(f)=>1, clearTimeout(){},
+  setInterval:(f)=>{ TIMERS.push(f); return TIMERS.length; },
+  clearInterval:(id)=>{ if(id) TIMERS[id-1]=null; },
+  matchMedia:()=>({matches:false,addEventListener(){},addListener(){}}),
+  addEventListener(){}, Event:class{constructor(t){this.type=t;}},
+  Math,JSON,Number,String,Array,Object,Float64Array,Float32Array,Uint8ClampedArray,Set,Map,Date,isNaN,parseFloat,parseInt,Infinity,NaN,undefined,
+};
+sandbox.window=sandbox; sandbox.globalThis=sandbox;
+vm.createContext(sandbox);
+try{
+  vm.runInContext(script+"\n;globalThis.__M=MODULES;globalThis.__SEQ=SEQ;globalThis.__META=META;",sandbox,{timeout:20000});
+}catch(e){ throw new Error("YÜKLEME HATASI: "+e.message+"\n"+(e.stack||'').split('\n').slice(0,4).join('\n')); }
+
+const M=sandbox.__M, SEQ=sandbox.__SEQ, META=sandbox.__META;
+const tick=(n)=>{ for(let i=0;i<n;i++){ let alive=false;
+  for(const f of TIMERS){ if(f){ alive=true; try{f();}catch(e){warnings.push('timer: '+e.message);} } }
+  if(!alive) break; } };
+const el=(id)=>REG.get(id);
+return {sandbox,M,SEQ,META,tick,el,REG,warnings,TIMERS};
+}
+if(require.main!==module){ module.exports={boot}; } else {
+const {M,SEQ,META,warnings:warn2}=boot(process.argv[2]);
+console.log(`yüklendi · MODULES=${M.length} SEQ=${SEQ.length} META=${META.length}\n`);
+const warnings=warn2;
+let fail=0;
+for(let i=0;i<SEQ.length;i++){
+  const mod=SEQ[i], no=META[i][0], name=META[i][2];
+  const before=warnings.length;
+  let err=null;
+  try{ mod.draw(); }catch(e){ err=e; }
+  // rehberli adımları da çalıştır
+  let stepErr=null;
+  if(!err && mod.steps) for(const st of mod.steps){
+    try{ st.run&&st.run(); mod.draw(); }catch(e){ stepErr=stepErr||`"${st.t}": ${e.message}`; }
+  }
+  // senaryolar
+  let scErr=null;
+  if(!err && mod.scenarios) for(const sc of mod.scenarios){
+    try{ sc.apply(); mod.draw(); }catch(e){ scErr=scErr||`"${sc.name}": ${e.message}`; }
+  }
+  const w=warnings.slice(before);
+  const bad=err||stepErr||scErr||w.length;
+  if(bad) fail++;
+  console.log(`${bad?'HATA ':'OK   '} ${no} ${name}`);
+  if(err) console.log(`        draw(): ${err.message}`);
+  if(stepErr) console.log(`        adım ${stepErr}`);
+  if(scErr) console.log(`        senaryo ${scErr}`);
+  [...new Set(w)].slice(0,3).forEach(x=>console.log(`        ${x}`));
+}
+console.log(`\n${SEQ.length-fail}/${SEQ.length} modül temiz`);
+process.exit(fail?1:0);
+}
