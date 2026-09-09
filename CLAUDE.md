@@ -42,8 +42,12 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   Açık ve koyu tema ayrı ayrı tanımlıdır; yeni renk eklerken ikisine de eklenir.
   `--accent` zeminine yazan metin `--on-accent` / `--on-accent-soft` kullanır —
   koyu temada beyaz yazı okunmuyor (kontrast 2.8), token koyu mürekkebe geçiyor.
-- **Pedagoji zorunlu.** Her modülün altında bir `.ask` kutusu vardır: hocanın derste
-  soracağı iki soru. Yeni modül eklerken bu kutu boş bırakılmaz.
+- **Pedagoji zorunlu.** Her modülün üç ayrı metin katmanı var ve hiçbiri boş bırakılmaz:
+  `.ask` kutusu (hocanın derste soracağı iki soru), `steps` (rehberli anlatım) ve
+  `CONTENT[id].lesson` — « Ders notu » düğmesinin açtığı kutu. Ayrıca her modülde
+  **en az iki somut veri kümesi** olur (`CONTENT[id].sets`): soyut "x₁ / x₂" ekseni
+  yerine "kanat açıklığı / hız" yazar ve aynı dersi başka bir hikâyeyle tekrar eder.
+  `tools/harness.js` bu iki kuralı denetliyor (eksik alan = HATA).
 
 ## Dosya haritası
 
@@ -56,7 +60,51 @@ tools/lint.py                bütünlük denetimi (id, sözleşme, META, renk)
 tools/harness.js             tarayıcısız çalıştırma (DOM/Canvas taklidi)
 tools/behaviour.js           17 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
 tools/contrast.js            tuval etiketlerinin iki temada WCAG kontrastı
+tools/layout.js              (isteğe bağlı) gerçek Chromium'da projeksiyon yerleşimi
 ```
+
+## Ders içeriği: `CONTENT`
+
+Metnin tamamı script bloğunun başındaki tek bir kayıtta durur — modül IIFE'leri
+kendi eksen adlarını kurulurken oradan okuduğu için blok **modüllerden önce** gelir
+(`const`, TDZ). `META` / `GROUPS` / `TH` dosyanın sonunda kalır.
+
+```js
+CONTENT["m-knn"] = {
+  pick:"Veri seti",        // seçicinin başlığı: "Veri seti" · "Hata yüzeyi" · "Görüntü" · "Senaryo"
+  ui:false,                // (isteğe bağlı) seçici modülün kendi düğmelerinde; araç çubuğuna eklenmesin
+  sets:[ {name, note, x, y, cls:[…], gen:"rings"}, … ],
+  lesson:{ q, idea:[…], read:[[başlık,metin],…], terms:[[en,tr,açıklama],…], life:[…], trap, next }
+};
+```
+
+- `sets[]` **eksen adı, sınıf adı ve üreteç adını** taşır; üretecin kendisi (nokta
+  bulutu, eğri, görüntü) modülün içindedir — `gen` alanı hangisi olduğunu söyler.
+  1D regresyon modülleri (`m-fit`, `m-reg`, `m-cv`) ortak `CURVES` listesini paylaşır:
+  aynı veri üç modülde, üç ayrı ders. `note` alanı ders notu kutusunda görünür,
+  bu yüzden **ölçülmüş** olmalı — "en iyi derece çoğunlukla 5" gibi bir cümle
+  `tools/behaviour.js`'te sınanır.
+- `lesson` kutusu: `q` bir soru, `idea` fikir, `read` ekranı okuma rehberi,
+  `terms` İngilizce/Türkçe terim tablosu, `life` gerçek kullanım, `trap` sık yapılan
+  hata, `next` sonraki durak. Kutu `mountTools()`'un eklediği « Ders notu » düğmesi
+  ya da klavyede `?` ile açılır; `Esc` kapatır (modal açıkken Esc modülü değil kutuyu
+  kapatır), perdeye tıklamak da kapatır.
+- **Modül 17 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
+  çekirdek boyu (3×3/5×5), padding (0/1/2) ve stride (1/2/3) segment düğmelerinde,
+  sonuç `⌊(girdi+2·dolgu−çekirdek)/adım⌋+1` formülüyle göstergede. Konvolüsyon
+  etikete göre önbellekli (`CACHE`): imlecin her hareketinde yeniden hesaplanırsa
+  256² girdi + 5×5 çekirdekte 1.6 M çarpma her karede tekrarlanır. Pencere
+  **kalıcı** — fare tuvalden çıkınca aritmetik ekranda kalır, yoksa hoca anlatmaya
+  başladığı anda ekran boşalıyor. Kendi görüntüsü dosya / sürükle-bırak / yapıştır
+  ile geliyor ve griye çevrilip anında işleniyor (renkli görüntüde çekirdek
+  3×3×3 = 27 ağırlık olur; bu not ders notunda yazıyor).
+- Veri kümesi seçici, `.stage` kartının **içinde**, tuvalin üstündeki `.tools`
+  şeridine girer (alt `.bar`'ın simetriği: aynı zemin, aynı hairline) ve
+  uygulamanın kendi "birini seç" bileşenini — birleşik `.seg` — kullanır.
+  Denenip bırakılanlar: `.bar`'a üçüncü satır (göstergeleri perdeden düşürüyor),
+  kartın dışında serbest satır (`.head` ile `.stage` arası **0 px**; şerit oraya
+  sıkışıp kartın üstüne 4 px biniyordu), üç ayrı `.btn` (aralarındaki 6 px beş eşit
+  kutu görüntüsü veriyor, hiyerarşi kayboluyor).
 
 Sunucuda 80/443'ü **Nginx Proxy Manager** karşılıyor; site host nginx'ine değil,
 `npm-net` ağındaki `ml-web` konteynerine bağlı. Alan adları:
@@ -80,13 +128,17 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    | `space` | ✓ | boşluk tuşunun eylemi |
    | `init` | ✓ | ilk veri (sayfa açılırken bir kez) |
    | `stop` | `setInterval` varsa | modül değişince zamanlayıcıyı durdurur |
-   | `steps` | önerilir | rehberli anlatım: `[{t,d,run()}]` |
-   | `scenarios` | isteğe bağlı | hazır kurulumlar: `[{name,apply()}]` |
+   | `steps` | önerilir | rehberli anlatım: `[{t,d,set?,run()}]` — `d` içinde `<b>` kullanılabilir |
+   | `scenarios` | ✓ (veri kümesi) | `CONTENT[id].sets`'ten üretilir: `DS.map((d,i)=>({name:d.name,apply(){useSet(i);}}))` |
+   | `scenarioLabel` | `scenarios` varsa | seçicinin başlığı, `CONTENT[id].pick` |
    | `undo` | tuval düzenlenebilirse | `editable()`'ın döndürdüğü `undo` |
 
    `steps[].run()` modülün içine elle dokunmaz; kontrolleri kullanıcı gibi sürer:
    `setR("#id",değer)`, `press("#id")`, `setPressed("#id",true)`. Böylece adımlar
    mevcut olay işleyicilerini kullanır, mantık iki yerde tekrarlanmaz.
+   Adım veri kümesi de değiştirebilir: `run()` içinde `useSet()` **çağırmak yerine**
+   `set:2` alanı yazılır — kabuk senaryo düğmesine basar (`mod.__pick`), böylece
+   düğmenin basılı hâli ekranda görünenle tutarlı kalır.
 
    Tuvale nokta eklenen modüllerde `editable(cv,{pts,setPts,toPx,toData,add,draw,commit})`
    kullanılır — sürükleme, silme ve geri almayı tek yerden getirir. `commit` pahalı
@@ -104,10 +156,15 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    `.eyebrow` içindeki "Modül NN · Grup" metni bu satırla birebir aynı olmalı.
    Grup adı `GROUPS` dizisinde geçmeli, yoksa modül menüde görünmez.
    Etiketler yalnız arama içindir, ekranda görünmez.
-4. `TH["m-XXX"]=(c,w,h)=>{...}` ile giriş sayfası kartı için küçük bir önizleme çiz.
+4. `CONTENT`'e bir kayıt ekle: en az iki `sets` girdisi (her birinde `name` + `note`)
+   ve tam bir `lesson` (`q`, `idea`, `read` ≥ 2 satır, `terms` ≥ 2 terim, `life`, `trap`).
+   Modülün içinde `const DS=SETS("m-XXX"); let dsi=0; const S=()=>DS[dsi];` kurup
+   eksen ve sınıf adlarını `S().x` / `S().cls[0]` üzerinden çiz — tuvale sabit dizgi
+   yazma. `useSet(i)` hem veriyi üretir hem gösterge adlarını (`txt("#id",…)`) yeniler.
+5. `TH["m-XXX"]=(c,w,h)=>{...}` ile giriş sayfası kartı için küçük bir önizleme çiz.
    `thumbBase(c,w,h)` zemini hazırlar, `tdot(c,x,y,r,renk)` nokta koyar. Burada da
    renkler token'dan gelir.
-5. `tools/behaviour.js`'e o modül için bir blok ekle. **Kural: her `chk()` bir METİN
+6. `tools/behaviour.js`'e o modül için bir blok ekle. **Kural: her `chk()` bir METİN
    cümlesinden türetilir** — `.ask` kutusu ya da bir `steps[].d` ne vaat ediyorsa
    gösterge onu doğrulamalı. Bu araç olmadığı için "%50 der" yazıp %95 gösteren,
    "ıraksar" deyip global minimuma inen beş modül derse kadar fark edilmedi.
@@ -136,14 +193,15 @@ python3 tools/lint.py index.html
 
 # 17 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
 # istisna, canvas'a giden NaN ve "draw() bu göstergeye hiç dokunmadı" durumu.
+# Ayrıca CONTENT kapsaması: eksik ders notu, tek veri kümesi, kutuda kalan "undefined".
 # ML_W ile DAR yerleşim dalları da sınanır: 930 tek başına yetmez, çünkü panel
 # gizleme eşiklerinin altındaki kod yolu hiç çalıştırılmamış olur.
 for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; done
 
-# 17 modülün pedagojik iddialarını sına — ".ask/adım metni ne vaat ediyor,
+# 17 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
-node tools/behaviour.js index.html
+node tools/behaviour.js index.html   # 86 denetim: 17 modül + alternatif veri kümeleri
 
 # tuvale yazılan her etiket rengini açık VE koyu temada zemine karşı ölç
 # (label(...) çağrılarını ayıklar; 4.5 altındakileri bildirir)
@@ -157,8 +215,28 @@ Bu üç araç `tools/` altında. Tek dosya kuralı **uygulamayı** kapsar; geli�
 araçları ayrı dosyada durur. `harness.js` küçük bir DOM/Canvas taklidi kurup
 `index.html`'in script'ini gerçekten çalıştırır — tarayıcı gerekmez.
 
-Ayrıca: açık ve koyu temada okunabilirlik, 1280×720 projeksiyon çözünürlüğünde
-taşma olmaması, konsolda hata olmaması.
+```bash
+# projeksiyon yerleşimi: gösterge DEĞERLERİ perdenin içinde mi (gerçek Chromium)
+# kurulum depoya değil geçici dizine — bkz. tools/layout.js başındaki not
+NODE_PATH=/tmp/ml-visual/node_modules PUPPETEER_CACHE_DIR=/tmp/ml-visual/.chrome \
+  node tools/layout.js index.html [--shots]
+```
+
+Bu kapı olmadan görünmeyen iki kusur şöyle bulundu: (1) `.stats` satırı 1280×720'de
+**her modülde** perdenin altında kalıyordu (+22 … +256 px), yani hoca gösterge
+değerlerini görmek için kaydırıyordu; (2) `show()` bölüme programatik odak veriyor
+ve Chrome `:focus-visible`'ı üstünde tuttuğu için 930 px genişliğinde accent bir
+dikdörtgen sürekli ekranda duruyordu (tıklamayla da kaybolmuyordu). İkisi de
+`harness.js`'in sahte DOM'unda görünmez — yerleşim hesaplanmıyor.
+
+**Dikey bütçe.** Yükseklik iki kırılımla sıkışır (`index.html` içinde ölçüm notlarıyla):
+`≤820px` başlık/boşluk/çubuk/gösterge kutuları ve tuval (58vh → 50vh) kısılır,
+kontrol çubuğundaki tek satırlık `.hint` gizlenir; `≤660px` (tam ekran değilse
+pencere ~600 px kalıyor) başlık paragrafı da gizlenir — aynı metnin daha iyisi ders
+notu kutusunda ve düğmesi tam altında. Bu yüzden `.head` paragrafları **kısa**
+tutulur; uzun anlatım `CONTENT[id].lesson`'a yazılır.
+
+Ayrıca: açık ve koyu temada okunabilirlik, konsolda hata olmaması.
 
 1280×720'de tuval **930 px** kalır (1280 − 280 rail − 68 kenar boşluğu). Çok
 panelli modüllerde yerleşim eşiği bunun altında olmalı; aksi halde panel derste
@@ -185,3 +263,6 @@ Eşiği 930'un hemen altına koymak da yetmez: tek kademe tarayıcı zoom'u (%11
 - `localStorage` bağımlılığı — uygulama her açılışta çalışır durumda olmalı.
 - Modülleri ayrı dosyalara bölme (tek dosya kuralı bilinçli bir tercihtir;
   değiştirilecekse önce konuşulur).
+- HTML kısmına `<script>` dizgisini **yorum içinde bile** yazmak: `tools/lint.py` ve
+  `tools/harness.js` dosyayı ilk `<script>` geçtiği yerden ikiye bölüyor; yorumda kalan
+  bir tanesi bütün id denetimini ve tarayıcısız koşumu sessizce bozar.

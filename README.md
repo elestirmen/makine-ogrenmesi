@@ -32,7 +32,7 @@ etkileşimli deney. Tek HTML dosyası, bağımlılık yok.
 | | **Derin öğrenme** | |
 | 15 | Tek nöron | perceptron, linear separability, XOR sorunu |
 | 16 | Gizli katman | MLP, backpropagation, XOR'un çözümü |
-| 17 | Filtre gezdirmek | convolution, kernel, ReLU, max pooling |
+| 17 | Filtre gezdirmek | convolution, kernel size, padding, stride, ReLU, pooling |
 
 **Terimler.** Cümleler Türkçe, adlandırılmış yöntem ve metrik adları İngilizce
 (`bagging`, `overfitting`, `precision`, `epoch`, `kernel` …); her terim modül başına
@@ -45,12 +45,46 @@ gösterir, 06 ormanla düzeltir. 12 k'yı sorar, 13 doğru k'yı nasıl bulacağ
 
 ## Derste kullanım
 
+**Ders notu.** Her modülün başlığının altında *Ders notu* düğmesi var (klavyede `?`).
+Açılan kutu tek ekranda şunları verir: modülün cevapladığı soru, fikrin iki paragraflık
+anlatımı, **ekranda ne var** rehberi (hangi panel neyi gösteriyor), veri kümelerinin
+tek satırlık özetleri, İngilizce–Türkçe terim tablosu, gerçek hayattaki kullanımı ve
+o konuda **sık yapılan hata**. Öğrenci kaydırıcıyı çevirip hiçbir şey anlamadan
+geçmesin diye var; kutunun altındaki *Adım adım anlat* düğmesi doğrudan rehberli
+anlatımı başlatır.
+
 **Adım adım modu.** Her modülün kontrol çubuğunda *Adım adım* düğmesi var: hoca ileri
 bastıkça tuval sırayla kurulur ve altta o adımın ne gösterdiği yazar. Kaydırıcılar
 serbest kalır, istediğiniz an araya girebilirsiniz.
 
-**Senaryolar.** Bazı modüllerde hazır kurulumlar var — Modül 10'da *Kanser taraması*
-ile *Spam filtresi* aynı eşik kaydırıcısını taban tabana zıt yönde kullanmayı gösterir.
+**Veri setleri.** Her modülde aynı dersi başka bir hikâyeyle tekrar eden 2–3 somut veri
+var; tuvalin üstündeki şeritten seçilir ve eksen adları, sınıf adları, göstergeler
+onunla birlikte değişir. Soyut "x₁ / x₂" yerine gerçek bir ölçüm:
+
+| modül | veri setleri |
+|---|---|
+| 03 k-NN | uçak / kuş (kanat açıklığı–hız) · baz istasyonu kapsaması (halka sınır) · kredi riski (iç içe sınıflar) |
+| 05 karar ağacı | bağ hastalığı · sahte işlem (tek eşik yetmez) · kalite kontrol (şerit) |
+| 07 · 08 · 11 | gün içi sıcaklık · reklam → satış (doygunluk) · titreşim ölçümü — *aynı veri üç modülde* |
+| 09 gradient descent | iki vadi · tek vadi (convex) · dik kanyon (0.06 iyi, 0.20 patlar) |
+| 10 eşik | İHA tespiti · kanser taraması (recall öne geçer) · spam filtresi (precision öne geçer) |
+| 12 k-means | müşteri segmenti · artçı sarsıntılar (uzun kümeler) · uydu pikselleri |
+| 14 PCA | boy–kilo · matematik–fizik notu · uydu bantları (bitki örtüsü ekseni) |
+| 15 · 16 | kalite kontrol (ayrılabilir) · ilaç etkileşimi (XOR) · baz istasyonu (halka) |
+| 17 convolution | hava fotoğrafı · tarla parselleri · test deseni · **kendi görüntün** (dosya, sürükle-bırak ya da Ctrl+V) |
+
+Kalan modüllerde de en az iki set var (01 ev fiyatı / araç yaşı → negatif eğim,
+02 boy–maaş / otel puanı–yorum / araç yaşı–kilometre, 04 tümör / sınav / balon turu,
+06 kredi onayı / pivot sulama, 13 üç ayrı "kaç küme var" hikâyesi).
+
+**Modül 17 · convolution.** Dört hiperparametre de kontrolde: girdi boyu (64/128/256),
+çekirdek boyu (3×3/5×5), padding (0/1/2), stride (1/2/3) — çıktı boyutu
+`⌊(girdi+2·dolgu−çekirdek)/adım⌋+1` formülüyle göstergede yazıyor. Tuvalde girdi,
+`çekirdek ⊙ pencere = çarpımlar → Σ` tablosu ve öznitelik haritası yan yana; pencere
+kalıcı, fareyi bıraktığınızda hesap ekranda kalır. *Pencereyi gezdir* çekirdeği baştan
+sona yürütüp haritayı adım adım doldurur; *Filtre bankası* aynı görüntüye dört ayrı
+çekirdek uygulayıp "bir katmanda 32–256 filtre var" fikrini gösterir. Kendi resminizi
+yükleyebilirsiniz (griye çevrilip anında işlenir).
 
 **Klavye**
 
@@ -61,6 +95,7 @@ ile *Spam filtresi* aynı eşik kaydırıcısını taban tabana zıt yönde kull
 | `Esc` | tüm modüller sayfasına dön |
 | `↑` `↓` | adım adım modda önceki/sonraki adım |
 | `Ctrl`+`Z` | tuvale eklenen noktayı geri al |
+| `?` | ders notu kutusu (açık kutuda `Esc` kapatır) |
 | `/` | arama kutusuna atla |
 | `T` | açık / koyu tema |
 
@@ -73,6 +108,10 @@ tuvalin üstünden kaydırarak sayfayı gezmek veri kümesini bozmaz.
 
 **Tema.** Sağ üstteki düğme (ya da `T`) açık/koyu arasında geçirir; varsayılan
 işletim sistemi ayarıdır. Seçim oturum boyunca geçerlidir (`localStorage` yok).
+
+**Projeksiyon.** 1280×720'de gösterge değerleri kaydırmadan görünür: pencere
+kısaldıkça başlık, boşluklar ve tuval kademeli olarak sıkışır (`≤820px` ve `≤660px`).
+Tam ekran (`F11`) en rahatı. Ölçüm: `node tools/layout.js`.
 
 ## Yerelde çalıştırma
 

@@ -10,7 +10,10 @@ bad=[]; warn=[]
 # 1 · $("#id") ile sorgulanan her id HTML'de veya JS'te üretiliyor mu
 ids_html=set(re.findall(r'id="([^"]+)"',html))
 made=set(re.findall(r'\.id\s*=\s*["\']([^"\']+)',script))
-q=set(re.findall(r'\$\("#([^"]+)"\)',script))
+# $("#id"), setR/press/txt("#id", …) ve dizi içinde tutulan ["#id",deger] çiftleri:
+# script'teki her "#id" dizgisi bir seçici sayılıyor
+q=set(re.findall(r'"#([\w-]+)"',script))
+q={i for i in q if not i.isdigit()}          # yorumdaki "#09" gibi örnekler seçici değil
 missing=sorted(q-ids_html-made)
 if missing: bad.append(f"HTML'de olmayan id sorgulanıyor: {missing}")
 

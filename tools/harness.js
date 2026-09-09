@@ -103,18 +103,18 @@ sandbox.history={
 };
 vm.createContext(sandbox);
 try{
-  vm.runInContext(script+"\n;globalThis.__M=MODULES;globalThis.__SEQ=SEQ;globalThis.__META=META;",sandbox,{timeout:20000});
+  vm.runInContext(script+"\n;globalThis.__M=MODULES;globalThis.__SEQ=SEQ;globalThis.__META=META;globalThis.__C=CONTENT;",sandbox,{timeout:20000});
 }catch(e){ throw new Error("YÜKLEME HATASI: "+e.message+"\n"+(e.stack||'').split('\n').slice(0,4).join('\n')); }
 
-const M=sandbox.__M, SEQ=sandbox.__SEQ, META=sandbox.__META;
+const M=sandbox.__M, SEQ=sandbox.__SEQ, META=sandbox.__META, CONTENT=sandbox.__C;
 const tick=(n)=>{ for(let i=0;i<n;i++){ let alive=false;
   for(const f of TIMERS){ if(f){ alive=true; try{f();}catch(e){warnings.push('timer: '+e.message);} } }
   if(!alive) break; } };
 const el=(id)=>REG.get(id);
-return {sandbox,M,SEQ,META,tick,el,REG,warnings,TIMERS,STATS,W,H};
+return {sandbox,M,SEQ,META,CONTENT,tick,el,REG,warnings,TIMERS,STATS,W,H};
 }
 if(require.main!==module){ module.exports={boot}; } else {
-const {M,SEQ,META,warnings:warn2,STATS,el:EL,W:BW,H:BH}=boot(process.argv[2]);
+const {M,SEQ,META,CONTENT,sandbox:SB,warnings:warn2,STATS,el:EL,W:BW,H:BH}=boot(process.argv[2]);
 console.log(`yüklendi · MODULES=${M.length} SEQ=${SEQ.length} META=${META.length} · tuval ${BW}×${BH}\n`);
 /* Yalnız imleç hareketiyle ya da eğitim sırasında yazılan göstergeler: draw()
    bunlara dokunmaz, bu beklenen davranıştır. Listeye ekleme yapmadan önce
@@ -131,7 +131,9 @@ for(let i=0;i<SEQ.length;i++){
   // rehberli adımları da çalıştır
   let stepErr=null;
   if(!err && mod.steps) for(const st of mod.steps){
-    try{ st.run&&st.run(); mod.draw(); }catch(e){ stepErr=stepErr||`"${st.t}": ${e.message}`; }
+    /* st.set adımın veri kümesi: uygulamada senaryo düğmesine basılıyor, burada da öyle */
+    try{ if(st.set!==undefined && mod.__pick) mod.__pick(st.set);
+         st.run&&st.run(); mod.draw(); }catch(e){ stepErr=stepErr||`"${st.t}": ${e.message}`; }
   }
   // senaryolar
   let scErr=null;
@@ -151,6 +153,42 @@ for(let i=0;i<SEQ.length;i++){
   if(sessiz.length) console.log(`        draw() hiç yazmadı: ${sessiz.join(', ')}`);
   [...new Set(w)].slice(0,3).forEach(x=>console.log(`        ${x}`));
 }
+/* ── ders notu ve veri kümesi kapsaması ──
+   İçeriği olmayan modül derste "bu ekran ne anlatıyor" sorusuna cevapsız kalıyor;
+   tek veri kümesi kalan modülde de "alternatif somut örnek" vaadi boşa düşüyor. */
+const eksik=[];
+for(const mod of SEQ){
+  const c=CONTENT&&CONTENT[mod.id];
+  if(!c){ eksik.push(`${mod.id}: CONTENT kaydı yok`); continue; }
+  const L=c.lesson;
+  if(!L) eksik.push(`${mod.id}: ders notu (lesson) yok`);
+  else{
+    if(!L.q||!(L.idea||[]).length)   eksik.push(`${mod.id}: lesson.q / lesson.idea eksik`);
+    if((L.read||[]).length<2)        eksik.push(`${mod.id}: lesson.read en az iki satır olmalı`);
+    if((L.terms||[]).length<2)       eksik.push(`${mod.id}: lesson.terms en az iki terim olmalı`);
+    if(!(L.life||[]).length)         eksik.push(`${mod.id}: lesson.life eksik`);
+    if(!L.trap)                      eksik.push(`${mod.id}: lesson.trap eksik`);
+  }
+  if((c.sets||[]).length<2) eksik.push(`${mod.id}: en az iki veri kümesi olmalı`);
+  else (c.sets||[]).forEach((x,i)=>{ if(!x.name||!x.note) eksik.push(`${mod.id}: sets[${i}] name/note eksik`); });
+  /* seçici ya araç çubuğunda (scenarios) ya da modülün kendi düğmelerinde (ui:false) */
+  if(c.ui!==false && (mod.scenarios||[]).length!==(c.sets||[]).length)
+    eksik.push(`${mod.id}: senaryo düğmeleri veri kümeleriyle eşleşmiyor`);
+}
+/* ders notu kutusunu gerçekten kur: eksik alan "undefined" olarak PERDEYE düşer */
+for(let i=0;i<SEQ.length;i++){
+  const mod=SEQ[i];
+  try{
+    SB.openLesson(i);
+    const body=EL('lesson-b').innerHTML||"", ttl=EL('lesson-t').textContent||"";
+    if(body.length<600) eksik.push(`${mod.id}: ders notu kutusu neredeyse boş (${body.length} karakter)`);
+    if(/undefined|\[object/.test(body+ttl)) eksik.push(`${mod.id}: ders notu kutusunda undefined kaldı`);
+    if(!ttl) eksik.push(`${mod.id}: ders notu başlığı yazılmadı`);
+  }catch(e){ eksik.push(`${mod.id}: ders notu açılamadı — ${e.message}`); }
+}
+if(eksik.length){ fail++; console.log("\nİÇERİK EKSİĞİ"); eksik.forEach(x=>console.log("        "+x)); }
+else console.log(`\nders notu + veri kümesi: ${SEQ.length}/${SEQ.length} modül tam`);
+
 console.log(`\n${SEQ.length-fail}/${SEQ.length} modül temiz`);
 process.exit(fail?1:0);
 }
