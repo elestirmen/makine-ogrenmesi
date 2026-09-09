@@ -27,6 +27,10 @@ for w in 930 800 676; do ML_W=$w node "$SRC/tools/harness.js" "$SRC/index.html" 
 echo "· tuval etiketi kontrastı"
 ( cd "$SRC" && node tools/contrast.js >/dev/null )
 
+# Gerçek tarayıcı kapısı: puppeteer kurulu değilse kendisi atlıyor (çıkış 0).
+echo "· projeksiyon yerleşimi (tarayıcı varsa)"
+node "$SRC/tools/layout.js" "$SRC/index.html" >/dev/null
+
 if [ "${SKIP_SLOW:-0}" = "1" ]; then
   echo "· davranış denetimi ATLANDI (SKIP_SLOW=1)"
 else

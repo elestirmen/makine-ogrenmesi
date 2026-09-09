@@ -217,10 +217,19 @@ araçları ayrı dosyada durur. `harness.js` küçük bir DOM/Canvas taklidi kur
 
 ```bash
 # projeksiyon yerleşimi: gösterge DEĞERLERİ perdenin içinde mi (gerçek Chromium)
-# kurulum depoya değil geçici dizine — bkz. tools/layout.js başındaki not
-NODE_PATH=/tmp/ml-visual/node_modules PUPPETEER_CACHE_DIR=/tmp/ml-visual/.chrome \
-  node tools/layout.js index.html [--shots]
+node tools/layout.js index.html [--shots]
 ```
+
+Bu kapı isteğe bağlı ve **tarayıcı yoksa sessizce atlanır**. Makinede bir kez
+kurulur, sonra ortam değişkeni istemez (sudo da gerekmez):
+
+```bash
+npm install -g puppeteer     # modül npm prefix'ine, tarayıcı ~/.cache/puppeteer'a (~650 MB)
+```
+
+Araç puppeteer'ı sırayla arar: yerel `node_modules` / `NODE_PATH` → `npm root -g`
+→ `puppeteer-core` + sistemdeki chromium. Tarayıcı açılmazsa yığın iziyle çökmez,
+kapıyı atlar. Tek dosya kuralı bozulmuyor: bağımlılık depoda değil makinede.
 
 Bu kapı olmadan görünmeyen iki kusur şöyle bulundu: (1) `.stats` satırı 1280×720'de
 **her modülde** perdenin altında kalıyordu (+22 … +256 px), yani hoca gösterge

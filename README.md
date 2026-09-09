@@ -111,7 +111,9 @@ işletim sistemi ayarıdır. Seçim oturum boyunca geçerlidir (`localStorage` y
 
 **Projeksiyon.** 1280×720'de gösterge değerleri kaydırmadan görünür: pencere
 kısaldıkça başlık, boşluklar ve tuval kademeli olarak sıkışır (`≤820px` ve `≤660px`).
-Tam ekran (`F11`) en rahatı. Ölçüm: `node tools/layout.js`.
+Tam ekran (`F11`) en rahatı. Ölçüm: `node tools/layout.js` — gerçek Chromium'da
+her modülü açıp gösterge değerlerinin perdeye sığıp sığmadığını denetler.
+Tarayıcı yoksa sessizce atlanır; kalıcı kurulum tek satır: `npm install -g puppeteer`.
 
 ## Yerelde çalıştırma
 
