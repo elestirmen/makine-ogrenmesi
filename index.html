@@ -481,6 +481,12 @@ input[type=range]{min-height:28px;margin:0}
 .sheetbody p+p{margin-top:11px}
 .sheetbody .lead{font-size:19px;font-weight:600;line-height:1.42;letter-spacing:-.01em;margin-bottom:2px}
 .sheetbody b{font-weight:700}
+/* kısa cevap: sorunun altında, accent şeritli sakin bir kutu — uzun metne girmeden
+   önce "olay şu" diyen iki üç cümle */
+.sheetbody .short{margin-top:12px;padding:12px 16px;border-left:3px solid var(--accent);
+  background:var(--tint);border-radius:0 8px 8px 0;font-size:16px;line-height:1.55}
+.sheetbody .short .sk{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;font-weight:600}
 
 /* ekranı okuma rehberi: iki dar sütun yerine kalın giriş + akan cümle */
 .sheetbody .rows{display:flex;flex-direction:column;gap:10px}
@@ -1422,22 +1428,24 @@ const CONTENT={
     {name:"Çalışma → not", x:"çalışma saati · 0–30", y:"sınav notu (100)", gen:"noisy",
      note:"Aynı ilişki daha gürültülü: çalışan öğrenci daha iyi not alıyor ama tek bir doğru kimsenin notunu tam bilemiyor."},
     {name:"Araç yaşı → fiyat", x:"araç yaşı · 0–15 yıl", y:"ikinci el fiyatı (bin ₺)", gen:"down",
-     note:"Eğim bu kez NEGATİF. Kaydırıcıyı sola geçirmeden en iyi doğruyu bulamazsınız — eğimin işareti de veriden gelir."}
+     note:"Eğim bu kez NEGATİF. Kaydırıcıyı sola geçirmeden en iyi doğruyu bulamazsın; eğimin işareti de veriden gelir."}
   ],
   lesson:{
-    q:"Bir nokta bulutuna 'en iyi' doğruyu kim, neye göre seçer?",
-    idea:["Elimizde ikili ölçümler var: her ev için alan ve fiyat. Yeni bir ev geldiğinde fiyatını tahmin etmek istiyoruz. En basit model bir doğru: <b>fiyat = a · alan + b</b>. İki sayı, bütün model bu.",
-          "\"En iyi\" bir zevk meselesi değil, bir tanım: her noktanın doğruya olan dikey uzaklığı o noktanın <b>artık</b>ıdır (residual); artıkların KARELERİ toplamı en küçük olan doğru kazanır. Bu tanıma <b>least squares</b> (en küçük kareler) denir ve tek bir formülle çözülür — deneme yanılma gerekmez."],
-    read:[["Sol panel","Mavi noktalar veri, kalın pembe çizgi senin doğrun, kesikli yeşil çizgi least squares çözümü. Kırmızı dikey çubuklar artıklar: kalınlığı hatanın büyüklüğüyle artıyor."],
-          ["Sağ panel","Her eğim değeri için toplam kare hata. Tek bir dip noktası var — çözümün tek olmasının sebebi bu. Pembe top senin eğimin, yeşil kesik çizgi en iyisi."],
-          ["Göstergeler","SSE senin doğrunun hatası, 'En iyi SSE' ulaşılabilecek en küçük değer. R² veriyi ne kadar açıkladığını söyler: 1 kusursuz, 0 ise 'ortalamayı söylemekten iyi değil'."]],
-    terms:[["linear regression","doğrusal regresyon","girdiden sayısal bir çıktı tahmin eden en basit model"],
-           ["least squares","en küçük kareler","artıkların karelerinin toplamını en küçük yapan çözüm"],
-           ["residual","artık","gerçek değer − tahmin; her nokta için bir tane"],
-           ["R²","açıklanan varyans oranı","modelin veriyi ortalamaya kıyasla ne kadar iyi açıkladığı"]],
-    life:["Emlak değerleme, sigorta primi, enerji tüketimi tahmini — sayısal bir çıktının en hızlı taban çizgisi (baseline) hep budur.",
-          "Bilimsel ölçümde kalibrasyon doğrusu: sensörün ham çıktısını gerçek birime çeviren şey tam olarak bu iki katsayıdır."],
-    trap:"Kareyi almanın bedeli var: tek bir aykırı nokta doğruyu peşinden sürükler. Tuvalin kenarına çok uzak bir nokta koyup deneyin — least squares aykırı değere DAYANIKSIZDIR.",
+    q:"Bir avuç noktanın arasından geçen 'en iyi' doğruyu kim seçiyor, neye göre?",
+    short:"Bilgisayar, noktalara en yakından geçen doğruyu bulur. 'Yakın' derken her noktanın doğruya uzaklığının karesini alıp topluyor; bu toplam en küçük olan doğru kazanıyor. Deneme yanılma yok, tek formülle çıkıyor.",
+    idea:["Elimizde ev ilanları var: her evin alanı ve fiyatı. Yeni bir ev gelince fiyatını kestirmek istiyoruz. En basit yol bir doğru çizmek: <b>fiyat = a · alan + b</b>. Burada a eğim, yani 'metrekare başına kaç lira'; b ise doğrunun nereden başladığı. Bütün model bu iki sayıdan ibaret. Adı <b>linear regression</b> (doğrusal regresyon).",
+          "Peki hangi doğru 'en iyi'? Göz kararı değil, bir ölçüsü var. Her noktanın doğruya olan dikey uzaklığına <b>residual</b> (artık) diyoruz: gerçek fiyat eksi doğrunun söylediği fiyat. Bu artıkların karelerini alıp topluyoruz. Kare almak iki iş yapıyor: artı ve eksi hatalar birbirini götürmüyor, büyük hatalar daha çok cezalanıyor. Bu toplamı en küçük yapan doğruya <b>least squares</b> (en küçük kareler) çözümü deniyor.",
+          "Güzel tarafı şu: en iyi doğruyu bulmak için deneme yanılma gerekmiyor. Tek bir formül, bir hamlede en iyi a ve b'yi veriyor. Sağdaki panelde eğimi değiştirince toplam hatanın tek bir çukur çizdiğini görüyorsun; çukurun dibi o formülün cevabı."],
+    read:[["Sol panel","Mavi noktalar veri. Kalın pembe çizgi senin kaydırıcıyla çizdiğin doğru, kesikli yeşil çizgi bilgisayarın bulduğu en iyi doğru. Kırmızı dikey çubuklar artıklar; çubuk ne kadar uzunsa o noktada o kadar yanılıyorsun."],
+          ["Sağ panel","Eğimi soldan sağa değiştirince toplam hata nasıl değişiyor, onu gösteriyor. Tek bir çukur var, yani tek bir en iyi cevap var. Pembe top senin eğimin, yeşil kesik çizgi çukurun dibi."],
+          ["Göstergeler","SSE senin doğrunun toplam kare hatası. 'En iyi SSE' ulaşabileceğin en küçük değer. R² modelin veriyi ne kadar açıkladığını söylüyor: 1 kusursuz, 0 'herkese ortalama fiyatı söylemekten farkı yok', eksi ise ortalamadan bile kötü."]],
+    terms:[["linear regression","doğrusal regresyon","bir sayıdan başka bir sayıyı tahmin eden en basit model: bir doğru"],
+           ["least squares","en küçük kareler","artıkların kareleri toplamını en küçük yapan doğruyu seçme yöntemi"],
+           ["residual","artık","gerçek değer eksi tahmin; her noktanın kendi hatası"],
+           ["R²","açıklanan varyans oranı","model, 'ortalamayı söyle' demekten ne kadar daha iyi; 1 kusursuz"]],
+    life:["Emlak değerleme, sigorta primi hesabı, bir binanın enerji tüketimini kestirme. Sayısal bir şey tahmin edileceği zaman ilk denenen model hep bu.",
+          "Laboratuvarda kalibrasyon: bir sensörün ham sayısını gerçek birime (derece, ppm) çeviren doğru tam olarak bu iki katsayı."],
+    trap:"Kare almanın bir bedeli var: çok uzakta duran tek bir nokta bile doğruyu peşinden sürükler. Tuvalin bir köşesine uzak bir nokta koyup dene; en iyi doğru bir anda ona doğru dönüyor. Yani least squares aykırı değere karşı dayanıksız. Veriye önce bakmadan doğru uydurma.",
     next:"Modül 09 · Yamaçtan aşağı — burada formülle bir hamlede indik; orada aynı dibi adım adım arayacağız."
   }},
 
@@ -1452,19 +1460,21 @@ const CONTENT={
      note:"Araç yaşı 0–15, kilometre yüz binlerde. k-NN'e göre 1 yaşındaki 200.000 km'lik araç, 12 yaşındaki 195.000 km'lik aracın komşusu."}
   ],
   lesson:{
-    q:"İki öznitelikten biri binlerle, diğeri birlerle ölçülüyorsa uzaklık ne anlama gelir?",
-    idea:["Uzaklık hesabı birimleri bilmez: 5.000 TL'lik fark ile 0.1 m'lik farkı aynı torbaya atıp toplar. Sonuç: büyük aralıklı öznitelik hesabın tamamını ele geçirir, küçük aralıklı öznitelik model için görünmez olur.",
-          "Çözüm veriyi değiştirmek değil, ölçeği eşitlemek. <b>min–max</b> her özniteliği 0–1 aralığına sıkıştırır; <b>z-score</b> (z-skoru) ortalamayı çıkarıp standart sapmaya böler — sonuç ortalaması 0, sapması 1 olan bir öznitelik. İkisi de aynı soruna iki cevap; hangisinin uygun olduğu veriye bağlı."],
-    read:[["Sol panel","Ham veri. Öznitelik aralığı kaydırıcısı ikinci özniteliği kaç kat büyüttüğünü söylüyor. Fareyi gezdirin: kesikli çizgiler sorgu noktasının k en yakın komşusu."],
-          ["Sağ panel","Aynı veri, ölçeklenmiş hâli. Aynı sorgu noktası, ama komşular değişiyor — çünkü uzaklığın tanımı değişti."],
-          ["Göstergeler","İki pay, uzaklığın yüzde kaçının hangi öznitelikten geldiğini söyler. 'Değişen komşu' ve 'Tahmin değişti mi' ise ölçeklemenin sonucu gerçekten etkilediğini gösterir."]],
-    terms:[["min–max scaling","min–maks ölçekleme","(x − min) / (maks − min): her şey 0 ile 1 arasına iner"],
-           ["z-score","z-skoru","(x − ortalama) / standart sapma: ortalaması 0, sapması 1"],
+    q:"Bir özellik binlerle, öteki birlerle ölçülüyorsa 'birbirine yakın' ne demek?",
+    short:"Uzaklık hesabı birimden anlamaz. 5.000 TL'lik maaş farkıyla 10 cm'lik boy farkını aynı torbaya atıp toplar; sonuçta büyük sayılı özellik her şeyi belirler, küçük sayılı özellik görünmez olur. Çare, bütün özellikleri aynı ölçeğe getirmek.",
+    idea:["Bilgisayar iki kişinin 'benzer' olup olmadığına nasıl karar veriyor? Aralarındaki uzaklığa bakıyor: boy farkını ve maaş farkını alıp bir tür Pisagor hesabıyla birleştiriyor. Sorun şu: boy farkı en fazla yarım metre, maaş farkı ise binlerce lira. Toplamın içinde boyun payı yok denecek kadar küçük kalıyor. Model boyu fiilen görmüyor.",
+          "Çözüm veriyi değiştirmek değil, ölçeği eşitlemek. İki yaygın yol var. <b>Min–max</b> ölçekleme her özelliği 0 ile 1 arasına sıkıştırır: en küçük değer 0, en büyük 1 olur. <b>Z-score</b> (z-skoru) ise her değerden ortalamayı çıkarıp standart sapmaya böler; sonuçta 'ortalamadan kaç sapma uzakta' diyen bir sayı çıkar. İkisi de aynı derdin ilacı; aykırı değer çoksa z-score daha rahat çalışır.",
+          "Bu adım o kadar sıradan ki genelde unutuluyor, ama etkisi büyük: sağ panelde aynı sorgu noktasının komşuları ölçekledikten sonra değişiyor. Yani ölçekleme bir süsleme değil, cevabı değiştiren bir işlem."],
+    read:[["Sol panel","Ham veri. 'Öznitelik aralığı' kaydırıcısı ikinci özelliği kaç kat büyüttüğünü gösteriyor. Fareyi gezdir: kesikli çizgiler o noktanın en yakın k komşusuna gidiyor."],
+          ["Sağ panel","Aynı veri, ölçeklenmiş hâli. Aynı sorgu noktası ama komşular farklı. Çünkü 'uzak' kelimesinin anlamı değişti."],
+          ["Göstergeler","İki 'pay' göstergesi uzaklığın yüzde kaçının hangi özellikten geldiğini söylüyor. Ham veride biri %99'a yakın çıkıyor: sorun tam da bu. 'Değişen komşu' ve 'Tahmin değişti mi' ölçeklemenin sonucu gerçekten etkilediğini gösteriyor."]],
+    terms:[["min–max scaling","min–maks ölçekleme","(x − en küçük) / (en büyük − en küçük): her şey 0 ile 1 arasına iner"],
+           ["z-score","z-skoru","(x − ortalama) / standart sapma: 'ortalamadan kaç sapma uzakta'"],
            ["standardization","standartlaştırma","z-skoru uygulamanın öteki adı"],
-           ["preprocessing","ön işleme","model kurulmadan önce veriye yapılan bütün işlemler"]],
-    life:["k-NN, k-means, SVM, PCA ve gradient descent ile eğitilen her model ölçeğe duyarlıdır: ölçeklemeyi atlamak sessiz bir hatadır, program çalışır ama sonuç yanlıştır.",
-          "Decision tree ve random forest ölçekten etkilenmez, çünkü her özniteliğe kendi eşiğini koyar. Bu yüzden tablo verisinde ağaç tabanlı modeller 'hazırlık gerektirmeyen' seçenektir."],
-    trap:"Ölçekleme parametreleri (min, maks, ortalama, sapma) YALNIZ eğitim verisinden hesaplanır ve test verisine aynısı uygulanır. Test verisini de katarak ölçeklemek data leakage'dır (veri sızıntısı) — notunuz olduğundan iyi çıkar.",
+           ["preprocessing","ön işleme","model kurulmadan önce veriye yapılan bütün hazırlık işleri"]],
+    life:["k-NN, k-means, SVM, PCA ve gradient descent ile eğitilen her model (sinir ağları dâhil) ölçeğe duyarlı. Ölçeklemeyi unutursan program hata vermez, sessizce yanlış sonuç verir.",
+          "Karar ağacı ve random forest ölçekten etkilenmez, çünkü her özelliğe kendi eşiğini koyar. Tablo verisinde 'hazırlıksız çalışan model' diye anılmalarının sebebi bu."],
+    trap:"Ölçekleme için gereken sayılar (en küçük, en büyük, ortalama, sapma) yalnız eğitim verisinden hesaplanır; test verisine aynı sayılar uygulanır. Test verisini de katarak hesaplarsan model sınav sorularını önceden görmüş olur. Buna <b>data leakage</b> (veri sızıntısı) deniyor ve notun olduğundan iyi çıkar.",
     next:"Modül 03 · Komşuna bak — uzaklığı fiilen kullanan ilk model orada."
   }},
 
@@ -1479,20 +1489,22 @@ const CONTENT={
      note:"Sınıflar iç içe: aynı gelir ve borçla biri ödüyor, biri ödemiyor. k = 1 bu gürültüyü ezberler."}
   ],
   lesson:{
-    q:"Hiçbir formül kurmadan sınıflandırmak mümkün mü?",
-    idea:["<b>k-NN</b> (k-en yakın komşu) hiçbir şey öğrenmez: bütün veriyi saklar ve yeni bir nokta gelince en yakın k komşusuna bakıp oylatır. Çoğunluk hangi sınıfsa cevap o. Eğitim süresi sıfır, tahmin süresi ise veri büyüdükçe artar — çoğu modelin tam tersi.",
-          "k tek bir kaydırıcı ama bütün dönemin konusunu içinde taşıyor. Küçük k yerel gürültüye uyar (yüksek varyans), büyük k her şeyi yumuşatır ve yerel yapıyı kaçırır (yüksek yanlılık). Aradaki dengeye <b>bias–variance</b> (yanlılık–varyans) denir."],
-    read:[["Tuval","Soluk renkli bölgeler karar bölgesi: o noktaya düşen yeni bir örnek hangi sınıfa atanır. Fareyi gezdirin — kesikli çizgiler oylamaya katılan k komşuyu, halka ise 'ne kadar uzağa baktığını' gösterir."],
-          ["Sınır","Sınır bir formül değil, komşuluğun sonucu. Tek bir aykırı nokta kendi adacığını kurabiliyor; k büyüdükçe adacıklar kayboluyor."],
-          ["Göstergeler","'Eğitim hatası' modelin KENDİ verisindeki hatası. k = 1'de tam olarak %0 çıkar, çünkü her noktanın en yakın komşusu kendisidir — bu bir başarı değil, ölçüm hatasıdır."]],
+    q:"Hiç formül kurmadan, sadece komşulara bakarak karar verilebilir mi?",
+    short:"Evet. k-NN yeni bir noktayı gördüğünde en yakın k komşusuna bakar ve oy çokluğuyla karar verir. Öğrenme diye bir aşaması yok; bütün veriyi cebinde taşır, işi tahmin anında yapar.",
+    idea:["Mahalleye yeni taşınan birinin hangi takımı tuttuğunu tahmin et desem, muhtemelen komşularına bakarsın. <b>k-NN</b> (k-en yakın komşu) tam olarak bunu yapar: yeni nokta gelince en yakın k tanesine bakar, çoğunluk hangi sınıfsa cevabı o verir. Eğitim diye bir adımı yok; bütün veriyi saklar ve işi tahmin anına bırakır.",
+          "k'yı sen seçiyorsun ve bu tek sayı dönemin en önemli konusunu içinde taşıyor. k = 1 dersen model en yakın tek komşuya körü körüne inanır; tek bir tuhaf nokta bile kendi adacığını kurar. k = 21 dersen her şey yumuşar, adacıklar kaybolur ama ince ayrıntılar da gider. Birincisi <i>ezber</i>, ikincisi <i>üstünkörü bakma</i>. İkisinin arasındaki dengeye <b>bias–variance</b> (yanlılık–varyans) dengesi deniyor; bu isim dönem boyunca karşına çıkacak.",
+          "Bir de 'eğitim hatası' tuzağı var. k = 1 yapınca eğitim hatası tam %0 çıkıyor. Neden? Çünkü her noktanın en yakın komşusu kendisi. Bu bir başarı değil, ölçümün kendini kandırması. Bir modeli hiç görmediği veride sınamak gerekir; o konu Modül 07'de."],
+    read:[["Tuval","Soluk renkli bölgeler karar bölgesi: o bölgeye düşen yeni bir nokta o renge atanır. Fareyi gezdir; kesikli çizgiler oy veren k komşuya gidiyor, halka modelin 'ne kadar uzağa baktığını' gösteriyor."],
+          ["Sınır","İki renk arasındaki sınır bir formül değil, komşuluğun sonucu. k küçükken kıvrımlı ve adacıklı, k büyürken düz ve yumuşak."],
+          ["Göstergeler","'Eğitim hatası' modelin kendi noktalarından kaçını yanlış bildiği. k = 1'de %0: her nokta kendine en yakın. 'Oy dağılımı' imlecin olduğu yerde komşuların kaça kaç oy verdiği."]],
     terms:[["k-NN","k-en yakın komşu","en yakın k komşunun oyuyla karar veren model"],
-           ["decision boundary","karar sınırı","tahminin bir sınıftan diğerine geçtiği yer"],
-           ["bias–variance","yanlılık–varyans","fazla basit model ile fazla esnek model arasındaki denge"],
-           ["lazy learning","tembel öğrenme","eğitimde hiçbir şey hesaplamayıp bütün işi tahmine bırakan yaklaşım"]],
-    life:["Öneri sistemlerinin en eski hâli: 'sana benzeyen kullanıcılar bunu beğendi'.",
-          "Uydu görüntüsünde arazi sınıflandırma, el yazısı tanımada taban çizgisi, endüstride 'bu ölçüm hangi partiye benziyor' sorusu."],
-    trap:"k-NN'in tek gördüğü şey uzaklık. Öznitelikler farklı ölçekteyse (Modül 02) sonuç ölçeğin ta kendisi olur; ayrıca 'eğitim hatası %0' cümlesi asla bir başarı kanıtı değildir.",
-    next:"Modül 07 · Ezber mi, öğrenme mi — k = 1'de gördüğünüz ezberin genel adı."
+           ["decision boundary","karar sınırı","tahminin bir sınıftan ötekine geçtiği çizgi"],
+           ["bias–variance","yanlılık–varyans","fazla basit (üstünkörü) ile fazla esnek (ezberci) model arasındaki denge"],
+           ["lazy learning","tembel öğrenme","eğitimde hiçbir şey hesaplamayıp bütün işi tahmin anına bırakma"]],
+    life:["Öneri sistemlerinin en eski hâli: 'sana benzeyen kullanıcılar bunu da beğendi'.",
+          "Uydu görüntüsünde arazi türü ayırma, el yazısı rakam tanıma, fabrikada 'bu ölçüm hangi partiye benziyor' sorusu. Karmaşık bir model kurmadan önce karşılaştırma ölçütü olarak hep denenir."],
+    trap:"k-NN'in tek gördüğü şey uzaklık. Özellikler farklı ölçekteyse (biri binlerle, biri birlerle) sonuç ölçeğin ta kendisi olur; önce Modül 02'yi uygula. Bir de veri büyüdükçe her tahmin yavaşlar, çünkü her seferinde bütün noktalara uzaklık hesaplanıyor.",
+    next:"Modül 07 · Ezber mi, öğrenme mi — k = 1'de gördüğün ezberin genel adı."
   }},
 
 /* ══ 04 ══ */
@@ -1506,19 +1518,21 @@ const CONTENT={
      note:"Rüzgâr arttıkça iptal olasılığı artıyor. Eşiği nereye koyacağı pilotun kararı — modelin işi olasılığı vermek."}
   ],
   lesson:{
-    q:"Model 'evet' demek zorunda mı, yoksa '%73' diyebilir mi?",
-    idea:["<b>Logistic regression</b> (lojistik regresyon) önce tıpkı doğrusal regresyon gibi bir skor hesaplar (w · x + b), sonra bu skoru <b>sigmoid</b> S eğrisinden geçirip 0–1 arasına sıkıştırır. Çıktı artık bir karar değil, bir olasılık.",
-          "Eğitimin ölçütü de değişir: kare hata yerine <b>log loss</b> (log-kayıp) kullanılır. Log loss emin olup yanılmayı acımasızca cezalandırır — '%99 eminim' deyip yanılmak, '%55 eminim' deyip yanılmaktan kat kat pahalıdır. Modelin dürüst kalmasını sağlayan şey budur."],
-    read:[["S eğrisi","Pembe eğri P(pozitif | x). w eğrinin dikliği, b ise nereye oturduğu. Kesikli dikey çizgi karar sınırı: eğrinin 0.5'i kestiği yer."],
-          ["Noktalar ve çubuklar","Alt sıradaki ve üst sıradaki noktalar gerçek etiketler. Her noktadan eğriye inen ince çubuk o örneğin kaybı — uzun çubuk 'model buna emin ve yanlış' demek."],
-          ["Göstergeler","Log loss modelin kendine güveninin bedeli, doğruluk ise yalnız 0.5 eşiğine göre kaç örneği tuttuğu. İkisi aynı şeyi ölçmüyor: doğruluk aynı kalırken log loss düşebilir."]],
-    terms:[["logistic regression","lojistik regresyon","olasılık üreten doğrusal sınıflandırıcı"],
-           ["sigmoid","S eğrisi","her sayıyı 0 ile 1 arasına sıkıştıran fonksiyon"],
-           ["log loss","log-kayıp","olasılık tahminlerini ölçen kayıp; cross-entropy'nin ikili hâli"],
-           ["decision boundary","karar sınırı","olasılığın 0.5'i geçtiği yer"]],
-    life:["Kredi skorlaması, tıbbi risk hesabı, reklam tıklama tahmini: sektörde en çok kurulan modeldir, çünkü katsayıları yorumlanabilir.",
-          "Derin ağların son katmanı da tam olarak budur — sigmoid ya da çok sınıflı kardeşi softmax."],
-    trap:"Yüksek olasılık ile yüksek kesinlik aynı şey değil. Ayrılabilir veride w'yi büyüttükçe log loss sıfıra yaklaşır ama hiç ulaşmaz; model her şeye %100 der ve bu kendine güven, veriden gelen bir bilgi değildir.",
+    q:"Model 'evet' ya da 'hayır' demek zorunda mı, yoksa '%73 ihtimalle evet' diyebilir mi?",
+    short:"Diyebilir. Logistic regression önce bir puan hesaplar, sonra bu puanı S biçimli bir eğriden geçirip 0 ile 1 arasına sıkıştırır. Çıkan sayı bir olasılık: 0.73 demek '%73 ihtimalle geçer' demek. Kararı sonra sen verirsin.",
+    idea:["Bir öğrencinin kaç saat çalıştığını biliyorsun; sınavı geçer mi? 12 saat çalışan biri için 'kesin geçer' demek dürüst olmaz, geçmeyen de olur. Dürüst cevap bir olasılık: '%73 geçer'. <b>Logistic regression</b> (lojistik regresyon) bunu yapan model.",
+          "Nasıl yapıyor? Önce doğrusal regresyondaki gibi bir puan hesaplıyor: <b>w · x + b</b>. Bu puan eksi sonsuzdan artı sonsuza gidebilir, olasılık olamaz. O yüzden puanı <b>sigmoid</b> denen S biçimli eğriden geçiriyor: çok küçük puan 0'a, çok büyük puan 1'e yaklaşıyor, ortası 0.5. w eğrinin ne kadar dik olduğunu, b ise nereye oturduğunu belirliyor.",
+          "Model nasıl 'iyi' oluyor? Kare hata burada iş görmez; onun yerine <b>log loss</b> (log-kayıp) kullanılıyor. Bu ölçü emin olup yanılmayı çok pahalıya getirir: '%99 eminim' deyip yanılmak, '%55 eminim' deyip yanılmaktan katbekat fazla ceza alır. Modeli dürüst tutan şey bu."],
+    read:[["S eğrisi","Pembe eğri, her x değeri için 'pozitif olma olasılığı'. Kesikli dikey çizgi eğrinin 0.5'i kestiği yer: karar sınırı. Sağındakilere 'evet', solundakilere 'hayır' deniyor."],
+          ["Noktalar ve çubuklar","Alttaki sıra gerçek 'hayır'lar, üstteki sıra gerçek 'evet'ler. Her noktadan eğriye inen ince çubuk o örneğin kaybı. Uzun çubuk 'model buna emindi ve yanıldı' demek."],
+          ["Göstergeler","Log loss modelin dürüstlük notu; küçüğü iyi. Doğruluk ise 0.5 eşiğine göre kaç örneği doğru bildiği. İkisi farklı şeyler ölçüyor: doğruluk aynı kalırken log loss düşebilir, çünkü model aynı kararları daha makul bir güvenle vermeye başlamıştır."]],
+    terms:[["logistic regression","lojistik regresyon","olasılık üreten, doğru çizgiyle ayıran sınıflandırıcı"],
+           ["sigmoid","S eğrisi","her sayıyı 0 ile 1 arasına sıkıştıran S biçimli fonksiyon"],
+           ["log loss","log-kayıp","olasılık tahminlerinin notu; emin olup yanılmayı ağır cezalar"],
+           ["decision boundary","karar sınırı","olasılığın 0.5'i geçtiği yer; 'evet' ile 'hayır'ın sınırı"]],
+    life:["Kredi verilsin mi, hasta risk grubunda mı, bu reklama tıklanır mı: sektörde en çok kurulan model bu. Çünkü katsayılara bakıp 'şu özellik olasılığı şu kadar artırıyor' denebiliyor.",
+          "Derin sinir ağlarının son katmanı da tam olarak bu: sigmoid, ya da çok sınıf için kardeşi softmax."],
+    trap:"Yüksek olasılık ile haklılık aynı şey değil. Veri iki gruba tertemiz ayrılıyorsa w'yi büyüttükçe log loss sıfıra yaklaşır ama hiç sıfır olmaz; model herkese %100 demeye başlar. Bu kendine güven veriden gelmiyor, katsayının büyüklüğünden geliyor. Modül 08'deki ceza tam bunun için var.",
     next:"Modül 10 · Eşiği nereye koyalım — olasılığı karara çeviren adım orada tartışılıyor."
   }},
 
@@ -1528,25 +1542,27 @@ const CONTENT={
     {name:"Bağ hastalığı", x:"yaprak nemi (%)", y:"sıcaklık (°C)", cls:["Risk yok","Mildiyö riski"], gen:"demo",
      note:"Nem ve sıcaklık birlikte yükselince mantar hastalığı riski doğuyor. Bağcının kafasındaki kural da tam olarak 'şu eşikten sonra' biçiminde."},
     {name:"Sahte işlem", x:"işlem tutarı (₺)", y:"işlem saati (0–24)", cls:["Normal","Sahte"], gen:"boxes",
-     note:"Sahtelik bir KUTUNUN içinde: yüksek tutar VE gece saatleri. Tek eşik yetmez, iki eşik gerekir — derinlik 1 ile 3'ü karşılaştırın."},
+     note:"Sahtelik bir KUTUNUN içinde: yüksek tutar VE gece saatleri. Tek eşik yetmez, iki eşik gerekir; derinlik 1 ile 3'ü karşılaştır."},
     {name:"Kalite kontrol", x:"parça ağırlığı (g)", y:"titreşim (mm/s)", cls:["Sağlam","Kusurlu"], gen:"band",
      note:"Kusurlular bir ŞERİT hâlinde: ağırlık aralığın dışına çıkınca parça hatalı. Ağaç bunu iki dikey kesikle çözüyor."}
   ],
   lesson:{
-    q:"Bir model insanın anlayabileceği kurallarla karar verebilir mi?",
-    idea:["<b>Decision tree</b> (karar ağacı) tek bir soruyu tekrar tekrar sorar: \"hangi öznitelikte, hangi eşikte kesersem karışıklık en çok azalır?\" Karışıklığın ölçüsü <b>Gini</b>: bir kümede iki sınıf yarı yarıyaysa Gini 0.5, kümede tek sınıf kaldıysa 0. Bölmeden önceki Gini ile sonraki ağırlıklı Gini arasındaki fark bilgi kazancıdır.",
-          "Ağaç bu kesikleri iç içe uygulayarak düzlemi dikdörtgenlere böler. Her yaprağın kararı basit bir çoğunluk oyu. Sonucu bir insana anlatabilirsiniz: \"nem %70'in üstünde ve sıcaklık 22 dereceyi geçtiyse riskli\" — bu yüzden ağaçlar tarım, tıp ve hukukta tercih edilir."],
-    read:[["Sol panel","Renkli dikdörtgenler yaprakların kararı; rengin koyuluğu yaprağın saflığı. Kalın pembe çizgi kök bölmesi (senin eşiğin), kesikli ince çizgiler daha derin bölmeler."],
-          ["Sağ panel","Eşik soldan sağa gezerken ağırlıklı Gini. Eğri BASAMAKLI iniyor: eşik iki komşu nokta arasında dolaşırken hiçbir noktanın tarafı değişmediği için Gini de değişmiyor. Yeşil çizgi kaydırıcının ulaşabildiği en iyi eşik."],
-          ["Göstergeler","Bilgi kazancı = kök Gini − bölme sonrası. Yaprak sayısı ağacın kaç kutuya böldüğü; eğitim doğruluğu %99'a çıktığında sevinmeyin, ezber başladı."]],
-    terms:[["decision tree","karar ağacı","iç içe eşik sorularıyla karar veren model"],
-           ["Gini impurity","Gini karışıklığı","bir kümede sınıfların ne kadar karışık olduğunun ölçüsü"],
-           ["split","bölme","bir özniteliğe konan tek eşik"],
-           ["leaf","yaprak","artık bölünmeyen son kutu; kararı çoğunluk verir"]],
-    life:["Banka kredi kuralları, hastane triyaj protokolleri, üretimde kalite kontrol: 'neden reddedildi' sorusuna cevap verebilen tek model ailesi.",
-          "Tablo verisinde bugün de şampiyon olan gradient boosting (XGBoost, LightGBM) yüzlerce küçük ağacın toplamıdır — hepsi bu ekrandaki tek ağaçtan doğuyor."],
-    trap:"Derinliği artırmak eğitim doğruluğunu her zaman yükseltir, çünkü ağaç sonunda her noktaya kendi kutusunu verir. Derinliği 5 yapıp doğruluğun %99 olduğunu görün — sonra bunun neden bir kanıt olmadığını Modül 07'de konuşacağız.",
-    next:"Modül 06 · Kırk ağaç — tek ağacın ezberini düzeltmenin yolu ağacı değiştirmek değil, çoğaltmaktır."
+    q:"Bir model, kararını bir insana 'şu yüzden' diye açıklayabilir mi?",
+    short:"Karar ağacı evet/hayır soruları sorarak ilerler: 'Nem %70'ten yüksek mi? Evetse sıcaklık 22'den yüksek mi?' Sonunda her yol bir karara varır. Kararı satır satır okuyup anlayabildiğin tek model ailesi bu.",
+    idea:["Bir bağcıya 'hastalık riski var mı' diye sorsan kafasındaki kural şuna benzer: 'yaprak nemi yüksekse ve hava sıcaksa risk var'. <b>Decision tree</b> (karar ağacı) tam bu tür kuralları veriden kendi çıkarır. Bir özellik seçer, bir eşik koyar, veriyi ikiye böler; sonra her parçada aynı şeyi tekrar eder.",
+          "Hangi eşiği seçiyor? 'Karışıklığı en çok azaltan' eşiği. Karışıklığın ölçüsü <b>Gini</b>: bir kutuda iki sınıf yarı yarıyaysa Gini 0.5 (tam karışık), tek sınıf kaldıysa 0 (tertemiz). Ağaç her aday eşik için 'böldükten sonra karışıklık ne kadar düşer' diye hesaplar; en çok düşüren kazanır. Bu düşüşe <b>bilgi kazancı</b> deniyor.",
+          "Sonuç, düzlemi dikdörtgenlere bölen bir kurallar zinciri. Her dikdörtgen bir <b>leaf</b> (yaprak); kararı içindeki çoğunluk verir. En büyük artısı açıklanabilirlik: 'neden reddedildi' sorusuna 'nem %70'in üstünde ve sıcaklık 22'yi geçti' diye cevap verebilirsin. Tarımda, tıpta, bankacılıkta bu yüzden sevilir."],
+    read:[["Sol panel","Renkli dikdörtgenler yaprakların kararı; renk ne kadar koyuysa o yaprak o kadar 'temiz'. Kalın pembe çizgi ilk (kök) bölme, yani kaydırıcıyla seçtiğin eşik. Kesikli ince çizgiler daha derindeki bölmeler."],
+          ["Sağ panel","Eşiği soldan sağa gezdirince bölme sonrası karışıklık nasıl değişiyor. Eğri basamak basamak iniyor: eşik iki nokta arasında dolaşırken hiçbir nokta taraf değiştirmiyor, o yüzden Gini de değişmiyor. Yeşil çizgi en iyi eşik."],
+          ["Göstergeler","Bilgi kazancı = bölmeden önceki Gini − sonraki. Yaprak sayısı ağacın kaç kutuya böldüğü. Eğitim doğruluğu %99'a çıkınca sevinme; derinlik arttıkça ağaç her noktaya kendi kutusunu vermeye başlıyor, yani ezberliyor."]],
+    terms:[["decision tree","karar ağacı","iç içe evet/hayır sorularıyla karar veren model"],
+           ["Gini impurity","Gini karışıklığı","bir kutuda sınıfların ne kadar karışık olduğu: 0 tertemiz, 0.5 yarı yarıya"],
+           ["split","bölme","bir özelliğe konan tek bir eşik: 'şundan büyük mü?'"],
+           ["leaf","yaprak","artık bölünmeyen son kutu; kararı içindeki çoğunluk verir"]],
+    life:["Banka kredi kuralları, hastanede triyaj (aciliyet sıralama) protokolleri, üretimde kalite kontrol. 'Neden bu karar çıktı' sorusuna cevap verebilen tek model ailesi.",
+          "Tablo verisinde bugün yarışma kazanan modeller (XGBoost, LightGBM) yüzlerce küçük ağacın toplamı. Hepsi bu ekrandaki tek ağaçtan türüyor."],
+    trap:"Derinliği artırmak eğitim doğruluğunu her zaman yükseltir, çünkü ağaç sonunda her noktaya ayrı kutu açar. Derinliği 5 yapıp %99 gördüğünde bu bir başarı değil, ezberin başladığının işareti. Tek ağaç kullanırken derinliği sınırlamak şart; bunun neden böyle olduğunu Modül 07'de göreceğiz.",
+    next:"Modül 06 · Kırk ağaç — tek ağacın ezberini düzeltmenin yolu ağacı değiştirmek değil, çoğaltmak."
   }},
 
 /* ══ 06 ══ */
@@ -1558,89 +1574,93 @@ const CONTENT={
      note:"Döner pivot sulama uydu görüntüsünde bir DAİRE bırakır. Sınır kapalı bir eğri; topluluk bunu da yumuşatarak öğreniyor."}
   ],
   lesson:{
-    q:"Kötü bir modeli düzeltmek yerine çoğaltmak işe yarar mı?",
-    idea:["<b>Bagging</b> (torbalama) fikri şu: veriyi yerine koyarak çekip (<b>bootstrap</b>) her ağacı biraz farklı bir örneklemle eğit, sonra oylarını topla. Tek tek ağaçlar hâlâ ezberci, ama hataları birbirinden farklı olduğu için ortalamada birbirlerini götürüyorlar. Varyans düşer, yanlılık aynı kalır.",
-          "<b>Random forest</b> (rastgele orman) bir adım daha atar: her bölmede yalnızca rastgele seçilmiş birkaç özniteliğe bakılır. Bu, her ağacı TEK BAŞINA kötüleştirir ama ağaçların birbirine benzemesini engeller — ve topluluk için önemli olan tam olarak bu benzemezliktir.",
-          "Bedava sınav: her ağacın bootstrap örneğine girmeyen noktalar onun <b>out-of-bag</b> (torba dışı) örnekleridir. Bu noktalar o ağaç için hiç görülmemiş veri sayılır, yani ayrı bir test kümesi ayırmadan dürüst bir tahmin elde edilir."],
-    read:[["Sol panel","Soluk merdivenler tek tek ağaçların sınırları, kalın pembe eğri topluluğun oyu. Ağaç sayısını 1'den 40'a çekerken kalın eğrinin nasıl sakinleştiğine bakın."],
-          ["Sağ panel","Ağaç sayısına göre üç eğri: yeşil ormanın OOB doğruluğu, turuncu kesikli TEK ağacın OOB'si, kırmızı kesikli eğitim doğruluğu. Yeşil eğri 15–20 ağaçtan sonra düzleşiyor."],
-          ["Göstergeler","'Ormanın katkısı' = orman OOB'si − tek ağaç OOB'si. Eğitim doğruluğu ise modelin kendi kâğıdını okuması; hep yukarıda ve hep yanıltıcı."]],
-    terms:[["bagging","torbalama","bootstrap örneklemleriyle eğitilmiş modellerin oyunu toplamak"],
-           ["bootstrap","yerine koyarak örnekleme","n noktadan n tane çekmek — bazıları tekrarlanır, ~%37'si hiç gelmez"],
-           ["random forest","rastgele orman","bagging + her bölmede rastgele öznitelik alt kümesi"],
+    q:"Ezberleyen bir modeli düzeltmek yerine ondan kırk tane yapmak niye işe yarıyor?",
+    short:"Kırk ağaç aynı veriyi biraz farklı görüp farklı hatalar yapar. Oylarını toplayınca hatalar birbirini götürür, ortak doğru kalır. Kalabalığın bilgeliği gibi: tek tek yanılırlar, ortalamada tutarlar.",
+    idea:["Bir kavanozdaki şekerleri tek kişiye tahmin ettirirsen çok yanılır; yüz kişinin tahminini ortalarsan şaşırtıcı derecede yaklaşır. <b>Bagging</b> (torbalama) bu fikri modele uygular. Her ağaç için veriden yerine koyarak rastgele bir örneklem çekilir; buna <b>bootstrap</b> deniyor. Bazı noktalar iki üç kez gelir, bazıları hiç gelmez. Her ağaç biraz farklı veri gördüğü için biraz farklı hatalar yapar. Oylarını topladığında hatalar sönümlenir.",
+          "<b>Random forest</b> (rastgele orman) bir adım daha atar: her bölmede bütün özelliklere değil, rastgele seçilmiş birkaçına bakılır. Bu tek tek ağaçları biraz kötüleştirir ama birbirine benzemelerini engeller. Topluluk için önemli olan da tam bu: hep aynı hatayı yapan kırk ağacın ortalaması o hatayı düzeltmez.",
+          "Bedava bir sınav da var. Her ağacın örneklemine girmeyen noktalar (yaklaşık %37'si) o ağaç için hiç görülmemiş veridir. Bu noktalara <b>out-of-bag</b> (torba dışı, OOB) deniyor. Her ağacı kendi OOB noktalarında sınayıp ortalarsan, ayrı bir test kümesi ayırmadan dürüst bir not alırsın."],
+    read:[["Sol panel","Soluk merdiven biçimli çizgiler tek tek ağaçların sınırları; kalın pembe eğri topluluğun oyu. Ağaç sayısını 1'den 40'a çekerken kalın eğrinin nasıl sakinleştiğine bak."],
+          ["Sağ panel","Ağaç sayısına göre üç eğri. Yeşil: ormanın OOB doğruluğu. Turuncu kesikli: tek bir ağacın OOB doğruluğu. Kırmızı kesikli: eğitim doğruluğu. Yeşil eğri 15–20 ağaçtan sonra düzleşiyor; daha fazlası bir şey kazandırmıyor."],
+          ["Göstergeler","'Ormanın katkısı' = orman OOB'si − tek ağaç OOB'si. Eğitim doğruluğu ise modelin kendi kâğıdını kendisinin okuması; hep yüksek, hep yanıltıcı."]],
+    terms:[["bagging","torbalama","her modeli farklı bir bootstrap örneklemiyle eğitip oylarını toplamak"],
+           ["bootstrap","yerine koyarak örnekleme","n noktadan n tane çekmek; bazıları tekrar gelir, yaklaşık %37'si hiç gelmez"],
+           ["random forest","rastgele orman","bagging + her bölmede yalnız rastgele birkaç özelliğe bakmak"],
            ["out-of-bag (OOB)","torba dışı","bir ağacın örneklemine girmeyen noktalar; bedava test kümesi"]],
-    life:["Tablo verisinde ilk denenen ciddi model: dolandırıcılık tespiti, kredi riski, uzaktan algılamada arazi örtüsü sınıflandırması.",
-          "Uydu ve İHA görüntülerinden ürün haritalama işinin standart aracı random forest'tır — ölçekleme istemez, öznitelik önemini söyler, az veriyle çalışır."],
-    trap:"Ağaç sayısını artırmak overfitting'i ARTIRMAZ; sadece bir yerden sonra hiçbir şey kazandırmaz ve hesabı pahalılaştırır. Aşırı öğrenmeyi belirleyen şey ağaç sayısı değil, tek tek ağaçların derinliğidir.",
-    next:"Modül 11 · Şansı ortalamak — OOB'nin yaptığı işi, ayrı bir test kümesiyle nasıl yaptığımız orada."
+    life:["Tablo verisinde ilk denenen ciddi model: dolandırıcılık tespiti, kredi riski, hastalık riski.",
+          "Uydu ve İHA görüntüsünden ürün haritası çıkarmanın standart aracı random forest. Ölçekleme istemez, hangi özelliğin önemli olduğunu söyler, az veriyle çalışır."],
+    trap:"Ağaç sayısını artırmak ezberi artırmaz; bir yerden sonra sadece boşuna hesap yaptırır. Ezberi belirleyen şey ağaç sayısı değil, tek tek ağaçların derinliği. Bir de: orman tek ağaçtan iyidir ama artık 'neden' sorusuna tek bir kural zinciriyle cevap veremezsin; açıklanabilirlikten biraz fedakârlık ediyorsun.",
+    next:"Modül 11 · Şansı ortalamak — OOB'nin yaptığı işi ayrı bir test kümesiyle nasıl yaptığımız orada."
   }},
 
 /* ══ 07 ══ */
 "m-fit":{ pick:"Veri seti", sets:CURVES,
   lesson:{
-    q:"Hatası sıfıra inen bir model neden kötü olabilir?",
-    idea:["Aynı veriye 1. dereceden 14. dereceye kadar polinom uyduruyoruz. Derece arttıkça model daha esnek hâle gelir: eğitim noktalarına daha iyi oturur. 14. derecede 14 noktanın hepsinden geçer ve eğitim hatası neredeyse sıfır olur.",
-          "Ama modelin işi eğitim noktalarını tekrar etmek değil, HİÇ GÖRMEDİĞİ noktayı tahmin etmek. Test hatası bir yere kadar düşer, sonra tırmanmaya başlar. O dönüş noktasından sonrası <b>overfitting</b> (aşırı öğrenme): model ilişkiyi değil, gürültüyü öğrenmiştir. Dönüş noktasının solu ise <b>underfitting</b> (yetersiz öğrenme).",
-          "Kritik nokta: aşırı öğrenme modelin tek başına özelliği değil, model karmaşıklığı ile veri miktarının ORANININ sonucudur. Aynı 14. derece, 40 noktayla çok daha makul davranır."],
-    read:[["Sol panel","Kesikli gri eğri gerçek ilişki (model bunu bilmiyor), mavi noktalar eğitim verisi, soluk küçük noktalar test verisi, pembe eğri modelin tahmini."],
-          ["Sağ panel","Dereceye göre iki hata eğrisi: mavi eğitim, kırmızı test. Eğitim hep düşer; test U çizer. Yeşil bant en iyi dereceyi işaretliyor."],
-          ["Göstergeler","RMSE ortalama hatanın büyüklüğü. 'Durum' rozetine dikkat: yetersiz / dengede / aşırı öğrenme — bu rozet test eğrisinin dibine göre konuşur, eğitim hatasına göre değil."]],
+    q:"Hatası sıfıra inen bir model nasıl kötü olabilir?",
+    short:"Çünkü hatası sıfır olan model soruları değil, cevapları ezberlemiş olabilir. Gördüğü noktaları kusursuz bilir, yeni bir nokta gelince çuvallar. Buna overfitting (aşırı öğrenme) deniyor ve makine öğrenmesinin baş belası.",
+    idea:["Sınava, kitaptaki çözümlü örnekleri ezberleyerek giren öğrenciyi düşün. Aynı sorular çıksa 100 alır; biraz değişik bir soru gelince kalır. Model için de aynı şey geçerli. Buradaki modele istediğin kadar esneklik verebiliyorsun: 'derece' kaydırıcısı. 1. derece düz çizgi, 14. derece 14 noktanın hepsinden geçebilen kıvrımlı bir eğri.",
+          "İki ayrı hata ölçüyoruz. <b>Eğitim hatası</b>: modelin gördüğü noktalarda ne kadar yanıldığı. <b>Test hatası</b>: hiç görmediği noktalarda ne kadar yanıldığı. Derece arttıkça eğitim hatası hep düşer, çünkü daha esnek eğri noktalara daha iyi oturur. Test hatası ise bir yere kadar düşer, sonra tırmanır. Tırmanmanın başladığı yerden sonrası <b>overfitting</b> (aşırı öğrenme): model asıl ilişkiyi değil, o örneklemin rastgele gürültüsünü öğrenmiş. Dönüş noktasının solu ise <b>underfitting</b> (yetersiz öğrenme): model veriyi görecek kadar esnek değil.",
+          "Asıl ders şu: aşırı öğrenme modelin tek başına suçu değil, model karmaşıklığı ile veri miktarının oranı. Aynı 14. derece, 40 noktayla çok daha uslu duruyor. Veri arttıkça esnek model de disipline giriyor."],
+    read:[["Sol panel","Kesikli gri eğri gerçek ilişki; model bunu bilmiyor, sen biliyorsun. Mavi noktalar eğitim verisi, soluk küçük noktalar test verisi, pembe eğri modelin tahmini. Yüksek derecede pembe eğrinin noktalar arasında nasıl çıldırdığına bak."],
+          ["Sağ panel","Dereceye göre iki hata eğrisi: mavi eğitim, kırmızı test. Eğitim hep iniyor, test U çiziyor. Yeşil bant test hatasının en düşük olduğu derece: aranan denge orası."],
+          ["Göstergeler","RMSE 'ortalama olarak ne kadar yanılıyorum' demek, verinin biriminde. 'Durum' rozeti yetersiz / dengede / aşırı öğrenme diyor ve kararını test eğrisine göre veriyor, eğitim hatasına göre değil."]],
     terms:[["overfitting","aşırı öğrenme","eğitim verisini ezberleyip yeni veride bozulmak"],
-           ["underfitting","yetersiz öğrenme","model veriyi görecek kadar esnek değil"],
-           ["generalization","genelleme","hiç görülmemiş veride başarı — asıl amaç"],
-           ["RMSE","kök ortalama kare hata","hataların karesinin ortalamasının karekökü"]],
-    life:["Her makine öğrenmesi projesinin görünmez ana sorunu budur: modelin sunumda %99, sahada %60 çıkması hep aynı hikâyedir.",
-          "Bu yüzden veri her zaman eğitim / doğrulama / test diye bölünür ve test kümesine karar verirken bakılmaz."],
-    trap:"Eğitim hatası bir kalite ölçütü değildir. Dahası: test kümesine bakarak derece seçip sonra aynı test kümesindeki hatayı rapor etmek de kendini kandırmaktır — o iş için doğrulama kümesi (Modül 11) var.",
+           ["underfitting","yetersiz öğrenme","modelin veriyi görecek kadar esnek olmaması"],
+           ["generalization","genelleme","hiç görülmemiş veride başarılı olmak; asıl amaç bu"],
+           ["RMSE","kök ortalama kare hata","hataların karesinin ortalamasının karekökü; 'ortalama ne kadar yanılıyorum'"]],
+    life:["Her makine öğrenmesi projesinin baş belası. 'Sunumda %99, sahada %60' hikâyesinin adı hep overfitting.",
+          "Bu yüzden veri her zaman eğitim / doğrulama / test diye üçe bölünür ve test kümesine karar verirken hiç bakılmaz. Test, sınav günü açılan zarftır."],
+    trap:"Eğitim hatası bir kalite ölçütü değildir. Daha sinsi bir hata da var: test kümesine bakarak dereceyi seçip sonra aynı test kümesindeki notu rapor etmek. O zaman test artık test değildir, sen ona göre ayar yapmışsın. Derece seçmek için ayrı bir doğrulama kümesi lazım; Modül 11 bunu anlatıyor.",
     next:"Modül 08 · Katsayıya ceza — dereceyi küçültmeden aşırı öğrenmeyi durdurmanın yolu."
   }},
 
 /* ══ 08 ══ */
 "m-reg":{ pick:"Veri seti", sets:CURVES,
   lesson:{
-    q:"Model karmaşıklığını düşürmeden aşırı öğrenme durdurulabilir mi?",
-    idea:["Ezber modülündeki kurulumun aynısı: aynı veri, aynı yüksek dereceli polinom. Bu kez dereceyi küçültmüyoruz — büyük katsayıyı PAHALI hâle getiriyoruz. Kayıp fonksiyonuna katsayıların büyüklüğüne bağlı bir ceza ekleniyor: <b>regularization</b> (düzenlileştirme). λ cezanın ağırlığı.",
-          "İki ceza türü, iki farklı davranış. <b>L2</b> (ridge) katsayıların karelerini cezalandırır: hepsini birden kısar ama hiçbirini tam sıfır yapmaz. <b>L1</b> (lasso) mutlak değerleri cezalandırır: bir kısmını TAM OLARAK sıfıra indirir, yani o kuvveti modelden atar. Buna <b>sparsity</b> (seyreklik) denir ve otomatik öznitelik seçimi demektir.",
-          "λ'yı büyütmek eğitim hatasını her zaman kötüleştirir. Buna rağmen test hatası düşüyorsa, genelleme uğruna eğitim hatasından bilerek fedakârlık ediyoruz demektir. Aşırıya kaçarsa öteki uca varırız: düz bir çizgi, yani underfitting."],
-    read:[["Sol panel","Pembe eğri şu anki cezalı uyum, kırmızı kesikli eğri λ en küçükken elde edilen (cezasız) uyum. İkisi arasındaki fark cezanın işi."],
-          ["Sağ üst","Katsayı büyüklükleri |w|. Kesikli kırmızı çizgiler cezasız hâldeki boyları. L1'de boş kesikli kutular tam olarak sıfırlanmış katsayılar."],
-          ["Sağ alt","λ yolu: soldan sağa ceza büyürken eğitim (mavi) ve test (kırmızı) hatası. Yeşil bant en iyi λ. Şeride tıklayarak λ'yı oraya götürebilirsiniz."]],
+    q:"Modeli küçültmeden ezberi durdurmak mümkün mü?",
+    short:"Mümkün. Modele 'büyük katsayı kullanmak sana pahalıya patlar' diyorsun. Model esnekliğini koruyor ama onu ancak gerçekten gerektiğinde kullanıyor. Buna regularization (düzenlileştirme) deniyor.",
+    idea:["Modül 07'deki kurulum aynen duruyor: aynı veri, aynı 12. derece polinom. Ama bu kez dereceyi düşürmüyoruz. Ezberleyen eğri neden çıldırıyor? Çünkü katsayıları devasa oluyor; iki nokta arasında zıplamak için büyük sayılar gerekiyor. O hâlde büyük katsayıyı cezalandıralım. Hata ölçüsüne bir ceza eklenir: <b>hata + λ × katsayıların büyüklüğü</b>. λ (lambda) cezanın ne kadar ağır olduğu. λ sıfırsa ceza yok, eski model; λ büyüdükçe model 'büyük sayı kullanmadan da idare edeyim' der.",
+          "İki ceza türü var ve farklı davranıyorlar. <b>L2</b> (ridge) katsayıların karelerini cezalandırır: hepsini birden küçültür ama hiçbirini tam sıfıra indirmez. <b>L1</b> (lasso) mutlak değerleri cezalandırır: bir kısmını <i>tam olarak</i> sıfır yapar, yani o özelliği modelden atar. Buna <b>sparsity</b> (seyreklik) deniyor; pratikte 'hangi özellikler gerçekten işe yarıyor' sorusunu modelin kendisinin cevaplaması demek.",
+          "λ'yı büyüttükçe eğitim hatası mutlaka kötüleşir; modelin elini bağlıyorsun. Ama test hatası düşüyorsa doğru yoldasın: eğitimde biraz kaybedip yeni veride kazanıyorsun. Fazla kaçırırsan öteki uca düşersin: model düz çizgiye döner, underfitting başlar. Doğru λ ne tahminle ne hisle seçilir; Modül 11'deki yöntemle seçilir."],
+    read:[["Sol panel","Pembe eğri şu anki cezalı model. Kırmızı kesikli eğri cezanın neredeyse sıfır olduğu, yani ezberleyen hâli. Aradaki fark cezanın işi."],
+          ["Sağ üst","Her katsayının büyüklüğü |w|. Kesikli kırmızı çizgiler cezasız hâldeki boyları; ne kadar kısaldıklarını gösteriyor. L1'e geçince bazı çubuklar tamamen yok oluyor: o katsayılar sıfırlandı, 'Sıfır olmayan' göstergesi düştü."],
+          ["Sağ alt","λ yolu: soldan sağa ceza büyürken eğitim (mavi) ve test (kırmızı) hatası. Yeşil bant test hatasının en düşük olduğu λ. Şeride tıklayarak λ'yı oraya götürebilirsin."]],
     terms:[["regularization","düzenlileştirme","büyük katsayıyı cezalandırarak modeli sadeleştirmek"],
-           ["ridge (L2)","L2 cezası","katsayıların karelerini cezalar; hepsini kısar, sıfırlamaz"],
-           ["lasso (L1)","L1 cezası","mutlak değerleri cezalar; bazılarını tam sıfır yapar"],
-           ["sparsity","seyreklik","katsayıların çoğunun sıfır olması — modelin kendi öznitelik seçimi"]],
-    life:["Yüzlerce öznitelikli tablo verisinde lasso hangi ölçümün gerçekten işe yaradığını söyler; genetikte binlerce gen arasından birkaçını seçmek için kullanılır.",
-          "Derin öğrenmede aynı fikir weight decay adıyla her optimizer'ın içinde durur — sinir ağlarının varsayılan ayarıdır."],
-    trap:"Ceza ancak öznitelikler eşit ölçekliyse adildir; bu yüzden burada polinom sütunları standartlaştırılıyor (Modül 02). Ölçeklenmemiş veride λ, en büyük aralıklı özniteliği kayırır. Bir de sabit terim asla cezalandırılmaz.",
-    next:"Modül 11 · Şansı ortalamak — λ'yı hangi veriyle seçeceğiniz sorusunun cevabı."
+           ["ridge (L2)","L2 cezası","katsayıların karelerini cezalar; hepsini kısar, hiçbirini sıfırlamaz"],
+           ["lasso (L1)","L1 cezası","mutlak değerleri cezalar; bazılarını tam sıfır yapar, o özelliği atar"],
+           ["sparsity","seyreklik","katsayıların çoğunun sıfır olması; modelin kendi yaptığı özellik seçimi"]],
+    life:["Yüzlerce sütunlu bir tabloda lasso 'şu on sütun yeter, kalanı gürültü' der. Genetikte binlerce gen arasından birkaç tanesini seçmek için kullanılır.",
+          "Derin öğrenmede aynı fikir <i>weight decay</i> adıyla her eğitim aracının içinde hazır durur. Sinir ağlarının varsayılan ayarıdır."],
+    trap:"Ceza yalnız özellikler aynı ölçekteyse adil olur; büyük sayılı bir özelliğin katsayısı zaten küçük çıkar ve ceza onu kayırır. Bu yüzden burada polinom sütunları önce standartlaştırılıyor (Modül 02). Bir de sabit terim b hiç cezalandırılmaz; doğrunun yukarı aşağı kayması karmaşıklık değildir.",
+    next:"Modül 11 · Şansı ortalamak — λ'yı hangi veriyle seçeceğin sorusunun cevabı."
   }},
 
 /* ══ 09 ══ */
 "m-gd":{ pick:"Hata yüzeyi",
   sets:[
     {name:"İki vadi", x:"ağırlık w", srf:"twin",
-     note:"Gerçek problemlerin yüzeyi budur: birden fazla çukur. Nereye vardığınız nereden başladığınıza bağlı."},
+     note:"Gerçek problemlerin yüzeyi budur: birden fazla çukur. Nereye varacağın nereden başladığına bağlı."},
     {name:"Tek vadi · convex", x:"ağırlık w", srf:"convex",
      note:"Doğrusal regresyonun yüzeyi böyledir (Modül 01): tek çukur. Başlangıç noktası hiç önemli değil, her yol aynı yere çıkıyor."},
     {name:"Dik kanyon", x:"ağırlık w", srf:"steep",
-     note:"Aynı çukur ama duvarları dik. Öteki yüzeylerde sorunsuz çalışan 0.06'lık adım burada da iş görür; 0.20'yi deneyin — patlar. Learning rate yüzeyin dikliğine göre seçilir."}
+     note:"Aynı çukur ama duvarları dik. Öteki yüzeylerde sorunsuz çalışan 0.06'lık adım burada da iş görür; 0.20'yi dene; patlar. Learning rate yüzeyin dikliğine göre seçilir."}
   ],
   lesson:{
-    q:"Bütün haritayı görmeyen bir model dibi nasıl bulur?",
-    idea:["Model \"öğrenirken\" aslında bir hata yüzeyinde aşağı yürür: <b>gradient descent</b> (gradyan inişi). Tek bildiği ayağının altındaki eğim (türev). Kural tek satır: <b>w ← w − learning rate × eğim</b>. Eğim yukarı bakıyorsa aşağı iner; eğim sıfıra yaklaştıkça adımlar kendiliğinden kısalır.",
-          "<b>Learning rate</b> (öğrenme oranı) adım boyudur ve iki yönlü bir risk taşır. Çok küçükse doğru yöne gider ama ders bitmeden varamaz; çok büyükse çukuru her seferinde aşar ve hata büyüyerek patlar (divergence). Doğru değer yüzeyin dikliğine bağlıdır — bu yüzden sabit bir 'iyi learning rate' yoktur.",
-          "İkinci ders daha derin: yüzey birden çok çukurluysa (non-convex) gradient descent en yakın çukura yerleşir, en derinini bulmayı GARANTİ ETMEZ. Sinir ağlarının yüzeyi tam olarak böyledir."],
-    read:[["Eğri","Siyah eğri hata L(w). Turuncu kesikli doğru bulunduğunuz noktadaki teğet — yani eğim. Yatay pembe ok bir sonraki adımın boyu."],
-          ["İzlek","Soluk pembe noktalar geçmiş adımlar. Adımların dipte kendiliğinden kısaldığına dikkat: eğim küçüldüğü için."],
-          ["Göstergeler","Eğim (dL/dw) sıfıra yaklaştığında 'yakınsadı' deriz. Durum rozeti hangi çukurda durduğunuzu ya da ıraksadığını söyler."]],
-    terms:[["gradient descent","gradyan inişi","eğimin tersi yönde küçük adımlarla ilerlemek"],
-           ["learning rate","öğrenme oranı","adım boyu; en kritik hiperparametre"],
-           ["local minimum","yerel minimum","çevresinin en dibi ama yüzeyin en dibi değil"],
+    q:"Sisli bir yamaçta, bütün haritayı görmeden en alçak noktaya nasıl inersin?",
+    short:"Ayağının altındaki eğime bakıp aşağı doğru bir adım atarsın, sonra tekrar bakarsın. Gradient descent bundan ibaret. Adım boyunu (learning rate) doğru seçmek işin bütün zorluğu: küçükse varamazsın, büyükse uçuruma yuvarlanırsın.",
+    idea:["Bir modelin 'öğrenmesi' aslında şu: ağırlıkları öyle ayarla ki hata en küçük olsun. Hatayı ağırlığa göre çizersen bir arazi çıkar; dip noktası en iyi ağırlık. Ama model bütün araziyi görmez, sadece bulunduğu yerin eğimini (türevini) hesaplayabilir. <b>Gradient descent</b> (gradyan inişi) tek kurallı bir yürüyüş: <b>yeni w = eski w − learning rate × eğim</b>. Eğim yukarıysa aşağı iner; eğim sıfıra yaklaştıkça adımlar kendiliğinden kısalır.",
+          "<b>Learning rate</b> (öğrenme oranı) adım boyu ve iki yönlü bir risk taşır. Çok küçükse doğru yöne gider ama dibe varması saatler sürer. Çok büyükse çukurun bir yanından öteki yanına atlar, her adımda hata büyür ve sayılar patlar; buna <b>divergence</b> (ıraksama) deniyor. Doğru değer yüzeyin dikliğine bağlı: 'Dik kanyon'da 0.06 sorunsuz iner, 0.20 patlar. Yani herkese uyan tek bir learning rate yok.",
+          "İkinci ders daha derin. Arazide birden fazla çukur varsa gradient descent en yakın çukura yerleşir ve en derini bulmayı garanti etmez. Nereye varacağın nereden başladığına bağlı. 'İki vadi' yüzeyinde başlangıç noktasını değiştir, göreceksin. Sinir ağlarının arazisi tam böyle, milyonlarca çukurlu."],
+    read:[["Eğri","Siyah eğri hata L(w): her ağırlık değerinde hatanın ne olduğu. Turuncu kesikli doğru bulunduğun yerdeki teğet, yani eğim. Pembe yatay ok bir sonraki adımın boyu ve yönü."],
+          ["İz","Soluk pembe noktalar geçmiş adımlar. Dibe yaklaştıkça adımların kendiliğinden kısaldığına bak: eğim küçülüyor, çarpım küçülüyor."],
+          ["Göstergeler","Eğim (dL/dw) sıfıra yaklaşınca 'yakınsadı' deriz: durdu. Durum rozeti hangi çukurda olduğunu ya da patladığını söyler. Adım sayacının artması ilerleme demek değil; eğime bak."]],
+    terms:[["gradient descent","gradyan inişi","eğimin tersi yönde küçük adımlarla aşağı inmek"],
+           ["learning rate","öğrenme oranı","adım boyu; ayarlanması en kritik sayı"],
+           ["local minimum","yerel minimum","çevresinin en alçak yeri ama bütün arazinin en alçağı değil"],
            ["divergence","ıraksama","adım fazla büyük olduğu için hatanın büyüyerek patlaması"]],
-    life:["Bütün derin öğrenme bu tek kuralın üstünde duruyor; dil modelleri de dâhil olmak üzere her ağ böyle eğitiliyor.",
-          "Pratikte tek bir sabit adım yerine momentum ve Adam gibi uyarlamalı yöntemler kullanılır — hepsi bu iskeletin üstüne kurulmuş iyileştirmeler."],
-    trap:"Hata patladığında ilk suçlanan genelde model olur; oysa çoğu zaman tek suçlu learning rate'tir. Bir de: adım sayacının artması ilerleme demek değildir — eğime bakın.",
-    next:"Modül 16 · Gizli katman — aynı iniş, bu kez yüzlerce ağırlığın olduğu bir yüzeyde."
+    life:["Bütün derin öğrenme bu tek kuralın üstünde duruyor. Sohbet botlarını eğiten şey de bu yürüyüşün milyarlarca ağırlıklı hâli.",
+          "Pratikte sabit adım yerine momentum ve Adam gibi 'akıllı adım' yöntemleri kullanılır; hepsi bu iskeletin üstüne eklenen iyileştirmeler."],
+    trap:"Hata patladığında ilk suçlanan model olur; oysa çoğu zaman tek suçlu learning rate'tir. Önce onu küçült. Bir de: hata azalmayı bıraktı diye 'en iyiye vardım' deme; belki sadece yerel bir çukurdasın. Farklı başlangıçlardan birkaç kez dene.",
+    next:"Modül 16 · Gizli katman — aynı iniş, bu kez yüzlerce ağırlığın olduğu bir arazide."
   }},
 
 /* ══ 10 ══ */
@@ -1649,45 +1669,47 @@ const CONTENT={
     {name:"İHA tespiti", pos:"İHA var", neg:"kuş / boş gök", set:[34,35,50],
      note:"Dengeli sayılabilir bir problem. Yanlış alarm operatörü yorar, kaçırmak ise güvenlik açığı — eşik bu iki maliyetin pazarlığı."},
     {name:"Kanser taraması", pos:"kanser", neg:"temiz", set:[42,6,18],
-     note:"Pozitifler nadir (%6). Kaçırmanın bedeli çok yüksek olduğu için eşik AŞAĞI çekilir: yanlış alarmı göze alıp recall'ı yükseltirsiniz."},
+     note:"Pozitifler nadir (%6). Kaçırmanın bedeli çok yüksek olduğu için eşik AŞAĞI çekilir: yanlış alarmı göze alıp recall'ı yükseltirsin."},
     {name:"Spam filtresi", pos:"spam", neg:"normal posta", set:[50,42,85],
      note:"Burada tam tersi: gerçek postayı spam'e atmak affedilmez. Eşik YUKARI çekilir, precision öne geçer."}
   ],
   lesson:{
-    q:"Aynı model, aynı veri — nasıl olur da hem iyi hem kötü sayılır?",
-    idea:["Model bir olasılık üretir; kararı veren şey senin koyduğun <b>threshold</b> (eşik). Eşiği oynatmak modeli değiştirmez, yalnızca hataların TÜRÜNÜ değiştirir. Dört sayıyı bir tabloya koyalım: <b>confusion matrix</b> (konfüzyon matrisi) — doğru pozitif, yanlış alarm, kaçırılan, doğru negatif.",
-          "İki oran her şeyi anlatır. <b>Precision</b> (kesinlik): pozitif dediklerimin yüzde kaçı gerçekten pozitif. <b>Recall</b> (duyarlılık): gerçek pozitiflerin yüzde kaçını yakaladım. Eşik sağa gidince precision yükselir, recall düşer — ikisi birden yükselmez. F1 bu ikisinin harmonik ortalaması.",
-          "<b>AUC</b> ise eşikten BAĞIMSIZ tek sayıdır: bütün eşikleri birden değerlendirir, yani modelin kendi gücünü ölçer. Eşik teknik değil, alana ait bir karardır — hangi hatanın daha pahalı olduğuna hekim, operatör ya da hukuk karar verir."],
-    read:[["Sol panel","Model skorlarının iki dağılımı: gerçek pozitifler ve gerçek negatifler. Üst üste binen bölge kaçınılmaz hata bölgesi. Pembe dikey çizgi eşik — tuvale tıklayarak da taşıyabilirsiniz."],
-          ["Orta panel","Confusion matrix. Hücre koyulaştıkça o hücredeki örnek sayısı artıyor. Eşiği oynatınca sayıların çapraz olarak yer değiştirmesine bakın."],
-          ["Sağ panel","ROC eğrisi: her eşik için (yanlış alarm oranı, yakalama oranı) çifti. Altındaki alan AUC. Köşegen kesikli çizgi 'yazı tura' modeli."]],
-    terms:[["confusion matrix","konfüzyon matrisi","dört hata/başarı sayısını tutan tablo"],
-           ["precision","kesinlik","pozitif dediklerimin doğruluk oranı"],
-           ["recall","duyarlılık","gerçek pozitiflerin yakalanma oranı"],
-           ["ROC / AUC","ROC eğrisi / eğri altı alan","bütün eşiklerdeki başarıyı özetleyen eğri ve tek sayı"]],
-    life:["Tıbbi tarama, dolandırıcılık tespiti, güvenlik kamerası, savunma sanayii: eşiği yanlış yere koymanın bedeli hep insana çıkar.",
-          "Nadir olay tespitinde raporlarda doğruluk yerine precision–recall eğrisi verilir; doğruluk orada bilgi taşımaz."],
-    trap:"Dengesiz sınıfta doğruluk yalan söyler: pozitif oranını %3 yapıp eşiği 0.95'e çekin — model neredeyse hiçbir şeye pozitif demez ama doğruluk %97 görünür. 'Hepsine negatif de' diyen bir model bile %97 alır.",
+    q:"Aynı model, aynı veri; nasıl oluyor da birine göre iyi, ötekine göre kötü?",
+    short:"Çünkü 'iyi' ne demek, hangi hatanın affedilmediğine bağlı. Kanser taramasında kaçırılan hasta affedilmez; spam filtresinde çöpe giden gerçek mail affedilmez. Eşiği nereye koyduğun, hangi hatayı göze aldığını belirler.",
+    idea:["Model her örnek için bir puan üretiyor: 0 ile 1 arası. Karar vermek için bir <b>threshold</b> (eşik) gerekiyor: 'puanı 0.5'ten büyükse pozitif de'. Eşiği oynatmak modeli değiştirmez, hataların <i>türünü</i> değiştirir. Dört durum var: gerçekten pozitif olanı yakaladın (doğru pozitif), negatife pozitif dedin (yanlış alarm), pozitifi kaçırdın (kaçırılan), negatifi doğru bildin (doğru negatif). Bu dört sayıyı 2×2 tabloya yazarsan <b>confusion matrix</b> (konfüzyon matrisi) çıkar.",
+          "Tablodan iki oran çıkıyor ve ikisi dünyaya farklı yerden bakıyor. <b>Precision</b> (kesinlik): 'pozitif dediklerimin yüzde kaçı gerçekten pozitif?' Yanlış alarm ne kadar az, precision o kadar yüksek. <b>Recall</b> (duyarlılık): 'gerçek pozitiflerin yüzde kaçını yakaladım?' Kaçırılan ne kadar az, recall o kadar yüksek. Eşiği sağa çekersen daha seçici olursun: precision artar, recall düşer. Sola çekersen tersi. İkisini birden yükseltemezsin; bu bir pazarlık. F1 skoru ikisinin ortak notu.",
+          "Peki eşikten bağımsız olarak modelin kendisi ne kadar iyi? Bunun için <b>ROC eğrisi</b> ve altındaki alan <b>AUC</b> var: bütün eşikleri tek tek dener ve tek bir sayıya indirir. AUC 0.5 yazı tura, 1.0 kusursuz. Eşiği oynatmak AUC'yi değiştirmez; onu değiştiren modelin gücü. Eşik ise teknik değil, alana ait bir karar: hangi hatanın daha pahalı olduğuna hekim, operatör ya da hukukçu karar verir."],
+    read:[["Sol panel","Model puanlarının iki dağılımı: gerçek pozitifler ve gerçek negatifler. Üst üste bindikleri bölge kaçınılmaz hata bölgesi; hiçbir eşik oradakileri tam ayıramaz. Pembe dikey çizgi eşik; tuvale tıklayıp taşıyabilirsin."],
+          ["Orta panel","Confusion matrix. Hücre koyulaştıkça oradaki örnek sayısı artıyor. Eşiği oynatınca sayıların çaprazlama yer değiştirmesine bak: yanlış alarm azalırken kaçırılan artıyor."],
+          ["Sağ panel","ROC eğrisi: her eşik için (yanlış alarm oranı, yakalama oranı) noktası. Eğri sol üst köşeye ne kadar yaklaşırsa model o kadar iyi. Köşegen kesikli çizgi yazı tura atan model."]],
+    terms:[["confusion matrix","konfüzyon matrisi","dört sonucu (yakaladı, yanlış alarm, kaçırdı, doğru reddetti) tutan 2×2 tablo"],
+           ["precision","kesinlik","'pozitif' dediklerimin yüzde kaçı gerçekten pozitif"],
+           ["recall","duyarlılık","gerçek pozitiflerin yüzde kaçını yakaladım"],
+           ["ROC / AUC","ROC eğrisi / eğri altı alan","bütün eşiklerdeki başarıyı özetleyen eğri ve tek sayı; 0.5 yazı tura, 1 kusursuz"]],
+    life:["Tıbbi tarama, kart dolandırıcılığı, güvenlik kamerası, savunma sanayii. Eşiği yanlış yere koymanın bedeli hep insana çıkar; o yüzden bu karar mühendise değil alan uzmanına bırakılır.",
+          "Nadir olay tespitinde raporlara doğruluk değil precision–recall eğrisi yazılır, çünkü doğruluk orada hiçbir şey söylemez."],
+    trap:"Dengesiz sınıfta doğruluk yalan söyler. Pozitif oranını %3 yapıp eşiği 0.95'e çek: model neredeyse hiçbir şeye pozitif demiyor ama doğruluk %97 görünüyor. 'Herkese negatif de' diyen bir model bile %97 alır. Nadir olay ararken doğruluğa bakma; precision ve recall'a bak.",
     next:"Modül 11 · Şansı ortalamak — bu sayıların ne kadarı model, ne kadarı şans?"
   }},
 
 /* ══ 11 ══ */
 "m-cv":{ pick:"Veri seti", sets:CURVES,
   lesson:{
-    q:"Tek bir test notuna güvenilir mi?",
-    idea:["Veriyi bir kez eğitim–test diye ayırıp aldığın nota bakmak, tek zar atıp 'zar altı gelir' demeye benzer. Şanslı bir bölmede model olduğundan iyi, şanssız bir bölmede olduğundan kötü görünür — hem de aynı modelle.",
-          "<b>k-fold cross-validation</b> (k-katlı çapraz doğrulama) veriyi k eşit parçaya böler; her turda bir parça test, kalanlar eğitim olur. Sonunda k not ortalanır. Böylece her nokta tam bir kez test edilir ve elimizde bir ortalamanın yanında bir de SAÇILMA (standart sapma) olur — 'modelim %86' değil, '%86 ± 3' diyebiliriz.",
-          "k büyüdükçe tahmin kararlılaşır ama hesap pahalılaşır: k = n olduğunda her nokta tek başına test olur (leave-one-out). Uygulamada 5 ya da 10 alışılmış dengedir."],
-    read:[["Sol panel","Kesikli gri eğri gerçek ilişki. Renkli noktalar katlar; içi dolu olanlar o turun test katı. Pembe eğri, o katı HİÇ görmeden eğitilmiş model."],
-          ["Alt şerit","Karıştırılmış seri ve katlara bölünüşü. Bir kata tıklayarak o katı test yapabilirsiniz."],
-          ["Sağ panel","Kat başına hata çubukları, ortalama ve ±1 standart sapma bandı. Soluk yeşil çizgiler önceki karıştırmaların ortalamaları: k küçükken dağınık, k büyükken üst üste."]],
-    terms:[["cross-validation","çapraz doğrulama","veriyi k kez farklı bölerek ortalama başarı ölçmek"],
+    q:"Tek bir sınav notuna bakıp 'bu model iyi' demek güvenilir mi?",
+    short:"Değil. Veriyi bir kez bölüp not almak tek zar atmaya benzer; şanslı ya da şanssız bir bölme çıkabilir. Cross-validation veriyi k kez farklı böler, k not alır ve ortalamasını verir. Yanına bir de 'artı eksi ne kadar' ekler.",
+    idea:["Elinde 20 nokta var, modeli sınamak için 4'ünü ayırdın. Hangi 4'ünü? Kolay 4 nokta ayrılırsa model olduğundan iyi, zor 4 nokta ayrılırsa olduğundan kötü görünür. Aynı model, iki farklı not. Tek bölmeye güvenmek bu yüzden tehlikeli.",
+          "<b>k-fold cross-validation</b> (k-katlı çapraz doğrulama) çözümü basit: veriyi k eşit parçaya böl; her parçaya <b>fold</b> (kat) deniyor. Sırayla her parçayı bir kez test yap, kalanlarla eğit. k tur sonunda k notun var. Ortalaması modelin notu; standart sapması ise bu notun ne kadar güvenilir olduğu. Artık 'modelim %86' değil, '%86 ± 3' diyebiliyorsun. İkinci sayı birincisi kadar önemli.",
+          "k'yı kaç seçmeli? Büyük k daha kararlı tahmin verir ama k kez eğitim demek, pahalı. k = nokta sayısı olursa her nokta tek başına test olur; buna leave-one-out deniyor. Pratikte 5 ya da 10 alışılmış denge."],
+    read:[["Sol panel","Kesikli gri eğri gerçek ilişki. Renkli noktalar katlar; içi dolu olanlar o turun test katı. Pembe eğri, o katı hiç görmeden eğitilmiş model. Bir kattan ötekine geçince eğrinin nasıl değiştiğine bak."],
+          ["Alt şerit","Veri karıştırılıp katlara bölünmüş hâli. Bir kata tıklayarak onu test yapabilirsin."],
+          ["Sağ panel","Kat başına hata çubukları, ortalama çizgisi ve ±1 standart sapma bandı. Soluk yeşil çizgiler önceki karıştırmaların ortalamaları: k küçükken dağınık, k büyükken üst üste biniyor. Yani k büyüdükçe not kararlılaşıyor."]],
+    terms:[["cross-validation","çapraz doğrulama","veriyi k kez farklı bölüp her seferinde not alarak ortalama başarı ölçmek"],
            ["fold","kat","verinin k parçasından biri"],
-           ["validation set","doğrulama kümesi","hiperparametre seçmek için kullanılan, test dışı küme"],
-           ["variance of the estimate","tahminin varyansı","aynı modelin farklı bölmelerde farklı not almasının ölçüsü"]],
-    life:["Bilimsel yayında ve yarışmada tek bir bölme notu artık kabul edilmez; sonuçlar ortalama ± sapma olarak verilir.",
-          "Zaman serisinde katlar rastgele seçilemez — geleceği görmemek için ileriye doğru bölme (forward chaining) kullanılır."],
-    trap:"Ölçekleme, öznitelik seçimi ve λ ayarı her katın İÇİNDE, yalnız o katın eğitim verisiyle yapılmalıdır. Bütün veri üstünde bir kez yapıp sonra bölmek data leakage'dır (veri sızıntısı) ve notu haksızca yükseltir.",
+           ["validation set","doğrulama kümesi","ayar (hiperparametre) seçmek için kullanılan, testten ayrı küme"],
+           ["variance of the estimate","tahminin varyansı","aynı modelin farklı bölmelerde farklı not almasının ölçüsü; '± kaç'"]],
+    life:["Bilimsel yayında ve yarışmalarda tek bir bölmenin notu artık kabul edilmez; sonuçlar 'ortalama ± sapma' olarak yazılır.",
+          "Zaman serisinde (borsa, hava durumu) katlar rastgele seçilemez; model geleceği görmüş olur. Orada 'geçmişle eğit, gelecekle sına' düzeni kullanılır."],
+    trap:"Ölçekleme, özellik seçimi ve λ ayarı gibi her hazırlık adımı her katın içinde, yalnız o katın eğitim verisiyle yapılmalı. Bütün veriyle bir kez yapıp sonra bölersen test katı eğitime sızmış olur; buna data leakage (veri sızıntısı) deniyor ve not haksız yere yükselir. En yaygın ve en zor fark edilen hata bu.",
     next:"Modül 08 · Katsayıya ceza — en iyi λ'yı işte bu ortalamayla seçeriz."
   }},
 
@@ -1703,19 +1725,20 @@ const CONTENT={
   ],
   lesson:{
     q:"Kimse etiket vermediyse gruplar nereden çıkıyor?",
-    idea:["<b>k-means</b> (k-ortalamalar) iki adımı sırayla tekrarlar. Atama: her nokta en yakın merkeze bağlanır. Güncelleme: her merkez kendi noktalarının ortasına taşınır. Hepsi bu; merkezler kımıldamayı bıraktığında algoritma durur.",
-          "Küçülttüğü nicelik <b>WCSS</b> (küme içi kareli hata): her noktanın kendi merkezine uzaklığının karesi toplamı. İki adımın ikisi de bu sayıyı ya azaltır ya sabit bırakır — bu yüzden yakınsama garantidir. Ama nereye yakınsadığı BAŞLANGIÇ merkezlerine bağlıdır: aynı veri, farklı başlangıç, farklı sonuç.",
-          "Bu bir denetimsiz (unsupervised) yöntem: doğru cevap yok, dolayısıyla 'doğruluk' da yok. Sonucun iyi olup olmadığına insan karar verir."],
-    read:[["Tuval","Gri noktalar henüz atanmamış. Renkli çizgiler hangi noktanın hangi merkeze bağlandığını gösteriyor. Kesikli izler merkezlerin adım adım yürüyüşü."],
-          ["Adımlar","'Sıradaki adım' göstergesi atama mı, taşıma mı olduğunu söyler. İkisini tek tek çalıştırmak algoritmanın tamamını görmenin en kolay yolu."],
-          ["WCSS","Merkezler atanır atanmaz WCSS düşmeye başlar ve hiçbir adımda ARTMAZ. Artmışsa uygulamada hata var demektir."]],
-    terms:[["k-means","k-ortalamalar","merkez atama ve taşıma adımlarını tekrarlayan kümeleme"],
-           ["centroid","merkez","bir kümenin noktalarının ortalaması"],
-           ["WCSS / inertia","küme içi kareli hata","noktaların kendi merkezine uzaklık karelerinin toplamı"],
-           ["unsupervised learning","denetimsiz öğrenme","etiketsiz veriden yapı çıkarma"]],
-    life:["Müşteri segmentasyonu, görüntü renk azaltma (renk paleti kurma), belge kümeleme, uydu görüntüsünde arazi örtüsü ayırma.",
-          "Sensör verisinde anomali tespiti: hiçbir merkeze yakın olmayan nokta 'bunda bir tuhaflık var' demektir."],
-    trap:"k-means küresel ve benzer boyutlu kümeler varsayar; uzun ince ya da iç içe halka biçimli kümelerde başarısız olur. Ayrıca sonuç ölçeğe duyarlıdır (Modül 02) ve k'yı size vermez.",
+    short:"Verinin kendisinden. k-means, 'birbirine yakın noktalar aynı gruptadır' varsayımıyla noktaları k gruba ayırır. Doğru cevap diye bir şey yok; bulduğu grupların anlamlı olup olmadığına sen karar verirsin.",
+    idea:["Şimdiye kadar her noktanın etiketi vardı: uçak mı kuş mu, geçti mi kaldı mı. Burada yok. Elimizde sadece müşterilerin ne sıklıkla geldiği ve ne kadar harcadığı var; 'kaç tür müşteri var' diye soruyoruz. Buna <b>unsupervised learning</b> (denetimsiz öğrenme) deniyor: öğretmen yok, model kendi kendine düzen arıyor.",
+          "<b>k-means</b> (k-ortalamalar) iki adımı sırayla tekrar eder. <b>Atama</b>: her nokta kendine en yakın merkeze bağlanır. <b>Taşıma</b>: her merkez kendi noktalarının tam ortasına kayar. Sonra tekrar atama, tekrar taşıma. Merkezler artık kımıldamıyorsa iş bitti. Hepsi bu kadar; 'Sıradaki adım' düğmesiyle ikisini tek tek izleyebilirsin.",
+          "Algoritmanın küçülttüğü sayı <b>WCSS</b> (küme içi kareli hata): her noktanın kendi merkezine uzaklığının karesi, hepsinin toplamı. İki adımın ikisi de bu sayıyı ya düşürür ya sabit bırakır, o yüzden mutlaka durur. Ama nerede duracağı başlangıç merkezlerine bağlı: aynı veri, farklı başlangıç, farklı kümeler. 'Yeni başlangıç'a birkaç kez basıp gör."],
+    read:[["Tuval","Gri noktalar henüz kimseye atanmamış. Renkli çizgiler hangi noktanın hangi merkeze bağlı olduğunu, kesikli izler merkezlerin adım adım nereden nereye yürüdüğünü gösteriyor."],
+          ["Adımlar","'Sıradaki adım' göstergesi atama mı taşıma mı olduğunu söylüyor. Algoritmayı anlamanın en kolay yolu bu ikisini birer birer çalıştırmak."],
+          ["WCSS","Merkezler atanır atanmaz WCSS düşmeye başlar ve hiçbir adımda artmaz. Artıyorsa kodda hata vardır; bu, algoritmanın matematiksel garantisi."]],
+    terms:[["k-means","k-ortalamalar","atama ve taşıma adımlarını tekrarlayan kümeleme yöntemi"],
+           ["centroid","merkez","bir kümedeki noktaların ortalaması, yani ağırlık merkezi"],
+           ["WCSS / inertia","küme içi kareli hata","noktaların kendi merkezine uzaklık karelerinin toplamı; küçüğü iyi"],
+           ["unsupervised learning","denetimsiz öğrenme","etiketsiz veriden düzen çıkarma; doğru cevap yok"]],
+    life:["Müşteri segmentasyonu, bir fotoğrafın renk sayısını azaltma (palet oluşturma), benzer belgeleri gruplama, uydu görüntüsünde arazi türlerini ayırma.",
+          "Anomali tespiti: hiçbir merkeze yakın olmayan nokta 'bunda bir tuhaflık var' demek. Sensör arızası ya da sahte işlem böyle yakalanır."],
+    trap:"k-means kümelerin yuvarlak ve benzer boyda olduğunu varsayar. Uzun ince kümelerde ya da iç içe halkalarda saçmalar; 'Artçı sarsıntılar' verisinde bunu görebilirsin. Ayrıca uzaklıkla çalıştığı için ölçeğe duyarlı (Modül 02) ve k'yı sana söylemez; sen vereceksin.",
     next:"Modül 13 · Kaç küme var? — k'nın kendisini nasıl seçeceğimiz sorusu."
   }},
 
@@ -1723,26 +1746,28 @@ const CONTENT={
 "m-kch":{ pick:"Veri seti",
   sets:[
     {name:"Müşteri segmenti", x:"ziyaret sıklığı (ay)", y:"sepet tutarı (₺)",
-     note:"Pazarlamacı 'kaç segment var' diye sorar; iki ölçüt de aynı sayıyı söylüyorsa cevabı verebilirsiniz."},
+     note:"Pazarlamacı 'kaç segment var' diye sorar; iki ölçüt de aynı sayıyı söylüyorsa cevabı verebilirsin."},
     {name:"Bağ çeşidi", x:"tane ağırlığı (g)", y:"şeker oranı (%)",
      note:"Aynı ölçütler, tarımsal veri: kaç ayrı çeşit toplanmış? Ayrıklık düşükken çeşitler birbirine karışıyor."},
     {name:"Yerleşim yerleri", x:"doğu (km)", y:"kuzey (km)",
-     note:"Coğrafi kümeler: kaç köy öbeği var? Ayrıklığı 20'ye indirin — bir yerde 'öbek yok, süreklilik var' demek gerekir."}
+     note:"Coğrafi kümeler: kaç köy öbeği var? Ayrıklığı 20'ye indir; bir yerde 'öbek yok, süreklilik var' demek gerekir."}
   ],
   lesson:{
-    q:"k-means k'yı sizden istiyor; doğru k'yı kim söylüyor?",
-    idea:["İki ölçüt yardıma koşar. <b>Elbow</b> (dirsek) yöntemi: k arttıkça WCSS her zaman düşer, ama bir yerden sonra düşüş yavaşlar. O kırılma noktası 'yeni küme eklemek artık bir şey kazandırmıyor' demektir. <b>Silhouette</b> (siluet) skoru ise her nokta için 'kendi kümeme mi daha yakınım, komşu kümeye mi' sorusunu sorar; −1 ile +1 arasında bir sayı verir, yükseği iyidir.",
-          "İkisi aynı sayıyı söylüyorsa rahat edin. Söylemiyorlarsa cevap 'veri gerçekten kümeli değil' olabilir — ve bu da bir bulgudur. Ayrıklık kaydırıcısını düşürüp 'Yeni veri'ye birkaç kez basın: önerilen k her seferinde değişiyorsa kararsızlığın kendisi bilgi taşıyor."],
-    read:[["Sol panel","Seçili k ile kümeleme sonucu. Üstte 'gerçekte kaç küme var' yazıyor — gerçek hayatta bu satır YOKTUR, burada yalnız ölçütleri sınamak için var."],
-          ["Sağ üst","WCSS eğrisi. Dirsek noktası işaretli. Eğri k = nokta sayısında sıfıra iner: 'en düşük WCSS en iyi k' demek anlamsızdır."],
-          ["Sağ alt","Silhouette eğrisi. Tepe noktası önerilen k. Bu eğri k = 1'de tanımsızdır, çünkü 'komşu küme' yoktur."]],
+    q:"k-means kaç küme istediğini soruyor. Doğru sayıyı kim söyleyecek?",
+    short:"Kimse tam söylemez, ama iki ölçüt yol gösterir. Elbow: 'bir küme daha eklemek hâlâ işe yarıyor mu?' Silhouette: 'noktalar kendi kümesine mi daha yakın, komşu kümeye mi?' İkisi aynı sayıyı söylüyorsa rahat ol.",
+    idea:["<b>Elbow</b> (dirsek) yöntemi şöyle düşünür: k arttıkça WCSS mutlaka düşer; k = nokta sayısı olsa sıfıra iner, her nokta kendi kümesi olur. O yüzden 'en düşük WCSS' diye bir hedef yok. Asıl soru düşüşün nerede yavaşladığı. Eğri bir kola benzer; dirseğin olduğu k'da 'bir küme daha eklemek artık çok şey kazandırmıyor' demektir. Orası aday.",
+          "<b>Silhouette</b> (siluet) skoru her noktaya iki soru sorar: kendi kümendekilere ortalama ne kadar uzaksın, en yakın komşu kümedekilere ne kadar? Farkı −1 ile +1 arası bir sayıya çevirir. +1 'tam yerimdeyim', 0 'iki kümenin arasında kalmışım', eksi 'yanlış kümedeyim'. Bütün noktaların ortalaması en yüksek çıkan k, önerilen k.",
+          "İkisi aynı sayıyı söylüyorsa güvenle ilerle. Söylemiyorsa cevap 'bu veri aslında kümeli değil' olabilir; bu da bir bulgu. 'Ayrıklık' kaydırıcısını düşürüp 'Yeni veri'ye birkaç kez bas: önerilen k her seferinde değişiyorsa, o kararsızlık sana verinin sürekli olduğunu söylüyor. Zorla bir sayı seçmek asıl hata."],
+    read:[["Sol panel","Seçili k ile kümeleme sonucu. Üstte 'gerçekte kaç küme var' yazıyor; gerçek hayatta bu satır yok, burada yalnız ölçütleri sınamak için var."],
+          ["Sağ üst","k'ya göre WCSS eğrisi. Dirsek noktası işaretli. Eğri hep iniyor; sağa doğru düzleşmesi 'artık kazanım yok' demek."],
+          ["Sağ alt","k'ya göre ortalama silhouette. Tepe noktası önerilen k. k = 1'de tanımsız, çünkü karşılaştıracak komşu küme yok."]],
     terms:[["elbow method","dirsek yöntemi","WCSS düşüşünün yavaşladığı k'yı seçmek"],
-           ["silhouette score","siluet skoru","noktanın kendi kümesine ne kadar, komşu kümeye ne kadar yakın olduğunun ölçüsü"],
-           ["model selection","model seçimi","hiperparametreyi (burada k) veriye bakarak seçmek"],
-           ["cluster validity","küme geçerliliği","bulunan kümelerin gerçekten var olup olmadığı sorusu"]],
-    life:["Segmentasyon raporlarında 'niye 4 segment?' sorusunun cevabı budur; keyfi bir sayı yerine ölçüte dayanmak gerekir.",
-          "Görüntü renk azaltmada kaç renk yeter, biyoinformatikte kaç hücre tipi var — hep aynı iki ölçüt."],
-    trap:"WCSS k büyüdükçe hep düşer, o yüzden 'en küçük WCSS' diye bir hedef yoktur. Dirsek de her zaman keskin değildir; kümesiz veride her iki ölçüt de kararsızlaşır — asıl hata bu kararsızlığa rağmen bir sayı seçmektir.",
+           ["silhouette score","siluet skoru","her noktanın kendi kümesine mi komşu kümeye mi yakın olduğunun −1 ile +1 arası notu"],
+           ["model selection","model seçimi","ayarı (burada k'yı) veriye bakarak seçmek"],
+           ["cluster validity","küme geçerliliği","bulunan kümeler gerçekten var mı, yoksa biz mi uydurduk sorusu"]],
+    life:["Pazarlama raporunda 'neden 4 segment?' sorusunun cevabı bu iki grafiktir; keyfî bir sayı yerine ölçüte dayanır.",
+          "Görüntüde kaç renk yeter, biyolojide kaç hücre tipi var, coğrafyada kaç yerleşim öbeği var: hep aynı iki ölçüt."],
+    trap:"WCSS k büyüdükçe hep düşer; 'en küçük WCSS'yi seç' dersen k = nokta sayısı çıkar, saçma. Dirsek de her zaman keskin değildir. Kümesiz veride iki ölçüt de kararsızlaşır; asıl hata bu kararsızlığa rağmen bir sayıyı zorla seçip rapora yazmaktır.",
     next:"Modül 14 · İki sayı yerine bir — kümelemeden önce boyutu düşürmek çoğu zaman işe yarar."
   }},
 
@@ -1757,20 +1782,21 @@ const CONTENT={
      note:"Uzaktan algılamanın kalbi: iki bandın bileşimi bitki yoğunluğunu verir. NDVI dediğimiz şey elle kurulmuş bir bileşendir."}
   ],
   lesson:{
-    q:"İki sayının yerini bir sayı tutabilir mi?",
-    idea:["Nokta bulutu bir yöne uzamışsa, o yön verinin çoğunu zaten anlatıyordur. <b>PCA</b> (ana bileşen analizi) bu yönü bulur: verinin en çok yayıldığı doğru birinci bileşendir, ona dik olan ikinci bileşendir. Sonra her noktayı birinci bileşene <b>izdüşürüp</b> tek sayıya indiririz.",
-          "Bileşen yüzdeleri 'bu yön varyansın yüzde kaçını açıklıyor' demektir. Uzama fazlaysa birinci bileşen %90'ları bulur ve bir sayı kaybı neredeyse sıfır olur. Bulut yuvarlaksa yüzdeler eşitlenir ve PCA hiçbir şey kazandırmaz — indirgeme yapmanın anlamı yoktur.",
-          "PCA koordinat sisteminin nasıl kurulduğuna bağlı değildir: bulutu döndürürseniz eksenler onunla birlikte döner, yüzdeler değişmez. Ama ÖLÇEĞE bağlıdır — ölçeklenmemiş veride en büyük birimli öznitelik birinci bileşeni ele geçirir."],
-    read:[["Sol panel","Kalın pembe doğru 1. bileşen, ince gri doğru 2. bileşen; boyları o yöndeki yayılımla orantılı. İnce çizgiler her noktanın izdüşümü — kaybedilen şey tam olarak o çizgilerin uzunluğu."],
-          ["Sağ panel","Bir (ya da iki) bileşenden geri kurulan veri. 1 bileşende bütün noktalar tek bir doğru üstüne düşüyor: sıkıştırmanın bedeli bu."],
-          ["Göstergeler","Yüzdeler açıklanan varyans. 'Yeniden oluşturma hatası' geri kurulanla özgün arasındaki ortalama uzaklık; 'saklanan sayı' ise nokta başına kaç sayı tuttuğumuz."]],
-    terms:[["PCA","ana bileşen analizi","verinin en çok yayıldığı yönleri bulup oraya izdüşürmek"],
-           ["principal component","ana bileşen","varyansı en çok açıklayan yön"],
-           ["explained variance","açıklanan varyans","bir bileşenin verinin yayılımının yüzde kaçını taşıdığı"],
-           ["dimensionality reduction","boyut indirgeme","öznitelik sayısını, bilgiyi mümkün olduğunca koruyarak azaltmak"]],
-    life:["Yüz tanımada eigenfaces, gen ifadesi verisinde binlerce genden iki eksene inmek, uydu görüntüsünde onlarca bandı üç kanala sıkıştırmak.",
-          "Görselleştirme: 50 boyutlu veriyi insana göstermenin en hızlı yolu ilk iki bileşeni çizmektir."],
-    trap:"PCA etiketleri bilmez: 'en çok yayılan yön' ile 'sınıfları en iyi ayıran yön' aynı şey olmak zorunda değildir. Ayrıca bileşenler ölçekten etkilenir, bu yüzden PCA'dan önce standartlaştırma neredeyse zorunludur.",
+    q:"İki sayının yerini tek bir sayı tutabilir mi?",
+    short:"İki sayı birlikte hareket ediyorsa evet. Boy ve kilo çoğunlukla birlikte artar; 'irilik' diye tek bir sayı ikisinin çoğunu anlatır. PCA bu tek sayıyı, yani verinin en çok yayıldığı yönü bulur.",
+    idea:["Boy ve kilo noktalarını çizersen bulut yuvarlak değil, çapraz bir yöne uzamış çıkar: uzunlar genelde ağırdır. Demek ki verinin çoğu tek bir yön boyunca yaşıyor. <b>PCA</b> (ana bileşen analizi) bu yönü bulur: noktaların en çok yayıldığı doğru <b>birinci bileşen</b>, ona dik olan <b>ikinci bileşen</b>. Sonra her noktayı birinci doğrunun üstüne düşürüp (gölgesini alıp) tek sayıyla temsil ederiz.",
+          "Ne kadar kaybettik? Bileşen yüzdeleri söylüyor: 'birinci bileşen varyansın %92'sini açıklıyor' demek, bulutun yayılımının %92'si o yönde demek. Bulut ne kadar uzunsa yüzde o kadar yüksek, kayıp o kadar az. Bulut yuvarlaksa yüzdeler yarı yarıya olur ve PCA hiçbir şey kazandırmaz; iki sayıyı bire indirmek o zaman gerçek bir kayıptır. 'Uzama' kaydırıcısıyla ikisini de gör.",
+          "İki özelliği bire indirmek göze küçük geliyor, ama aynı fikir 50 sütunu 2'ye indirir ve o zaman ilk kez veriyi <i>görebilirsin</i>. Bir uyarı: PCA yalnız yayılıma bakar, ölçeğe çok duyarlıdır. Kilo gram cinsinden yazılırsa birinci bileşen 'kilo' olur, boy görünmez. O yüzden PCA'dan önce standartlaştırma (Modül 02) neredeyse zorunlu."],
+    read:[["Sol panel","Kalın pembe doğru 1. bileşen, ince gri doğru 2. bileşen; boyları o yöndeki yayılımla orantılı. Her noktadan pembe doğruya inen ince çizgi o noktanın 'gölgesi'. Kaybettiğin bilgi tam olarak o çizgilerin uzunluğu."],
+          ["Sağ panel","Bir (ya da iki) bileşenden geri kurulan veri. Tek bileşenle bütün noktalar bir doğru üstüne diziliyor; sıkıştırmanın bedeli bu. İki bileşenle veri aynen geri geliyor, çünkü zaten iki boyutluydu."],
+          ["Göstergeler","Yüzdeler açıklanan varyans. 'Yeniden oluşturma hatası' geri kurulan noktaların özgünden ortalama ne kadar uzağa düştüğü. 'Saklanan sayı' nokta başına kaç sayı tuttuğumuz: 2 yerine 1."]],
+    terms:[["PCA","ana bileşen analizi","verinin en çok yayıldığı yönleri bulup noktaları oraya düşürmek"],
+           ["principal component","ana bileşen","yayılımı (varyansı) en çok açıklayan yön"],
+           ["explained variance","açıklanan varyans","bir bileşenin verinin toplam yayılımının yüzde kaçını taşıdığı"],
+           ["dimensionality reduction","boyut indirgeme","sütun sayısını, bilgiyi olabildiğince koruyarak azaltmak"]],
+    life:["Yüz tanımada 'eigenfaces', genetikte binlerce genden iki eksene inmek, uydu görüntüsünde onlarca bandı üç renk kanalına sıkıştırmak.",
+          "Görselleştirme: 50 sütunlu bir tabloyu insana göstermenin en hızlı yolu ilk iki bileşeni çizmek."],
+    trap:"PCA etiketleri bilmez. 'En çok yayılan yön' ile 'sınıfları en iyi ayıran yön' aynı şey olmak zorunda değil; bazen sınıfları ayıran bilgi tam da attığın ikinci bileşende durur. Boyut indirgeyip sonra sınıflandırma başarısı düştüyse sebebi bu olabilir.",
     next:"Modül 02 · Metre ile kilometre — PCA'yı bozan ölçek sorununun kendisi orada."
   }},
 
@@ -1783,20 +1809,21 @@ const CONTENT={
      note:"XOR düzeni: A tek başına iyi, B tek başına iyi, ikisi birlikte ya da hiçbiri kötü. Hiçbir doğru bunu ayıramaz — « Ayrılamaz veri » düğmesi."}
   ],
   lesson:{
-    q:"Bir tek nöron neyi öğrenebilir, neyi asla öğrenemez?",
-    idea:["1958 modeli <b>perceptron</b>: girdileri ağırlıklarla çarpıp toplar, sonuç sıfırın üstündeyse bir sınıf, altındaysa diğeri. Öğrenme kuralı çocuk kadar basit — yanlış sınıflanan her örnekte ağırlıkları o örneğe doğru biraz iter. Doğru yalnız yanlışlar üzerinden düzelir; doğru bildiği örnek hiçbir şey değiştirmez.",
-          "Yakınsama teoremi şunu vaat eder: veri <b>linearly separable</b> ise (doğrusal ayrılabilir) perceptron SONLU adımda durur. Vaat etmediği şey ise daha önemli — ayrılamayan veride algoritma hiç durmaz, çizgi sonsuza kadar salınır.",
-          "XOR bunun en küçük karşı örneği ve yapay zekânın tarihini değiştirmiştir: 1969'da bu sınırın gösterilmesi sinir ağlarına olan ilgiyi on yıllarca dondurmuştur. Çözüm nöronu akıllandırmak değil, araya bir katman daha koymaktı."],
-    read:[["Yarı düzlemler","Soluk renkli iki bölge modelin iki kararı. Pembe doğru karar sınırı, ondan çıkan kısa çizgi ağırlık vektörü — sınır her zaman bu vektöre diktir."],
-          ["Kırmızı halkalar","Şu anda yanlış sınıflanan örnekler. Eğitim tam olarak bu halkalar bitene kadar sürer."],
-          ["Göstergeler","'Güncelleme' sayacı kaç kez düzeltme yapıldığını söyler. Ayrılabilir veride durur; XOR'da durmadan artar — asıl ders bu sayaçta."]],
-    terms:[["perceptron","—","tek katmanlı, doğrusal karar veren en eski öğrenen model"],
-           ["linearly separable","doğrusal ayrılabilir","iki sınıfın tek bir doğruyla ayrılabildiği durum"],
-           ["weight vector","ağırlık vektörü","karar sınırının yönünü belirleyen katsayılar"],
-           ["XOR problem","XOR problemi","tek katmanın çözemediği en küçük örnek"]],
-    life:["Bugün doğrudan kullanılmıyor, ama her sinir ağının nöronu bunun türevidir: çarp, topla, bir eşikten geçir.",
-          "Aynı doğrusal karar mantığı SVM ve lojistik regresyonun da iskeletidir; aradaki fark eğitim ölçütünde."],
-    trap:"Perceptron olasılık vermez, yalnız taraf söyler: '%51 eminim' ile '%99 eminim' onun için aynı şeydir. Bir de ayrılamayan veride 'daha çok eğitmek' hiçbir işe yaramaz — sorun eğitimde değil, mimaride.",
+    q:"Tek bir yapay nöron neyi öğrenebilir, neyi asla öğrenemez?",
+    short:"Bir nöron düzleme tek bir düz çizgi çeker: bir yanı bir sınıf, öteki yanı öteki. İki grup tek çizgiyle ayrılabiliyorsa öğrenir. Ayrılamıyorsa (XOR gibi) ne kadar eğitsen de asla öğrenemez.",
+    idea:["1958'de tasarlanan <b>perceptron</b>, yapay nöronun atası. Yaptığı şey basit: girdileri ağırlıklarla çarpıp toplar, sonuç sıfırın üstündeyse 'bir sınıf', altındaysa 'öteki' der. Geometrik olarak bu, düzleme tek bir düz çizgi çekmek demek. Öğrenme kuralı da çocuk kadar sade: yanlış sınıfladığı her örnekte ağırlıkları o örneğe doğru biraz iter. Doğru bildiği örnekler hiçbir şey değiştirmez.",
+          "Bir teorem güzel bir söz veriyor: veri <b>linearly separable</b> ise, yani iki grubun arasına bir çizgi çekilebiliyorsa, perceptron sonlu sayıda düzeltmeden sonra mutlaka durur ve doğru çizgiyi bulur. Sözün verilmediği kısım daha önemli: veri ayrılamıyorsa algoritma hiç durmaz, çizgi sonsuza kadar bir o yana bir bu yana salınır. 'Güncelleme' sayacına bak; XOR'da durmadan artıyor.",
+          "XOR ('ya biri ya öteki, ikisi birden değil') bunun en küçük örneği. İlaç verisinde A tek başına iyi, B tek başına iyi, ikisi birlikte kötü, hiçbiri de kötü: dört köşe çaprazlama, hiçbir tek çizgi ayıramaz. 1969'da bu sınırın gösterilmesi sinir ağlarına ilgiyi yıllarca dondurdu. Çözüm nöronu akıllandırmak değil, araya bir katman daha koymaktı; Modül 16."],
+    read:[["Yarı düzlemler","Soluk renkli iki bölge modelin iki kararı. Pembe doğru karar sınırı. Ondan çıkan kısa çizgi ağırlık vektörü; sınır her zaman bu çizgiye dik durur, çünkü ağırlıklar 'hangi yöne bakılacağını' söyler."],
+          ["Kırmızı halkalar","Şu anda yanlış sınıflanan örnekler. Eğitim tam olarak bu halkalar bitene kadar sürer; XOR'da hiç bitmez."],
+          ["Göstergeler","'Güncelleme' kaç kez düzeltme yapıldığı. Ayrılabilir veride bir yerde durur; XOR'da durmadan artar. Asıl ders bu sayaçta."]],
+    terms:[["perceptron","—","tek çizgiyle karar veren en eski öğrenen model; yapay nöronun atası"],
+           ["linearly separable","doğrusal ayrılabilir","iki sınıfın arasına tek bir düz çizgi çekilebilmesi"],
+           ["weight vector","ağırlık vektörü","karar çizgisinin yönünü belirleyen sayılar"],
+           ["XOR problem","XOR problemi","tek çizginin çözemediği en küçük örnek: çaprazlama dört köşe"]],
+    life:["Bugün tek başına kullanılmıyor, ama her sinir ağının her nöronu bunun torunu: çarp, topla, bir eşikten geçir.",
+          "Aynı 'düz çizgiyle ayır' mantığı lojistik regresyonun ve SVM'in de temeli; aralarındaki fark çizgiyi hangi ölçüte göre seçtikleri."],
+    trap:"Perceptron olasılık vermez, sadece taraf söyler; '%51' ile '%99' onun için aynı. Bir de ayrılamayan veride 'daha çok eğitmek' hiçbir işe yaramaz. Sorun eğitim süresinde değil, modelin yapısında. Bunu erken fark etmek saatlerce boşuna eğitim yapmaktan kurtarır.",
     next:"Modül 16 · Gizli katman — bu ekrandaki başarısızlığın çözümü."
   }},
 
@@ -1811,20 +1838,21 @@ const CONTENT={
      note:"Girintili tek parça sınır. Kasıtlı olarak geometrik bir sınama deseni: scikit-learn'deki make_moons budur, her öğreticide karşınıza çıkar."}
   ],
   lesson:{
-    q:"Tek doğru yetmiyorsa çare nöronu büyütmek mi, çoğaltmak mı?",
-    idea:["Girdi ile çıktı arasına bir <b>hidden layer</b> (gizli katman) koyuyoruz. Her gizli nöron kendi doğrusunu çizer; çıkış katmanı bu doğruların sonuçlarını birleştirip eğri sınırlar kurar. XOR için iki doğru yeter: biri bir köşeyi keser, diğeri karşı köşeyi.",
-          "Katmanı eğiten şey <b>backpropagation</b> (geri yayılım): hata çıkıştan girişe doğru zincir kuralıyla dağıtılır, her ağırlık kendi payına düşen eğimi öğrenir ve gradient descent (Modül 09) bir adım atar. Tam turların her birine <b>epoch</b> (devir) diyoruz.",
-          "En öğretici gözlem şu: 2 gizli nöron XOR için TEORİK olarak yeterlidir, ama bazı rastgele başlangıçlardan çözüme hiç varamaz — 'Sıfırla'ya birkaç kez basıp deneyin. 3'te çoğu kez, 4'te her seferinde çözüyor. <b>İfade gücü ile optimize edilebilirlik aynı şey değildir</b>; modern ağların ihtiyaçtan fazla parametreyle kurulmasının sebebi de budur."],
-    read:[["Sol panel","Renkli bölgeler ağın olasılık haritası; koyuluk kendine güveni. İnce çizgiler tek tek gizli nöronların doğruları — eğitim boyunca yerlerini nasıl bulduklarına bakın."],
-          ["Sağ panel","Epoch'a göre log loss. Yatay kesikli çizgi 0.69: yazı-tura seviyesi. Kayıp orada takılıyorsa model hiçbir şey öğrenmemiş demektir."],
-          ["Göstergeler","'Parametre' ağırlık sayısı: 4·gizli nöron + 1. Dört nöronla toplam 17 parametreyle XOR çözülüyor — kıyas için modern bir dil modeli milyarlarla ölçülür."]],
+    q:"Tek çizgi yetmiyorsa çare nöronu büyütmek mi, çoğaltmak mı?",
+    short:"Çoğaltmak. Girdiyle çıktı arasına birkaç nöronluk bir gizli katman koyarsın; her nöron kendi çizgisini çeker, çıkış nöronu bu çizgileri birleştirip eğri sınırlar kurar. XOR için iki çizgi yeter.",
+    idea:["Perceptron tek çizgi çekiyordu. Peki iki perceptron alıp ikisinin de çıktısını üçüncü bir nörona verirsek? İlk iki nöron iki çizgi çeker, üçüncüsü 'birinin sağında ve ötekinin solunda olanlar' gibi birleşimler kurar. Artık sınır eğri olabiliyor. Aradaki bu katmana <b>hidden layer</b> (gizli katman), ağın tamamına <b>MLP</b> (çok katmanlı ağ) deniyor. Sol paneldeki ince çizgiler tek tek gizli nöronların çizgileri.",
+          "Bu kadar ağırlığı kim ayarlıyor? <b>Backpropagation</b> (geri yayılım): çıkıştaki hata, zincir kuralıyla geriye doğru her ağırlığa 'senin payın şu kadar' diye dağıtılır. Sonra her ağırlık kendi eğimi yönünde bir gradient descent adımı atar (Modül 09). Bütün eğitim verisi üzerinden bir tam geçişe <b>epoch</b> (devir) deniyor. Sağ paneldeki eğri devir devir hatanın düşüşü.",
+          "En öğretici gözlem şu: XOR için 2 gizli nöron teorik olarak yeterli, ama bazı rastgele başlangıçlardan hiç çözüme varamıyor. 'Sıfırla'ya birkaç kez basıp dene. 3 nöronda çoğunlukla, 4 nöronda her seferinde çözüyor. Yani 'yeterince güçlü olmak' ile 'eğitimle o güce ulaşabilmek' ayrı şeyler. Modern ağların gereğinden fazla parametreyle kurulmasının bir sebebi bu."],
+    read:[["Sol panel","Renkli bölgeler ağın olasılık haritası; renk koyulaştıkça model daha emin. İnce çizgiler gizli nöronların tek tek çizgileri; eğitim boyunca yerlerini nasıl bulduklarına bak."],
+          ["Sağ panel","Devire göre log loss. Yatay kesikli çizgi 0.69: yazı tura seviyesi. Kayıp orada takılı kalıyorsa ağ hiçbir şey öğrenmemiş demek."],
+          ["Göstergeler","'Parametre' toplam ağırlık sayısı: 4 × gizli nöron + 1. Dört nöronla 17 parametre XOR'u çözüyor. Kıyas için: bir dil modeli milyarlarca parametre taşır, ama ilkesi aynı."]],
     terms:[["MLP","çok katmanlı ağ","gizli katmanı olan en basit sinir ağı"],
-           ["hidden layer","gizli katman","girdi ile çıktı arasındaki, doğrudan gözlenmeyen katman"],
-           ["backpropagation","geri yayılım","hatayı zincir kuralıyla geriye dağıtıp eğimleri hesaplamak"],
+           ["hidden layer","gizli katman","girdi ile çıktı arasındaki, dışarıdan görünmeyen nöron katmanı"],
+           ["backpropagation","geri yayılım","hatayı geriye doğru dağıtıp her ağırlığın payını hesaplamak"],
            ["epoch","devir","bütün eğitim verisi üzerinden bir tam geçiş"]],
     life:["Bugünün bütün derin öğrenmesi bu iskeletin büyütülmüş hâli: aynı ileri hesap, aynı geri yayılım, aynı gradient descent.",
-          "Tablo verisinde küçük bir MLP hâlâ iyi bir taban çizgisidir; görüntüde yerini convolution katmanlarına (Modül 17) bırakır."],
-    trap:"Nöron eklemek her zaman çözüm değil: learning rate yanlışsa (çok büyükse kayıp zıplar, çok küçükse hiç ilerlemez) ağ kaç nöronlu olursa olsun öğrenmez. Bir de aynı ağ farklı başlangıçlarla farklı sonuç verir — tek bir koşuya bakıp karar vermeyin.",
+          "Tablo verisinde küçük bir MLP hâlâ iyi bir başlangıç modeli. Görüntüde ise yerini convolution katmanlarına bırakır; nedenini Modül 17'de göreceksin."],
+    trap:"Nöron eklemek her derde deva değil. Learning rate yanlışsa (çok büyükse kayıp zıplar, çok küçükse hiç ilerlemez) ağ kaç nöronlu olsa öğrenmez. Bir de aynı ağ farklı başlangıçla farklı sonuç verir; tek bir koşuya bakıp 'çalışıyor' ya da 'çalışmıyor' deme.",
     next:"Modül 17 · Filtre gezdirmek — görüntüde neden bu mimarinin yetmediği."
   }},
 
@@ -1836,33 +1864,34 @@ const CONTENT={
     {name:"Tarla parselleri", gen:"farm",
      note:"Uydu görüntüsünde parseller: kenarlar neredeyse yalnız yatay ve dikey. Sobel Y bu görüntüde Sobel X'ten belirgin biçimde farklı bir harita çıkarır."},
     {name:"Test deseni", gen:"test",
-     note:"Dikey çubuk, yatay çubuk, köşegen, daire ve sağda yumuşak bir eğim. Filtrenin ne yaptığını en net gösteren görüntü — bir filtreyi tanımak için önce buraya bakın."},
+     note:"Dikey çubuk, yatay çubuk, köşegen, daire ve sağda yumuşak bir eğim. Filtrenin ne yaptığını en net gösteren görüntü — bir filtreyi tanımak için önce buraya bak."},
     {name:"Kendi görüntün", gen:"custom",
      note:"Bilgisayarından bir resim seç (ya da tuvale sürükleyip bırak, Ctrl+V ile yapıştır): griye çevrilip anında işlenir. Kendi İHA/uydu karesinde kenar filtresini görmek, sentetik sahneden çok daha ikna edici."}
   ],
   lesson:{
-    q:"Görüntüyü anlamak için her piksele ayrı ağırlık gerekir mi?",
-    idea:["Bir CNN'in ilk katmanı küçük bir <b>kernel</b>'i (çekirdek) görüntünün her yerinde gezdirip çarpar ve toplar — <b>convolution</b> (konvolüsyon) bundan ibaret. Çıkan yeni görüntüye <b>feature map</b> (öznitelik haritası) denir.",
-          "Bütün mucize ağırlık paylaşımında: aynı 9 sayı görüntünün her yerinde kullanılır. Tam bağlantılı bir katman 128×128 girdi için çıktı başına 16.384 ağırlık isterdi; burada 9 tane var (+1 bias). Üstelik filtre kaydırılarak uygulandığı için öğrenilen şey konumdan bağımsız hâle gelir: kenar, görüntünün neresinde olursa olsun aynı filtreyle bulunur.",
-          "Katmanın davranışını üç sayı belirler. <b>Kernel size</b> (çekirdek boyu) bir çıktı pikselinin kaç pikseli gördüğünü — <b>receptive field</b> (alıcı alan) — söyler. <b>Padding</b> (dolgu) görüntünün etrafına sıfır sırası ekler; olmazsa her katmanda kenarlardan piksel kaybedilir. <b>Stride</b> (adım) çekirdeğin kaç piksel atlayarak kaydığıdır; büyütmek çıktıyı küçültür ama ağırlık sayısını değiştirmez. Üçünün sonucu tek formülde: <b>çıktı = ⌊(girdi + 2·dolgu − çekirdek) / adım⌋ + 1</b>.",
-          "Katmanın tamamı üç işlemden oluşur: convolution, <b>ReLU</b> (negatifleri sıfıra çekmek) ve <b>pooling</b> (havuzlama — 2×2 pencerelerin en büyüğünü alıp boyutu yarıya indirmek). Sonra aynısı tekrar; derinleştikçe filtreler kenardan dokuya, dokudan nesne parçasına geçer."],
-    read:[["Sol görüntü","Girdi. Padding'i açtığınızda görüntünün etrafında soluk bir halka çıkıyor: eklenen sıfırlar. Fareyi gezdirin — pembe kare o an çarpılan pencere; « Pencereyi gezdir » düğmesi bu kareyi baştan sona yürütüyor."],
-          ["Orta","Çekirdek ve pencere hesabı: üstte ağırlıklar, altta o pencerenin piksel değerleri, en altta çarpımların toplamı Σ. ReLU açıkken negatif toplamın sıfıra çekildiğini de yazıyor."],
-          ["Sağ görüntü","Feature map. Altındaki satır boyut formülünü ve bir çıktı pikselinin kaç pikseli gördüğünü söylüyor. Haritada gezinmek de olur: bir çıktı pikselinin hangi pencereden geldiğini gösterir."],
-          ["Filtre bankası","Aynı görüntü, dört ayrı çekirdek, dört ayrı harita. Gerçek bir katmanda 32–256 filtre olur; hepsini eğitim bulur."],
-          ["Göstergeler","Kernel toplamı önemli bir ipucu: 1 ise parlaklık korunur, 0 ise düz alanlar sıfırlanır (filtre yalnız DEĞİŞİMİ görür). « Tam bağlantılı olsa » aynı işi ağırlık paylaşmadan yapmanın bedeli."]],
-    terms:[["convolution","konvolüsyon","küçük bir çekirdeği görüntü boyunca gezdirip çarpıp toplamak"],
-           ["kernel / filter","çekirdek / filtre","convolution'da kullanılan küçük ağırlık matrisi"],
-           ["feature map","öznitelik haritası","bir filtrenin görüntü üzerindeki çıktısı"],
+    q:"Bilgisayar bir görüntüyü anlamak için her piksele ayrı bir ağırlık mı öğreniyor?",
+    short:"Hayır, gerek yok. Küçük bir sayı tablosu (çekirdek) alır, görüntünün her yerinde gezdirir. Aynı 9 sayı her yerde kullanılır; kenar görüntünün neresinde olursa olsun aynı filtreyle bulunur. Az ağırlık, çok iş.",
+    idea:["Bir fotoğrafta kenar aramak istiyorsun: nerede parlaklık aniden değişiyor? Bunun için 3×3'lük küçük bir sayı tablosu, <b>kernel</b> (çekirdek), alıp görüntünün üstünde kaydırırsın. Her konumda çekirdeğin 9 sayısıyla altındaki 9 pikseli çarpıp toplarsın; çıkan tek sayı yeni görüntünün bir pikseli olur. Bu işleme <b>convolution</b> (konvolüsyon), çıkan görüntüye <b>feature map</b> (öznitelik haritası) deniyor. Fareyi sol görüntüde gezdir, hesabı ortada canlı gör.",
+          "Bütün mucize <b>ağırlık paylaşımı</b>. Aynı 9 sayı görüntünün her yerinde kullanılıyor. Her pikseli ayrı ayrı bağlasaydık 128×128 girdi için çıktı başına 16.384 ağırlık gerekirdi; burada 9 tane var (+1 sabit). Üstelik filtre kaydırılarak uygulandığı için kenar görüntünün neresinde olursa olsun aynı filtreyle yakalanıyor. Bu iki özellik, CNN'lerin görüntüde bu kadar iyi olmasının sebebi.",
+          "Katmanın davranışını üç ayar belirliyor. <b>Kernel size</b> (çekirdek boyu): bir çıktı pikselinin kaç pikseli gördüğü, yani <b>receptive field</b> (alıcı alan). <b>Padding</b> (dolgu): görüntünün etrafına sıfır sırası eklemek; eklemezsen her katmanda kenardan piksel kaybedersin. <b>Stride</b> (adım): çekirdeğin her seferinde kaç piksel atladığı; büyütmek çıktıyı küçültür ama ağırlık sayısını değiştirmez. Üçünün sonucu tek formülde: <b>çıktı = ⌊(girdi + 2·dolgu − çekirdek) / adım⌋ + 1</b>. Göstergede canlı hesaplanıyor.",
+          "Bir katman genelde üç işlemden oluşur: convolution, <b>ReLU</b> (eksileri sıfıra çekmek, artıları olduğu gibi bırakmak) ve <b>pooling</b> (2×2 pencerelerin en büyüğünü alıp boyutu yarıya indirmek). Sonra aynısı tekrar. Derinleştikçe ilk katmanlar kenarı, sonrakiler dokuyu, daha sonrakiler nesne parçalarını tanır. Ve unutma: bu 9 sayıyı kimse elle yazmıyor; eğitimde gradient descent (Modül 09) buluyor."],
+    read:[["Sol görüntü","Girdi. Padding'i açınca etrafında soluk bir çerçeve çıkıyor: eklenen sıfırlar. Fareyi gezdir; pembe kare o an çarpılan pencere. « Pencereyi gezdir » kareyi baştan sona yürütüyor."],
+          ["Orta","Hesabın kendisi: solda çekirdeğin ağırlıkları, ortada pencerenin piksel değerleri, sağda çarpımlar, en altta toplam Σ. ReLU açıkken eksi toplamın sıfıra çekildiği de yazıyor."],
+          ["Sağ görüntü","Feature map, yani çıktı. Altında boyut formülü ve alıcı alan. Harita üstünde de gezinebilirsin: bir çıktı pikselinin hangi pencereden geldiğini gösterir."],
+          ["Filtre bankası","Aynı görüntü, dört ayrı çekirdek, dört ayrı harita. Gerçek bir katmanda 32–256 filtre olur; hepsini eğitim bulur, her biri başka bir şeye bakar."],
+          ["Göstergeler","'Kernel toplamı' önemli bir ipucu: 1 ise parlaklık korunur (bulanıklaştırma gibi), 0 ise düz alanlar sıfırlanır ve filtre yalnız değişimi görür (kenar bulucu). 'Tam bağlantılı' aynı işi ağırlık paylaşmadan yapmanın bedeli."]],
+    terms:[["convolution","konvolüsyon","küçük bir çekirdeği görüntü boyunca gezdirip her yerde çarpıp toplamak"],
+           ["kernel / filter","çekirdek / filtre","convolution'da kullanılan küçük ağırlık tablosu (3×3, 5×5)"],
+           ["feature map","öznitelik haritası","bir filtrenin görüntü üzerindeki çıktısı; yeni bir görüntü"],
            ["padding","dolgu","kenarları korumak için görüntünün etrafına eklenen sıfır sırası"],
            ["stride","adım","çekirdeğin her seferinde kaç piksel kaydığı"],
            ["receptive field","alıcı alan","bir çıktı pikselinin girdide gördüğü bölge"],
-           ["pooling","havuzlama","komşu pikselleri özetleyip boyutu küçültmek (en yaygını max pooling)"],
-           ["ReLU","—","negatifi sıfıra çeken, pozitifi olduğu gibi bırakan etkinleştirme"]],
+           ["pooling","havuzlama","komşu pikselleri özetleyip boyutu küçültmek; en yaygını 2×2'nin en büyüğünü almak"],
+           ["ReLU","—","eksiyi sıfıra çeken, artıyı olduğu gibi bırakan basit fonksiyon"]],
     life:["Görüntü sınıflandırma, tıbbi görüntüde lezyon tespiti, uydu ve İHA görüntülerinden bina/yol çıkarma, plaka okuma.",
-          "Sobel gibi filtreler on yıllarca ELLE yazıldı; CNN'in getirdiği yenilik bu sayıları veriden öğrenmek oldu.",
+          "Sobel gibi filtreler on yıllarca elle yazıldı; CNN'in getirdiği yenilik bu sayıları veriden öğrenmek oldu.",
           "Stride ve pooling ağın hesabını küçültmenin en ucuz yolu: modern mimarilerde çözünürlük kademe kademe yarıya iner, filtre sayısı ise artar."],
-    trap:"Kimse bu dokuz sayıyı elle yazmıyor: eğitim sırasında gradient descent (Modül 09) onları kendisi buluyor. İki uyarı daha: padding olmadan her katman kenardan piksel yer (on katman sonra kenarın 20 pikseli gitmiş olur); ve buradaki görüntü tek kanallı (gri) — renkli bir görüntüde çekirdek 3×3×3 = 27 ağırlıklı olur, çünkü üç kanalı birden görür.",
+    trap:"Padding olmadan her katman kenardan piksel yer: on katman sonra kenarın 20 pikseli gitmiş olur; derin ağlarda padding bu yüzden neredeyse hep açıktır. Bir de buradaki görüntü tek kanallı (gri). Renkli görüntüde çekirdek 3×3×3 = 27 ağırlıklı olur, çünkü kırmızı, yeşil ve mavi kanalı birden görür.",
     next:"Modül 09 · Yamaçtan aşağı — bu filtrelerin nasıl öğrenildiği orada."
   }}
 
@@ -5953,20 +5982,23 @@ function lessonHTML(id){
   const c=CONTENT[id]; if(!c||!c.lesson) return "";
   const L=c.lesson, out=[];
   out.push(`<p class="lead">${L.q}</p>`);
-  out.push(`<section><h4>Fikir</h4>${L.idea.map(t=>`<p>${t}</p>`).join("")}</section>`);
+  /* Kısa cevap: sorunun hemen altında, iki üç cümlelik günlük dille özet.
+     Hiç bilmeyen biri yalnız bunu okusa da bir şey götürsün. */
+  if(L.short) out.push(`<p class="short"><span class="sk">Kısa cevap</span>${L.short}</p>`);
+  out.push(`<section><h4>Ne oluyor?</h4>${L.idea.map(t=>`<p>${t}</p>`).join("")}</section>`);
   const rows=(items)=>`<div class="rows">`+
     items.map(([k,v])=>`<p><b>${k}</b><span class="dash"> — </span>${v}</p>`).join("")+`</div>`;
-  out.push(`<section><h4>Ekranda ne var</h4>`+rows(L.read)+`</section>`);
+  out.push(`<section><h4>Ekranda ne var, nasıl okunur?</h4>`+rows(L.read)+`</section>`);
   if(c.sets&&c.sets.length>1)
-    out.push(`<section><h4>${c.pick||"Veri seti"} · aynı dersin başka hikâyeleri</h4>`+
+    out.push(`<section><h4>${c.pick||"Veri seti"} · aynı ders, başka hikâyeler</h4>`+
       rows(c.sets.map(x=>[x.name,x.note||""]))+`</section>`);
-  out.push(`<section><h4>Terimler</h4><ul class="tm">`+
+  out.push(`<section><h4>Terimler · sınavda ve kütüphanede İngilizcesiyle karşına çıkar</h4><ul class="tm">`+
     L.terms.map(([en,tr,d])=>`<li><span class="en">${en}</span>`+
       (tr&&tr!=="—"?` <span class="tr">· ${tr}</span>`:"")+
       `<br><span class="ds">${d}</span></li>`).join("")+`</ul></section>`);
-  out.push(`<section><h4>Gerçek hayatta</h4><ul class="life">`+L.life.map(t=>`<li>${t}</li>`).join("")+`</ul></section>`);
+  out.push(`<section><h4>Gerçek hayatta nerede?</h4><ul class="life">`+L.life.map(t=>`<li>${t}</li>`).join("")+`</ul></section>`);
   out.push(`<section><div class="trap"><b>Sık yapılan hata:</b> ${L.trap}</div></section>`);
-  if(L.next) out.push(`<p class="nxt">↗ ${L.next}</p>`);
+  if(L.next) out.push(`<p class="nxt">↗ Sıradaki durak: ${L.next}</p>`);
   return out.join("");
 }
 function openLesson(i){

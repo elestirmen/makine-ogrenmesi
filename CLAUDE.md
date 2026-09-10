@@ -74,7 +74,7 @@ CONTENT["m-knn"] = {
   pick:"Veri seti",        // seçicinin başlığı: "Veri seti" · "Hata yüzeyi" · "Görüntü" · "Senaryo"
   ui:false,                // (isteğe bağlı) seçici modülün kendi düğmelerinde; araç çubuğuna eklenmesin
   sets:[ {name, note, x, y, cls:[…], gen:"rings"}, … ],
-  lesson:{ q, idea:[…], read:[[başlık,metin],…], terms:[[en,tr,açıklama],…], life:[…], trap, next }
+  lesson:{ q, short, idea:[…], read:[[başlık,metin],…], terms:[[en,tr,açıklama],…], life:[…], trap, next }
 };
 ```
 
@@ -84,9 +84,15 @@ CONTENT["m-knn"] = {
   aynı veri üç modülde, üç ayrı ders. `note` alanı ders notu kutusunda görünür,
   bu yüzden **ölçülmüş** olmalı — "en iyi derece çoğunlukla 5" gibi bir cümle
   `tools/behaviour.js`'te sınanır.
-- `lesson` kutusu: `q` bir soru, `idea` fikir, `read` ekranı okuma rehberi,
-  `terms` İngilizce/Türkçe terim tablosu, `life` gerçek kullanım, `trap` sık yapılan
-  hata, `next` sonraki durak. Kutu `mountTools()`'un eklediği « Ders notu » düğmesi
+- `lesson` kutusu: `q` bir soru, `short` sorunun iki üç cümlelik **kısa cevabı**
+  (accent şeritli kutuda, hiç bilmeyen biri yalnız bunu okusa da bir şey götürsün),
+  `idea` fikir, `read` ekranı okuma rehberi, `terms` İngilizce/Türkçe terim tablosu,
+  `life` gerçek kullanım, `trap` sık yapılan hata, `next` sonraki durak.
+  **Dil kuralı:** ders notu günlük Türkçeyle, "sen" hitabıyla ve ön bilgisi olmayan
+  okura yazılır. Her terim ilk geçtiği yerde bir benzetme ya da somut örnekle
+  açılır (mahalleye taşınan komşu, kavanozdaki şeker, sisli yamaç). Uzun em-dash
+  zincirleri, "nicelik / izdüşürmek / iskelet" gibi çeviri kokan sözcükler ve
+  "siz" ile "sen" karışımı yok; kısa cümle, bir cümlede bir fikir. Kutu `mountTools()`'un eklediği « Ders notu » düğmesi
   ya da klavyede `?` ile açılır; `Esc` kapatır (modal açıkken Esc modülü değil kutuyu
   kapatır), perdeye tıklamak da kapatır.
 - **Modül 17 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),

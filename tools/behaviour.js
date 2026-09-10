@@ -531,8 +531,13 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
 {
   head("Modül 10 · üç senaryo (İHA / kanser / spam)");
   const {el,M}=boot(F);
-  const at=(j)=>{ PK(M,'m-cm',j);
-    return {t:T(el,'cm-to'), pre:V(el,'cm-pre'), rec:V(el,'cm-rec'), auc:V(el,'cm-auc')}; };
+  /* Senaryo seçimi veriyi yeniden üretiyor: tek örneklem İHA'da precision–recall
+     farkını bazen 15'in üstüne atıyordu (ölçüldü: %77.5 / %93.2). 10 turun
+     ORTALAMASI alınıyor — CLAUDE.md kuralı: rastgele veride tek örneklem değil ortalama. */
+  const at=(j)=>{ const pre=[],rec=[],auc=[]; let t="";
+    for(let r=0;r<10;r++){ PK(M,'m-cm',j); t=T(el,'cm-to'); pre.push(V(el,'cm-pre')); rec.push(V(el,'cm-rec')); auc.push(V(el,'cm-auc')); }
+    const f=(a)=>+mean(a).toFixed(1);
+    return {t, pre:f(pre), rec:f(rec), auc:f(auc)}; };
   const iha=at(0), kanser=at(1), spam=at(2);
   console.log(`       İHA    eşik ${iha.t}: precision %${iha.pre} · recall %${iha.rec}`);
   console.log(`       kanser eşik ${kanser.t}: precision %${kanser.pre} · recall %${kanser.rec}`);

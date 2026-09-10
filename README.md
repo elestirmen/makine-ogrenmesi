@@ -46,8 +46,8 @@ gösterir, 06 ormanla düzeltir. 12 k'yı sorar, 13 doğru k'yı nasıl bulacağ
 ## Derste kullanım
 
 **Ders notu.** Her modülün başlığının altında *Ders notu* düğmesi var (klavyede `?`).
-Açılan kutu tek ekranda şunları verir: modülün cevapladığı soru, fikrin iki paragraflık
-anlatımı, **ekranda ne var** rehberi (hangi panel neyi gösteriyor), veri kümelerinin
+Açılan kutu tek ekranda şunları verir: modülün cevapladığı soru ve iki üç cümlelik
+**kısa cevabı**, fikrin günlük dille anlatımı, **ekranda ne var** rehberi (hangi panel neyi gösteriyor), veri kümelerinin
 tek satırlık özetleri, İngilizce–Türkçe terim tablosu, gerçek hayattaki kullanımı ve
 o konuda **sık yapılan hata**. Öğrenci kaydırıcıyı çevirip hiçbir şey anlamadan
 geçmesin diye var; kutunun altındaki *Adım adım anlat* düğmesi doğrudan rehberli
