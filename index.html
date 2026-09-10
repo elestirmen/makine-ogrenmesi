@@ -112,7 +112,15 @@ main{padding:30px 34px 60px;display:flex;flex-direction:column;gap:20px;min-widt
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
   box-shadow:var(--shadow);overflow:hidden;
 }
-canvas{display:block;width:100%;height:min(56vh,520px);min-height:320px;touch-action:pan-y;cursor:crosshair}
+/* Tuval yüksekliği tek değişkende: kırılımlar ve m-cn yalnız --cvh'yi değiştirir.
+   Rehber şeridi (.guided) açıkken tuval o şerit kadar kısalır, böylece gösterge
+   satırı perdede kalır — adım metni tuvalin ÜSTÜNDE olduğu için önce okunur,
+   sonra bakılır. (Eski hâlde şerit .stats'ın altına ekleniyor ve 720p'de perdenin
+   dışında kalıyordu: hoca "Adım adım"a basıyor, ekranda hiçbir şey değişmiyordu.) */
+:root{--cvh:min(56vh,520px); --gh:58px}
+canvas{display:block;width:100%;height:var(--cvh);min-height:320px;touch-action:pan-y;cursor:crosshair}
+.stage.guided>canvas{height:calc(var(--cvh) - var(--gh));min-height:200px}
+#m-cn .stage.guided>canvas{min-height:150px}   /* üç panel yan yana, kısa tuval yeter */
 /* Önizlemeler dekoratif (aria-hidden): pan hareketini yutmasınlar — bkz. .card canvas */
 
 .bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;
@@ -235,7 +243,7 @@ main section{animation:enter var(--t) var(--ease) both}
 @keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 .stage{transition:box-shadow var(--t) var(--ease)}
-canvas{height:min(58vh,560px)}
+:root{--cvh:min(58vh,560px)}
 
 /* ── projeksiyon sıkıştırması ──
    1280×720'de .stats satırı ÖLÇÜLDÜ: her modülde perdenin altında kalıyordu
@@ -249,14 +257,28 @@ canvas{height:min(58vh,560px)}
   .head h2{font-size:clamp(25px,2.7vw,34px)}
   .head p{font-size:16px;line-height:1.42;max-width:88ch}
   .head .eyebrow{font-size:10.5px}
-  .tools{padding:7px 14px;gap:9px 16px}
-  .tools .btn{padding:5px 11px}
-  .tools .seg button{padding:5px 11px}
+  /* .tools sıkıştırması aşağıda, kendi tanımından SONRA: burada dururken temel
+     kural (kaynakta daha sonra, aynı özgüllük) onu eziyordu ve şerit 720p'de
+     hep 57 px kalıyordu. */
   .bar{padding:8px 14px;gap:8px 14px}
   .stat{padding:5px 14px}
   .stat .v{font-size:18px}
-  .guide{padding:9px 14px}
-  canvas{height:min(50vh,560px);min-height:260px}
+  .guide{padding:8px 14px}
+  :root{--cvh:min(48vh,560px); --gh:52px}   /* 720p'de 346 px: iki satırlı kontrol çubuğu olan modüllerde (m-reg, m-cn) göstergeler ancak böyle sığıyor */
+  canvas{min-height:260px}
+  /* rail: 720 px yükseklikte menünün yalnız 5 maddesi görünüyordu; tanıtım
+     paragrafı ve maddeler arası boşluk kısılınca 8–9 madde sığıyor */
+  .rail{padding:18px 18px 16px;gap:14px}
+  .brand p{display:none}
+  .brand h1{font-size:22px}
+  nav button{padding:6px 10px}
+  nav .grp{padding:10px 0 4px 2px;margin-top:5px}
+  .railfoot{padding-top:10px}
+  .railfoot p{margin-bottom:5px !important}
+  .hero{gap:8px;margin-bottom:0}
+  .hero h2{font-size:clamp(28px,3.4vw,42px)}
+  .hero p{font-size:16px}
+  .grouphead{margin:16px 0 0}
   /* Kontrol çubuğundaki tek satırlık ipucu burada bir SATIR yer kaplıyor ve
      gösterge değerlerini perdeden düşürüyor. Aynı bilgi rail altında ("Tuvale
      tıkla → nokta ekle…") ve ders notu kutusunun "Ekranda ne var" bölümünde var. */
@@ -267,8 +289,8 @@ canvas{height:min(58vh,560px)}
   /* m-cn'in İKİ kontrol çubuğu var (çekirdek ızgarası + hiperparametreler) ve
      5×5 seçilince ızgara bir sıra daha uzuyor; tuval buna göre kısalıyor.
      Üç panel yan yana olduğu için kısa tuval bu modülde bir şey kaybettirmiyor. */
-  #m-cn canvas{height:min(37vh,560px)}
-  #m-cn.k5 canvas{height:min(33vh,560px)}
+  #m-cn{--cvh:min(36vh,560px)}
+  #m-cn.k5{--cvh:min(32vh,560px)}
   .kgrid input{padding:4px 3px}
   .kpresets .btn{padding:4px 9px}
 }
@@ -280,14 +302,20 @@ canvas{height:min(58vh,560px)}
   main{padding:14px 34px 28px;gap:10px}
   .head p{display:none}
   .head h2{font-size:clamp(22px,2.4vw,29px)}
-  canvas{height:min(46vh,560px);min-height:200px}
+  :root{--cvh:min(46vh,560px)}
+  canvas{min-height:200px}
+  .stage.guided>canvas{min-height:170px}
   .ask{padding:11px 16px}
 }
 
 /* --- rehberli anlatım --- */
+/* Şerit araç çubuğunun altında, tuvalin ÜSTÜNDE durur (okuma sırası: adım → tuval
+   → kontroller → göstergeler). Metin serbestçe sarılır (adımlar 64–379 karakter,
+   kırpılmaz); applyStep() şeridin gerçek yüksekliğini ölçüp .stage'in --gh'sine
+   yazar, tuval o kadar kısalır ve göstergeler perdede kalır. */
 .guide{
   display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;
-  padding:11px 14px;border-top:1px solid var(--line);
+  padding:8px 14px;border-bottom:1px solid var(--line);
   background:linear-gradient(90deg,var(--tint),transparent 70%);
 }
 .guide[hidden]{display:none !important}
@@ -315,8 +343,77 @@ main>section:focus,main>section:focus-visible{outline:none}
 .gdots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .2s var(--ease),transform .2s var(--ease)}
 .gdots i.on{background:var(--accent);transform:scale(1.35)}
 
-.modes{display:flex;gap:6px;margin-left:auto}
-.modes .btn{padding:6px 11px;font-size:13px}
+/* Pedagoji düğmeleri (Ders notu · Adım adım) araç şeridinde yan yana; kontrol
+   çubuğunun sağ köşesindeki eski yeri hem gözden kaçıyordu hem de m-lin gibi
+   kalabalık çubuklarda ikinci satıra düşüp göstergeleri perdeden itiyordu. */
+.tools .modes{display:contents}
+.tools .tright{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tools .btn.ghost{color:var(--ink-soft);border-color:transparent;background:transparent;
+  display:inline-flex;align-items:center;gap:7px}
+.tools .btn.ghost:hover{color:var(--accent);border-color:var(--line);background:var(--surface)}
+.tools .btn.ghost svg{width:15px;height:15px;flex:0 0 auto}
+
+/* ── sunum modu: rail gizlenir, tuval 930 → 1210 px ──
+   Perdede menünün işi yok; F tuşu ya da şeritteki düğme. Giriş sayfasına dönüş
+   (Esc) modu kapatır — orada gizli rail'i geri getirecek düğme yok. */
+.app.focus{grid-template-columns:minmax(0,1fr)}
+.app.focus .rail{display:none}
+
+/* ── modül sayfalayıcı: .ask kutusunun altında önceki / sonraki ──
+   Derste fareyle ders sırasında ilerlemek için tek yol rail'di; telefonda ise
+   rail sayfanın en üstünde, 17 madde yukarıda. */
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:78ch}
+.pager a{
+  display:flex;flex-direction:column;gap:2px;padding:10px 14px;text-decoration:none;color:var(--ink);
+  border:1px solid var(--line);border-radius:var(--r);background:var(--surface);min-width:0;
+  transition:border-color .18s var(--ease),transform .18s var(--ease);
+}
+.pager a:hover{border-color:var(--accent);transform:translateY(-1px)}
+.pager a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pager a.next{text-align:right;align-items:flex-end}
+.pager .pk{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.pager .pt{font-weight:700;font-size:15px;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.pager a:hover .pt{color:var(--accent)}
+.pager a[hidden]{display:none}
+
+/* ── dar ekran (telefon / yan yana pencere): rail katlanır ──
+   Rail statik olarak main'in üstüne geçiyor ve 17 maddelik menü ~2000 px yer
+   kaplıyordu: öğrenci telefonda modüle ulaşmak için bütün menüyü kaydırıyordu.
+   Şimdi başlık + arama + üç düğme; menü yalnız ☰ ile açılır ve seçimde kapanır. */
+.navtoggle{display:none}
+@media (max-width:900px){
+  .rail{padding:14px 16px 12px;gap:10px}
+  .brand h1{font-size:20px}
+  .brand p{display:none}
+  .navtoggle{display:inline-flex;align-items:center;gap:6px}
+  .themebtn .tl{display:none}
+  .themebtn{padding:0 10px}
+  nav,.railfoot,.prog{display:none}
+  .app.navopen nav{display:flex}
+  .app.navopen .prog{display:flex}
+  main{padding-top:14px}
+  /* rail zaten üstte ve statik: "menüyü gizle" anlamsız. Klavye ipucu da öyle. */
+  .tools .tright,.hero .meta .kb{display:none}
+  /* seçici düğmeleri sözcük ortasından kırılmasın: düğme bütün kalır, grup sarılır */
+  .tools .pickwrap{flex-wrap:wrap}
+  .tools .seg{flex-wrap:wrap}
+  .tools .seg button{white-space:nowrap;flex:1 1 auto;justify-content:center}
+  .head p{font-size:15.5px}
+  .pager{grid-template-columns:1fr}
+  .pager a.next{align-items:flex-start;text-align:left}
+}
+
+/* Adres çubuğundan (#m-knn) gelince tarayıcı bölümü kendi kaydırıyor ve main'in
+   iç boşluğu kadar (16–30 px) yukarı kaçıyordu: başlık satırı perdede kesik
+   çıkıyordu. Kaydırma payı iç boşluğa eşitlenince bölüm tam yerine oturuyor. */
+main>section{scroll-margin-top:30px}
+@media (max-height:820px){main>section{scroll-margin-top:16px}}
+@media (max-height:660px){main>section{scroll-margin-top:14px}}
+@media (max-width:900px){main>section{scroll-margin-top:14px}}
+
+/* Kaydırıcı tutamağı 16 px; dokunmatikte kaçırılıyordu. Yükseklik kutuyu
+   büyütür, görünümü değiştirmez (tutamak dikeyde ortalanır). */
+input[type=range]{min-height:28px;margin:0}
 
 /* --- senaryo seçici --- */
 .scen{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -343,6 +440,12 @@ main>section:focus,main>section:focus-visible{outline:none}
   background:var(--tint);border-color:var(--ring);color:var(--accent)}
 .learn:hover{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .learn svg{width:15px;height:15px;flex:0 0 auto}
+/* projeksiyon sıkıştırması — temel .tools kurallarından SONRA gelmeli (ölçüldü: 57 → 47 px) */
+@media (max-height:820px){
+  .tools{padding:7px 14px;gap:8px 16px}
+  .tools .btn{padding:4px 11px}
+  .tools .seg button{padding:5px 11px}
+}
 
 /* --- ders notu kutusu ---
    Tipografi kuralları: (1) ölçü — kutu 680 px, yani satır ~70 karakter; 840 px'lik
@@ -453,6 +556,7 @@ main>section:focus,main>section:focus-visible{outline:none}
     <div class="railtop">
       <div class="railrow">
         <button class="homebtn" id="gohome">◂ Tüm modüller</button>
+        <button class="themebtn navtoggle" id="navtoggle" aria-expanded="false" aria-controls="nav" aria-label="Modül menüsünü aç">☰ <span class="tl">Menü</span></button>
         <button class="themebtn" id="theme" title="Açık / koyu tema (T)">—</button>
       </div>
       <div class="search">
@@ -464,7 +568,7 @@ main>section:focus,main>section:focus-visible{outline:none}
     <nav id="nav"></nav>
     <div class="railfoot">
       <p style="margin:0 0 8px">Tuvale <b>tıkla</b> → nokta ekle · <b>sürükle</b> → taşı · <kbd>Alt</kbd>+tık ya da sağ tık → sil · <kbd>Ctrl</kbd>+<kbd>Z</kbd> → geri al · <kbd>/</kbd> → ara · <kbd>T</kbd> → tema.</p>
-      <p style="margin:0 0 8px"><kbd>Boşluk</kbd> ana eylem · <kbd>←</kbd> <kbd>→</kbd> modül geçişi · <kbd>?</kbd> ders notu · <kbd>Esc</kbd> tüm modüller · adım adım modda <kbd>↑</kbd> <kbd>↓</kbd>.</p>
+      <p style="margin:0 0 8px"><kbd>Boşluk</kbd> ana eylem · <kbd>←</kbd> <kbd>→</kbd> modül geçişi · <kbd>?</kbd> ders notu · <kbd>F</kbd> sunum modu · <kbd>Esc</kbd> tüm modüller · adım adım modda <kbd>↑</kbd> <kbd>↓</kbd>.</p>
       <p style="margin:0">KÜN Geospatial AI &amp; UAV Lab</p>
     </div>
   </aside>
@@ -5628,6 +5732,8 @@ addEventListener("popstate",()=>{
 /* arama */
 $("#q").oninput=e=>{
   const q=fold(e.target.value.trim());
+  /* dar ekranda menü katlı: sonuçlar görünsün diye yazmaya başlayınca açılır */
+  if(q && active>=0) setNav(true);
   let n=0;
   navBtns.forEach(b=>{const ok=!q||b.dataset.q.includes(q); b.hidden=!ok; if(ok)n++;});
   /* giriş sayfası kartları da süzülsün: hoca oradayken büyük ekranda hiçbir şey
@@ -5666,26 +5772,42 @@ function mountGuide(mod){
     <div class="gbody"><span class="gt"><span class="gnum"></span><span class="gtt"></span></span><span class="gd"></span></div>
     <div class="gdots"></div>
     <button class="gnav" data-d="1" aria-label="Sonraki adım">›</button>`;
-  stage.appendChild(bar);
+  /* Şerit tuvalin ÜSTÜNE: araç şeridinden hemen sonra. Eskiden .stats'ın altına
+     ekleniyordu ve 1280×720'de perdenin dışında kalıyordu — "Adım adım"a basan
+     hoca ekranda hiçbir değişiklik görmüyordu. */
+  const cv=stage.querySelector("canvas");
+  if(cv) stage.insertBefore(bar,cv); else stage.appendChild(bar);
+  bar.querySelector(".gbody").setAttribute("aria-live","polite");
   const dots=bar.querySelector(".gdots");
   mod.steps.forEach(()=>dots.appendChild(document.createElement("i")));
-  mod.__guide={bar, i:0};
+  mod.__guide={bar, i:0, stage};
   bar.querySelectorAll(".gnav").forEach(b=>b.onclick=()=>gstep(mod,+b.dataset.d));
-  /* mod düğmeleri kontrol çubuğuna */
-  const bars=document.querySelectorAll("#"+mod.id+" .bar");
-  const barsel=bars[bars.length-1];
+  /* "Adım adım" düğmesi araç şeridinde, « Ders notu »nun hemen yanında: iki
+     pedagoji düğmesi tek yerde. Şerit yoksa (olağan dışı) son kontrol çubuğuna. */
   const modes=document.createElement("div"); modes.className="modes";
   const gb=document.createElement("button");
-  gb.className="btn"; gb.textContent="Adım adım"; gb.setAttribute("aria-pressed","false");
+  gb.className="btn"; gb.type="button"; gb.textContent="Adım adım"; gb.setAttribute("aria-pressed","false");
   gb.onclick=()=>toggleGuide(mod);
-  modes.appendChild(gb); barsel.appendChild(modes);
+  modes.appendChild(gb);
+  if(mod.__tools&&mod.__tools.anchor) mod.__tools.row.insertBefore(modes,mod.__tools.anchor);
+  else { const bars=document.querySelectorAll("#"+mod.id+" .bar"); bars[bars.length-1].appendChild(modes); }
   mod.__guide.btn=gb;
 }
 function toggleGuide(mod,force){
   const g=mod.__guide; if(!g) return;
   const on = force!==undefined ? force : g.bar.hidden;
   g.bar.hidden=!on; g.btn.setAttribute("aria-pressed",String(on));
+  g.stage.classList.toggle("guided",on);
   if(on){ g.i=0; applyStep(mod); }
+  else fitGuide(mod);
+}
+/* Şerit yüksekliğini tuvalden düş: metin sarıldıkça şerit uzar, tuval kısalır,
+   gösterge satırı yerinde kalır. Ölçüm sonrası tuval yeniden çizilir. */
+function fitGuide(mod){
+  const g=mod.__guide; if(!g||!g.stage.style||!g.stage.style.setProperty) return;
+  const h=g.bar.hidden?0:(g.bar.offsetHeight||0);
+  if(h>0) g.stage.style.setProperty("--gh",h+"px"); else g.stage.style.removeProperty("--gh");
+  if(SEQ[active]===mod) requestAnimationFrame(()=>mod.draw());
 }
 function gstep(mod,d){
   const g=mod.__guide; g.i=clamp(g.i+d,0,mod.steps.length-1); applyStep(mod);
@@ -5704,6 +5826,7 @@ function applyStep(mod){
      basarak, böylece düğmenin basılı hâli ekranda görünenle tutarlı kalıyor */
   try{ if(st.set!==undefined && mod.__pick) mod.__pick(st.set); }catch(err){ console.warn("adım veri kümesi",mod.id,err); }
   try{ st.run&&st.run(); }catch(err){ console.warn("adım hatası",mod.id,err); }
+  fitGuide(mod);
 }
 
 /* ── modül araç çubuğu: « Ders notu » düğmesi + veri kümesi seçici ──
@@ -5723,6 +5846,15 @@ function mountTools(mod){
   lb.onclick=()=>openLesson(seqIndexById(mod.id));
   row.appendChild(lb);
 
+  /* sağ köşe: sunum modu (rail'i gizle). mountGuide "Adım adım"ı bu satırın
+     başına, veri kümesi seçicinin önüne koyar (anchor). */
+  const tright=document.createElement("div"); tright.className="tright";
+  const fb=document.createElement("button");
+  fb.className="btn ghost focusbtn"; fb.type="button"; fb.setAttribute("aria-pressed","false");
+  fb.onclick=()=>setFocus();
+  tright.appendChild(fb);
+  mod.__tools={row, anchor:tright};
+
   if(mod.scenarios&&mod.scenarios.length){
     const name=mod.scenarioLabel||"Veri seti";
     const wrap=document.createElement("div"); wrap.className="pickwrap";
@@ -5740,11 +5872,77 @@ function mountTools(mod){
     });
     wrap.appendChild(seg); row.appendChild(wrap);
     mod.__pick=(j)=>{ const b=btns[clamp(j,0,btns.length-1)]; if(b) b.click(); };
+    mod.__tools.anchor=wrap;
   }
+  row.appendChild(tright);
 
   /* kartın İÇİNE, tuvalin üstüne: alt kontrol çubuğunun simetriği */
   const stage=sec.querySelector(".stage");
   if(stage) stage.insertBefore(row,stage.firstChild); else sec.appendChild(row);
+}
+
+/* ── sunum modu: rail gizlenir, tuval bütün genişliği alır ──
+   Perdede menünün işi yok; 1280 px'te tuval 930 → 1210 px. F tuşu ya da
+   şeritteki düğme açar/kapar; giriş sayfasına dönüş kapatır (orada düğme yok). */
+const APP=document.querySelector(".app");
+const FOCUS_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+const MENU_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '+
+  'stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+function paintFocus(){
+  const on=!!(APP&&APP.classList.contains("focus"));
+  document.querySelectorAll(".focusbtn").forEach(b=>{
+    b.innerHTML=(on?MENU_ICON:FOCUS_ICON)+(on?" Menü":" Sunum");
+    b.setAttribute("aria-pressed",String(on));
+    b.title=(on?"Menüyü göster":"Menüyü gizle, tuvali genişlet")+" (F)";
+    b.setAttribute("aria-label",on?"Menüyü göster":"Sunum modu: menüyü gizle");
+  });
+}
+function setFocus(force){
+  if(!APP) return;
+  const on = force!==undefined ? !!force : !APP.classList.contains("focus");
+  APP.classList.toggle("focus",on);
+  paintFocus();
+  /* rail gidince tuval genişledi: fit() yeni ölçüyü okusun */
+  requestAnimationFrame(()=>{ if(active>=0) SEQ[active].draw(); });
+}
+
+/* ── dar ekranda katlanır menü ── */
+function setNav(force){
+  if(!APP) return;
+  const on = force!==undefined ? !!force : !APP.classList.contains("navopen");
+  APP.classList.toggle("navopen",on);
+  const t=$("#navtoggle");
+  if(t){ t.setAttribute("aria-expanded",String(on)); t.setAttribute("aria-label",(on?"Modül menüsünü kapat":"Modül menüsünü aç")); }
+}
+{ const t=$("#navtoggle"); if(t) t.onclick=()=>setNav(); }
+
+/* ── modül sayfalayıcı: .ask kutusunun altında ‹ önceki · sonraki › ──
+   Derste fareyle ders sırasında ilerlemek için tek yol rail'di; telefonda rail
+   sayfanın tepesinde. Uçlarda giriş sayfasına bağlanır. */
+function mountPager(mod){
+  const sec=document.getElementById(mod.id); if(!sec) return;
+  const i=seqIndexById(mod.id); if(i<0) return;
+  const pg=document.createElement("nav"); pg.className="pager"; pg.setAttribute("aria-label","Modüller arası geçiş");
+  const link=(j,dir)=>{
+    const a=document.createElement("a");
+    a.className=dir;
+    const k=document.createElement("span"), t=document.createElement("span");
+    k.className="pk"; t.className="pt";
+    if(j<0||j>=SEQ.length){
+      a.href="#"; k.textContent=dir==="prev"?"‹ Giriş":"Giriş ›"; t.textContent="Tüm modüller";
+      a.onclick=(e)=>{ e.preventDefault(); showHome(); };
+    }else{
+      const r=META.find(x=>x[1]===SEQ[j].id)||[];
+      a.href="#"+SEQ[j].id;
+      k.textContent=(dir==="prev"?"‹ Önceki · ":"Sonraki · ")+"Modül "+(r[0]||"")+(dir==="next"?" ›":"");
+      t.textContent=r[2]||SEQ[j].id;
+      a.onclick=(e)=>{ e.preventDefault(); show(j); };
+    }
+    a.appendChild(k); a.appendChild(t); return a;
+  };
+  pg.appendChild(link(i-1,"prev")); pg.appendChild(link(i+1,"next"));
+  sec.appendChild(pg);
 }
 
 /* ── ders notu kutusu ──
@@ -5835,7 +6033,7 @@ function buildHome(){
     `<span><b>${SEQ.length}</b> etkileşimli deney</span>
      <span><b>${GROUPS.filter(g=>META.some(m=>m[4]===g)).length}</b> konu başlığı</span>
      <span>Her modülde <b>Ders notu</b> kutusu ve 2–3 alternatif <b>veri seti</b></span>
-     <span>Klavye: <b>←</b> <b>→</b> geçiş · <b>Boşluk</b> ana eylem · <b>?</b> ders notu · <b>Esc</b> bu sayfa</span>`;
+     <span class="kb">Klavye: <b>←</b> <b>→</b> geçiş · <b>Boşluk</b> ana eylem · <b>?</b> ders notu · <b>F</b> sunum · <b>Esc</b> bu sayfa</span>`;
 }
 function paintThumb(cv,id){
   const f=TH[id]; if(!f) return;
@@ -5857,6 +6055,9 @@ function show(i){
   HOME.hidden=true;
   SEQ.forEach((m,j)=>{document.getElementById(m.id).hidden = j!==i;});
   navBtns.forEach(b=>b.setAttribute("aria-current",String(+b.dataset.i===i)));
+  /* 17 madde rail'e sığmıyor: ok tuşuyla ilerlerken seçili madde görünür kalsın */
+  try{ const nb=navBtns.find(b=>+b.dataset.i===i); if(nb&&window.innerWidth>900) nb.scrollIntoView({block:"nearest"}); }catch(_){ }
+  setNav(false);
   paintProg();
   const sec=document.getElementById(SEQ[i].id);
   sec.style.animation="none"; void sec.offsetWidth; sec.style.animation="";
@@ -5875,6 +6076,7 @@ function showHome(boot){
   active=-1;
   SEQ.forEach(m=>{document.getElementById(m.id).hidden=true;});
   navBtns.forEach(b=>b.setAttribute("aria-current","false"));
+  setFocus(false); setNav(false);
   HOME.hidden=false;
   paintProg();
   HOME.style.animation="none"; void HOME.offsetWidth; HOME.style.animation="";
@@ -5886,7 +6088,8 @@ function showHome(boot){
 $("#gohome").onclick=showHome;
 
 /* ── başlat ── */
-MODULES.forEach(m=>{ if(m.init) m.init(); mountTools(m); mountGuide(m); });
+MODULES.forEach(m=>{ if(m.init) m.init(); mountTools(m); mountGuide(m); mountPager(m); });
+paintFocus();
 /* programatik odak hedefi: tabIndex=-1 sekme sırasına EKLEMEZ, yalnız focus()'a izin verir */
 SEQ.forEach(m=>{const el=document.getElementById(m.id); if(el) el.tabIndex=-1;});
 if(HOME) HOME.tabIndex=-1;
@@ -5917,7 +6120,7 @@ const darkNow=()=>{
 function paintTheme(){
   const b=$("#theme"); if(!b) return;
   const d=darkNow();
-  b.textContent=d?"☀ Açık":"☾ Koyu";
+  b.innerHTML=(d?"☀ ":"☾ ")+'<span class="tl">'+(d?"Açık":"Koyu")+"</span>";
   b.setAttribute("aria-label",(d?"Açık":"Koyu")+" temaya geç");
 }
 function toggleTheme(){
@@ -5943,6 +6146,7 @@ addEventListener("keydown",e=>{
   if(e.key==="/"){ e.preventDefault(); const q=$("#q"); if(q&&q.focus) q.focus(); return; }
   if(e.key==="?"){ e.preventDefault(); if(active>=0) openLesson(active); return; }
   if(e.key==="t"||e.key==="T"){ if(!e.ctrlKey&&!e.metaKey&&!e.altKey){ toggleTheme(); return; } }
+  if((e.key==="f"||e.key==="F")&&active>=0){ if(!e.ctrlKey&&!e.metaKey&&!e.altKey){ setFocus(); return; } }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){
     const m=SEQ[active]; if(m&&m.undo){e.preventDefault();m.undo();} return;
   }

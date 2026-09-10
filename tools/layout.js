@@ -130,6 +130,32 @@ async function launch(){
       console.log(`  ${bad?'HATA ':'OK   '} ${id.padEnd(8)} tuval ${String(g.tuval).padStart(3)} · stats altı ${g.stats} (${over>0?'+'+over:over})`+
         (degerOver>DEGER_TOL?` · GÖSTERGE DEĞERİ perdenin altında (+${degerOver})`:'')+
         (g.halka?' · bölümde görünür odak halkası':''));
+      /* Rehber şeridi tuvalin üstünde ve tuval o kadar kısalıyor; yine de EN UZUN
+         adımda (379 karakter, 3–4 satır) gösterge satırı perdede kalmalı. Şerit
+         .stats'ın altındayken bu durum hiç ölçülmüyordu ve "Adım adım"a basan hoca
+         720p'de hiçbir değişiklik görmüyordu. */
+      const gg=await p.evaluate(async (id)=>{
+        const mod=SEQ.find(m=>m.id===id); if(!mod||!mod.steps||!mod.__guide) return null;
+        let k=0; mod.steps.forEach((s,j)=>{ if(String(s.d||'').length>String(mod.steps[k].d||'').length) k=j; });
+        toggleGuide(mod,true); mod.__guide.i=k; applyStep(mod);
+        await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+        const sec=document.getElementById(id);
+        const st=sec.querySelector('.stats'), cv=sec.querySelector('.stage>canvas'), v=sec.querySelector('.stats .v');
+        const bar=sec.querySelector('.guide');
+        const out={adim:k+1, serit:Math.round(bar.getBoundingClientRect().height),
+                stats:Math.round(st.getBoundingClientRect().bottom),
+                deger:v?Math.round(v.getBoundingClientRect().bottom):null,
+                tuval:Math.round(cv.getBoundingClientRect().height)};
+        toggleGuide(mod,false);
+        return out;
+      },id).catch(e=>({err:String(e.message||e)}));
+      if(gg&&gg.err){ fail++; console.log(`  HATA  ${id.padEnd(8)} rehber ölçümü: ${gg.err}`); }
+      else if(gg){
+        const o2=gg.stats-H, d2=gg.deger-H, bad2=o2>TOL||d2>DEGER_TOL;
+        if(bad2) fail++;
+        console.log(`  ${bad2?'HATA ':'OK   '} ${''.padEnd(8)} rehber açık · adım ${gg.adim} · şerit ${gg.serit} · tuval ${String(gg.tuval).padStart(3)} · stats altı ${gg.stats} (${o2>0?'+'+o2:o2})`+
+          (d2>DEGER_TOL?` · GÖSTERGE DEĞERİ perdenin altında (+${d2})`:''));
+      }
     }
   }
   if(SHOTS){
@@ -139,7 +165,7 @@ async function launch(){
       await new Promise(r=>setTimeout(r,500));
       if(theme==='koyu'){ await p.click('#theme'); await new Promise(r=>setTimeout(r,400)); }
       await p.screenshot({path:`${OUT}/${id}-${theme}.png`});
-      await p.evaluate(()=>window.openLesson&&window.openLesson(0));
+      await p.evaluate(()=>window.openLesson&&window.openLesson(active));   // açık modülün notu
       await new Promise(r=>setTimeout(r,350));
       await p.screenshot({path:`${OUT}/${id}-${theme}-dersnotu.png`});
     }

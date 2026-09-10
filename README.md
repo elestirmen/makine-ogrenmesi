@@ -53,9 +53,18 @@ o konuda **sık yapılan hata**. Öğrenci kaydırıcıyı çevirip hiçbir şey
 geçmesin diye var; kutunun altındaki *Adım adım anlat* düğmesi doğrudan rehberli
 anlatımı başlatır.
 
-**Adım adım modu.** Her modülün kontrol çubuğunda *Adım adım* düğmesi var: hoca ileri
-bastıkça tuval sırayla kurulur ve altta o adımın ne gösterdiği yazar. Kaydırıcılar
-serbest kalır, istediğiniz an araya girebilirsiniz.
+**Adım adım modu.** *Ders notu*'nun hemen yanındaki *Adım adım* düğmesi: hoca ileri
+bastıkça tuval sırayla kurulur ve tuvalin **üstündeki** şeritte o adımın ne gösterdiği
+yazar (tuval şerit kadar kısalır, gösterge satırı perdede kalır). Kaydırıcılar serbest
+kalır, istediğiniz an araya girebilirsiniz.
+
+**Sunum modu.** Şeridin sağındaki *Sunum* düğmesi (klavyede `F`) sol menüyü gizler;
+1280 px'lik perdede tuval 930'dan 1210 px'e çıkar. Aynı düğme (*Menü*) ya da `Esc`
+geri getirir.
+
+**İleri / geri.** Her modülün en altında *Önceki · Sonraki* kartları var: ders
+sırasında fareyle ilerlemek için menüye dönmek gerekmez. Telefonda menü katlıdır
+(☰ ile açılır); modüller arası geçiş bu kartlarla yapılır.
 
 **Veri setleri.** Her modülde aynı dersi başka bir hikâyeyle tekrar eden 2–3 somut veri
 var; tuvalin üstündeki şeritten seçilir ve eksen adları, sınıf adları, göstergeler
@@ -98,6 +107,7 @@ yükleyebilirsiniz (griye çevrilip anında işlenir).
 | `?` | ders notu kutusu (açık kutuda `Esc` kapatır) |
 | `/` | arama kutusuna atla |
 | `T` | açık / koyu tema |
+| `F` | sunum modu: menüyü gizle / göster |
 
 **Tuval.** Tıkla → nokta ekle · sürükle → taşı · `Alt`+tık veya sağ tık → sil.
 Dokunmatikte nokta parmağı kaldırınca eklenir (8 px'den az hareket ettiyse), böylece

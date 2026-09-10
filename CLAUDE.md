@@ -105,6 +105,29 @@ CONTENT["m-knn"] = {
   kartın dışında serbest satır (`.head` ile `.stage` arası **0 px**; şerit oraya
   sıkışıp kartın üstüne 4 px biniyordu), üç ayrı `.btn` (aralarındaki 6 px beş eşit
   kutu görüntüsü veriyor, hiyerarşi kayboluyor).
+- **Araç şeridinin tam içeriği** (soldan sağa): « Ders notu » · « Adım adım » ·
+  veri kümesi seçici · sağ köşede « Sunum » (`.focusbtn`). İki pedagoji düğmesi
+  yan yana durur; « Adım adım » eskiden kontrol çubuğunun sağ köşesindeydi, hem
+  gözden kaçıyordu hem kalabalık çubuklarda ikinci satıra düşüp göstergeleri
+  perdeden itiyordu. `mountTools()` şeridi kurar ve `mod.__tools={row,anchor}`
+  bırakır; `mountGuide()` düğmeyi `anchor`'ın önüne ekler.
+- **Rehber şeridi (`.guide`) tuvalin ÜSTÜNDE**, araç şeridinin hemen altında.
+  Eskiden `.stats`'ın altına ekleniyordu ve 1280×720'de perdenin dışında kalıyordu:
+  hoca « Adım adım »a basıyor, ekranda hiçbir şey değişmiyordu. Adım metni
+  kırpılmaz (64–379 karakter, sarılır); `fitGuide()` şeridin gerçek yüksekliğini
+  ölçüp `.stage`'in `--gh` değişkenine yazar, `.stage.guided>canvas` o kadar
+  kısalır ve gösterge satırı yerinde kalır. Tuval yüksekliği tek değişkende:
+  `--cvh` (kırılımlar ve `#m-cn` yalnız onu değiştirir).
+- **Sunum modu** (`.app.focus`, `F` tuşu ya da şeritteki düğme): rail gizlenir,
+  tuval 930 → 1210 px. Giriş sayfasına dönüş modu kapatır (orada düğme yok).
+  Sonrasında `draw()` yeniden çağrılır — `fit()` yeni genişliği okusun.
+- **Sayfalayıcı** (`.pager`, `mountPager()`): `.ask` kutusunun altında ‹ önceki ·
+  sonraki › kartları, ders sırasına (`SEQ`) göre; uçlar giriş sayfasına bağlanır.
+  Gerçek `<a href="#m-…">` — orta tık / yeni sekme çalışır, tık `show()`a gider.
+- **Dar ekran (≤900 px)**: rail statik olarak main'in üstüne geçer ve menü
+  katlanır (`.app.navopen`, `#navtoggle` ☰). Eskiden 17 madde ~2000 px yer
+  kaplıyordu, öğrenci telefonda modüle ulaşmak için hepsini kaydırıyordu. Menü
+  seçimde kapanır; arama kutusuna yazınca açılır. « Sunum » düğmesi bu boyda gizli.
 
 Sunucuda 80/443'ü **Nginx Proxy Manager** karşılıyor; site host nginx'ine değil,
 `npm-net` ağındaki `ml-web` konteynerine bağlı. Alan adları:
@@ -238,8 +261,19 @@ ve Chrome `:focus-visible`'ı üstünde tuttuğu için 930 px genişliğinde acc
 dikdörtgen sürekli ekranda duruyordu (tıklamayla da kaybolmuyordu). İkisi de
 `harness.js`'in sahte DOM'unda görünmez — yerleşim hesaplanmıyor.
 
+Kapı her modülü **iki hâlde** ölçer: olağan ve rehber açık (metni en uzun adım
+seçili). İkincisi eklenmeden önce şerit `.stats`'ın altındaydı ve hiç ölçülmemişti.
+Ölçüm `scrollY = 0`'da yapılmalı: adres çubuğundan (`#m-knn`) gelince tarayıcı bölümü
+kendisi kaydırıp main'in iç boşluğu kadar (16 px) yukarı kaçırıyordu; başlık kesik
+çıkıyor, kapı ise 16 px iyimser ölçüyordu (`main>section{scroll-margin-top}` düzeltti).
+
+Bir de kaynak sırası tuzağı: `@media` bloğundaki bir kural, aynı özgüllükteki temel
+kural kaynakta **sonra** geliyorsa kaybeder. `.tools` sıkıştırması bu yüzden 720p'de
+hiç uygulanmıyordu (şerit 57 px kalıyordu); kural artık `.tools` tanımının altında.
+
 **Dikey bütçe.** Yükseklik iki kırılımla sıkışır (`index.html` içinde ölçüm notlarıyla):
-`≤820px` başlık/boşluk/çubuk/gösterge kutuları ve tuval (58vh → 50vh) kısılır,
+`≤820px` başlık/boşluk/çubuk/gösterge kutuları, rail (tanıtım paragrafı gizlenir,
+maddeler sıkışır) ve tuval (`--cvh`: 58vh → 48vh) kısılır,
 kontrol çubuğundaki tek satırlık `.hint` gizlenir; `≤660px` (tam ekran değilse
 pencere ~600 px kalıyor) başlık paragrafı da gizlenir — aynı metnin daha iyisi ders
 notu kutusunda ve düğmesi tam altında. Bu yüzden `.head` paragrafları **kısa**
@@ -247,9 +281,10 @@ tutulur; uzun anlatım `CONTENT[id].lesson`'a yazılır.
 
 Ayrıca: açık ve koyu temada okunabilirlik, konsolda hata olmaması.
 
-1280×720'de tuval **930 px** kalır (1280 − 280 rail − 68 kenar boşluğu). Çok
-panelli modüllerde yerleşim eşiği bunun altında olmalı; aksi halde panel derste
-hiç görünmez (Modül 07'nin ROC eğrisi bir süre böyle kayıptı).
+1280×720'de tuval **930 px** kalır (1280 − 280 rail − 68 kenar boşluğu; sunum
+modunda rail gidince 1210). Çok panelli modüllerde yerleşim eşiği bunun altında
+olmalı; aksi halde panel derste hiç görünmez (Modül 07'nin ROC eğrisi bir süre
+böyle kayıptı).
 
 Eşiği 930'un hemen altına koymak da yetmez: tek kademe tarayıcı zoom'u (%110 →
 ~815 px, Chrome bunu alan adı başına hatırlıyor) paneli yine götürür. Modül 10'un
