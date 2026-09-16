@@ -26,9 +26,9 @@ const head=(t)=>console.log(`\n=== ${t} ===`);
    düğmeyi her turda geri çeviriyor ve iki koşul birbirine karışıyor */
 const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true')!==on) e.click();};
 
-/* ── 16 · Çok katmanlı ağ: h=1 XOR'u çözemez, h≥2 çözer ── */
+/* ── 20 · Çok katmanlı ağ: h=1 XOR'u çözemez, h≥2 çözer ── */
 {
-  console.log("=== Modül 16 · Gizli katman (XOR) ===");
+  console.log("=== Modül 20 · Gizli katman (XOR) ===");
   const r=[];
   for(const h of [1,4]){
     const {el,tick}=boot(F);
@@ -46,9 +46,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(r[1].acc>r[0].acc+15, "gizli nöron eklemek belirgin fark yaratıyor");
 }
 
-/* ── 06 · Rastgele orman: çok ağaç tek ağacı geçer ── */
+/* ── 07 · Rastgele orman: çok ağaç tek ağacı geçer ── */
 {
-  console.log("\n=== Modül 06 · Kırk ağaç (torbalama / OOB) ===");
+  console.log("\n=== Modül 07 · Kırk ağaç (torbalama / OOB) ===");
   const {el,tick}=boot(F);
   /* TEK veri kümesiyle ölçmek kırılgandı: özgün sürümde de 40 kümenin ~1'inde
      fark 1.5 puanın altına düşüyordu (ort 5.0, min 0.8). Ortalama alınıyor. */
@@ -75,9 +75,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(out[1].oob-out[1].one>1.5, "fark anlamlı (>1.5 puan)", `+${(out[1].oob-out[1].one).toFixed(1)} puan`);
 }
 
-/* ── 08 · Düzenlileştirme: L1 katsayıları sıfırlar, L2 sıfırlamaz ── */
+/* ── 11 · Düzenlileştirme: L1 katsayıları sıfırlar, L2 sıfırlamaz ── */
 {
-  console.log("\n=== Modül 08 · Katsayıya ceza (L1 / L2) ===");
+  console.log("\n=== Modül 11 · Katsayıya ceza (L1 / L2) ===");
   const {el,tick}=boot(F);
   const ds=el('reg-d'); ds.value='12'; ds.dispatchEvent({type:'input'});
   const read=()=>({nz:num(el('reg-nz').textContent), tr:num(el('reg-tr').textContent),
@@ -94,9 +94,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(l2hi.tr>=l2lo.tr-1e-9, "λ büyüyünce eğitim hatası artıyor (ceza çalışıyor)", `${l2lo.tr} → ${l2hi.tr}`);
 }
 
-/* ── 11 · Çapraz doğrulama: katlar ve ortalama tutarlı ── */
+/* ── 14 · Çapraz doğrulama: katlar ve ortalama tutarlı ── */
 {
-  console.log("\n=== Modül 11 · Şansı ortalamak (k-katlı) ===");
+  console.log("\n=== Modül 14 · Şansı ortalamak (k-katlı) ===");
   const {el,tick}=boot(F);
   const run=(k)=>{
     const s=el('cv-k'); s.value=String(k); s.dispatchEvent({type:'input'});
@@ -114,9 +114,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
       `k=2 → ${a.mean}, k=10 → ${b.mean}`);
 }
 
-/* ── 01 · Doğrusal regresyon: kapalı formül gerçekten en iyisini buluyor ── */
+/* ── 03 · Doğrusal regresyon: kapalı formül gerçekten en iyisini buluyor ── */
 {
-  head("Modül 01 · En iyi doğru (least squares)");
+  head("Modül 03 · En iyi doğru (least squares)");
   const {el}=boot(F); const r=[];
   for(let t=0;t<20;t++){
     el('lin-new').click();
@@ -147,9 +147,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
       `%${a.boy} → %${b.boy}`);
 }
 
-/* ── 03 · kNN: ".ask: k=1'de eğitim hatası tam olarak sıfır" ── */
+/* ── 05 · kNN: ".ask: k=1'de eğitim hatası tam olarak sıfır" ── */
 {
-  head("Modül 03 · Komşuna bak (k-NN)");
+  head("Modül 05 · Komşuna bak (k-NN)");
   const {el}=boot(F); const e1=[], e21=[];
   for(let t=0;t<20;t++){ el('knn-demo').click();
     S(el,'knn-k',1);  e1.push(V(el,'knn-e'));
@@ -188,9 +188,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(mean(HA)<mean(EA)-10, "karışık veride doğruluk da düşüyor", `%${mean(EA).toFixed(1)} → %${mean(HA).toFixed(1)}`);
 }
 
-/* ── 05 · Karar ağacı: düğme kaydırıcının ulaşabildiği en iyi bölmeyi buluyor ── */
+/* ── 06 · Karar ağacı: düğme kaydırıcının ulaşabildiği en iyi bölmeyi buluyor ── */
 {
-  head("Modül 05 · Bölerek karar ver (decision tree)");
+  head("Modül 06 · Bölerek karar ver (decision tree)");
   const {el}=boot(F);
   let lost=0; const leaves=[], accs=[], d1=[];
   for(let t=0;t<8;t++){
@@ -211,9 +211,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(mean(accs)>mean(d1), "derinlik artınca eğitim doğruluğu yükseliyor", `%${mean(d1).toFixed(1)} → %${mean(accs).toFixed(1)}`);
 }
 
-/* ── 07 · Aşırı öğrenme: Durum göstergesi en iyi derecede uyarı VERMEMELİ ── */
+/* ── 09 · Aşırı öğrenme: Durum göstergesi en iyi derecede uyarı VERMEMELİ ── */
 {
-  head("Modül 07 · Ezber mi, öğrenme mi (overfitting)");
+  head("Modül 09 · Ezber mi, öğrenme mi (overfitting)");
   const {el}=boot(F);
   let bad4=0, ok14=0; const t14=[], t40=[];
   for(let t=0;t<20;t++){
@@ -243,9 +243,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
       `max ${Math.max(...trQ).toExponential(2)}`);
 }
 
-/* ── 09 · Gradyan inişi: kaydırıcının ULAŞABİLDİĞİ bir değerde ıraksamalı ── */
+/* ── 12 · Gradyan inişi: kaydırıcının ULAŞABİLDİĞİ bir değerde ıraksamalı ── */
 {
-  head("Modül 09 · Yamaçtan aşağı (gradient descent)");
+  head("Modül 12 · Yamaçtan aşağı (gradient descent)");
   const run=(lr,x0)=>{const {el,tick}=boot(F);S(el,'gd-lr',lr);S(el,'gd-x0',x0);
     el('gd-run').click();tick(400);
     return {st:T(el,'gd-s'), i:V(el,'gd-i'), x:V(el,'gd-x'), L:V(el,'gd-l')};};
@@ -260,9 +260,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(/[Yy]erel/.test(okr.st), "adım 4: soldan başlayınca yerel minimuma takılıyor", okr.st);
 }
 
-/* ── 10 · Eşik: precision ↑ recall ↓, AUC eşikten bağımsız ── */
+/* ── 13 · Eşik: precision ↑ recall ↓, AUC eşikten bağımsız ── */
 {
-  head("Modül 10 · Eşiği nereye koyalım (precision / recall)");
+  head("Modül 13 · Eşiği nereye koyalım (precision / recall)");
   const {el}=boot(F);
   const rows=[20,50,80].map(t=>{S(el,'cm-t',t);
     return {t, pre:V(el,'cm-pre'), rec:V(el,'cm-rec'), auc:V(el,'cm-auc'), acc:V(el,'cm-acc')};});
@@ -278,9 +278,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
       `doğruluk %${trap.acc}, recall %${trap.rec}`);
 }
 
-/* ── 12 · k-ortalamalar: WCSS atama öncesi yalan söylememeli, sonra hep azalmalı ── */
+/* ── 15 · k-ortalamalar: WCSS atama öncesi yalan söylememeli, sonra hep azalmalı ── */
 {
-  head("Modül 12 · Etiketsiz gruplama (k-means)");
+  head("Modül 15 · Etiketsiz gruplama (k-means)");
   const {el}=boot(F);
   chk(T(el,'km-j')==="—", "atama yapılmadan WCSS '—' (0.0000 'mümkün en iyi' yalanıydı)", T(el,'km-j'));
   const seq=[];
@@ -293,9 +293,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(T(el,'km-j')==="—", "merkezler yeniden atılınca gösterge tekrar '—'", T(el,'km-j'));
 }
 
-/* ── 13 · Kaç küme: ayrık veride her iki ölçüt de gerçek k'yı bulmalı ── */
+/* ── 16 · Kaç küme: ayrık veride her iki ölçüt de gerçek k'yı bulmalı ── */
 {
-  head("Modül 13 · Kaç küme var? (elbow / silhouette)");
+  head("Modül 16 · Kaç küme var? (elbow / silhouette)");
   const {el}=boot(F); const r=[];
   S(el,'kch-true',4); S(el,'kch-sep',100);
   for(let t=0;t<12;t++){ el('kch-new').click();
@@ -320,9 +320,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   console.log(`       ayrıklık 100'de elbow isabeti: ${perK.join(' · ')}`);
 }
 
-/* ── 14 · PCA: uzama kaydırıcısı yuvarlak ↔ uzun karşıtlığını KURMALI ── */
+/* ── 18 · PCA: uzama kaydırıcısı yuvarlak ↔ uzun karşıtlığını KURMALI ── */
 {
-  head("Modül 14 · İki sayı yerine bir (PCA)");
+  head("Modül 18 · İki sayı yerine bir (PCA)");
   const {el}=boot(F);
   /* pca-cor her input'ta yeniden örnekliyor: aynı değeri 12 kez sürüp ortalıyoruz */
   const at=(c)=>{const v=[];for(let i=0;i<12;i++){S(el,'pca-cor',c);v.push(V(el,'pca-v1'));}return mean(v);};
@@ -334,9 +334,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
       `%${p0.toFixed(1)} → %${p50.toFixed(1)} → %${p90.toFixed(1)}`);
 }
 
-/* ── 15 · Perceptron: ayrılabilirde durur, XOR'da durmaz ── */
+/* ── 19 · Perceptron: ayrılabilirde durur, XOR'da durmaz ── */
 {
-  head("Modül 15 · Tek nöron (perceptron)");
+  head("Modül 19 · Tek nöron (perceptron)");
   const go=(btn)=>{const {el,tick}=boot(F); el(btn).click(); el('per-run').click(); tick(900);
     return {m:V(el,'per-m'), u:V(el,'per-u'), raw:T(el,'per-m')};};
   const sep=go('per-sep'), xor=go('per-xor');
@@ -347,13 +347,13 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(xor.u>sep.u*10, "XOR'da güncellemeler bitmiyor", `${sep.u} vs ${xor.u}`);
 }
 
-/* ── 17 · Konvolüsyon: dört hiperparametre ve BOYUT FORMÜLÜ ──
+/* ── 21 · Konvolüsyon: dört hiperparametre ve BOYUT FORMÜLÜ ──
    Modülün ekranda yazdığı formül: çıktı = ⌊(girdi + 2·dolgu − çekirdek)/adım⌋ + 1.
    .ask kutusu bunun üç somut sonucunu vaat ediyor (5×5 → 124, dolgu 2 → 128,
    stride 2 → yarısı) — üçü de burada sınanıyor, ayrıca 54 kombinasyonun
    tamamında gösterge formülle karşılaştırılıyor. */
 {
-  head("Modül 17 · Filtre gezdirmek (convolution)");
+  head("Modül 21 · Filtre gezdirmek (convolution)");
   const {el,M}=boot(F);
   const cn=M.find(m=>m.id==='m-cn');
   const setK=(k)=>el(k===3?'cn-k3':'cn-k5').click();
@@ -425,9 +425,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
    PK(M,id,j) veri kümesini senaryo düğmesine basarak seçer — uygulamadaki yol. */
 const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Error(id+": __pick yok");m.__pick(j);};
 
-/* ── 03 · k-NN · "Baz istasyonu": kapsama alanı bir HALKA ── */
+/* ── 05 · k-NN · "Baz istasyonu": kapsama alanı bir HALKA ── */
 {
-  head("Modül 03 · veri kümesi « Baz istasyonu » (halka)");
+  head("Modül 05 · veri kümesi « Baz istasyonu » (halka)");
   const {el,M}=boot(F); const e1=[],e5=[],e21=[];
   for(let t=0;t<12;t++){ PK(M,'m-knn',1);
     S(el,'knn-k',1);  e1.push(V(el,'knn-e'));
@@ -439,9 +439,9 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(e1.every(x=>x===0), "k=1 bu veride de tam olarak %0 (ezber her veri kümesinde ezber)", `max %${Math.max(...e1)}`);
 }
 
-/* ── 03 · k-NN · "Kredi riski": sınıflar iç içe ── */
+/* ── 05 · k-NN · "Kredi riski": sınıflar iç içe ── */
 {
-  head("Modül 03 · veri kümesi « Kredi riski » (gürültülü sınır)");
+  head("Modül 05 · veri kümesi « Kredi riski » (gürültülü sınır)");
   const {el,M}=boot(F); const e1=[],e21=[];
   for(let t=0;t<12;t++){ PK(M,'m-knn',2);
     S(el,'knn-k',1);  e1.push(V(el,'knn-e'));
@@ -451,7 +451,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(mean(e21)>10, "aynı veride k=21 dürüst bir hata gösteriyor", `%${mean(e21).toFixed(1)}`);
 }
 
-/* ── 07 · Aşırı öğrenme · "doğru derece veriye bağlı" ──
+/* ── 09 · Aşırı öğrenme · "doğru derece veriye bağlı" ──
    İki ölçüt: (a) 3. derecede "Yetersiz" rozeti kaç turda çıkıyor, (b) test RMSE'yi
    en küçük yapan derece kaç turda 5 ve üstünde. Durum rozeti tek örneklemde
    zıplıyor (14 nokta + 0.12 gürültü), o yüzden 16 tur sayılıyor. Ölçüm:
@@ -460,7 +460,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
    bu oranları değiştirmiyor. Eşikler dağılımların ~3 σ ötesine konuldu (30 turda 18);
    daha dar eşiklerle (24'te 18) on koşudan ikisi kırılganlıktan düşüyordu. */
 {
-  head("Modül 07 · üç eğri, üç ayrı « doğru derece »");
+  head("Modül 09 · üç eğri, üç ayrı « doğru derece »");
   const {el,M}=boot(F);
   const scan=(j,N)=>{
     let yet=0, hi=0; const best=[];
@@ -485,9 +485,9 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(c.best>b.best+1, "üç eğrinin « doğru derecesi » aynı değil", `doygunluk ${b.best.toFixed(1)} → titreşim ${c.best.toFixed(1)}`);
 }
 
-/* ── 09 · Gradyan inişi · üç hata yüzeyi ── */
+/* ── 12 · Gradyan inişi · üç hata yüzeyi ── */
 {
-  head("Modül 09 · üç hata yüzeyi (convex / dik kanyon)");
+  head("Modül 12 · üç hata yüzeyi (convex / dik kanyon)");
   const run=(j,lr,x0)=>{const {el,M,tick}=boot(F); PK(M,'m-gd',j);
     S(el,'gd-lr',lr); if(x0!==undefined) S(el,'gd-x0',x0);
     el('gd-run').click(); tick(500);
@@ -503,9 +503,9 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(/raksad/.test(sBad.st), "aynı yüzeyde 0.20 ıraksıyor — learning rate yüzeye bağlı (note: '0.20'yi deneyin — patlar')", sBad.st);
 }
 
-/* ── 05 · Karar ağacı · "Sahte işlem": pozitif sınıf bir kutunun içinde ── */
+/* ── 06 · Karar ağacı · "Sahte işlem": pozitif sınıf bir kutunun içinde ── */
 {
-  head("Modül 05 · veri kümesi « Sahte işlem » (tek eşik yetmiyor)");
+  head("Modül 06 · veri kümesi « Sahte işlem » (tek eşik yetmiyor)");
   const {el,M}=boot(F); const d1=[],d3=[];
   for(let t=0;t<10;t++){ PK(M,'m-dt',1); el('dt-best').click();
     S(el,'dt-d',1); d1.push(V(el,'dt-acc'));
@@ -516,9 +516,9 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(mean(d1)<92, "derinlik 1 kutuyu ayıramıyor", `%${mean(d1).toFixed(1)}`);
 }
 
-/* ── 06 · Orman · "Pivot sulama": sınır kapalı bir eğri ── */
+/* ── 07 · Orman · "Pivot sulama": sınır kapalı bir eğri ── */
 {
-  head("Modül 06 · veri kümesi « Pivot sulama » (halka sınır)");
+  head("Modül 07 · veri kümesi « Pivot sulama » (halka sınır)");
   const {el,M,tick}=boot(F); const oob=[],one=[];
   for(let t=0;t<8;t++){ PK(M,'m-ens',1); S(el,'ens-d',4); S(el,'ens-k',40); tick(50);
     oob.push(V(el,'ens-oob')); one.push(V(el,'ens-one')); }
@@ -527,9 +527,9 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
       `+${(mean(oob)-mean(one)).toFixed(1)} puan`);
 }
 
-/* ── 10 · Eşik · üç senaryo, üç ayrı maliyet ── */
+/* ── 13 · Eşik · üç senaryo, üç ayrı maliyet ── */
 {
-  head("Modül 10 · üç senaryo (İHA / kanser / spam)");
+  head("Modül 13 · üç senaryo (İHA / kanser / spam)");
   const {el,M}=boot(F);
   /* Senaryo seçimi veriyi yeniden üretiyor: tek örneklem İHA'da precision–recall
      farkını bazen 15'in üstüne atıyordu (ölçüldü: %77.5 / %93.2). 10 turun
@@ -560,6 +560,120 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   names.forEach((n,j)=>console.log(`       set${j}: ${n}`));
   chk(new Set(names).size===3, "üç veri kümesi üç ayrı gösterge adı yazıyor", names.join(" · "));
   chk(/y(ı|i)ld(ı|i)z/i.test(names[1]), "otel verisinde gösterge 'yıldız puanı' diyor", names[1]);
+}
+
+/* ══════════ Yeni modüller ══════════ */
+
+/* ── 01 · Ortalama / medyan: uç değer birini sürükler, diğerini sürüklemez ── */
+{
+  head("Modül 01 · Ortalama mı, medyan mı (dayanıklılık)");
+  const {el,M}=boot(F);
+  const dm=[], dmed=[], dsd=[], diqr=[];
+  for(let t=0;t<12;t++){
+    PK(M,'m-stat',1);                       // sınav notu · simetriğe yakın
+    S(el,'st-n',24);
+    S(el,'st-out',55);
+    const m0=V(el,'st-mean'), md0=V(el,'st-med'), sd0=V(el,'st-sd'), iq0=V(el,'st-iqr');
+    S(el,'st-out',99);
+    dm.push(Math.abs(V(el,'st-mean')-m0));
+    dmed.push(Math.abs(V(el,'st-med')-md0));
+    dsd.push(Math.abs(V(el,'st-sd')-sd0));
+    diqr.push(Math.abs(V(el,'st-iqr')-iq0));
+  }
+  console.log(`       uç değer sağa: ortalama ${mean(dm).toFixed(2)} puan oynadı, medyan ${mean(dmed).toFixed(2)}`);
+  console.log(`       aynı hamlede: std sapma ${mean(dsd).toFixed(2)} oynadı, IQR ${mean(diqr).toFixed(2)}`);
+  chk(mean(dm)>3*Math.max(mean(dmed),0.05), "ortalama uç değerin peşinden gidiyor, medyan yerinde duruyor (adım 2)",
+      `ortalama ${mean(dm).toFixed(2)} · medyan ${mean(dmed).toFixed(2)}`);
+  chk(mean(dsd)>mean(diqr), "standart sapma zıplıyor, IQR dayanıklı kalıyor (adım 5)",
+      `std ${mean(dsd).toFixed(2)} · IQR ${mean(diqr).toFixed(2)}`);
+  const gap=[];
+  for(let t=0;t<12;t++){ PK(M,'m-stat',0); S(el,'st-n',30); S(el,'st-out',60);
+    gap.push(V(el,'st-mean')-V(el,'st-med')); }
+  console.log(`       maaş verisi: ortalama − medyan = ${mean(gap).toFixed(1)} bin ₺`);
+  chk(mean(gap)>2, "çarpık veride ortalama medyanın üstünde kalıyor (adım 4 · set notu)",
+      `+${mean(gap).toFixed(1)} bin ₺`);
+}
+
+/* ── 08 · SVM: C koridoru daraltır, RBF halkayı çözer ── */
+{
+  head("Modül 08 · En geniş koridor (C ve kernel)");
+  const {el,M}=boot(F);
+  const wide=[], mid=[], narrow=[], svN=[];
+  for(let t=0;t<10;t++){
+    PK(M,'m-svm',0); P(el,'svm-lin',true);
+    S(el,'svm-c',0);   wide.push(V(el,'svm-m'));
+    S(el,'svm-c',50);  mid.push(V(el,'svm-m'));
+    S(el,'svm-c',100); narrow.push(V(el,'svm-m'));
+    svN.push(V(el,'svm-sv'));
+  }
+  console.log(`       marj: C=0.01 → ${mean(wide).toFixed(3)} · C=1 → ${mean(mid).toFixed(3)} · C=100 → ${mean(narrow).toFixed(3)}`);
+  chk(mean(wide)>mean(narrow), "C büyüdükçe marj koridoru daralıyor (adım 2–3)",
+      `${mean(wide).toFixed(3)} → ${mean(narrow).toFixed(3)}`);
+  chk(mean(svN)<36, "modeli 36 noktanın yalnız bir kısmı belirliyor (.ask: 'kaçını gerçekten kullanıyor')",
+      `ortalama ${mean(svN).toFixed(1)} destek vektörü / 36 nokta`);
+  const linErr=[], rbfErr=[];
+  for(let t=0;t<10;t++){
+    PK(M,'m-svm',2);                                   // halka
+    P(el,'svm-lin',true); S(el,'svm-c',60); linErr.push(V(el,'svm-err'));
+    P(el,'svm-rbf',true); S(el,'svm-g',45); rbfErr.push(V(el,'svm-err'));
+  }
+  console.log(`       halka verisi · yanlış sınıflanan: doğrusal ${mean(linErr).toFixed(1)} · RBF ${mean(rbfErr).toFixed(1)}`);
+  chk(mean(linErr)>3*Math.max(mean(rbfErr),0.2), "doğrusal çekirdek halkada çaresiz, RBF çözüyor (adım 5)",
+      `doğrusal ${mean(linErr).toFixed(1)} → RBF ${mean(rbfErr).toFixed(1)}`);
+}
+
+/* ── 10 · Yanlılık–varyans: karmaşıklık ikisini ters yönde hareket ettiriyor ── */
+{
+  head("Modül 10 · Yanlılık mı, varyans mı (ayrışma)");
+  const {el,M}=boot(F);
+  const b1=[],v1=[],b9=[],v9=[],v6=[],t1=[],t4=[],t9=[];
+  for(let t=0;t<10;t++){
+    PK(M,'m-bv',0); S(el,'bv-m',20); S(el,'bv-n',24);
+    S(el,'bv-d',1); b1.push(V(el,'bv-b')); v1.push(V(el,'bv-v')); t1.push(V(el,'bv-t'));
+    S(el,'bv-d',3); t4.push(V(el,'bv-t'));
+    S(el,'bv-d',4); b9.push(V(el,'bv-b')); v9.push(V(el,'bv-v'));
+    S(el,'bv-d',6); v6.push(V(el,'bv-v')); t9.push(V(el,'bv-t'));
+  }
+  console.log(`       derece 1: yanlılık² ${mean(b1).toFixed(4)} · varyans ${mean(v1).toFixed(4)}`);
+  console.log(`       derece 4: yanlılık² ${mean(b9).toFixed(4)} · varyans ${mean(v9).toFixed(4)} · derece 6 varyans ${mean(v6).toFixed(4)}`);
+  chk(mean(b9)<mean(b1), "karmaşıklık artınca yanlılık düşüyor (adım 2)",
+      `${mean(b1).toFixed(4)} → ${mean(b9).toFixed(4)}`);
+  chk(mean(v9)>mean(v1), "aynı hamlede varyans yükseliyor (adım 2)",
+      `${mean(v1).toFixed(4)} → ${mean(v9).toFixed(4)}`);
+  chk(mean(v6)>mean(v9), "derece 6'da varyans daha da patlıyor (adım 3)",
+      `${mean(v9).toFixed(4)} → ${mean(v6).toFixed(4)}`);
+  chk(mean(t4)<mean(t1)&&mean(t4)<mean(t9), "toplam hata uçlarda değil ortada en küçük (adım 3)",
+      `d1 ${mean(t1).toFixed(3)} · d3 ${mean(t4).toFixed(3)} · d6 ${mean(t9).toFixed(3)}`);
+  const vSmall=[],vBig=[],bSmall=[],bBig=[];
+  for(let t=0;t<10;t++){
+    PK(M,'m-bv',0); S(el,'bv-d',6);
+    S(el,'bv-n',12); vSmall.push(V(el,'bv-v')); bSmall.push(V(el,'bv-b'));
+    S(el,'bv-n',60); vBig.push(V(el,'bv-v'));   bBig.push(V(el,'bv-b'));
+  }
+  console.log(`       n=12 → varyans ${mean(vSmall).toFixed(4)} · n=60 → varyans ${mean(vBig).toFixed(4)}`);
+  chk(mean(vBig)<mean(vSmall), "örnek sayısı artınca varyans düşüyor (adım 4)",
+      `${mean(vSmall).toFixed(4)} → ${mean(vBig).toFixed(4)}`);
+}
+
+/* ── 17 · DBSCAN: eps iki uçta anlamsızlaşır, ortada hilalleri bulur ── */
+{
+  head("Modül 17 · Küme yuvarlak olmak zorunda mı (DBSCAN)");
+  const {el,M}=boot(F);
+  const okN=[],tinyN=[],hugeN=[],ringN=[],tinyNoise=[];
+  for(let t=0;t<8;t++){
+    PK(M,'m-dbs',0); P(el,'db-dbscan',true); S(el,'db-mp',4); S(el,'db-k',2);
+    S(el,'db-eps',8);  okN.push(V(el,'db-rn'));
+    S(el,'db-eps',2);  tinyN.push(V(el,'db-rn')); tinyNoise.push(V(el,'db-noise'));
+    S(el,'db-eps',30); hugeN.push(V(el,'db-rn'));
+    PK(M,'m-dbs',1); S(el,'db-eps',10); ringN.push(V(el,'db-rn'));
+  }
+  console.log(`       hilal · eps=0.08 → ${mean(okN).toFixed(2)} küme · eps=0.02 → ${mean(tinyN).toFixed(2)} · eps=0.30 → ${mean(hugeN).toFixed(2)}`);
+  console.log(`       halka · eps=0.10 → ${mean(ringN).toFixed(2)} küme`);
+  chk(Math.abs(mean(okN)-2)<0.3, "hilal verisinde DBSCAN iki kümeyi buluyor (adım 2)", mean(okN).toFixed(2));
+  chk(mean(tinyNoise)>60, "eps çok küçükken noktaların çoğu gürültüye düşüyor (adım 3)",
+      `110 noktanın ${mean(tinyNoise).toFixed(0)} tanesi gürültü`);
+  chk(mean(hugeN)<=1.2, "eps çok büyükken her şey tek kümeye düşüyor (adım 4)", mean(hugeN).toFixed(2));
+  chk(Math.abs(mean(ringN)-2)<0.4, "iç içe halkada da iki kümeyi ayırıyor (adım 6)", mean(ringN).toFixed(2));
 }
 
 console.log(`\n${fail?fail+" DENETİM DÜŞTÜ":"tüm davranış denetimleri geçti"}`);

@@ -1,47 +1,59 @@
 # Makine Öğrenmesi Oyun Alanı
 
-Giriş seviyesi lisans Makine Öğrenmesi dersinde **canlı gösterim** için on yedi
+Giriş seviyesi lisans Makine Öğrenmesi dersinde **canlı gösterim** için yirmi bir
 etkileşimli deney. Tek HTML dosyası, bağımlılık yok.
 
 **Yayında:** https://ml.perinet.org · https://ml.urgup.keenetic.link
 
 ## Ders sırası
 
-| # | Modül | Konu |
-|---|-------|------|
-| | **Temeller** | |
-| 01 | En iyi doğru | linear regression, artıklar, least squares |
-| 02 | Metre ile kilometre | öznitelik ölçekleme, min–max ve z-score |
-| | **Denetimli öğrenme** | |
-| 03 | Komşuna bak | k-NN, decision boundary, k'nın etkisi |
-| 04 | Yüzde kaç? | logistic regression, sigmoid, log loss |
-| 05 | Bölerek karar ver | decision tree, Gini kazancı, derinlik ve ezber |
-| 06 | Kırk ağaç | bagging, random forest, OOB doğruluğu |
-| | **Genelleme** | |
-| 07 | Ezber mi, öğrenme mi | overfitting / underfitting, eğitim–test hata eğrisi |
-| 08 | Katsayıya ceza | regularization, L1 (lasso) sparsity, L2 (ridge) shrinkage |
-| | **Optimizasyon** | |
-| 09 | Yamaçtan aşağı | gradient descent, learning rate, yerel minimum |
-| | **Değerlendirme** | |
-| 10 | Eşiği nereye koyalım | confusion matrix, precision–recall, ROC/AUC |
-| 11 | Şansı ortalamak | k-fold cross-validation, katlar arası varyans |
-| | **Denetimsiz öğrenme** | |
-| 12 | Etiketsiz gruplama | k-means, başlangıca duyarlılık |
-| 13 | Kaç küme var? | elbow yöntemi, silhouette skoru |
-| 14 | İki sayı yerine bir | PCA, boyut indirgeme |
-| | **Derin öğrenme** | |
-| 15 | Tek nöron | perceptron, linear separability, XOR sorunu |
-| 16 | Gizli katman | MLP, backpropagation, XOR'un çözümü |
-| 17 | Filtre gezdirmek | convolution, kernel size, padding, stride, ReLU, pooling |
+Modül sırası dersin haftalık programını izler: soldaki numara menüde görünen numaradır,
+sağdaki sütun o modülün hangi haftaya denk geldiğini söyler.
+
+| # | Modül | Konu | Hafta |
+|---|-------|------|-------|
+| | **Temeller** | | |
+| 01 | Ortalama mı, medyan mı | mean/median, IQR, boxplot, outlier | 2 |
+| 02 | Metre ile kilometre | öznitelik ölçekleme, min–max ve z-score | 2 |
+| 03 | En iyi doğru | linear regression, artıklar, least squares | 5 |
+| | **Denetimli öğrenme** | | |
+| 04 | Yüzde kaç? | logistic regression, sigmoid, log loss | 6 |
+| 05 | Komşuna bak | k-NN, decision boundary, k'nın etkisi | 9 |
+| 06 | Bölerek karar ver | decision tree, Gini kazancı, derinlik ve ezber | 10 |
+| 07 | Kırk ağaç | bagging, random forest, OOB doğruluğu | 11 |
+| 08 | En geniş koridor | SVM, margin, support vector, kernel, C ve gamma | 12 |
+| | **Genelleme** | | |
+| 09 | Ezber mi, öğrenme mi | overfitting / underfitting, eğitim–test hata eğrisi | 3 |
+| 10 | Yanlılık mı, varyans mı | bias–variance ayrışması, indirgenemez hata | 4 |
+| 11 | Katsayıya ceza | regularization, L1 (lasso) sparsity, L2 (ridge) shrinkage | 8 |
+| | **Optimizasyon** | | |
+| 12 | Yamaçtan aşağı | gradient descent, learning rate, yerel minimum | 5 |
+| | **Değerlendirme** | | |
+| 13 | Eşiği nereye koyalım | confusion matrix, precision–recall, ROC/AUC | 8 |
+| 14 | Şansı ortalamak | k-fold cross-validation, katlar arası varyans | 4 |
+| | **Denetimsiz öğrenme** | | |
+| 15 | Etiketsiz gruplama | k-means, başlangıca duyarlılık | 14 |
+| 16 | Kaç küme var? | elbow yöntemi, silhouette skoru | 14 |
+| 17 | Küme yuvarlak olmak zorunda mı | DBSCAN, eps/minPts, hiyerarşik (Ward) | 14 |
+| 18 | İki sayı yerine bir | PCA, boyut indirgeme | 13 |
+| | **Derin öğrenme** | | |
+| 19 | Tek nöron | perceptron, linear separability, XOR sorunu | — |
+| 20 | Gizli katman | MLP, backpropagation, XOR'un çözümü | — |
+| 21 | Filtre gezdirmek | convolution, kernel size, padding, stride, ReLU, pooling | — |
+
+Son üç modül haftalık programın dışında; dönem sonunda derin öğrenmeye giriş olarak
+kullanılabilir. 1. ve 7. haftaların (giriş kavramları ve uçtan uca uygulama)
+etkileşimli karşılığı yok: ikisi de ekranda gösterilecek bir mekanizma değil,
+sınıfta yürütülecek bir tartışma ve bir kod oturumu.
 
 **Terimler.** Cümleler Türkçe, adlandırılmış yöntem ve metrik adları İngilizce
 (`bagging`, `overfitting`, `precision`, `epoch`, `kernel` …); her terim modül başına
 bir kez `İngilizce (Türkçe)` biçiminde açılır. Arama kutusu iki dili de tanır —
-"bagging" da "torbalama" da Modül 06'yı getirir. Ayrıntı: `CLAUDE.md`.
+"bagging" da "torbalama" da Modül 07'yi getirir. Ayrıntı: `CLAUDE.md`.
 
-Modüller birbirine bağlanır: 15 perceptron'un XOR'da çaresiz kaldığını gösterir,
-16 onu çözer. 07 aşırı öğrenmeyi gösterir, 08 çözer. 05 tek ağacın ezberlediğini
-gösterir, 06 ormanla düzeltir. 12 k'yı sorar, 13 doğru k'yı nasıl bulacağını anlatır.
+Modüller birbirine bağlanır: 19 perceptron'un XOR'da çaresiz kaldığını gösterir,
+20 onu çözer. 09 aşırı öğrenmeyi gösterir, 11 çözer. 06 tek ağacın ezberlediğini
+gösterir, 07 ormanla düzeltir. 15 k'yı sorar, 16 doğru k'yı nasıl bulacağını anlatır; 17 ise k'nın hiç sorulmadığı yolu gösterir.
 
 ## Derste kullanım
 
@@ -72,21 +84,25 @@ onunla birlikte değişir. Soyut "x₁ / x₂" yerine gerçek bir ölçüm:
 
 | modül | veri setleri |
 |---|---|
-| 03 k-NN | uçak / kuş (kanat açıklığı–hız) · baz istasyonu kapsaması (halka sınır) · kredi riski (iç içe sınıflar) |
+| 01 ortalama/medyan | maaş (sağa çarpık) · sınav notu (simetrik) · ev fiyatı |
+| 05 k-NN | uçak / kuş (kanat açıklığı–hız) · baz istasyonu kapsaması (halka sınır) · kredi riski (iç içe sınıflar) |
 | 05 karar ağacı | bağ hastalığı · sahte işlem (tek eşik yetmez) · kalite kontrol (şerit) |
 | 07 · 08 · 11 | gün içi sıcaklık · reklam → satış (doygunluk) · titreşim ölçümü — *aynı veri üç modülde* |
 | 09 gradient descent | iki vadi · tek vadi (convex) · dik kanyon (0.06 iyi, 0.20 patlar) |
 | 10 eşik | İHA tespiti · kanser taraması (recall öne geçer) · spam filtresi (precision öne geçer) |
-| 12 k-means | müşteri segmenti · artçı sarsıntılar (uzun kümeler) · uydu pikselleri |
-| 14 PCA | boy–kilo · matematik–fizik notu · uydu bantları (bitki örtüsü ekseni) |
-| 15 · 16 | kalite kontrol (ayrılabilir) · ilaç etkileşimi (XOR) · baz istasyonu (halka) |
-| 17 convolution | hava fotoğrafı · tarla parselleri · test deseni · **kendi görüntün** (dosya, sürükle-bırak ya da Ctrl+V) |
+| 08 SVM | kalite kontrol (ayrılabilir) · kredi riski (örtüşen) · baz istasyonu (halka → RBF) |
+| 10 yanlılık–varyans | 09 · 11 · 14 ile aynı üç eğri |
+| 15 k-means | müşteri segmenti · artçı sarsıntılar (uzun kümeler) · uydu pikselleri |
+| 17 DBSCAN | iki hilal · iç içe halka · öbek + gürültü |
+| 18 PCA | boy–kilo · matematik–fizik notu · uydu bantları (bitki örtüsü ekseni) |
+| 19 · 20 | kalite kontrol (ayrılabilir) · ilaç etkileşimi (XOR) · baz istasyonu (halka) |
+| 21 convolution | hava fotoğrafı · tarla parselleri · test deseni · **kendi görüntün** (dosya, sürükle-bırak ya da Ctrl+V) |
 
-Kalan modüllerde de en az iki set var (01 ev fiyatı / araç yaşı → negatif eğim,
+Kalan modüllerde de en az iki set var (03 ev fiyatı / araç yaşı → negatif eğim,
 02 boy–maaş / otel puanı–yorum / araç yaşı–kilometre, 04 tümör / sınav / balon turu,
-06 kredi onayı / pivot sulama, 13 üç ayrı "kaç küme var" hikâyesi).
+07 kredi onayı / pivot sulama, 16 üç ayrı "kaç küme var" hikâyesi).
 
-**Modül 17 · convolution.** Dört hiperparametre de kontrolde: girdi boyu (64/128/256),
+**Modül 21 · convolution.** Dört hiperparametre de kontrolde: girdi boyu (64/128/256),
 çekirdek boyu (3×3/5×5), padding (0/1/2), stride (1/2/3) — çıktı boyutu
 `⌊(girdi+2·dolgu−çekirdek)/adım⌋+1` formülüyle göstergede yazıyor. Tuvalde girdi,
 `çekirdek ⊙ pencere = çarpımlar → Σ` tablosu ve öznitelik haritası yan yana; pencere

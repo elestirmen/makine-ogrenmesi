@@ -28,6 +28,10 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   | perceptron · hidden layer · MLP · backpropagation | — · gizli katman · çok katmanlı ağ · geri yayılım |
   | convolution · kernel · feature map · pooling · ReLU | konvolüsyon · çekirdek · öznitelik haritası · havuzlama · — |
   | decision boundary · linearly separable · z-score · min–max | karar sınırı · doğrusal ayrılabilir · z-skoru · min–maks |
+  | SVM · margin · support vector · kernel · hinge loss | destek vektör makinesi · marj · destek vektörü · çekirdek · menteşe kaybı |
+  | DBSCAN · eps · minPts · core point · hierarchical clustering | yoğunluk temelli kümeleme · komşuluk yarıçapı · en az komşu · çekirdek nokta · hiyerarşik kümeleme |
+  | mean · median · IQR · outlier · robust | ortalama · medyan · çeyrekler açıklığı · aykırı değer · dayanıklı |
+  | bias–variance decomposition · irreducible error | yanlılık–varyans ayrışması · indirgenemez hata |
 
   **Türkçe kalan sözcükler** (calque değil, cümlenin dokusu): eşik, öznitelik, katsayı,
   eğim, kesişim, ağırlık, artık, hata, doğruluk, küme, merkez, ağaç, derinlik, yaprak,
@@ -95,7 +99,7 @@ CONTENT["m-knn"] = {
   "siz" ile "sen" karışımı yok; kısa cümle, bir cümlede bir fikir. Kutu `mountTools()`'un eklediği « Ders notu » düğmesi
   ya da klavyede `?` ile açılır; `Esc` kapatır (modal açıkken Esc modülü değil kutuyu
   kapatır), perdeye tıklamak da kapatır.
-- **Modül 17 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
+- **Modül 21 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
   çekirdek boyu (3×3/5×5), padding (0/1/2) ve stride (1/2/3) segment düğmelerinde,
   sonuç `⌊(girdi+2·dolgu−çekirdek)/adım⌋+1` formülüyle göstergede. Konvolüsyon
   etikete göre önbellekli (`CACHE`): imlecin her hareketinde yeniden hesaplanırsa
@@ -131,7 +135,7 @@ CONTENT["m-knn"] = {
   sonraki › kartları, ders sırasına (`SEQ`) göre; uçlar giriş sayfasına bağlanır.
   Gerçek `<a href="#m-…">` — orta tık / yeni sekme çalışır, tık `show()`a gider.
 - **Dar ekran (≤900 px)**: rail statik olarak main'in üstüne geçer ve menü
-  katlanır (`.app.navopen`, `#navtoggle` ☰). Eskiden 17 madde ~2000 px yer
+  katlanır (`.app.navopen`, `#navtoggle` ☰). Eskiden 21 madde ~2400 px yer
   kaplıyordu, öğrenci telefonda modüle ulaşmak için hepsini kaydırıyordu. Menü
   seçimde kapanır; arama kutusuna yazınca açılır. « Sunum » düğmesi bu boyda gizli.
 
@@ -220,17 +224,17 @@ sed -n '/^<script>/,/^<\/script>/p' index.html | sed '1d;$d' > /tmp/check.js && 
 # tutarlılığı, canvas'ta sabit renk, setInterval↔stop eşleşmesi, önizleme kapsaması
 python3 tools/lint.py index.html
 
-# 17 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
+# 21 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
 # istisna, canvas'a giden NaN ve "draw() bu göstergeye hiç dokunmadı" durumu.
 # Ayrıca CONTENT kapsaması: eksik ders notu, tek veri kümesi, kutuda kalan "undefined".
 # ML_W ile DAR yerleşim dalları da sınanır: 930 tek başına yetmez, çünkü panel
 # gizleme eşiklerinin altındaki kod yolu hiç çalıştırılmamış olur.
 for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; done
 
-# 17 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
+# 21 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
-node tools/behaviour.js index.html   # 86 denetim: 17 modül + alternatif veri kümeleri
+node tools/behaviour.js index.html   # 109 denetim: 21 modül + alternatif veri kümeleri
 
 # tuvale yazılan her etiket rengini açık VE koyu temada zemine karşı ölç
 # (label(...) çağrılarını ayıklar; 4.5 altındakileri bildirir)
@@ -289,15 +293,15 @@ Ayrıca: açık ve koyu temada okunabilirlik, konsolda hata olmaması.
 
 1280×720'de tuval **930 px** kalır (1280 − 280 rail − 68 kenar boşluğu; sunum
 modunda rail gidince 1210). Çok panelli modüllerde yerleşim eşiği bunun altında
-olmalı; aksi halde panel derste hiç görünmez (Modül 07'nin ROC eğrisi bir süre
+olmalı; aksi halde panel derste hiç görünmez (Modül 09'un ROC eğrisi bir süre
 böyle kayıptı).
 
 Eşiği 930'un hemen altına koymak da yetmez: tek kademe tarayıcı zoom'u (%110 →
-~815 px, Chrome bunu alan adı başına hatırlıyor) paneli yine götürür. Modül 10'un
+~815 px, Chrome bunu alan adı başına hatırlıyor) paneli yine götürür. Modül 13'ün
 üç panel eşiği bu yüzden 900'den **780**'e indirildi. Kural iki parçalı:
 
 - Yerleşim eşiği ≤ **780**; dar dalda küçülen metin varsa boyutu eşiğe bağla
-  (Modül 10'un matris alt yazısı 930 px'te 10.5, dar hücrede 9.5 — projeksiyon
+  (Modül 13'ün matris alt yazısı 930 px'te 10.5, dar hücrede 9.5 — projeksiyon
   çözünürlüğünde yazı KÜÇÜLMEMELİ, yalnız zoom'lu/dar durumda küçülür).
 - Bir gösterge yalnız geniş dalda yazılıyorsa dar yerleşimde son geniş çizimin
   değerinde **donar**. Hesabı çizimden ayır, göstergeyi daldan çıkar.
