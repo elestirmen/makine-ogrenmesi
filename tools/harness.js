@@ -1,4 +1,4 @@
-/* Minimal DOM/Canvas taklidi — 17 modülü gerçekten çalıştırıp hata avlar. */
+/* Minimal DOM/Canvas taklidi — 21 modülü gerçekten çalıştırıp hata avlar. */
 const fs=require('fs'), vm=require('vm');
 function boot(FILE){
 const src=fs.readFileSync(FILE,'utf8');

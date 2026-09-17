@@ -1324,7 +1324,7 @@ input[type=range]{min-height:28px;margin:0}
       <div class="head">
         <div class="eyebrow"><span>Modül 17 · Denetimsiz öğrenme</span><span class="chip">DBSCAN</span></div>
         <h2>Küme Yuvarlak Olmak Zorunda mı</h2>
-        <p>k-means her kümeyi bir merkezin çevresinde yuvarlak varsayar. Kümeler hilal ya da halka biçimindeyse bu varsayım tutmaz. <b>DBSCAN</b> yoğunluğu takip eder ve şekli olan kümeleri bulur; <b>hierarchical clustering</b> (hiyerarşik kümeleme) ise noktaları en yakından başlayarak birleştirir. Solda k-means, sağda seçtiğiniz yöntem.</p>
+        <p>k-means kümeleri bir merkezin çevresinde yuvarlak varsayar; hilal ya da halkada bu tutmaz. <b>DBSCAN</b> (yoğunluk temelli kümeleme) merkez aramaz, yoğunluğu takip eder; <b>hierarchical clustering</b> (hiyerarşik kümeleme) en yakını birleştirerek ilerler. Solda k-means, sağda seçilen yöntem.</p>
       </div>
       <div class="stage">
         <canvas id="c-dbs" aria-label="Solda k-means, sağda DBSCAN ya da hiyerarşik kümeleme sonucu"></canvas>
@@ -1337,6 +1337,7 @@ input[type=range]{min-height:28px;margin:0}
           <label class="ctl"><span class="lab">eps</span><input type="range" id="db-eps" min="2" max="30" step="1" value="8"><output id="db-epso">0.08</output></label>
           <label class="ctl"><span class="lab">minPts</span><input type="range" id="db-mp" min="2" max="12" step="1" value="4"><output id="db-mpo">4</output></label>
           <button class="btn" id="db-new">Yeni veri</button>
+          <span class="hint">Sol panele tıkla → nokta ekle · sürükle → taşı</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">k-means kümesi</span><span class="v" id="db-kn">—</span></div>
@@ -1745,7 +1746,7 @@ const CONTENT={
     life:["Her makine öğrenmesi projesinin baş belası. 'Sunumda %99, sahada %60' hikâyesinin adı hep overfitting.",
           "Bu yüzden veri her zaman eğitim / doğrulama / test diye üçe bölünür ve test kümesine karar verirken hiç bakılmaz. Test, sınav günü açılan zarftır."],
     trap:"Eğitim hatası bir kalite ölçütü değildir. Daha sinsi bir hata da var: test kümesine bakarak dereceyi seçip sonra aynı test kümesindeki notu rapor etmek. O zaman test artık test değildir, sen ona göre ayar yapmışsın. Derece seçmek için ayrı bir doğrulama kümesi lazım; Modül 14 bunu anlatıyor.",
-    next:"Modül 11 · Katsayıya ceza — dereceyi küçültmeden aşırı öğrenmeyi durdurmanın yolu."
+    next:"Modül 10 · Yanlılık mı, varyans mı — bu U eğrisinin iki ucundaki hatanın adı ve kaynağı orada."
   }},
 
 /* ══ 08 ══ */
@@ -1903,7 +1904,7 @@ const CONTENT={
     life:["Pazarlama raporunda 'neden 4 segment?' sorusunun cevabı bu iki grafiktir; keyfî bir sayı yerine ölçüte dayanır.",
           "Görüntüde kaç renk yeter, biyolojide kaç hücre tipi var, coğrafyada kaç yerleşim öbeği var: hep aynı iki ölçüt."],
     trap:"WCSS k büyüdükçe hep düşer; 'en küçük WCSS'yi seç' dersen k = nokta sayısı çıkar, saçma. Dirsek de her zaman keskin değildir. Kümesiz veride iki ölçüt de kararsızlaşır; asıl hata bu kararsızlığa rağmen bir sayıyı zorla seçip rapora yazmaktır.",
-    next:"Modül 18 · İki sayı yerine bir — kümelemeden önce boyutu düşürmek çoğu zaman işe yarar."
+    next:"Modül 17 · Küme yuvarlak olmak zorunda mı — k'yı hiç sormayan bir kümeleme var."
   }},
 
 /* ══ 14 ══ */
@@ -2056,7 +2057,7 @@ const CONTENT={
            ["outlier","aykırı değer","kalabalıktan belirgin biçimde ayrılan gözlem"]],
     life:["Gelir, ev fiyatı ve bekleme süresi istatistiklerinde kurumlar ortalama değil medyan yayımlar; sebebi tam olarak bu ekrandaki fark.",
           "Veri temizliğinde IQR kuralı ilk filtredir: sınır dışındaki satırlar önce gözle incelenir, sonra düzeltilir ya da işaretlenir."],
-    trap:"Aykırı değeri görür görmez silmek. Bir uç değer bazen veri giriş hatasıdır (boy sütununda 1750 cm), bazen de tam aradığınız şeydir (dolandırıcılık, arıza, deprem). Silmeden önce sorulacak soru hep aynı: bu sayı yanlış mı, yoksa nadir mi?",
+    trap:"Aykırı değeri görür görmez silmek. Bir uç değer bazen veri giriş hatasıdır (boy sütununda 1750 cm), bazen de tam aradığın şeydir (dolandırıcılık, arıza, deprem). Silmeden önce sorulacak soru hep aynı: bu sayı yanlış mı, yoksa nadir mi?",
     next:"Modül 02 · Metre ile kilometre — aynı veriyi modele vermeden önceki ikinci adım."
   }},
 
@@ -2128,7 +2129,7 @@ const CONTENT={
     short:"k-means her kümeyi bir merkezin çevresinde toplanmış varsayar; hilal ya da halka biçimli kümelerde bu varsayım yanlıştır. DBSCAN merkez aramaz, yoğunluğu takip eder: birbirine yakın noktalar zincirleme aynı kümeye girer, seyrek kalanlar gürültü sayılır.",
     idea:["k-means bir soruyu sorar: her nokta hangi merkeze daha yakın? Cevap her zaman merkezlerin ortasından geçen düz sınırlardır, yani kümeler zorunlu olarak dışbükey ve kabaca yuvarlak çıkar. İki hilal iç içe geçtiğinde bu soru yanlış sorudur ve cevap da yanlış olur.",
           "<b>DBSCAN</b> başka bir soru sorar: bu noktanın <b>eps</b> yarıçapındaki komşuluğunda en az <b>minPts</b> kadar nokta var mı? Varsa bu bir çekirdek noktadır. Çekirdek noktalar komşuluk üzerinden birbirine bağlanır ve zincir kendiliğinden kümeyi çizer. Hiçbir zincire bağlanamayan nokta gürültü ilan edilir ve hiçbir kümeye sokulmaz.",
-          "İki büyük avantajı var: küme sayısını siz söylemezsiniz, veriden çıkar; ve gürültü bir kümeye zorla tıkıştırılmaz, ayrı işaretlenir. Bedeli şu: eps ile minPts'i siz seçersiniz ve yoğunluğu çok farklı kümeler varsa tek bir eps ikisine birden uymaz.",
+          "İki büyük avantajı var: küme sayısını sen söylemezsin, veriden çıkar; ve gürültü bir kümeye zorla tıkıştırılmaz, ayrı işaretlenir. Bedeli şu: eps ile minPts'i sen seçersin ve yoğunluğu çok farklı kümeler varsa tek bir eps ikisine birden uymaz.",
           "<b>hierarchical clustering</b> (hiyerarşik kümeleme) üçüncü bir yol: en yakın iki kümeyi birleştir, tekrarla. Sonuç bir ağaçtır; istediğin yükseklikten keserek istediğin sayıda küme alırsın. Buradaki Ward yöntemi küme içi yayılımı en az artıracak birleşmeyi seçer, bu yüzden o da yuvarlak kümeleri sever ve hilalde k-means'e benzer davranır."],
     read:[["Sol panel","Her zaman k-means. Kümeler renkli, merkezler çarpı işaretiyle. Sınırların düz olduğuna dikkat et: k-means başka türlüsünü kuramaz."],
           ["Sağ panel","Seçtiğin yöntem. DBSCAN'de gri noktalar gürültüdür, hiçbir kümeye ait değildir. Hiyerarşik seçiliyken küme sayısı soldaki k ile aynı tutulur ki iki panel karşılaştırılabilsin."],

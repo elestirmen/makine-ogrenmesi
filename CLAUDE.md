@@ -62,7 +62,7 @@ deploy/nginx.conf.example    konteyner içi nginx — yalnız index.html'i yayı
 deploy/deploy.sh             rsync ile sunucuya yükleme
 tools/lint.py                bütünlük denetimi (id, sözleşme, META, renk)
 tools/harness.js             tarayıcısız çalıştırma (DOM/Canvas taklidi)
-tools/behaviour.js           17 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
+tools/behaviour.js           21 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
 tools/contrast.js            tuval etiketlerinin iki temada WCAG kontrastı
 tools/layout.js              (isteğe bağlı) gerçek Chromium'da projeksiyon yerleşimi
 ```
@@ -84,10 +84,10 @@ CONTENT["m-knn"] = {
 
 - `sets[]` **eksen adı, sınıf adı ve üreteç adını** taşır; üretecin kendisi (nokta
   bulutu, eğri, görüntü) modülün içindedir — `gen` alanı hangisi olduğunu söyler.
-  1D regresyon modülleri (`m-fit`, `m-reg`, `m-cv`) ortak `CURVES` listesini paylaşır:
-  aynı veri üç modülde, üç ayrı ders. `note` alanı ders notu kutusunda görünür,
-  bu yüzden **ölçülmüş** olmalı — "en iyi derece çoğunlukla 5" gibi bir cümle
-  `tools/behaviour.js`'te sınanır.
+  1D regresyon modülleri (`m-fit`, `m-bv`, `m-reg`, `m-cv`) ortak `CURVES` listesini
+  paylaşır: aynı veri dört modülde, dört ayrı ders. `note` alanı ders notu kutusunda
+  görünür, bu yüzden **ölçülmüş** olmalı — "en iyi derece çoğunlukla 5" gibi bir
+  cümle `tools/behaviour.js`'te sınanır.
 - `lesson` kutusu: `q` bir soru, `short` sorunun iki üç cümlelik **kısa cevabı**
   (accent şeritli kutuda, hiç bilmeyen biri yalnız bunu okusa da bir şey götürsün),
   `idea` fikir, `read` ekranı okuma rehberi, `terms` İngilizce/Türkçe terim tablosu,

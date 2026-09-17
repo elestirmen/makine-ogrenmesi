@@ -1,4 +1,4 @@
-/* 17 modülün PEDAGOJİK İDDİALARINI sına: çökme değil, ".ask kutusu ve rehberli
+/* 21 modülün PEDAGOJİK İDDİALARINI sına: çökme değil, ".ask kutusu ve rehberli
    adım metni ne vaat ediyor, gösterge ne diyor" karşılaştırması.
    Kural: her chk() bir METİN cümlesinden türetilir. Metin değişirse sınama da değişir.
    Eşikler ölçülerek konmuştur; rastgele veri üreten modüllerde ORTALAMA alınır

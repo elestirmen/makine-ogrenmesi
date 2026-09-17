@@ -86,12 +86,11 @@ onunla birlikte değişir. Soyut "x₁ / x₂" yerine gerçek bir ölçüm:
 |---|---|
 | 01 ortalama/medyan | maaş (sağa çarpık) · sınav notu (simetrik) · ev fiyatı |
 | 05 k-NN | uçak / kuş (kanat açıklığı–hız) · baz istasyonu kapsaması (halka sınır) · kredi riski (iç içe sınıflar) |
-| 05 karar ağacı | bağ hastalığı · sahte işlem (tek eşik yetmez) · kalite kontrol (şerit) |
-| 07 · 08 · 11 | gün içi sıcaklık · reklam → satış (doygunluk) · titreşim ölçümü — *aynı veri üç modülde* |
-| 09 gradient descent | iki vadi · tek vadi (convex) · dik kanyon (0.06 iyi, 0.20 patlar) |
-| 10 eşik | İHA tespiti · kanser taraması (recall öne geçer) · spam filtresi (precision öne geçer) |
+| 06 karar ağacı | bağ hastalığı · sahte işlem (tek eşik yetmez) · kalite kontrol (şerit) |
 | 08 SVM | kalite kontrol (ayrılabilir) · kredi riski (örtüşen) · baz istasyonu (halka → RBF) |
-| 10 yanlılık–varyans | 09 · 11 · 14 ile aynı üç eğri |
+| 09 · 10 · 11 · 14 | gün içi sıcaklık · reklam → satış (doygunluk) · titreşim ölçümü — *aynı veri dört modülde* |
+| 12 gradient descent | iki vadi · tek vadi (convex) · dik kanyon (0.06 iyi, 0.20 patlar) |
+| 13 eşik | İHA tespiti · kanser taraması (recall öne geçer) · spam filtresi (precision öne geçer) |
 | 15 k-means | müşteri segmenti · artçı sarsıntılar (uzun kümeler) · uydu pikselleri |
 | 17 DBSCAN | iki hilal · iç içe halka · öbek + gürültü |
 | 18 PCA | boy–kilo · matematik–fizik notu · uydu bantları (bitki örtüsü ekseni) |
@@ -130,7 +129,7 @@ Dokunmatikte nokta parmağı kaldırınca eklenir (8 px'den az hareket ettiyse),
 tuvalin üstünden kaydırarak sayfayı gezmek veri kümesini bozmaz.
 
 **Adres çubuğu.** Her modülün kendi adresi var: `ml.perinet.org/#m-kch` ya da
-`#13`. Yenileme, tarayıcı Geri tuşu ve "öğrenciye link atma" bu sayede çalışır.
+`#16`. Yenileme, tarayıcı Geri tuşu ve "öğrenciye link atma" bu sayede çalışır.
 
 **Tema.** Sağ üstteki düğme (ya da `T`) açık/koyu arasında geçirir; varsayılan
 işletim sistemi ayarıdır. Seçim oturum boyunca geçerlidir (`localStorage` yok).
