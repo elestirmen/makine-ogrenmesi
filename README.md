@@ -67,8 +67,29 @@ anlatımı başlatır.
 
 **Adım adım modu.** *Ders notu*'nun hemen yanındaki *Adım adım* düğmesi: hoca ileri
 bastıkça tuval sırayla kurulur ve tuvalin **üstündeki** şeritte o adımın ne gösterdiği
-yazar (tuval şerit kadar kısalır, gösterge satırı perdede kalır). Kaydırıcılar serbest
-kalır, istediğiniz an araya girebilirsiniz.
+yazar (tuval şerit kadar kısalır, gösterge satırı perdede kalır). Adımın sözünü ettiği
+gösterge ya da kontrol birkaç saniye **vurgulanır** ("eğitim hatasına bakın" dendiğinde
+göz doğrudan o kutuya gider); sonucu bir animasyon olan adımlar (iniş, eğitim, çapraz
+doğrulama) o animasyonu kendisi başlatır. Kaydırıcılar serbest kalır, istediğiniz an
+araya girebilirsiniz.
+
+**Ekranda görünen mekanizmalar.** Her modülde soyut kavramın kendisi çizilir:
+
+| modül | tuvalde |
+|---|---|
+| 01 ortalama/medyan | noktalar üst üste yığılır; ortalama tahterevallinin **denge noktası** (▲), medyan ortadaki noktanın halkası |
+| 03 en iyi doğru | « Kareler »: her artık gerçek bir kare, **SSE = kırmızı alanın toplamı** |
+| 06 karar ağacı | « Ağacı çiz »: sağ panel **kurallar ağacına** döner (soru kutuları, evet/hayır dalları, yaprak sayıları) |
+| 07 orman | « Bir ağacın torbası »: k'ıncı ağacın bootstrap örneklemi (tekrar çekilenler halkalı, OOB içi boş) ve kendi merdiven sınırı |
+| 08 SVM | RBF'de de marj görünür: karar sınırı f = 0 ve marj eğrileri f = ±1 |
+| 10 yanlılık–varyans | ders kitabının şekli: yanlılık² iner, varyans çıkar, toplam **U** çizer |
+| 12 gradyan inişi | tuvalin üstünde bir sonraki adımın hesabı: `w ← w − lr · eğim`, sayılarıyla |
+| 13 eşik | histogramda eşiğin yanlış tarafı taralı: **FN ve FP alanları**, dört sayı matrisle aynı |
+| 15 k-means | her merkezin **etki alanı** (bölge = atama kuralı); merkezler yeni yerine kayar |
+| 17 DBSCAN | **çekirdek** (dolu) / sınır (halka) / gürültü (gri), eps komşulukları, fareyle komşu sayısı |
+| 18 PCA | fareyle bir **deneme ekseni** çevrilir; o yöndeki yayılım yazar, en büyüğü 1. bileşen |
+| 19 perceptron | her düzeltmede önceki çizgi kesikli kalır; köşede kuralın kendisi: `w ← w + lr · y · x` |
+| 20 MLP | canlı **ağ diyagramı**: çizgi kalınlığı ağırlık, renk işaret; fareyle ileri yayılım izlenir |
 
 **Sunum modu.** Şeridin sağındaki *Sunum* düğmesi (klavyede `F`) sol menüyü gizler;
 1280 px'lik perdede tuval 930'dan 1210 px'e çıkar. Aynı düğme (*Menü*) ya da `Esc`
@@ -163,7 +184,7 @@ docker compose -f /opt/ml/deploy/docker-compose.yml up -d
 
 Dosya bağlı olduğu için güncelleme `index.html`'i yerine koymaktan ibaret —
 konteyneri yeniden başlatmaya gerek yok. `deploy/deploy.sh` bunu rsync ile yapar: önce dört doğrulama kapısını (sözdizimi,
-`lint.py`, üç genişlikte `harness.js`, `contrast.js` ve `behaviour.js`) çalıştırır,
+`lint.py`, üç genişlikte `harness.js`, `contrast.js`, `layout.js` ve `behaviour.js`) çalıştırır,
 sonra yükler. Değişen dosyaların eski hâli `/opt/ml/.prev/` altına taşınır —
 ders başlamadan geri dönmek gerekirse oradan alınır. Aceleyse `SKIP_SLOW=1`
 davranış denetimini atlar.

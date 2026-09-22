@@ -40,6 +40,11 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
 
   `META`'nın 6. alanı (arama etiketleri) **her iki dili de** içerir — öğrenci "bagging"
   yazınca da "torbalama" yazınca da modülü bulmalı. `aria-label` görünür metin sayılır.
+
+  Büyük harfle gösterilen etiketlerde (`.stat .k`, `.ctl .lab` — CSS `uppercase`)
+  İngilizce terim `lang="en"` taşır: sayfa `lang="tr"` olduğu için tarayıcı Türkçe
+  kuralla büyütüyor, "Precision" → "PRECİSİON", "Learning rate" → "LEARNİNG RATE"
+  çıkıyordu. Karışık etikette yalnız terimi sar: `<span lang="en">Silhouette</span> diyor ki`.
 - **Tema token'ları.** Bütün renkler `:root` içindeki CSS değişkenlerinden gelir
   (`--ink`, `--surface`, `--accent`, `--a`, `--b`, `--good`, `--warn`, `--bad`).
   Canvas içinde renk `css("--token")` ile okunur, asla sabit hex yazılmaz.
@@ -161,7 +166,7 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    | `space` | ✓ | boşluk tuşunun eylemi |
    | `init` | ✓ | ilk veri (sayfa açılırken bir kez) |
    | `stop` | `setInterval` varsa | modül değişince zamanlayıcıyı durdurur |
-   | `steps` | önerilir | rehberli anlatım: `[{t,d,set?,run()}]` — `d` içinde `<b>` kullanılabilir |
+   | `steps` | önerilir | rehberli anlatım: `[{t,d,set?,hl?,run()}]` — `d` içinde `<b>` kullanılabilir |
    | `scenarios` | ✓ (veri kümesi) | `CONTENT[id].sets`'ten üretilir: `DS.map((d,i)=>({name:d.name,apply(){useSet(i);}}))` |
    | `scenarioLabel` | `scenarios` varsa | seçicinin başlığı, `CONTENT[id].pick` |
    | `undo` | tuval düzenlenebilirse | `editable()`'ın döndürdüğü `undo` |
@@ -173,12 +178,39 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    `set:2` alanı yazılır — kabuk senaryo düğmesine basar (`mod.__pick`), böylece
    düğmenin basılı hâli ekranda görünenle tutarlı kalır.
 
+   `hl:["#knn-e","#knn-k"]` adımın metninde sözü geçen göstergeyi / kontrolü ~3 sn
+   vurgular (`spotlight()`: gösterge verilirse bütün `.stat` kutusu, kaydırıcı
+   verilirse `.ctl`). Metin "eğitim hatasına bakın" diyorsa o gösterge `hl`'de olur;
+   perdede beş göstergenin hangisi olduğu aranmasın. Metin bir animasyonun
+   SONUCUNU anlatıyorsa ("adım sayacına bakın", "Iraksadı diyor") adım onu kendisi
+   başlatır: `setPressed("#gd-run",true)`. Eskiden "Koştur'a basın" diyen adımlarda
+   hoca ilerlerken ekranda hiçbir şey olmuyordu.
+
    Tuvale nokta eklenen modüllerde `editable(cv,{pts,setPts,toPx,toData,add,draw,commit})`
    kullanılır — sürükleme, silme ve geri almayı tek yerden getirir. `commit` pahalı
    yeniden hesabı yapar (önbellek geçersiz kılma), `draw` sürükleme sırasındaki ucuz çizim.
    - `draw()` her çağrıldığında canvas'ı sıfırdan çizmeli (resize ve tema değişiminde
      yeniden çağrılıyor).
    - Canvas ölçekleme için `setupCanvas(cv)` ve `makeMap(cv,pad)` yardımcıları kullanılır.
+   - Dikey eksen adı `ylabel(ctx,metin,x,yÜst,yAlt,renk)` ile: eksenin ortasına
+     hizalanır, sığmazsa "…" ile kısalır. Eski `translate(x,Y(1)+52)` kalıbı uzun
+     adları ("fiyat (milyon ₺) →") tuvalin üst kenarından taşırıp kesiyordu.
+   - Lejant `legend(ctx,x,y,[[metin,"--token"],…],{align,size})` ile, yarı saydam
+     zeminli; tek satırlık seri lejantı `legendRow`. Renk token ADIYLA verilir ki
+     `contrast.js` iki temada ölçebilsin. Zeminsiz lejantlar veri noktalarının,
+     çubuk değerlerinin ve birbirlerinin üstüne biniyordu.
+   - Bölge / olasılık haritası hücre başına BİR PİKSELLİK küçük tuvale (`ImageData`,
+     renk `rgbOf("--a")`) yazılıp `imageSmoothingEnabled` ile büyütülür. Alfa ile üst
+     üste binen `fillRect` kareleri hem testere dişi sınır hem de m-ens'te bütün
+     panelde 8 px'lik bir kafes deseni bırakıyordu. Eş yükselti (karar sınırı,
+     marj f = ±1) için `isoline()`.
+   - Yalnız görsel bir geçiş (m-km'de merkezin kayması) ÇİZİMİ kaydırır; durum ve
+     göstergeler hemen güncellenir. `behaviour.js` zamanlayıcıyı sürmeden okuyor,
+     durumu da tween'e bağlamak sınamaları yarı adımdan okutur.
+   - Animasyon döngüsü `setInterval` ile kurulur (ve `stop`'ta temizlenir):
+     `harness.js` `requestAnimationFrame`'i EŞZAMANLI çağırıyor, kendini yeniden
+     isteyen bir rAF döngüsü tarayıcısız koşumda özyinelemeye girer; `setTimeout`
+     ise orada hiç çalışmaz. `setInterval` `tick(n)` ile sürülebiliyor.
 3. `META` dizisine satır ekle — **altı alan**:
    `["09","m-XXX","Kısa başlık","alt açıklama","Grup","arama etiketleri"]`
 
@@ -234,11 +266,12 @@ for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; 
 # 21 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
-node tools/behaviour.js index.html   # 109 denetim: 21 modül + alternatif veri kümeleri
+node tools/behaviour.js index.html   # 118 denetim: 21 modül + alternatif veri kümeleri
 
 # tuvale yazılan her etiket rengini açık VE koyu temada zemine karşı ölç
-# (label(...) çağrılarını ayıklar; 4.5 altındakileri bildirir)
-node tools/contrast.js
+# (label(...) ve legend(...) çağrılarını ayıklar; 4.5 altındakileri bildirir).
+# Dosya yolu argüman: verilmezse /opt/ml/index.html, yani CANLI dosya ölçülür.
+node tools/contrast.js index.html
 
 # yerel önizleme
 python3 -m http.server 8080   # → http://localhost:8080

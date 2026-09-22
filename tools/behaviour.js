@@ -676,5 +676,83 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(Math.abs(mean(ringN)-2)<0.4, "iç içe halkada da iki kümeyi ayırıyor (adım 6)", mean(ringN).toFixed(2));
 }
 
+/* ══════════ Görselleştirme turu (2026-09) ile gelen metin iddiaları ══════════ */
+
+/* ── 17 · DBSCAN: "dolu noktalar çekirdek" — eps küçülünce çekirdek azalıyor ── */
+{
+  head("Modül 17 · çekirdek nokta (adım 3: 'Çekirdek, sınır, gürültü')");
+  const {el,M}=boot(F); const cOk=[],cTiny=[],nOk=[];
+  for(let t=0;t<8;t++){
+    PK(M,'m-dbs',0); P(el,'db-dbscan',true); S(el,'db-mp',4);
+    S(el,'db-eps',8); cOk.push(V(el,'db-core')); nOk.push(V(el,'db-n'));
+    S(el,'db-eps',2); cTiny.push(V(el,'db-core'));
+  }
+  console.log(`       eps=0.08 → çekirdek ${mean(cOk).toFixed(1)}/${mean(nOk).toFixed(0)} · eps=0.02 → ${mean(cTiny).toFixed(1)}`);
+  chk(mean(cOk)>0.8*mean(nOk), "uygun eps'te noktaların çoğu çekirdek (dolu) nokta", `${mean(cOk).toFixed(1)}/${mean(nOk).toFixed(0)}`);
+  chk(mean(cTiny)<0.3*mean(cOk), "eps çok küçükken çekirdek nokta sayısı çöküyor (adım 4)", `${mean(cOk).toFixed(1)} → ${mean(cTiny).toFixed(1)}`);
+  P(el,'db-hier',true);
+  chk(T(el,'db-core')==="—", "hiyerarşik yöntemde 'çekirdek' kavramı yok, gösterge '—'", T(el,'db-core'));
+}
+
+/* ── 20 · MLP: "Nöron 4: her başlangıçtan çözüyor, hem de birkaç düzine epoch'ta" ──
+   Ölçüm (400 başlangıç, uygulamanın eğitiminin birebir kopyası): h=4 %100 çözüyor,
+   ≥%98 doğruluğa medyan 29 epoch, %90'lık dilim 65 epoch; tek bir başlangıç
+   2429 epoch sürdü. Tek koşuya değil MEDYANA bakılıyor. */
+{
+  head("Modül 20 · 4 nöron birkaç düzine epoch'ta (adım 4)");
+  const {el,tick}=boot(F); const ep=[]; let miss=0;
+  for(let t=0;t<8;t++){
+    el('mlp-xor').click(); S(el,'mlp-h',4); el('mlp-reset').click();
+    P(el,'mlp-run',true);
+    let got=-1;
+    for(let k=0;k<400;k++){ tick(1); if(V(el,'mlp-acc')>=98){ got=V(el,'mlp-ep'); break; } }
+    P(el,'mlp-run',false);
+    if(got<0) miss++; else ep.push(got);
+  }
+  console.log(`       h=4 · %98 doğruluğa epoch: ${ep.join(', ')} · 800 epoch'ta çözemeyen ${miss}/8`);
+  chk(miss<=1, "4 nöron neredeyse her başlangıçtan çözüyor", `${miss}/8 çözemedi`);
+  chk(ep.length>0 && med(ep)<=60, "medyan çözüm süresi birkaç düzine epoch", `medyan ${ep.length?med(ep):'—'}`);
+}
+
+/* ── 14 · k-fold: "k = 2'de dağınıklar, k = 10'da neredeyse tek çizgiye biniyorlar" ──
+   Soluk yeşil çizgiler karıştırma başına ortalama hata; burada aynı sayılar
+   « Ortalama hata » göstergesinden her karıştırmadan sonra okunuyor. */
+{
+  head("Modül 14 · karıştırmalar arası yayılım (.ask ve adım 4)");
+  const {el}=boot(F);
+  const spread=(k)=>{ S(el,'cv-k',k); S(el,'cv-d',3); const r=[];
+    for(let i=0;i<10;i++){ el('cv-shuf').click(); r.push(V(el,'cv-vm')); }
+    const m=mean(r); return Math.sqrt(mean(r.map(x=>(x-m)**2))); };
+  const s2=[],s10=[];
+  for(let t=0;t<6;t++){ el('cv-new').click(); s2.push(spread(2)); s10.push(spread(10)); }
+  console.log(`       karıştırma ortalamalarının std'si: k=2 → ${mean(s2).toFixed(4)} · k=10 → ${mean(s10).toFixed(4)}`);
+  chk(mean(s10)<mean(s2)*0.75, "k büyüyünce karıştırmadan karıştırmaya ortalama daha kararlı", `${mean(s2).toFixed(4)} → ${mean(s10).toFixed(4)}`);
+}
+
+/* ── 19 · Perceptron: "Tek düzeltme: yanlış taraftaki ilk noktayı bulup çizgiyi itiyor" ── */
+{
+  head("Modül 19 · tek düzeltme (adım 2)");
+  let moved=0, one=0, N=10;
+  for(let t=0;t<N;t++){
+    const {el}=boot(F); el('per-sep').click();
+    const w0=T(el,'per-w'), m0=V(el,'per-m');
+    el('per-step').click();
+    if(m0>0){ if(V(el,'per-u')===1) one++; if(T(el,'per-w')!==w0) moved++; }
+    else { one++; moved++; }                     // başlangıç zaten doğruysa düzeltme yok
+  }
+  chk(one===N, "bir basış = bir güncelleme", `${one}/${N}`);
+  chk(moved===N, "düzeltme ağırlıkları değiştiriyor (çizgi hareket ediyor)", `${moved}/${N}`);
+}
+
+/* ── 06 · Karar ağacı: "Ağacı çiz" yaprak sayısı göstergesiyle aynı ağacı çiziyor ── */
+{
+  head("Modül 06 · kurallar ağacı (adım 4–5)");
+  const {el,M}=boot(F); const dt=M.find(m=>m.id==='m-dt');
+  let bad=0;
+  for(let t=0;t<6;t++){ el('dt-demo').click(); P(el,'dt-tree',true);
+    for(const d of [1,2,3,5]){ S(el,'dt-d',d); try{ dt.draw(); }catch(e){ bad++; } } }
+  chk(bad===0, "ağaç görünümü her derinlikte çiziliyor", `${bad} hata`);
+}
+
 console.log(`\n${fail?fail+" DENETİM DÜŞTÜ":"tüm davranış denetimleri geçti"}`);
 process.exit(fail?1:0);

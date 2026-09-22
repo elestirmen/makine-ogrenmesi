@@ -1,6 +1,9 @@
-/* Her modülün label(...) ile tuvale yazdığı metin rengini iki temada zemine karşı ölç. */
+/* Her modülün label(...) ve legend(...) ile tuvale yazdığı metin rengini iki temada
+   zemine karşı ölç. Dosya yolu argümanla verilir; verilmezse canlı kopya (/opt/ml).
+   Eskiden yol sabitti: çalışma kopyasında koşunca farkına varmadan CANLI dosyayı
+   ölçüyordu. */
 const fs=require('fs');
-const src=fs.readFileSync('/opt/ml/index.html','utf8');
+const src=fs.readFileSync(process.argv[2]||'/opt/ml/index.html','utf8');
 const sc=src.slice(src.indexOf('<script>'));
 
 /* temaları CSS'ten oku */
@@ -39,6 +42,12 @@ for(const b of blocks){
   for(const m of b.body.matchAll(/label\(\s*(?:ctx|c|rcx)\s*,[\s\S]{0,200}?,\s*(css\("(--[\w-]+)"\)|hexA\("(--[\w-]+)"\s*,\s*([\d.]+)\))/g)){
     const tok=m[2]||m[3], al=m[4]?parseFloat(m[4]):1;
     rows.push({tok,al});
+  }
+  /* legend(ctx,x,y,[[metin,"--token"],…]) — satır rengi token adıyla yazılıyor.
+     Arka plan --surface'in %88 opak hâli; ölçüm yine --surface'e karşı yapılır
+     (kutu zemini neredeyse aynı renk, küçük fark güvenli tarafta kalıyor). */
+  for(const m of b.body.matchAll(/legend(?:Row)?\(\s*ctx\s*,[\s\S]{0,700}?\]\s*\]/g)){
+    for(const t of m[0].matchAll(/,\s*"(--[\w-]+)"\s*\]/g)) rows.push({tok:t[1],al:1});
   }
   const uniq=[...new Map(rows.map(r=>[r.tok+'|'+r.al,r])).values()];
   for(const r of uniq){

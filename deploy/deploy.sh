@@ -25,7 +25,7 @@ echo "· tarayıcısız çalıştırma (930 / 800 / 676 px)"
 for w in 930 800 676; do ML_W=$w node "$SRC/tools/harness.js" "$SRC/index.html" >/dev/null; done
 
 echo "· tuval etiketi kontrastı"
-( cd "$SRC" && node tools/contrast.js >/dev/null )
+node "$SRC/tools/contrast.js" "$SRC/index.html" >/dev/null
 
 # Gerçek tarayıcı kapısı: puppeteer kurulu değilse kendisi atlıyor (çıkış 0).
 echo "· projeksiyon yerleşimi (tarayıcı varsa)"
