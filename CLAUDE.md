@@ -32,6 +32,8 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   | DBSCAN · eps · minPts · core point · hierarchical clustering | yoğunluk temelli kümeleme · komşuluk yarıçapı · en az komşu · çekirdek nokta · hiyerarşik kümeleme |
   | mean · median · IQR · outlier · robust | ortalama · medyan · çeyrekler açıklığı · aykırı değer · dayanıklı |
   | bias–variance decomposition · irreducible error | yanlılık–varyans ayrışması · indirgenemez hata |
+  | multiple linear regression · confounding · multicollinearity | çoklu doğrusal regresyon · karıştırıcı etki · çoklu doğrusallık |
+  | polynomial regression · degree · design matrix · feature engineering · extrapolation | polinom regresyon · derece · tasarım matrisi · öznitelik türetme · veri dışı tahmin |
 
   **Türkçe kalan sözcükler** (calque değil, cümlenin dokusu): eşik, öznitelik, katsayı,
   eğim, kesişim, ağırlık, artık, hata, doğruluk, küme, merkez, ağaç, derinlik, yaprak,
@@ -67,7 +69,7 @@ deploy/nginx.conf.example    konteyner içi nginx — yalnız index.html'i yayı
 deploy/deploy.sh             rsync ile sunucuya yükleme
 tools/lint.py                bütünlük denetimi (id, sözleşme, META, renk)
 tools/harness.js             tarayıcısız çalıştırma (DOM/Canvas taklidi)
-tools/behaviour.js           21 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
+tools/behaviour.js           23 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
 tools/contrast.js            tuval etiketlerinin iki temada WCAG kontrastı
 tools/layout.js              (isteğe bağlı) gerçek Chromium'da projeksiyon yerleşimi
 ```
@@ -93,6 +95,44 @@ CONTENT["m-knn"] = {
   paylaşır: aynı veri dört modülde, dört ayrı ders. `note` alanı ders notu kutusunda
   görünür, bu yüzden **ölçülmüş** olmalı — "en iyi derece çoğunlukla 5" gibi bir
   cümle `tools/behaviour.js`'te sınanır.
+- **Modül 03 (`m-lin`) cevabı gizli başlatır.** Least squares doğrusu (yeşil
+  kesikli) ve sağ paneldeki dip işareti yalnız « Least squares çözümü »nden sonra
+  çizilir; yeni veri, veri kümesi değişimi ve « Temizle » cevabı yeniden gizler.
+  Eskiden ikisi açılışta ekrandaydı ve öğrenci kaydırıcıya dokunmadan cevabı
+  görüyordu. Düğmeden önceki deneme kesikli gri çizgi olarak SSE'siyle kalır.
+  Sağdaki hata eğrisi **öğrencinin kesişimiyle** çizilir (`sse(A, b)`), cevabın
+  kesişimiyle değil: yön gösterir, cevabı vermez. Denklem iki biçimde yazılır,
+  `y = 0.030x + 2.00, yani fiyat = 0.030 · alan + 2.00`, ikisi de verinin biriminde
+  (`sets[].eq`: eksenler 0'dan başlar, `y = a·(yr/xr)·x + b·yr`); kaydırıcı
+  çıktıları aynı iki katsayıyı gösterir. Düğme sonucu **iki saniyede, formülün üç
+  adımıyla** getirir (`setInterval`, 67 tık × 30 ms): doğru önce ortalama noktadan
+  (x̄, ȳ) geçecek kadar kayar, sonra orada döner, en sonda kesişim okunur; adımlar
+  köşede kalır. Yalnız çizim kayar: a, b, kaydırıcılar ve göstergeler basıldığı
+  anda son değerde (m-km kuralı). Animasyonda ikinci basış sona atlar. Tuval metni sahte DOM'da okunmadığı için
+  denklem ve "gizli mi" durumu tuvalin `aria-label`'ına da yazılır, `behaviour.js`
+  oradan sınar.
+- **Modül 04 (`m-mlr`) m-lin'in iki öznitelikli hâli, aynı kurallarla:** cevap gizli
+  başlar, « Least squares çözümü » düzlemi ~0.9 sn'de yerine kaydırır (yalnız çizim;
+  a₁, a₂ ve göstergeler hemen son değerde, ikinci basış sona atlar). Kesişim kaydırıcısı
+  **yok**: düzlem hep ortalama noktadan geçer (b = ȳ − a₁x̄₁ − a₂x̄₂), böylece iki sıfır
+  = yatay düzlem = R² tam 0 ve SSE yalnız (a₁, a₂)'ye bağlı bir kase olur; sağ panel o
+  kaseyi haritalar (tıkla → katsayı seç), içi boş halka a₂ = 0 çizgisinin en iyisi, yani
+  Modül 03'ün cevabı. Sol panel 3B; « fiyat–alan » bakışı tam yandan (φ = 0) gösterir:
+  x₂'nin üç dilimindeki çizgiler paralel, eğimleri a₁ — "öteki sabitken"in resmi. 3B
+  açı veri kümesine göre (`sets[].eq.v3`): düzlem izleyiciye doğru yükselince bakış
+  açısıyla birbirini götürüp tek çizgiye iniyordu. Üç küme üç ders: bağımsız öznitelik
+  (katsayı değişmez), birlikte büyüyen (yarısı ötekine geçer, katsayı oynar), karıştırıcı
+  (işaret döner). "Tek başına" R²'si ve denklemler `aria-label`'da; `behaviour.js` oradan okur.
+- **Modül 05 (`m-poly`) x'i ölçekler:** ölçüm aralığı [lo, hi] → [−1, 1]; ham saatle x⁴
+  100 bini geçer (ders notunun tuzağı). Tuval ekseni ölçüm aralığından geniş, kenarlar
+  gri (veri yok); gerçek ilişki YALNIZ gri bölgede kesikli çizilir, içeride veri konuşur.
+  Gri kenara da nokta eklenir ve şerit o noktaya kadar daralır: ilk sürümde oraya tıklama
+  sessizce yok sayılıyordu ve fidan verisinde tuvalin yalnız üçte biri nokta kabul ediyordu
+  (hoca "veri ekleyemiyorum" dedi). Nokta sayısı ağırlık sayısına yetmezse sol panel
+  ne yapılacağını yazar; tablo dar ekranda görünmüyor. Sağda tasarım matrisi (1, x, x², … sütunları, seçili satırda
+  sütun × ağırlık = ŷ); kısa tuvalde önce alt açıklama, sonra satır sayısı (5 → 3) düşer.
+  Seçili satır fareyle değişir ve fare çıkınca KALIR (m-cn kuralı). Veri dışı tahmin ve
+  gerçek değer `aria-label`'da ("model … gerçek …"), `behaviour.js` oradan sınar.
 - `lesson` kutusu: `q` bir soru, `short` sorunun iki üç cümlelik **kısa cevabı**
   (accent şeritli kutuda, hiç bilmeyen biri yalnız bunu okusa da bir şey götürsün),
   `idea` fikir, `read` ekranı okuma rehberi, `terms` İngilizce/Türkçe terim tablosu,
@@ -104,7 +144,7 @@ CONTENT["m-knn"] = {
   "siz" ile "sen" karışımı yok; kısa cümle, bir cümlede bir fikir. Kutu `mountTools()`'un eklediği « Ders notu » düğmesi
   ya da klavyede `?` ile açılır; `Esc` kapatır (modal açıkken Esc modülü değil kutuyu
   kapatır), perdeye tıklamak da kapatır.
-- **Modül 21 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
+- **Modül 23 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
   çekirdek boyu (3×3/5×5), padding (0/1/2) ve stride (1/2/3) segment düğmelerinde,
   sonuç `⌊(girdi+2·dolgu−çekirdek)/adım⌋+1` formülüyle göstergede. Konvolüsyon
   etikete göre önbellekli (`CACHE`): imlecin her hareketinde yeniden hesaplanırsa
@@ -212,7 +252,14 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
      isteyen bir rAF döngüsü tarayıcısız koşumda özyinelemeye girer; `setTimeout`
      ise orada hiç çalışmaz. `setInterval` `tick(n)` ile sürülebiliyor.
 3. `META` dizisine satır ekle — **altı alan**:
-   `["09","m-XXX","Kısa başlık","alt açıklama","Grup","arama etiketleri"]`
+   `["09","m-XXX","İngilizce terimle başlayan ad","Türkçe ad","Grup","arama etiketleri"]`
+
+   **Önce İngilizcesi, sonra Türkçesi.** 3. alan menüde (rail, giriş kartları,
+   sayfalayıcı, ders notu başlığı) kalın ilk satırdır ve İngilizce terimle başlar
+   (`k-NN ile sınıflandırma`); 4. alan gri ikinci satırdır, Türkçe addır
+   (`Komşuna bak`). İkisi eskiden ters sıradaydı: kalın satırda yalnız Türkçe ad
+   duruyordu, öğrenci teknik adı gri satırdan okuyordu. Yeni modülde 3. alana
+   Türkçe sözcükle başlama; başlayacaksan terimin İngilizcesini öne al.
 
    `META` ders sırasını tanımlar, `MODULES` ise IIFE çalışma sırasını. **İkisi
    bağımsızdır**; eşleşme ikinci alandaki `id` üzerinden kurulur (`SEQ` dizisi).
@@ -242,7 +289,7 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    - Çalıştır düğmeleri de anahtardır: eğitim koşarken tekrar basmak onu DURDURUR.
      `tick(n)` yeterli değilse ölçüm yarı eğitilmiş modelden okunur. Bitişi düğme
      metninden doğrula (`"Eğit"`e döndü mü) ve dönmediyse sürmeye devam et —
-     Modül 04'ün iç sayacı 400 tık, `tick(400)` tam sınırda kalıp kırılganlık üretti.
+     `m-log`'un (Modül 06) iç sayacı 400 tık, `tick(400)` tam sınırda kalıp kırılganlık üretti.
 
 ## Doğrulama
 
@@ -256,17 +303,17 @@ sed -n '/^<script>/,/^<\/script>/p' index.html | sed '1d;$d' > /tmp/check.js && 
 # tutarlılığı, canvas'ta sabit renk, setInterval↔stop eşleşmesi, önizleme kapsaması
 python3 tools/lint.py index.html
 
-# 21 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
+# 23 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
 # istisna, canvas'a giden NaN ve "draw() bu göstergeye hiç dokunmadı" durumu.
 # Ayrıca CONTENT kapsaması: eksik ders notu, tek veri kümesi, kutuda kalan "undefined".
 # ML_W ile DAR yerleşim dalları da sınanır: 930 tek başına yetmez, çünkü panel
 # gizleme eşiklerinin altındaki kod yolu hiç çalıştırılmamış olur.
 for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; done
 
-# 21 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
+# 23 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
-node tools/behaviour.js index.html   # 118 denetim: 21 modül + alternatif veri kümeleri
+node tools/behaviour.js index.html   # 160 denetim: 23 modül + alternatif veri kümeleri
 
 # tuvale yazılan her etiket rengini açık VE koyu temada zemine karşı ölç
 # (label(...) ve legend(...) çağrılarını ayıklar; 4.5 altındakileri bildirir).
@@ -326,15 +373,15 @@ Ayrıca: açık ve koyu temada okunabilirlik, konsolda hata olmaması.
 
 1280×720'de tuval **930 px** kalır (1280 − 280 rail − 68 kenar boşluğu; sunum
 modunda rail gidince 1210). Çok panelli modüllerde yerleşim eşiği bunun altında
-olmalı; aksi halde panel derste hiç görünmez (Modül 09'un ROC eğrisi bir süre
+olmalı; aksi halde panel derste hiç görünmez (`m-cm`'nin ROC eğrisi bir süre
 böyle kayıptı).
 
 Eşiği 930'un hemen altına koymak da yetmez: tek kademe tarayıcı zoom'u (%110 →
-~815 px, Chrome bunu alan adı başına hatırlıyor) paneli yine götürür. Modül 13'ün
+~815 px, Chrome bunu alan adı başına hatırlıyor) paneli yine götürür. `m-cm`'nin
 üç panel eşiği bu yüzden 900'den **780**'e indirildi. Kural iki parçalı:
 
 - Yerleşim eşiği ≤ **780**; dar dalda küçülen metin varsa boyutu eşiğe bağla
-  (Modül 13'ün matris alt yazısı 930 px'te 10.5, dar hücrede 9.5 — projeksiyon
+  (`m-cm`'nin matris alt yazısı 930 px'te 10.5, dar hücrede 9.5 — projeksiyon
   çözünürlüğünde yazı KÜÇÜLMEMELİ, yalnız zoom'lu/dar durumda küçülür).
 - Bir gösterge yalnız geniş dalda yazılıyorsa dar yerleşimde son geniş çizimin
   değerinde **donar**. Hesabı çizimden ayır, göstergeyi daldan çıkar.
