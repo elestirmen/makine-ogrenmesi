@@ -18,7 +18,7 @@ sağdaki sütun o modülün hangi haftaya denk geldiğini söyler.
 | 03 | En iyi doğru | linear regression, artıklar, least squares | 5 |
 | | **Denetimli öğrenme** | | |
 | 04 | İki öznitelik, bir düzlem | multiple linear regression, katsayının anlamı, confounding, multicollinearity | 5 |
-| 05 | Eğri de doğrusal olabilir | polynomial regression, tasarım matrisi, öznitelik türetme, extrapolation | 5 |
+| 05 | Eğri de doğrusal olabilir | polynomial regression (derece 1–10), tasarım matrisi, öznitelik türetme, extrapolation | 5 |
 | 06 | Yüzde kaç? | logistic regression, sigmoid, log loss | 6 |
 | 07 | Komşuna bak | k-NN, decision boundary, k'nın etkisi | 9 |
 | 08 | Bölerek karar ver | decision tree, Gini kazancı, derinlik ve ezber | 10 |

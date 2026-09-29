@@ -132,6 +132,7 @@ canvas{display:block;width:100%;height:var(--cvh);min-height:320px;touch-action:
    olmazsa kaydırıcı her harekette yana kayıyor */
 #m-lin .ctl output{min-width:6ch}
 #m-mlr .ctl output{min-width:6ch}
+#m-poly .ctl output{min-width:7ch}   /* "x … x¹⁰" */
 input[type=range]{accent-color:var(--accent);width:130px}
 input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
@@ -1001,14 +1002,7 @@ input[type=range]{min-height:28px;margin:0}
       <div class="stage">
         <canvas id="c-poly" aria-label="Polynomial regression: veri, eğri, terimler ve tasarım matrisi"></canvas>
         <div class="bar">
-          <div class="ctl"><span class="lab">Sütunlar</span>
-            <div class="seg" role="group" aria-label="Modele giren sütunlar">
-              <button id="poly-d1" aria-pressed="true">x</button>
-              <button id="poly-d2" aria-pressed="false">x · x²</button>
-              <button id="poly-d3" aria-pressed="false">x · x² · x³</button>
-              <button id="poly-d4" aria-pressed="false">x … x⁴</button>
-            </div>
-          </div>
+          <label class="ctl"><span class="lab">Derece</span><input type="range" id="poly-d" min="1" max="10" step="1" value="1"><output id="poly-do">x</output></label>
           <button class="btn primary" id="poly-fit">Least squares çözümü</button>
           <button class="btn" id="poly-t" aria-pressed="false">Terimler</button>
           <button class="btn" id="poly-new">Yeni veri</button>
@@ -1847,11 +1841,12 @@ const CONTENT={
     idea:["Gün içi sıcaklığa bir doğru uydurmaya çalış. Sabah serin, öğleden sonra sıcak, akşam yine serin; doğru ya hep çıkar ya hep iner, tepeyi göremez. Çözüm modeli değiştirmek değil, veriyi zenginleştirmek. Tabloya yeni bir sütun ekle: saatin karesi. Model artık <b>sıcaklık = w₀ + w₁·x + w₂·x²</b> ve x² sütunu eğriyi bükebiliyor. Buna <b>polynomial regression</b> (polinom regresyon) deniyor. En yüksek üsse <b>degree</b> (derece) diyoruz.",
           "Eğri çizse de bu hâlâ linear regression. Doğrusal olan x değil, ağırlıklar: model her sütunu bir sayıyla çarpıp topluyor, o kadar. Modül 04'teki iki sütun alan ve yaştı; burada ikinci sütun birincinin karesi. Yani polinom regresyon, sütunlarını kendisi üreten bir çoklu doğrusal regresyon. Var olan sütunlardan yeni sütun türetmeye <b>feature engineering</b> (öznitelik türetme) deniyor; gerçek projelerde emeğin büyük kısmı bu adıma gider.",
           "Eğriyi parçalarına ayırınca ne olduğu görünüyor. w₀ yatay bir seviye. w₁·x o seviyeyi eğiyor. w₂·x² kavis veriyor: bir tepe ya da bir çukur. w₃·x³ bir S kıvrımı katıyor. Kalın eğri bu ince çizgilerin toplamı. Ağırlıkları kimse elle seçmiyor; least squares hepsini birlikte, tek formülle buluyor.",
-          "Polinomun zayıf yeri veri aralığının dışı. Ölçüm olmayan saatlerde eğriyi tutan tek bir nokta yok; x³ ve x⁴ ise orada hızla büyüyor. Fidan verisinde üç sütunlu model aralığın içinde neredeyse kusursuz, ama 24. haftada 51 cm'lik fidanı sıfır boy civarına indiriyor. Modeli verinin dışında kullanmaya <b>extrapolation</b> (veri dışı tahmin) deniyor. İstisnası şu: ilişkinin biçimini bir yasadan biliyorsan (fren mesafesi hızın karesiyle büyür), doğru biçimdeki model dışarıda da tutar."],
+          "Polinomun zayıf yeri veri aralığının dışı. Ölçüm olmayan saatlerde eğriyi tutan tek bir nokta yok; x³ ve x⁴ ise orada hızla büyüyor. Fidan verisinde üç sütunlu model aralığın içinde neredeyse kusursuz, ama 24. haftada 51 cm'lik fidanı sıfır boy civarına indiriyor. Modeli verinin dışında kullanmaya <b>extrapolation</b> (veri dışı tahmin) deniyor. İstisnası şu: ilişkinin biçimini bir yasadan biliyorsan (fren mesafesi hızın karesiyle büyür), doğru biçimdeki model dışarıda da tutar.",
+          "Dereceyi 10'a çıkarınca ne olur? Eğitim noktalarındaki hata daha da düşer, çünkü on bir ağırlık on sekiz noktaya çok rahat yapışır. Ama sıcaklık verisinde 20:00 tahmini örneklemlerin çoğunda binlerce derece şaşar. Hatası düşen model daha iyi model değildir; bu ezberin adı overfitting, bir sonraki büyük durak."],
     read:[["Sol panel","Mavi noktalar ölçüm. Gri kenarlar ölçüm yapılmayan bölge; oradaki kesikli çizgi gerçekte ne olduğu. Tuvale tıklayıp nokta ekleyebilirsin, gri kenara da: eklediğin nokta orayı 'veri var' yapar ve şerit daralır. Kalın pembe eğri modelin. « Terimler » açıkken ince renkli çizgiler eğrinin parçaları: her biri w₀ seviyesine eklenen tek bir terim. Sağ kenardaki pembe halka modelin veri dışı tahmini, gri halka gerçek değer."],
           ["Least squares çözümü","Eğri kendiliğinden oturmaz. Yeni veride model düz bir çizgi (her x'e ortalama); nokta ekleyince ya da sütun değiştirince eğri yerinde kalır. Düğme o anki sütunlarla en iyi ağırlıkları bulur ve eğriyi yerine indirir; köşede hatanın nasıl düştüğü yazar, önceki eğri kesikli gri çizgide kalır."],
           ["Sağ panel","Tasarım matrisi, yani modelin gördüğü tablo. Her satır bir ölçüm, her sütun bir öznitelik: 1, x, x², x³. Buradaki x ham değer değil; ortalanıp −1 ile 1 arasına ölçeklenmiş hâli (Modül 02), formülü tablonun üstünde. Alttaki 'w' satırı ağırlıklar. Seçili satırda her sayı kendi ağırlığıyla çarpılıyor, toplamı ŷ. Fareyi bir noktanın üstüne götür, seçili satır değişir."],
-          ["Sütunlar","Düğmeler modele giren sütunları seçiyor. Her düğme bir sütun ve bir ağırlık daha ekliyor. Yeni ağırlık 0'dan başlar, yani sütunu eklemek tek başına eğriyi değiştirmez; değiştiren, ardından basılan « Least squares çözümü »."],
+          ["Derece","Kaydırıcı modele giren sütunları seçiyor: 1'den 10'a, yanında 'x … x⁷' gibi yazar. Her adım bir sütun ve bir ağırlık daha ekliyor. Yeni ağırlık 0'dan başlar, yani sütunu eklemek tek başına eğriyi değiştirmez; değiştiren, ardından basılan « Least squares çözümü ». 5. dereceden sonra tablo ortadaki sütunları '…' ile kısaltır."],
           ["Göstergeler","RMSE ekrandaki modelin ortalama ne kadar şaştığı, verinin kendi biriminde; 'En iyi RMSE' bu sütunlarla inilebilecek en düşük değer. İkisi eşitse RMSE yeşile döner. R² Modül 03'teki gibi. Son kutu veri dışındaki tek bir noktada modelin söylediği. Rengi gerçeğe ne kadar uzak olduğunu gösteriyor: yeşil yakın, kırmızı uzak."]],
     terms:[["polynomial regression","polinom regresyon","x'in üslerini yeni sütun olarak ekleyip doğrusal regresyon kurmak"],
            ["degree","derece","modeldeki en yüksek üs; 2 bir kavis, 3 bir S kıvrımı"],
@@ -4989,33 +4984,34 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const ease=(t)=>t<.5?2*t*t:1-(-2*t+2)**2/2;
   const Zs=()=>{const s=S(), mid=(s.lo+s.hi)/2, half=(s.hi-s.lo)/2;
     return {mid,half, zl:(s.xlo-mid)/half, zh:(s.xhi-mid)/half, ze:(s.ex-mid)/half, ry:s.yhi-s.ylo};};
-  const TC=["--ink-soft","--c","--b","--d","--ink"];          // w₀ · x · x² · x³ · x⁴
-  const SUP=["","","²","³","⁴"];
+  const DMAX=10;                                              // en yüksek derece (m-fit 14'e çıkıyor; burada sütunlar okunur kalsın)
+  const TC=["--ink-soft","--c","--b","--d","--ink"];          // w₀ · x · x² · x³ · x⁴; yukarısı döngüde
+  const tcol=(j)=>j<TC.length?TC[j]:["--a","--warn","--good","--c","--b","--d"][(j-TC.length)%6];
+  const SUP=["","","²","³","⁴","⁵","⁶","⁷","⁸","⁹","¹⁰"];
   const TN=["seviye","eğim","kavis","S kıvrımı","uçları büker"];
+  /* tabloda ve denklemde görünen sütunlar: 5. dereceye kadar hepsi, sonrası 1 · x · x² · x³ · … · x^d */
+  const visCols=()=>deg<=5?Array.from({length:deg+1},(_,j)=>j):[0,1,2,3,-1,deg];
 
-  /* Least squares, normal denklemlerle: sütunlar 1, u, u², …, u^d. u ∈ [−1, 1] ve d ≤ 4
-     olduğu için koşullanma zararsız (ham saatle x⁴ 100 bini geçerdi; bkz. ders notu). */
-  function solve(A,b){
-    const n=b.length; A=A.map(r=>r.slice()); b=b.slice();
-    for(let i=0;i<n;i++){
-      let pv=i; for(let r=i+1;r<n;r++) if(Math.abs(A[r][i])>Math.abs(A[pv][i])) pv=r;
-      [A[i],A[pv]]=[A[pv],A[i]]; [b[i],b[pv]]=[b[pv],b[i]];
-      if(Math.abs(A[i][i])<1e-10) return null;               // nokta sayısı sütun sayısından az
-      for(let r=i+1;r<n;r++){const f=A[r][i]/A[i][i]; for(let c=i;c<n;c++) A[r][c]-=f*A[i][c]; b[r]-=f*b[i];}
-    }
-    const x=new Array(n).fill(0);
-    for(let i=n-1;i>=0;i--){let s=b[i]; for(let c=i+1;c<n;c++) s-=A[i][c]*x[c]; x[i]=s/A[i][i];}
-    return x;
-  }
-  /* least squares çözümü (o anki sütunlarla en iyi ağırlıklar); veri ve sütun sayısına göre önbellekli */
+  /* Least squares, modifiye Gram-Schmidt QR ile: sütunlar 1, u, u², …, u^d. Normal
+     denklemler (XᵀX) koşullanmayı KARESİNE çıkarıyor; 10. derecede, gri kenara eklenmiş
+     noktalarla (u ≈ 1.75, u¹⁰ ≈ 270) pivotlar 1e-10'un altına düşüp çözüm "nokta yetmiyor"a
+     dönüyordu. m-fit de aynı sebeple QR kullanıyor. */
   let FW=null, fwKey="";
   function weights(){
     const key=ver+"|"+deg; if(key===fwKey) return FW; fwKey=key;
-    const n=deg+1; if(pts.length<n) return FW=null;
-    const A=Array.from({length:n},()=>new Array(n).fill(0)), b=new Array(n).fill(0);
-    pts.forEach(q=>{const z=[1]; for(let j=1;j<n;j++) z.push(z[j-1]*q.u);
-      for(let i=0;i<n;i++){ b[i]+=z[i]*q.v; for(let j=0;j<n;j++) A[i][j]+=z[i]*z[j]; }});
-    return FW=solve(A,b);
+    const n=deg+1, m=pts.length; if(m<n) return FW=null;
+    const Q=[], Rm=Array.from({length:n},()=>new Float64Array(n)), y=pts.map(q=>q.v);
+    for(let j=0;j<n;j++){
+      const c=Float64Array.from(pts,q=>q.u**j), v=Float64Array.from(c);
+      for(let k=0;k<j;k++){ let t=0; for(let i=0;i<m;i++) t+=Q[k][i]*v[i]; Rm[k][j]=t; for(let i=0;i<m;i++) v[i]-=t*Q[k][i]; }
+      let nr=0, nc0=0; for(let i=0;i<m;i++){ nr+=v[i]*v[i]; nc0+=c[i]*c[i]; } nr=Math.sqrt(nr);
+      if(!(nr>1e-9*Math.max(1,Math.sqrt(nc0)))) return FW=null;   // aynı x'te üst üste noktalar: bağımsız nokta yetmiyor
+      Rm[j][j]=nr; for(let i=0;i<m;i++) v[i]/=nr; Q.push(v);
+    }
+    const w=new Array(n).fill(0);
+    for(let j=n-1;j>=0;j--){ let t=0; for(let i=0;i<m;i++) t+=Q[j][i]*y[i];
+      for(let k=j+1;k<n;k++) t-=Rm[j][k]*w[k]; w[j]=t/Rm[j][j]; }
+    return FW=w;
   }
   const evw=(w,u)=>{let s=0,z=1; for(const c of w){s+=c*z;z*=u;} return s;};
   /* verinin birimi: y = ylo + v · (yhi − ylo); ağırlıklar da öyle (w₀ kaydırılır, ötekiler ölçeklenir) */
@@ -5027,8 +5023,9 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const m=Math.round(x*60); return `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;};
   const nf=(v,d)=>{const t=Math.abs(v).toFixed(d); return (v<0&&+t!==0?"−":"")+t;};   // eksi işareti U+2212, uygulamanın geri kalanı gibi
   const pm=(v,d)=>{const s=Math.abs(v).toFixed(d); return (v<0&&+s!==0?"− ":"+ ")+s;};
-  const eqStr=(w)=>{const s=S(), W=Wd(w);
-    return `${s.y} = ${W[0].toFixed(1)}`+W.slice(1).map((c,j)=>` ${pm(c,1)}·x${SUP[j+1]}`).join("");};
+  const eqStr=(w,short)=>{const s=S(), W=Wd(w), t=(c,j)=>` ${pm(c,1)}·x${SUP[j]}`;
+    if(!short||W.length<=5) return `${s.y} = ${W[0].toFixed(1)}`+W.slice(1).map((c,j)=>t(c,j+1)).join("");
+    return `${s.y} = ${W[0].toFixed(1)}${t(W[1],1)}${t(W[2],2)} …${t(W[W.length-1],W.length-1)}`;};
   const xdef=()=>{const s=S(), z=Zs(); return `x = (${s.x} − ${+z.mid.toFixed(2)}) / ${+z.half.toFixed(2)}`;};
 
   function sample(){
@@ -5082,7 +5079,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
        o noktaya kadar daralır. Eskiden gri kenara tıklama sessizce yok sayılıyordu; fidan
        verisinde tuvalin yalnız üçte birine nokta eklenebiliyordu. */
     const ul=Math.min(-1,...pts.map(q=>q.u)), uh=Math.max(1,...pts.map(q=>q.u));
-    const q0=split+22, qx1=W-12, qw=qx1-q0, nc=deg+3, cw=qw/nc;       // tablo: ham x · 1 … x^d · ŷ
+    const VC=visCols(), q0=split+22, qx1=W-12, qw=qx1-q0, nc=VC.length+2, cw=qw/nc;   // tablo: ham x · sütunlar · ŷ
     const TF=wide?tableFit(H,p,cw):{k:5};
     GM.k=TF.k;
     /* wo: least squares cevabı · wf: ekrandaki model (son değer) · w: çizilen (geçişin ara konumu) */
@@ -5116,7 +5113,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(showT){
         ctx.strokeStyle=hexA(TC[0],.9); ctx.lineWidth=1.6; ctx.setLineDash([3,4]);
         ctx.beginPath(); ctx.moveTo(x0,Y(w[0])); ctx.lineTo(x1,Y(w[0])); ctx.stroke(); ctx.setLineDash([]);
-        for(let j=1;j<w.length;j++){ ctx.strokeStyle=hexA(TC[j],.85); ctx.lineWidth=2; ctx.beginPath();
+        for(let j=1;j<w.length;j++){ ctx.strokeStyle=hexA(tcol(j),j<TC.length?.85:.6); ctx.lineWidth=j<TC.length?2:1.5; ctx.beginPath();
           for(let i=0;i<=120;i++){const u=z.zl+(z.zh-z.zl)*i/120, yy=Y(clamp(w[0]+w[j]*u**j,-2,3)); i?ctx.lineTo(X(u),yy):ctx.moveTo(X(u),yy);}
           ctx.stroke(); }
       }
@@ -5144,21 +5141,27 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(pe<-.02||pe>1.02) label(ctx,pe<0?"▼":"▲",ex,pe<0?y1-6:y0+6,css("--accent"),"center",11);
       const yu=s.yu, up=yp<yt;
       /* zeminli etiket: kenardaki noktaların üstüne biniyordu */
-      legend(ctx,ex-14,clamp(up?yp-6:yp+6,y0+10,y1-10),[[`model ${nf(Yd(pe),s.yd)} ${yu}`,"--accent"]],{size:11.5,align:"right"});
+      /* tahmin tuvalin dışına taştıysa (yüksek derece) etiket okun iç tarafına: üst kenarda
+         köşedeki denklemin altında kalıyordu */
+      const yl=pe>1.02?yp+20:pe<-.02?yp-20:(up?yp-6:yp+6);
+      legend(ctx,ex-14,clamp(yl,y0+10,y1-10),[[`model ${nf(Yd(pe),s.yd)} ${yu}`,"--accent"]],{size:11.5,align:"right"});
       legend(ctx,ex-14,clamp(up?yt+14:yt-14,y0+10,y1-10),[[`gerçek ${nf(Yd(te),s.yd)} ${yu}`,"--ink-soft"]],{size:11.5,align:"right"});
     }
     if(X(ul)-x0>44) label(ctx,"veri yok",(x0+X(ul))/2,y1-10,css("--ink-soft"),"center",10.5);
     if(x1-X(uh)>44) label(ctx,"veri yok",(X(uh)+x1)/2,y1-10,css("--ink-soft"),"center",10.5);
     /* nokta yetmezse sol panel ne yapılacağını söyler (tablo dar ekranda görünmüyor) */
-    if(!wo) legend(ctx,(x0+x1)/2,(y0+y1)/2,[[pts.length?`${deg+1} ağırlık için en az ${deg+1} nokta gerekiyor`:"veri yok: tuvale tıklayıp nokta ekle","--ink"],
+    if(!wo) legend(ctx,(x0+x1)/2,(y0+y1)/2,[[pts.length?`${deg+1} ağırlık için farklı x'te en az ${deg+1} nokta gerekiyor`:"veri yok: tuvale tıklayıp nokta ekle","--ink"],
       [pts.length?`şimdi ${pts.length} nokta var · tuvale tıklayıp ekle`:"sonra « Least squares çözümü »ne bas","--ink-soft"]],{size:12.5,lh:18,align:"center"});
 
     /* köşe metni: denklem (ne olduğu önekte), x'in tanımı, eğitimin durumu ve (Terimler
        açıksa) parçaların adları */
     if(w){
-      const tE=(anim?"iniyor: ":best?"least squares: ":"model: ")+eqStr(w), room=Math.max(120,X(1)-x0-40);
-      let fs=14; ctx.save();
+      const pre=anim?"iniyor: ":best?"least squares: ":"model: ", room=Math.max(120,X(1)-x0-40);
+      /* yüksek derecede denklem köşeye sığmıyor: 10 px'te de taşarsa ortadaki terimler "…" olur */
+      let tE=pre+eqStr(w), fs=14; ctx.save();
       for(;fs>10;fs-=.5){ctx.font=`600 ${fs}px "IBM Plex Mono", monospace`; if(ctx.measureText(tE).width<=room) break;}
+      if(ctx.measureText(tE).width>room){ tE=pre+eqStr(w,true);
+        for(fs=14;fs>10;fs-=.5){ctx.font=`600 ${fs}px "IBM Plex Mono", monospace`; if(ctx.measureText(tE).width<=room) break;} }
       ctx.restore();
       const lh=Math.round(fs*1.42);
       legend(ctx,x0+8,y0+lh/2+2,[[tE,"--accent"]],{size:fs,lh});
@@ -5166,7 +5169,9 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(anim) L.push([`RMSE ${rmseD(anim.from).toFixed(rd)} → ${rmseD(w).toFixed(rd)} ${s.yu}`,"--accent"]);
       else if(wo&&!best) L.push([`RMSE ${rN.toFixed(rd)} ${s.yu} · en iyisi ${rO.toFixed(rd)}: « Least squares çözümü »`,"--bad"]);
       else if(ghost) L.push([`- - önceki eğri · RMSE ${rmseD(ghost).toFixed(rd)} → ${rN.toFixed(rd)} ${s.yu}`,"--ink-soft"]);
-      if(showT&&y1-y0>=200) Wd(w).forEach((c,j)=>L.push([j?`— ${c<0?"−":"+"}${Math.abs(c).toFixed(1)}·x${SUP[j]} · ${TN[j]}`:`- - w₀ = ${c.toFixed(1)} · ${TN[0]}`,TC[j]]));
+      if(showT&&y1-y0>=200){ const Wv=Wd(w);
+        Wv.slice(0,Math.min(Wv.length,TC.length)).forEach((c,j)=>L.push([j?`— ${c<0?"−":"+"}${Math.abs(c).toFixed(1)}·x${SUP[j]} · ${TN[j]}`:`- - w₀ = ${c.toFixed(1)} · ${TN[0]}`,TC[j]]));
+        if(Wv.length>TC.length) L.push([`— x⁵ … x${SUP[Wv.length-1]}: ${Wv.length-TC.length} terim daha, soluk ince çizgiler`,"--ink-soft"]); }
       legend(ctx,x0+8,y0+lh+14,L,{size:11.5,lh:16});
     }
     label(ctx,s.ax+" →",(x0+x1)/2,y1+16,css("--ink-soft"),"center",11);
@@ -5181,15 +5186,15 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       label(ctx,xdef(),qx1,yy,css("--ink-soft"),"right",Math.min(11,fz));
       yy+=rh+2;
       const cx=(k)=>q0+cw*(k+.5);
-      const head=[s.x,"1",...Array.from({length:deg},(_,j)=>"x"+SUP[j+1]),"ŷ"];
+      const head=[s.x,...VC.map(j=>j<0?"…":j?"x"+SUP[j]:"1"),"ŷ"];
       head.forEach((h,k)=>label(ctx,h,cx(k),yy,css(k===0?"--ink-soft":k===nc-1?"--accent":"--ink"),"center",fz));
       ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1;
       ctx.beginPath(); ctx.moveTo(q0,yy+rh/2); ctx.lineTo(qx1,yy+rh/2); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(q0+cw,yy-rh/2); ctx.lineTo(q0+cw,yy+rh*(show.length+3.6)); ctx.stroke(); ctx.restore();
       yy+=rh;
       show.forEach((i)=>{
-        const q=pts[i], cells=[fx(z.mid+q.u*z.half),"1"];
-        for(let j=1;j<=deg;j++) cells.push((q.u**j<0?"−":"")+Math.abs(q.u**j).toFixed(2));
+        const q=pts[i], cells=[fx(z.mid+q.u*z.half)];
+        VC.forEach(j=>cells.push(j<0?"…":j?(q.u**j<0?"−":"")+Math.abs(q.u**j).toFixed(2):"1"));
         cells.push(w?nf(Yd(evw(w,q.u)),s.yd):"—");
         if(i===hr){ ctx.fillStyle=hexA("--accent",.10); ctx.fillRect(q0,yy-rh/2,qw,rh); }
         cells.forEach((c,k)=>label(ctx,c,cx(k),yy,css(k===nc-1?"--accent":"--ink"),"center",fz));
@@ -5200,12 +5205,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(w){
         const Wv=Wd(w);
         label(ctx,"w",cx(0),yy,css("--accent"),"center",fz);
-        Wv.forEach((c,j)=>label(ctx,(c<0?"−":"")+Math.abs(c).toFixed(1),cx(j+1),yy,css("--accent"),"center",fz));
+        VC.forEach((j,k)=>label(ctx,j<0?"…":(Wv[j]<0?"−":"")+Math.abs(Wv[j]).toFixed(1),cx(k+1),yy,css("--accent"),"center",fz));
         yy+=rh;
         if(hr>=0){
           const q=pts[hr], pr=Wv.map((c,j)=>c*q.u**j);
           label(ctx,"w × satır",cx(0),yy,css("--ink-soft"),"center",Math.min(fz,10.5));
-          pr.forEach((c,j)=>label(ctx,(c<0?"−":"")+Math.abs(c).toFixed(1),cx(j+1),yy,css("--ink-soft"),"center",fz));
+          VC.forEach((j,k)=>label(ctx,j<0?"…":(pr[j]<0?"−":"")+Math.abs(pr[j]).toFixed(1),cx(k+1),yy,css("--ink-soft"),"center",fz));
           const sum=pr.reduce((a2,b2)=>a2+b2,0);
           label(ctx,"Σ "+nf(sum,s.yd),cx(nc-1),yy,css("--accent"),"center",fz);
           yy+=rh+6;
@@ -5266,11 +5271,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     draw();
   };
   $("#poly-fit").onclick=applyOls;
-  const DB=["#poly-d1","#poly-d2","#poly-d3","#poly-d4"];   // sütun düğmeleri (lint: seçiciler açık yazılır)
-  const setDeg=(d)=>{ const nd=clamp(d,1,4); if(nd!==deg){ deg=nd; resize(); }
-    DB.forEach((sel,k)=>{const b=$(sel); if(b) b.setAttribute("aria-pressed",String(k+1===deg));});
+  /* derece kaydırıcısı: çıktısı modele giren sütunlar ("x", "x · x²", "x … x⁷") */
+  const colStr=(d)=>d===1?"x":d===2?"x · x²":`x … x${SUP[d]}`;
+  const setDeg=(d)=>{ const nd=clamp(Math.round(d),1,DMAX); if(nd!==deg){ deg=nd; resize(); }
+    $("#poly-d").value=deg; txt("#poly-do",colStr(deg));
     draw(); };
-  DB.forEach((sel,k)=>{$(sel).onclick=()=>setDeg(k+1);});
+  $("#poly-d").oninput=e=>setDeg(+e.target.value);
   $("#poly-t").onclick=e=>{showT=!showT; e.currentTarget.setAttribute("aria-pressed",String(showT)); draw();};
   $("#poly-new").onclick=()=>{ed.reset();sample();draw();};
   $("#poly-clr").onclick=()=>{ed.reset();pts=[];ver++;flat();draw();};
@@ -5280,21 +5286,23 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
     {t:"Düz çizgiden doğruya",d:"Gün içi sıcaklık. Model düz bir çizgiyle başladı: her saate ortalama sıcaklık, <b>R²</b> 0. « Least squares çözümü » tek sütunla (x) en iyi ağırlıkları buldu ve çizgi yerine indi. Ama doğru ya hep çıkar ya hep iner, tepeyi göremez: R² düşük, akşam 20:00 için yaklaşık 30 °C söylüyor, gerçek 20 °C.",
-     set:0, hl:["#poly-fit","#poly-r2","#poly-ex"], run(){setPressed("#poly-t",false);press("#poly-d1");press("#poly-fit");}},
+     set:0, hl:["#poly-fit","#poly-r2","#poly-ex"], run(){setPressed("#poly-t",false);setR("#poly-d",1);press("#poly-fit");}},
     {t:"Yeni bir sütun: x²",d:"Tabloya saatin karesini ekledik. Yeni ağırlık 0'dan başladı, eğri kıpırdamadı. « Least squares çözümü » bu ağırlığı da bulunca eğri büküldü ve tepe yakalandı; R² 0.9'un üstüne çıktı. Önceki doğru kesikli gri çizgide duruyor. Model hâlâ aynı işi yapıyor: her sütunu bir ağırlıkla çarpıp topluyor.",
-     hl:["#poly-d2","#poly-r2"], run(){press("#poly-d2");press("#poly-fit");}},
+     hl:["#poly-d","#poly-r2"], run(){setR("#poly-d",2);press("#poly-fit");}},
     {t:"Eğri, parçaların toplamı",d:"« Terimler » açıldı. Gri kesikli çizgi w₀, yani ortalama seviye. Mor çizgi w₁·x terimi, eğimi veriyor. Turuncu çizgi w₂·x², kavisi veriyor. Kalın pembe eğri bunların toplamı. Ağırlıkları least squares birlikte buluyor, Modül 03'teki gibi.",
      hl:["#poly-t"], run(){setPressed("#poly-t",true);press("#poly-fit");}},
     {t:"Tasarım matrisi",d:"Sağdaki tablo modelin gördüğü veri: her satır bir ölçüm, her sütun bir öznitelik. 1, x ve x² sütunlarını aynı ham ölçümden biz ürettik. Seçili satırda her sayı alttaki ağırlıkla çarpılıyor, toplamı ŷ: modelin o saat için tahmini. Fareyi bir noktanın üstüne götürün, seçili satır değişir.",
      run(){setPressed("#poly-t",false);press("#poly-fit");}},
     {t:"Veri dışında savruluyor",d:"Dört sütun: x … x⁴, ağırlıkları yeniden bulundu. Ölçüm aralığının içinde eğri iyi görünüyor, ama gri bölgede onu tutan tek bir nokta yok. Sağ kenardaki pembe halka modelin 20:00 tahmini, gri halka gerçek değer. « Yeni veri » ve ardından « Least squares çözümü »ne birkaç kez basın: aralığın içi hep benzer kalıyor, kenar her seferinde başka yere savruluyor.",
-     hl:["#poly-ex"], run(){press("#poly-d4");press("#poly-fit");}},
+     hl:["#poly-ex"], run(){setR("#poly-d",4);press("#poly-fit");}},
+    {t:"Derece 10: daha iyi mi?",d:"On bir sütun, on bir ağırlık. RMSE ve R² 4. dereceden de iyi: eğri noktalara daha çok yapışıyor. Ama 20:00 tahmini örneklemlerin neredeyse hepsinde 100 °C'den, çoğunda 1000 °C'den fazla şaşıyor. Eğitim noktalarındaki hata derece arttıkça hep düşer; modelin iyi olduğunu söylemez. Bu ezberin adı <b>overfitting</b> (aşırı öğrenme), Modül 11'de test hatasıyla ölçülüyor.",
+     hl:["#poly-d","#poly-rmse","#poly-ex"], run(){setR("#poly-d",10);press("#poly-fit");}},
     {t:"R² yüksek, biçim yanlış",d:"Fren mesafesi, tek sütun. Least squares doğrusunun R²'si 0.96 civarında; iyi bir model gibi. Ama 130 km/sa'te doğru, durma mesafesini 17 m kadar eksik söylüyor. Yolda bu 17 metre, öndeki araca çarpmakla durabilmek arasındaki fark.",
-     set:1, hl:["#poly-r2","#poly-ex"], run(){press("#poly-d1");press("#poly-fit");}},
+     set:1, hl:["#poly-r2","#poly-ex"], run(){setR("#poly-d",1);press("#poly-fit");}},
     {t:"Doğru biçim dışarıda da tutar",d:"Durma mesafesi hızın karesiyle büyür; bu bir fizik yasası. x² ekleyip ağırlıkları yeniden bulunca 130 km/sa tahmini gerçeğe iniyor, çünkü modelin biçimi yasanın biçimi. Burada extrapolation güvenli; sebebi veri değil, fizik. Dört sütuna çıkarsanız aynı kenar yine savruluyor.",
-     hl:["#poly-ex"], run(){press("#poly-d2");press("#poly-fit");}},
+     hl:["#poly-ex"], run(){setR("#poly-d",2);press("#poly-fit");}},
     {t:"S eğrisi için x³",d:"Fidan boyu: yavaş başlar, hızlanır, durulur. x² eklemek hatayı neredeyse hiç düşürmüyor, çünkü S tek bir tepe değil. x³ ile RMSE yaklaşık yarıya iniyor. Ama sağ kenara bakın: aynı model 24. haftada 51 cm'lik fidanı sıfır boy civarına indiriyor, örneklemlerin yarısında eksiye. Aralığın içinde R² 0.99, dışında saçma.",
-     set:2, hl:["#poly-rmse","#poly-ex"], run(){press("#poly-d3");press("#poly-fit");}}
+     set:2, hl:["#poly-rmse","#poly-ex"], run(){setR("#poly-d",3);press("#poly-fit");}}
   ]});
 })();
 

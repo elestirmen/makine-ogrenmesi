@@ -124,7 +124,10 @@ CONTENT["m-knn"] = {
   (katsayı değişmez), birlikte büyüyen (yarısı ötekine geçer, katsayı oynar), karıştırıcı
   (işaret döner). "Tek başına" R²'si ve denklemler `aria-label`'da; `behaviour.js` oradan okur.
 - **Modül 05 (`m-poly`) x'i ölçekler:** ölçüm aralığı [lo, hi] → [−1, 1]; ham saatle x⁴
-  100 bini geçer (ders notunun tuzağı). Tuval ekseni ölçüm aralığından geniş, kenarlar
+  100 bini geçer (ders notunun tuzağı). Derece kaydırıcıyla 1–10; çözücü QR (m-fit gibi):
+  normal denklemler 10. derecede, gri kenara eklenmiş noktalarla (u¹⁰ ≈ 270) pivotu
+  yitirip "nokta yetmiyor" diyordu. 5. dereceden sonra tablo ve köşedeki denklem ortadaki
+  sütunları "…" ile kısaltır. Tuval ekseni ölçüm aralığından geniş, kenarlar
   gri (veri yok); gerçek ilişki YALNIZ gri bölgede kesikli çizilir, içeride veri konuşur.
   Gri kenara da nokta eklenir ve şerit o noktaya kadar daralır: ilk sürümde oraya tıklama
   sessizce yok sayılıyordu ve fidan verisinde tuvalin yalnız üçte biri nokta kabul ediyordu
@@ -320,7 +323,7 @@ for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; 
 # 23 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
-node tools/behaviour.js index.html   # 167 denetim: 23 modül + alternatif veri kümeleri
+node tools/behaviour.js index.html   # 169 denetim: 23 modül + alternatif veri kümeleri
 
 # tuvale yazılan her etiket rengini açık VE koyu temada zemine karşı ölç
 # (label(...) ve legend(...) çağrılarını ayıklar; 4.5 altındakileri bildirir).

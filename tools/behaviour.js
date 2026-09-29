@@ -275,7 +275,7 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   const alive=()=>TIMERS.filter(Boolean).length;
   /* « Least squares çözümü » (m-lin kuralı): eğri kendiliğinden oturmaz, göstergeler basıldığı
      anda son değerde, çizim ~1.2 sn'de kayar. Ölçümler bu düğmeye basılarak alınıyor. */
-  { mod.__pick(0); el('poly-d1').click(); const r=[];
+  { mod.__pick(0); S(el,'poly-d',1); const r=[];
     for(let t=0;t<12;t++){
       el('poly-new').click();
       const r2new=T(el,'poly-r2'), flatBad=!/ok/.test(el('poly-rmse').className);
@@ -283,13 +283,13 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
       const fitOk=T(el,'poly-rmse')===T(el,'poly-best')&&/ok/.test(el('poly-rmse').className)&&/^Least squares:/.test(/\. (Least squares|Model):/.exec(AR())?.[1]+':');
       const ghost=/Önceki eğri kesikli çizgide/.test(AR());
       tick(38); const at38=alive()>t0; tick(4); const at42=alive()>t0;
-      const r1=V(el,'poly-r2'); el('poly-d2').click();            // yeni sütun, ağırlığı 0
+      const r1=V(el,'poly-r2'); S(el,'poly-d',2);            // yeni sütun, ağırlığı 0
       const kept=Math.abs(V(el,'poly-r2')-r1)<1e-9&&!/ok/.test(el('poly-rmse').className);
       el('poly-fit').click(); const r2=V(el,'poly-r2');
       el('poly-fit').click();                                     // geçiş sürerken ikinci basış
       const skip=alive()===t0;
-      el('poly-d1').click();
-      r.push({r2new,flatBad,on,fitOk,ghost,at38,at42,kept,up:r2>r1,skip});
+      S(el,'poly-d',1);
+      r.push({r2new,flatBad,on,fitOk,ghost,at38,at42,kept,r1,r2,skip});
     }
     const bad=(k)=>r.filter(x=>!x[k]).length;
     chk(r.every(x=>x.r2new==='0.000'&&x.flatBad), "yeni veride model düz çizgi: R² 0, RMSE en iyisi değil (adım 1)", `${r.filter(x=>!(x.r2new==='0.000'&&x.flatBad)).length}/12`);
@@ -297,7 +297,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
     chk(r.every(x=>x.on&&x.at38&&!x.at42), "eğri ~1.2 sn'de yerine iniyor ve geçiş kendiliğinden bitiyor", `başladı ${12-bad('on')} · 38. tıkta süren ${12-bad('at38')} · 42. tıkta süren ${12-bad('at42')}`);
     chk(r.every(x=>x.ghost), "önceki eğri kesikli çizgide kalıyor (adım 2)");
     chk(r.every(x=>x.kept), "yeni sütunun ağırlığı 0'dan başlıyor: eğri kıpırdamıyor (adım 2)", `${bad('kept')}/12 değişti`);
-    chk(r.every(x=>x.up), "düğmeye basınca yeni sütun R²'yi yükseltiyor");
+    /* nested least squares: R² hiç düşmez; gösterge 3 haneli, küçük artış "eşit" okunabiliyor */
+    chk(r.every(x=>x.r2>=x.r1)&&mean(r.map(x=>x.r2-x.r1))>.1, "düğmeye basınca yeni sütun R²'yi yükseltiyor (adım 2)",
+        `ort +${mean(r.map(x=>x.r2-x.r1)).toFixed(3)}`);
     chk(r.every(x=>x.skip), "geçiş sürerken ikinci basış sona atlıyor");
   }
   const sv=(s)=>num(String(s).replace(/−/g,'-'));
@@ -305,7 +307,7 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   const ex=()=>{const m=/model (−?[\d.]+) \S+, gerçek (−?[\d.]+)/.exec(AR()); return m?{pe:sv(m[1]),te:sv(m[2])}:{pe:NaN,te:NaN};};
   const run=(k,N)=>{ mod.__pick(k); const R={1:[],2:[],3:[],4:[]};
     for(let t=0;t<N;t++){ el('poly-new').click();
-      for(let d=1;d<=4;d++){ el('poly-d'+d).click(); el('poly-fit').click(); const e=ex();
+      for(let d=1;d<=4;d++){ S(el,'poly-d',d); el('poly-fit').click(); const e=ex();
         R[d].push({r2:V(el,'poly-r2'), rm:V(el,'poly-rmse'), pe:e.pe, te:e.te, k:V(el,'poly-k')}); } }
     return R; };
   const col=(a,k)=>a.map(x=>x[k]);
@@ -331,6 +333,17 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
       `sd x² ${sd(col(H[2],'pe')).toFixed(1)} → x⁴ ${sd(col(H[4],'pe')).toFixed(1)}`);
   chk(mean(col(H[4],'rm'))<=mean(col(H[2],'rm')), "ama aralığın içinde dört sütun daha kötü uymuyor",
       `RMSE ${mean(col(H[2],'rm')).toFixed(2)} → ${mean(col(H[4],'rm')).toFixed(2)}`);
+  /* adım 6 ve ders notu: "Derece 10 … RMSE ve R² 4. dereceden de iyi … 20:00 tahmini örneklemlerin
+     neredeyse hepsinde 100 °C'den, çoğunda 1000 °C'den fazla şaşıyor". 10 × 40 turda paylar
+     0.95–0.97 ve 0.68–0.88; RMSE her turda düştü. */
+  { mod.__pick(0); const e10=[]; let low=0, r2up=0; const N=40;
+    for(let t=0;t<N;t++){ el('poly-new').click(); S(el,'poly-d',4); el('poly-fit').click();
+      const r4=V(el,'poly-rmse'), q4=V(el,'poly-r2'); S(el,'poly-d',10); el('poly-fit').click();
+      if(V(el,'poly-rmse')<r4) low++; if(V(el,'poly-r2')>=q4) r2up++; const e=ex(); e10.push(Math.abs(e.pe-e.te)); }
+    S(el,'poly-d',1);
+    chk(low===N&&r2up===N, "derece 10: RMSE ve R² 4. dereceden de iyi (eğitim noktalarında)", `RMSE düştü ${low}/${N} · R² arttı ${r2up}/${N}`);
+    chk(share(e10,x=>x>100)>=.85&&share(e10,x=>x>1000)>=.55, "derece 10: 20:00 tahmini neredeyse hep 100 °C'den, çoğunlukla 1000 °C'den fazla şaşıyor",
+        `>100: ${share(e10,x=>x>100).toFixed(2)} · >1000: ${share(e10,x=>x>1000).toFixed(2)}`); }
   /* not ve adım 6–7: "Tek sütunla R² yine de yüksek (ortalama 0.96), ama doğru 130 km/sa'te
      mesafeyi 17 m kadar eksik söylüyor. x² ekleyince tahmin birkaç metreye kadar gerçeğe iniyor;
      x⁴'e kadar çıkınca kenar yine savruluyor." */
