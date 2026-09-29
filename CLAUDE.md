@@ -133,6 +133,13 @@ CONTENT["m-knn"] = {
   sütun × ağırlık = ŷ); kısa tuvalde önce alt açıklama, sonra satır sayısı (5 → 3) düşer.
   Seçili satır fareyle değişir ve fare çıkınca KALIR (m-cn kuralı). Veri dışı tahmin ve
   gerçek değer `aria-label`'da ("model … gerçek …"), `behaviour.js` oradan sınar.
+  Eğri **kendiliğinden oturmaz** (m-lin kuralı; ilk sürüm her tıklamada yeniden uyduruyordu
+  ve hoca "eğitimi göremiyoruz" dedi): yeni veride düz çizgi (w₀ = ortalama, R² 0), sütun
+  eklenince yeni ağırlık 0'dan başlar ve eğri kıpırdamaz, nokta eklenince eğri yerinde
+  kalır. « Least squares çözümü » o anki sütunlarla en iyi ağırlıkları bulur ve eğriyi
+  ~1.2 sn'de yerine indirir (40 tık × 30 ms; köşede RMSE düşüşü, önceki eğri kesikli gri).
+  Yalnız çizim kayar; göstergeler basıldığı anda son değerde, ikinci basış sona atlar.
+  Düğme en iyideyken basılırsa hiçbir şey yapmaz, adımlar bu yüzden her seferinde basabilir.
 - `lesson` kutusu: `q` bir soru, `short` sorunun iki üç cümlelik **kısa cevabı**
   (accent şeritli kutuda, hiç bilmeyen biri yalnız bunu okusa da bir şey götürsün),
   `idea` fikir, `read` ekranı okuma rehberi, `terms` İngilizce/Türkçe terim tablosu,
@@ -313,7 +320,7 @@ for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; 
 # 23 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
-node tools/behaviour.js index.html   # 160 denetim: 23 modül + alternatif veri kümeleri
+node tools/behaviour.js index.html   # 167 denetim: 23 modül + alternatif veri kümeleri
 
 # tuvale yazılan her etiket rengini açık VE koyu temada zemine karşı ölç
 # (label(...) ve legend(...) çağrılarını ayıklar; 4.5 altındakileri bildirir).

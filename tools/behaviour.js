@@ -270,22 +270,51 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
 /* ── 05 · Polinom regresyon: yeni sütunlar, veri dışı tahmin ── */
 {
   head("Modül 05 · Eğri de doğrusal olabilir (polynomial regression)");
-  const {el,M}=boot(F); const mod=M.find(m=>m.id==='m-poly');
+  const {el,M,TIMERS,tick}=boot(F); const mod=M.find(m=>m.id==='m-poly');
   const AR=()=>el('c-poly').getAttribute('aria-label')||'';
+  const alive=()=>TIMERS.filter(Boolean).length;
+  /* « Least squares çözümü » (m-lin kuralı): eğri kendiliğinden oturmaz, göstergeler basıldığı
+     anda son değerde, çizim ~1.2 sn'de kayar. Ölçümler bu düğmeye basılarak alınıyor. */
+  { mod.__pick(0); el('poly-d1').click(); const r=[];
+    for(let t=0;t<12;t++){
+      el('poly-new').click();
+      const r2new=T(el,'poly-r2'), flatBad=!/ok/.test(el('poly-rmse').className);
+      const t0=alive(); el('poly-fit').click(); const on=alive()>t0;
+      const fitOk=T(el,'poly-rmse')===T(el,'poly-best')&&/ok/.test(el('poly-rmse').className)&&/^Least squares:/.test(/\. (Least squares|Model):/.exec(AR())?.[1]+':');
+      const ghost=/Önceki eğri kesikli çizgide/.test(AR());
+      tick(38); const at38=alive()>t0; tick(4); const at42=alive()>t0;
+      const r1=V(el,'poly-r2'); el('poly-d2').click();            // yeni sütun, ağırlığı 0
+      const kept=Math.abs(V(el,'poly-r2')-r1)<1e-9&&!/ok/.test(el('poly-rmse').className);
+      el('poly-fit').click(); const r2=V(el,'poly-r2');
+      el('poly-fit').click();                                     // geçiş sürerken ikinci basış
+      const skip=alive()===t0;
+      el('poly-d1').click();
+      r.push({r2new,flatBad,on,fitOk,ghost,at38,at42,kept,up:r2>r1,skip});
+    }
+    const bad=(k)=>r.filter(x=>!x[k]).length;
+    chk(r.every(x=>x.r2new==='0.000'&&x.flatBad), "yeni veride model düz çizgi: R² 0, RMSE en iyisi değil (adım 1)", `${r.filter(x=>!(x.r2new==='0.000'&&x.flatBad)).length}/12`);
+    chk(r.every(x=>x.fitOk), "« Least squares çözümü » en iyi ağırlıkları buluyor (RMSE = en iyi RMSE, yeşil)", `${bad('fitOk')}/12 sapma`);
+    chk(r.every(x=>x.on&&x.at38&&!x.at42), "eğri ~1.2 sn'de yerine iniyor ve geçiş kendiliğinden bitiyor", `başladı ${12-bad('on')} · 38. tıkta süren ${12-bad('at38')} · 42. tıkta süren ${12-bad('at42')}`);
+    chk(r.every(x=>x.ghost), "önceki eğri kesikli çizgide kalıyor (adım 2)");
+    chk(r.every(x=>x.kept), "yeni sütunun ağırlığı 0'dan başlıyor: eğri kıpırdamıyor (adım 2)", `${bad('kept')}/12 değişti`);
+    chk(r.every(x=>x.up), "düğmeye basınca yeni sütun R²'yi yükseltiyor");
+    chk(r.every(x=>x.skip), "geçiş sürerken ikinci basış sona atlıyor");
+  }
   const sv=(s)=>num(String(s).replace(/−/g,'-'));
   /* veri dışı tahmin ve gerçek değer aria-label'da: "20:00 tahmini: model 30.6 °C, gerçek 20.1 °C." */
   const ex=()=>{const m=/model (−?[\d.]+) \S+, gerçek (−?[\d.]+)/.exec(AR()); return m?{pe:sv(m[1]),te:sv(m[2])}:{pe:NaN,te:NaN};};
   const run=(k,N)=>{ mod.__pick(k); const R={1:[],2:[],3:[],4:[]};
     for(let t=0;t<N;t++){ el('poly-new').click();
-      for(let d=1;d<=4;d++){ el('poly-d'+d).click(); const e=ex();
+      for(let d=1;d<=4;d++){ el('poly-d'+d).click(); el('poly-fit').click(); const e=ex();
         R[d].push({r2:V(el,'poly-r2'), rm:V(el,'poly-rmse'), pe:e.pe, te:e.te, k:V(el,'poly-k')}); } }
     return R; };
   const col=(a,k)=>a.map(x=>x[k]);
   const sd=(a)=>{const m=mean(a); return Math.sqrt(mean(a.map(x=>(x-m)**2)));};
   const share=(a,f)=>a.filter(f).length/a.length;
   const err=(a)=>a.map(x=>x.pe-x.te);
-  /* Fidan 60 tur: "yaklaşık yarısında eksi" payı ~0.45, 30 turda payın sd'si 0.09 */
-  const H=run(0,30), B=run(1,30), G=run(2,60);
+  /* 60 tur: fidanda "yaklaşık yarısında eksi" payı ~0.45 (30 turda payın sd'si 0.09);
+     sıcaklıkta kenar sd oranı ağır kuyruklu, 30 turda on koşudan birinde 3'ün altına düşüyordu */
+  const H=run(0,60), B=run(1,30), G=run(2,60);
   for(const [nm,R] of [["Gün içi sıcaklık",H],["Fren mesafesi",B],["Fidan boyu",G]])
     console.log(`       ${nm.padEnd(16)}: R² `+[1,2,3,4].map(d=>mean(col(R[d],'r2')).toFixed(3)).join(' · ')+
       `  |  kenar tahmini `+[1,2,3,4].map(d=>mean(col(R[d],'pe')).toFixed(1)+'±'+sd(col(R[d],'pe')).toFixed(1)).join(' · ')+`  (gerçek ${R[1][0].te})`);
@@ -297,8 +326,8 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(Math.abs(mean(col(H[1],'pe'))-30)<2.5&&Math.abs(H[1][0].te-20)<.6, "Gün içi sıcaklık: doğru 20:00 için yaklaşık 30 °C diyor, gerçek 20 °C",
       `model ort ${mean(col(H[1],'pe')).toFixed(1)} · gerçek ${H[1][0].te}`);
   /* adım 5: "aralığın içi hep benzer kalıyor, kenar her seferinde başka yere savruluyor" */
-  /* 25 × 30 turda oran en az 3.6, medyan 6.0 (kuyruk ağır: eşik 3) */
-  chk(sd(col(H[4],'pe'))>3*sd(col(H[2],'pe')), "dört sütunda kenar tahmini örneklemden örnekleme savruluyor",
+  /* 40 × 60 turda oran en az 3.3, %5'lik dilim 4.6, medyan 6.6 (kuyruk ağır: eşik 2.5) */
+  chk(sd(col(H[4],'pe'))>2.5*sd(col(H[2],'pe')), "dört sütunda kenar tahmini örneklemden örnekleme savruluyor",
       `sd x² ${sd(col(H[2],'pe')).toFixed(1)} → x⁴ ${sd(col(H[4],'pe')).toFixed(1)}`);
   chk(mean(col(H[4],'rm'))<=mean(col(H[2],'rm')), "ama aralığın içinde dört sütun daha kötü uymuyor",
       `RMSE ${mean(col(H[2],'rm')).toFixed(2)} → ${mean(col(H[4],'rm')).toFixed(2)}`);

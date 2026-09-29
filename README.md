@@ -84,7 +84,7 @@ araya girebilirsiniz.
 | 01 ortalama/medyan | noktalar üst üste yığılır; ortalama tahterevallinin **denge noktası** (▲), medyan ortadaki noktanın halkası |
 | 03 en iyi doğru | « Kareler »: her artık gerçek bir kare, **SSE = kırmızı alanın toplamı** |
 | 04 çoklu regresyon | 3B nokta bulutu ve **düzlem**; yandan bakınca üç paralel çizgi (katsayı = "öteki sabitken" eğim) ve kesikli tek değişkenli doğru; yanında iki katsayının **SSE kasesi** |
-| 05 polinom | eğri **terimlerine ayrılır** (w₀ seviye, w₁·x eğim, w₂·x² kavis …); sağda **tasarım matrisi**: 1, x, x², x³ sütunları, seçili satırda sütun × ağırlık = ŷ; gri kenarlarda veri dışı tahmin ile gerçek |
+| 05 polinom | « Least squares çözümü » eğriyi yerine indirir (yeni sütunun ağırlığı 0'dan başlar, eğri o ana dek kıpırdamaz); eğri **terimlerine ayrılır** (w₀ seviye, w₁·x eğim, w₂·x² kavis …); sağda **tasarım matrisi**: 1, x, x², x³ sütunları, seçili satırda sütun × ağırlık = ŷ; gri kenarlarda veri dışı tahmin ile gerçek |
 | 08 karar ağacı | « Ağacı çiz »: sağ panel **kurallar ağacına** döner (soru kutuları, evet/hayır dalları, yaprak sayıları) |
 | 09 orman | « Bir ağacın torbası »: k'ıncı ağacın bootstrap örneklemi (tekrar çekilenler halkalı, OOB içi boş) ve kendi merdiven sınırı |
 | 10 SVM | RBF'de de marj görünür: karar sınırı f = 0 ve marj eğrileri f = ±1 |
