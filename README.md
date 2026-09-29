@@ -63,9 +63,12 @@ gösterir, 09 ormanla düzeltir. 17 k'yı sorar, 18 doğru k'yı nasıl bulacağ
 
 **Ders notu.** Her modülün başlığının altında *Ders notu* düğmesi var (klavyede `?`).
 Açılan kutu tek ekranda şunları verir: modülün cevapladığı soru ve iki üç cümlelik
-**kısa cevabı**, fikrin günlük dille anlatımı, **ekranda ne var** rehberi (hangi panel neyi gösteriyor), veri kümelerinin
-tek satırlık özetleri, İngilizce–Türkçe terim tablosu, gerçek hayattaki kullanımı ve
-o konuda **sık yapılan hata**. Öğrenci kaydırıcıyı çevirip hiçbir şey anlamadan
+**kısa cevabı**, fikrin günlük dille anlatımı ve onun yanında bir **ders kitabı figürü**
+(mekanizma tek bakışta; tema değişince renkleri de döner), küçük sayılarla adım adım bir
+**elle hesap** örneği (Gini'yi, silhouette'i, precision'ı öğrenci bir kez kendi eliyle
+hesaplasın), **ekranda ne var** rehberi (hangi panel neyi gösteriyor), veri kümelerinin
+tek satırlık özetleri, İngilizce–Türkçe terim tablosu, gerçek hayattaki kullanımı,
+o konuda **sık yapılan hata** ve cevabı tıklayınca açılan üç **kendini sına** sorusu. Öğrenci kaydırıcıyı çevirip hiçbir şey anlamadan
 geçmesin diye var; kutunun altındaki *Adım adım anlat* düğmesi doğrudan rehberli
 anlatımı başlatır.
 

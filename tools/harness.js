@@ -103,7 +103,7 @@ sandbox.history={
 };
 vm.createContext(sandbox);
 try{
-  vm.runInContext(script+"\n;globalThis.__M=MODULES;globalThis.__SEQ=SEQ;globalThis.__META=META;globalThis.__C=CONTENT;",sandbox,{timeout:20000});
+  vm.runInContext(script+"\n;globalThis.__M=MODULES;globalThis.__SEQ=SEQ;globalThis.__META=META;globalThis.__C=CONTENT;globalThis.__FIGS=typeof FIGS!=='undefined'?FIGS:{};",sandbox,{timeout:20000});
 }catch(e){ throw new Error("YÜKLEME HATASI: "+e.message+"\n"+(e.stack||'').split('\n').slice(0,4).join('\n')); }
 
 const M=sandbox.__M, SEQ=sandbox.__SEQ, META=sandbox.__META, CONTENT=sandbox.__C;
@@ -168,6 +168,12 @@ for(const mod of SEQ){
     if((L.terms||[]).length<2)       eksik.push(`${mod.id}: lesson.terms en az iki terim olmalı`);
     if(!(L.life||[]).length)         eksik.push(`${mod.id}: lesson.life eksik`);
     if(!L.trap)                      eksik.push(`${mod.id}: lesson.trap eksik`);
+    /* figür + elle hesap + kendini sına: ders notu yalnız düz yazı kalınca öğrenci
+       formülü hiç çalıştırmadan, kendini hiç sınamadan geçiyordu */
+    if(!L.fig||!L.fig.cap)           eksik.push(`${mod.id}: lesson.fig (figür altyazısı) eksik`);
+    if(!(SB.__FIGS||{})[mod.id])     eksik.push(`${mod.id}: FIGS'te figür yok`);
+    if(!L.ex||!L.ex.t||(L.ex.s||[]).length<3) eksik.push(`${mod.id}: lesson.ex (elle hesap, en az 3 adım) eksik`);
+    if((L.check||[]).length<2||L.check.some(x=>!x[0]||!x[1])) eksik.push(`${mod.id}: lesson.check (en az iki soru–cevap) eksik`);
   }
   if((c.sets||[]).length<2) eksik.push(`${mod.id}: en az iki veri kümesi olmalı`);
   else (c.sets||[]).forEach((x,i)=>{ if(!x.name||!x.note) eksik.push(`${mod.id}: sets[${i}] name/note eksik`); });

@@ -55,10 +55,12 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   koyu temada beyaz yazı okunmuyor (kontrast 2.8), token koyu mürekkebe geçiyor.
 - **Pedagoji zorunlu.** Her modülün üç ayrı metin katmanı var ve hiçbiri boş bırakılmaz:
   `.ask` kutusu (hocanın derste soracağı iki soru), `steps` (rehberli anlatım) ve
-  `CONTENT[id].lesson` — « Ders notu » düğmesinin açtığı kutu. Ayrıca her modülde
+  `CONTENT[id].lesson` — « Ders notu » düğmesinin açtığı kutu. Ders notunun içinde de
+  düz yazının yanında üç zorunlu parça var: **figür** (`FIGS[id]` + `lesson.fig`),
+  **elle hesap** (`lesson.ex`) ve **kendini sına** (`lesson.check`). Ayrıca her modülde
   **en az iki somut veri kümesi** olur (`CONTENT[id].sets`): soyut "x₁ / x₂" ekseni
   yerine "kanat açıklığı / hız" yazar ve aynı dersi başka bir hikâyeyle tekrar eder.
-  `tools/harness.js` bu iki kuralı denetliyor (eksik alan = HATA).
+  `tools/harness.js` bu kuralları denetliyor (eksik alan = HATA).
 
 ## Dosya haritası
 
@@ -70,8 +72,10 @@ deploy/deploy.sh             rsync ile sunucuya yükleme
 tools/lint.py                bütünlük denetimi (id, sözleşme, META, renk)
 tools/harness.js             tarayıcısız çalıştırma (DOM/Canvas taklidi)
 tools/behaviour.js           23 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
-tools/contrast.js            tuval etiketlerinin iki temada WCAG kontrastı
-tools/layout.js              (isteğe bağlı) gerçek Chromium'da projeksiyon yerleşimi
+tools/contrast.js            tuval etiketlerinin ve figür yazılarının iki temada WCAG kontrastı
+tools/layout.js              (isteğe bağlı) gerçek Chromium'da projeksiyon yerleşimi + figür yazıları
+tools/figspec.md             ders notu figürlerinin kuralları (Codex'e verilen şartname)
+tools/figcheck.js            tek bir figür SVG'sini denetler, iki temada PNG çıkarır
 ```
 
 ## Ders içeriği: `CONTENT`
@@ -85,8 +89,13 @@ CONTENT["m-knn"] = {
   pick:"Veri seti",        // seçicinin başlığı: "Veri seti" · "Hata yüzeyi" · "Görüntü" · "Senaryo"
   ui:false,                // (isteğe bağlı) seçici modülün kendi düğmelerinde; araç çubuğuna eklenmesin
   sets:[ {name, note, x, y, cls:[…], gen:"rings"}, … ],
-  lesson:{ q, short, idea:[…], read:[[başlık,metin],…], terms:[[en,tr,açıklama],…], life:[…], trap, next }
+  lesson:{ q, short, idea:[…], read:[[başlık,metin],…], terms:[[en,tr,açıklama],…], life:[…], trap,
+           fig:{at, cap},                 // figür idea[at]'ın altına, cap = figür altı yazısı
+           ex:{t, s:[adım,…], end},       // « Elle hesapla »: küçük sayılarla 3–5 adım
+           check:[[soru,cevap],…],        // « Kendini sına »: cevap <details> içinde
+           next }
 };
+FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`;  // CONTENT'in hemen altında
 ```
 
 - `sets[]` **eksen adı, sınıf adı ve üreteç adını** taşır; üretecin kendisi (nokta
@@ -151,7 +160,34 @@ CONTENT["m-knn"] = {
   okura yazılır. Her terim ilk geçtiği yerde bir benzetme ya da somut örnekle
   açılır (mahalleye taşınan komşu, kavanozdaki şeker, sisli yamaç). Uzun em-dash
   zincirleri, "nicelik / izdüşürmek / iskelet" gibi çeviri kokan sözcükler ve
-  "siz" ile "sen" karışımı yok; kısa cümle, bir cümlede bir fikir. Kutu `mountTools()`'un eklediği « Ders notu » düğmesi
+  "siz" ile "sen" karışımı yok; kısa cümle, bir cümlede bir fikir.
+  Ders notunun sırası: soru → kısa cevap → « Ne oluyor? » (fikir paragrafları, figür
+  `fig.at` numaralı paragrafın altında) → « Elle hesapla » → ekranı okuma → veri
+  kümeleri → terimler → gerçek hayat → sık yapılan hata → « Kendini sına » → sonraki durak.
+  - **`ex` (elle hesap)** kaydırıcıyla görülen şeyin formülünü küçük, elle
+    hesaplanabilir sayılarla bir kez çalıştırır (beş nokta, 2×2 tablo, 5×5 görüntü…).
+    Eskiden ders notu yalnız anlatıyordu: öğrenci Gini'yi, silhouette'i, precision'ı
+    hiç kendi eliyle hesaplamadan geçiyordu. Her sayı doğrulanmış olmalı (tek bir
+    yanlış ara sonuç öğrenciye formülü yanlış öğretir); figürdeki sayılar örnekle aynı.
+  - **`check` (kendini sına)** 2–3 kavram sorusu; cevap `<details>` içinde, öğrenci
+    önce kendisi düşünür. `.ask` kutusundaki sorular hocanın derste sorduklarıdır,
+    bunlar evde tek başına çalışana.
+  - **Figür** (`FIGS[id]`) bir ders kitabı şeması: mekanizmayı tuvalden bağımsız, tek
+    bakışta, `ex` ile aynı sayılarla gösterir (k = 3 → Uçak, k = 7 → Kuş; Gini 0.50 →
+    0.32; 5×5 girdi ⊛ 3×3 çekirdek). Satır içi SVG, `viewBox` genişliği 640; renk YALNIZ
+    `var(--token)` (tema değişince kendiliğinden döner), metin rengi yalnız `--ink`,
+    `--ink-soft`, `--a`, `--c`, `--accent`, `--bad` (iki temada iki zeminde ≥ 4.5;
+    `--b` `--d` `--good` `--warn` açık temada `--surface-2` üstünde düşüyor), yazı en az
+    13; `id`, `class`, `<style>`, `<marker>`, gradyan, `url(#…)` yok — kutuya innerHTML
+    ile giriyor, id'ler çakışır. JS şablon dizgisine gömüldüğü için ters tırnak ve `${`
+    yazılmaz. Dar ekranda şema kendi içinde yatay kayar (`min-width:500px`), yazı
+    okunmaz boya inmesin diye. Taslakları Codex (`codex exec`, gpt-6-luna) çizdi:
+    kurallar `tools/figspec.md`'de, tek dosya denetimi `node tools/figcheck.js a.svg --png`
+    (gerçek Chromium'da yazı çakışması/taşma + iki temada PNG). Codex'in kum havuzu
+    Chromium açamıyor, figcheck orada metin kutusunu karakter sayısından kestiriyor;
+    son sözü gerçek render'a bakan inceleme söyler (ilk turda bias–variance
+    tahtasında atışlar ile ortalama işareti yer değiştirmişti, denetleyici bunu göremez).
+  Kutu `mountTools()`'un eklediği « Ders notu » düğmesi
   ya da klavyede `?` ile açılır; `Esc` kapatır (modal açıkken Esc modülü değil kutuyu
   kapatır), perdeye tıklamak da kapatır.
 - **Modül 23 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
@@ -279,7 +315,8 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    Grup adı `GROUPS` dizisinde geçmeli, yoksa modül menüde görünmez.
    Etiketler yalnız arama içindir, ekranda görünmez.
 4. `CONTENT`'e bir kayıt ekle: en az iki `sets` girdisi (her birinde `name` + `note`)
-   ve tam bir `lesson` (`q`, `idea`, `read` ≥ 2 satır, `terms` ≥ 2 terim, `life`, `trap`).
+   ve tam bir `lesson` (`q`, `idea`, `read` ≥ 2 satır, `terms` ≥ 2 terim, `life`, `trap`,
+   `fig` + `FIGS[id]`, `ex` ≥ 3 adım, `check` ≥ 2 soru).
    Modülün içinde `const DS=SETS("m-XXX"); let dsi=0; const S=()=>DS[dsi];` kurup
    eksen ve sınıf adlarını `S().x` / `S().cls[0]` üzerinden çiz — tuvale sabit dizgi
    yazma. `useSet(i)` hem veriyi üretir hem gösterge adlarını (`txt("#id",…)`) yeniler.
@@ -315,7 +352,8 @@ python3 tools/lint.py index.html
 
 # 23 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
 # istisna, canvas'a giden NaN ve "draw() bu göstergeye hiç dokunmadı" durumu.
-# Ayrıca CONTENT kapsaması: eksik ders notu, tek veri kümesi, kutuda kalan "undefined".
+# Ayrıca CONTENT kapsaması: eksik ders notu, figür, elle hesap, kendini sına, tek veri
+# kümesi, kutuda kalan "undefined".
 # ML_W ile DAR yerleşim dalları da sınanır: 930 tek başına yetmez, çünkü panel
 # gizleme eşiklerinin altındaki kod yolu hiç çalıştırılmamış olur.
 for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; done
@@ -325,8 +363,9 @@ for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; 
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
 node tools/behaviour.js index.html   # 169 denetim: 23 modül + alternatif veri kümeleri
 
-# tuvale yazılan her etiket rengini açık VE koyu temada zemine karşı ölç
-# (label(...) ve legend(...) çağrılarını ayıklar; 4.5 altındakileri bildirir).
+# tuvale yazılan her etiket rengini ve ders notu figürlerinin (FIGS) yazı rengini
+# açık VE koyu temada zemine karşı ölç (label(...) / legend(...) çağrılarını ve
+# figürlerdeki <text> fill'lerini ayıklar; 4.5 altındakileri bildirir).
 # Dosya yolu argüman: verilmezse /opt/ml/index.html, yani CANLI dosya ölçülür.
 node tools/contrast.js index.html
 
@@ -360,6 +399,11 @@ değerlerini görmek için kaydırıyordu; (2) `show()` bölüme programatik oda
 ve Chrome `:focus-visible`'ı üstünde tuttuğu için 930 px genişliğinde accent bir
 dikdörtgen sürekli ekranda duruyordu (tıklamayla da kaybolmuyordu). İkisi de
 `harness.js`'in sahte DOM'unda görünmez — yerleşim hesaplanmıyor.
+
+Kapı ayrıca her modülün ders notunu açıp figürünü ölçer: SVG yazıları birbirine
+biniyor mu, viewBox'tan taşıyor mu, en küçük yazı perdede 11.5 px'in üstünde mi,
+kutu yatay kayıyor mu. `lint.py` figür kurallarını (token, yasak öğe, yazı boyu),
+`contrast.js` figür metin renklerini iki temada iki zemine karşı ölçüyor.
 
 Kapı her modülü **iki hâlde** ölçer: olağan ve rehber açık (metni en uzun adım
 seçili). İkincisi eklenmeden önce şerit `.stats`'ın altındaydı ve hiç ölçülmemişti.

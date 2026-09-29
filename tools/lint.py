@@ -74,7 +74,35 @@ th=set(re.findall(r'TH\["([^"]+)"\]',script))
 noth=sorted(set(ids_reg)-th)
 if noth: warn.append(f"önizlemesi olmayan modül: {noth}")
 
-print(f"modül: {len(ids_reg)} · META: {nmeta} · önizleme: {len(th)} · sorgulanan id: {len(q)}")
+# 10 · ders notu figürleri (FIGS): satır içi SVG kutuya innerHTML ile giriyor ve tema
+#      değişince renkleri var(--token)'dan okuyor. Sabit renk temayı, id/class/<style>
+#      öteki figürleri ve sayfayı bozar; 13'ten küçük yazı perdeden okunmuyor.
+figs_m=re.search(r'const FIGS=\{(.*?)\n\};',script,re.S)
+figs=dict(re.findall(r'"(m-[\w-]+)":`(.*?)`',figs_m.group(1),re.S)) if figs_m else {}
+tokens=set(re.findall(r'(--[\w-]+)\s*:',html))
+for mid in ids_reg:
+    if mid not in figs: bad.append(f"{mid}: ders notu figürü yok (FIGS)")
+for mid,svg in figs.items():
+    e=[]
+    if not svg.startswith("<svg") or not svg.endswith("</svg>"): e.append("<svg> ile başlayıp bitmiyor")
+    vb=re.search(r'viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"',svg)
+    if not vb or float(vb.group(1))!=640: e.append("viewBox genişliği 640 değil")
+    if 'role="img"' not in svg or not re.search(r'aria-label="[^"]{12,}"',svg): e.append("role/aria-label eksik")
+    for t in ("script","style","foreignObject","image","use","marker","filter","linearGradient","radialGradient","pattern","clipPath","mask"):
+        if re.search(rf'<{t}[\s>/]',svg,re.I): e.append(f"yasak öğe <{t}>")
+    for a in (" id="," class="," href=","xlink:","url(#","currentColor",' style="'):
+        if a in svg: e.append(f"yasak öznitelik {a.strip()}")
+    for m in re.finditer(r'#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(',svg): e.append(f"sabit renk {m.group(0)}")
+    for k,v in re.findall(r'\b(fill|stroke)="([^"]*)"',svg):
+        if v=="none": continue
+        t=re.fullmatch(r'var\((--[\w-]+)\)',v)
+        if not t: e.append(f'{k}="{v}" (yalnız var(--token))')
+        elif t.group(1) not in tokens: e.append(f"tanımsız token {t.group(1)}")
+    for fs in re.findall(r'font-size="([\d.]+)"',svg):
+        if float(fs)<13: e.append(f"font-size {fs} < 13")
+    for x in sorted(set(e)): bad.append(f"{mid} figürü: {x}")
+
+print(f"modül: {len(ids_reg)} · META: {nmeta} · önizleme: {len(th)} · figür: {len(figs)} · sorgulanan id: {len(q)}")
 for b in bad:  print("  HATA  ",b)
 for w in warn: print("  uyarı ",w)
 print("TEMİZ" if not bad else f"{len(bad)} HATA")

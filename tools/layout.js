@@ -158,6 +158,40 @@ async function launch(){
       }
     }
   }
+  /* Ders notu figürleri (FIGS): SVG yazıları birbirine biniyor mu, viewBox'tan taşıyor
+     mu, perdede kaç piksel? Sahte DOM'da SVG ölçülemiyor; lint yalnız kuralları, contrast
+     yalnız rengi görüyor. Codex'in ilk taslaklarında etiketin kesikli çerçeveye ya da
+     viewBox'un üstüne taştığı figürler böyle yakalandı. */
+  console.log(`\n=== ders notu figürleri (1280×720) ===`);
+  await p.setViewport({width:1280,height:720});
+  await p.goto(FILE+'#'+ids[0],{waitUntil:'networkidle2'});
+  await p.evaluate(()=>document.fonts.ready).catch(()=>{});
+  for(let i=0;i<ids.length;i++){
+    const r=await p.evaluate((i)=>{
+      openLesson(i);
+      const svg=document.querySelector('#lesson-b figure.fig svg'), out={id:SEQ[i].id,err:[]};
+      if(!svg){ closeLesson(); out.yok=true; return out; }
+      const vb=svg.viewBox.baseVal, R=svg.getBoundingClientRect(), k=vb.width/R.width;
+      const bx=[...svg.querySelectorAll('text')].map(t=>{const b=t.getBoundingClientRect();
+        return {t:t.textContent.trim().slice(0,24),x:(b.left-R.left)*k,y:(b.top-R.top)*k,w:b.width*k,h:b.height*k*0.82,
+          px:parseFloat(getComputedStyle(t).fontSize)/k};});
+      for(const b of bx) if(b.x<2||b.y<0||b.x+b.w>vb.width-2||b.y+b.h>vb.height) out.err.push(`taşıyor "${b.t}"`);
+      for(let a=0;a<bx.length;a++)for(let c=a+1;c<bx.length;c++){
+        const A=bx[a],C=bx[c],ox=Math.min(A.x+A.w,C.x+C.w)-Math.max(A.x,C.x),oy=Math.min(A.y+A.h,C.y+C.h)-Math.max(A.y,C.y);
+        if(ox>1.5&&oy>2.5) out.err.push(`çakışıyor "${A.t}" ↔ "${C.t}"`);
+      }
+      out.enKucuk=Math.min(...bx.map(b=>b.px)); out.gen=Math.round(R.width);
+      const body=document.getElementById('lesson-b'); out.yatay=body.scrollWidth>body.clientWidth+1;
+      closeLesson(); return out;
+    },i);
+    if(r.yok){ fail++; console.log(`  HATA  ${r.id.padEnd(8)} figür yok`); continue; }
+    /* 13'lük viewBox yazısı 680'lik kutuda ~12.3 px; 11.5'in altı perdeden okunmuyor */
+    if(r.enKucuk<11.5) r.err.push(`en küçük yazı ${r.enKucuk.toFixed(1)} px`);
+    if(r.yatay) r.err.push('ders notu kutusu yatay kayıyor');
+    if(r.err.length) fail++;
+    console.log(`  ${r.err.length?'HATA ':'OK   '} ${r.id.padEnd(8)} ${r.gen} px · en küçük yazı ${r.enKucuk.toFixed(1)} px`+
+      (r.err.length?' · '+[...new Set(r.err)].slice(0,4).join(' · '):''));
+  }
   if(SHOTS){
     for(const [id,theme] of [['m-knn','acik'],['m-knn','koyu'],['m-cn','acik'],['m-reg','acik']]){
       await p.setViewport({width:1280,height:720,deviceScaleFactor:1.5});

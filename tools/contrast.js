@@ -65,5 +65,29 @@ for(const b of blocks){
     }
   }
 }
+/* Ders notu figürleri (FIGS): her <text>'in etkin fill'i (kendi ya da kapsayan <g>'nin)
+   iki temada hem --surface'e (figür zemini) hem --surface-2'ye (figür içindeki panel
+   ve kutular) karşı ölçülür — yazının hangi zeminde durduğunu bilmeden en kötüsünü al. */
+const figsBlk=(sc.match(/const FIGS=\{([\s\S]*?)\n\};/)||[])[1]||'';
+const figTok=new Map();
+for(const [,id,svg] of figsBlk.matchAll(/"(m-[\w-]+)":`([\s\S]*?)`/g)){
+  const stack=[null];
+  for(const m of svg.matchAll(/<(\/?)(g|text)\b([^>]*?)(\/?)>/g)){
+    if(m[1]){ stack.pop(); continue; }
+    const f=(m[3].match(/\sfill="var\((--[\w-]+)\)"/)||[])[1]||stack[stack.length-1];
+    if(m[2]==='text'&&f) figTok.set(f,[...(figTok.get(f)||[]),id]);
+    if(!m[4]) stack.push(f);
+  }
+}
+let figBad=0;
+for(const [tok,ids] of figTok){
+  const res=[['açık',light],['koyu',dark]].flatMap(([nm,T])=>['--surface','--surface-2'].map(z=>
+    ({nm:nm+(z==='--surface'?'':'/2'), v:cr(rgb(T[tok]||'#888'),rgb(T[z]))})));
+  const worst=Math.min(...res.map(x=>x.v));
+  if(worst<4.5){ figBad++; bad++;
+    console.log(`  ZAYIF figür ${tok}  ${res.map(x=>`${x.nm}=${x.v.toFixed(2)}`).join('  ')}  (${[...new Set(ids)].join(' ')})`); }
+}
+checked+=figTok.size;
+console.log(`figürlerde ${figTok.size} farklı metin rengi · ${figBad} tanesi 4.5'in altında`);
 console.log(`\n${checked} farklı etiket rengi denetlendi · ${bad} tanesi 4.5'in altında`);
 console.log(bad?'-> gözden geçirilmeli':'-> hepsi WCAG AA eşiğinin üstünde (iki temada da)');
