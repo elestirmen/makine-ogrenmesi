@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Makine öğrenmesi dersinde canlı gösterim için yirmi üç etkileşimli tarayıcı deneyi — mean/median, linear, multiple, polynomial ve logistic regression, k-NN, decision tree, random forest, SVM, overfitting, bias–variance, regularization, gradient descent, confusion matrix, cross-validation, k-means, DBSCAN, PCA, perceptron, MLP ve convolution.">
+<meta name="description" content="Makine öğrenmesi dersinde canlı gösterim için yirmi beş etkileşimli tarayıcı deneyi — mean/median, linear, multiple, polynomial ve logistic regression, k-NN, decision tree, random forest, SVM, overfitting, bias–variance, regularization, gradient descent, confusion matrix, cross-validation, k-means, DBSCAN, PCA, artificial neuron, perceptron, layers, MLP ve convolution.">
 <meta name="author" content="Ahmet Ertuğrul Arık — Kapadokya Üniversitesi">
 <style>
   :root{color-scheme:light dark}
@@ -596,13 +596,13 @@ input[type=range]{min-height:28px;margin:0}
 <div class="app">
   <noscript><p style="margin:0;padding:14px 18px;background:var(--bad);color:var(--surface);font-weight:600">
     Bu uygulama tamamen tarayıcıda çalışır ve JavaScript gerektirir. Tarayıcınızda
-    JavaScript kapalı görünüyor — açtığınızda yirmi üç deneyin hepsi çalışacak.</p></noscript>
+    JavaScript kapalı görünüyor — açtığınızda yirmi beş deneyin hepsi çalışacak.</p></noscript>
   <a class="skip" href="#main">İçeriğe atla</a>
   <aside class="rail">
     <div class="brand">
       <div class="kicker">BST · Güz Dönemi</div>
       <h1>Makine Öğrenmesi Oyun Alanı</h1>
-      <p>Derste projeksiyona yansıtıp oynatmak için yirmi üç canlı deney. Formül yok, kaydırıcı var.</p>
+      <p>Derste projeksiyona yansıtıp oynatmak için yirmi beş canlı deney. Formül yok, kaydırıcı var.</p>
     </div>
     <div class="railtop">
       <div class="railrow">
@@ -739,10 +739,50 @@ input[type=range]{min-height:28px;margin:0}
       </div>
     </section>
 
+    <!-- ══════════ 21 · Yapay nöron ══════════ -->
+    <section id="m-neu" hidden>
+      <div class="head">
+        <div class="eyebrow"><span>Modül 21 · Derin öğrenme</span><span class="chip">YAPAY NÖRON</span></div>
+        <h2>Çarp, Topla, Fonksiyondan Geçir</h2>
+        <p>Bir <b>artificial neuron</b> (yapay nöron) her girdiyi kendi ağırlığıyla çarpar, toplar, bir <b>bias</b> (sabit terim) ekler ve toplamı bir <b>activation function</b> (aktivasyon fonksiyonu) ile cevaba çevirir. Kaydırıcılar nöronun üç sayısı.</p>
+      </div>
+      <div class="stage">
+        <canvas id="c-neu" aria-label="Yapay nöron: girdiler, ağırlıklar, toplam, aktivasyon ve karar haritası"></canvas>
+        <div class="bar">
+          <label class="ctl"><span class="lab" id="neu-w1l">w₁ · rüzgar</span><input type="range" id="neu-w1" min="-50" max="50" step="1" value="10"><output id="neu-w1o">1.0</output></label>
+          <label class="ctl"><span class="lab" id="neu-w2l">w₂ · görüş</span><input type="range" id="neu-w2" min="-50" max="50" step="1" value="10"><output id="neu-w2o">1.0</output></label>
+          <label class="ctl"><span class="lab"><span lang="en">Bias</span> b</span><input type="range" id="neu-b" min="-50" max="50" step="1" value="-10"><output id="neu-bo">−1.0</output></label>
+          <div class="seg" role="group" aria-label="Aktivasyon fonksiyonu">
+            <button id="neu-step" aria-pressed="true">Basamak</button>
+            <button id="neu-sig" aria-pressed="false">Sigmoid</button>
+            <button id="neu-relu" aria-pressed="false">ReLU</button>
+            <button id="neu-lin" aria-pressed="false">Yok</button>
+          </div>
+          <button class="btn" id="neu-good">Örnek ağırlıklar</button>
+          <button class="btn" id="neu-next">Sonraki örnek</button>
+          <span class="hint">Haritaya tıkla → o nokta girdi olur.</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k">Girdi x₁, x₂</span><span class="v" id="neu-x">—</span></div>
+          <div class="stat"><span class="k">Toplam z</span><span class="v" id="neu-z">—</span></div>
+          <div class="stat"><span class="k">Çıktı ŷ</span><span class="v" id="neu-y">—</span></div>
+          <div class="stat"><span class="k">Karar</span><span class="v" id="neu-d">—</span></div>
+          <div class="stat"><span class="k">Doğru bilinen</span><span class="v" id="neu-acc">—</span></div>
+        </div>
+      </div>
+      <div class="ask">
+        <span class="tag">Derste sor</span>
+        <div>
+          <p>Aktivasyonu Basamak'tan Sigmoid'e, sonra ReLU'ya çevirin. Çıktı ŷ değişiyor, ama haritadaki sınır çizgisi yerinden oynuyor mu? Neden?</p>
+          <p>Sonra « Lamba devresi »nde yalnız b'yi kaydırarak önce OR'u, sonra AND'i kurun. "Ya biri ya öteki" (XOR) için hangi w₁, w₂, b gerekir? Bulamıyorsanız sorun sizde değil: <b>tek nöron tek düz çizgi çizer.</b></p>
+        </div>
+      </div>
+    </section>
+
     <!-- ══════════ 4 · Perceptron ══════════ -->
     <section id="m-per" hidden>
       <div class="head">
-        <div class="eyebrow"><span>Modül 21 · Derin öğrenme</span></div>
+        <div class="eyebrow"><span>Modül 22 · Derin öğrenme</span></div>
         <h2>Tek Nöron, Tek Çizgi</h2>
         <p>1958 modeli perceptron: bir çizgi çizer, yanlış tarafta kalan her örnekte çizgiyi biraz iter. Doğrusal ayrılabilir (<b>linearly separable</b>) veride kesin durur; ayrılamayan veride sonsuza kadar salınır.</p>
       </div>
@@ -883,7 +923,7 @@ input[type=range]{min-height:28px;margin:0}
     <!-- ══════════ 8 · Konvolüsyon ══════════ -->
     <section id="m-cn" hidden>
       <div class="head">
-        <div class="eyebrow"><span>Modül 23 · Derin öğrenme</span><span class="chip">CNN KATMANI</span></div>
+        <div class="eyebrow"><span>Modül 25 · Derin öğrenme</span><span class="chip">CNN KATMANI</span></div>
         <h2>Görüntüde Filtre Gezdirmek</h2>
         <p>Bir CNN katmanı üç işlemden ibaret: <b>convolution</b> (konvolüsyon), <b>ReLU</b> ve <b>pooling</b> (havuzlama). Çekirdek boyunu, <b>padding</b>'i (dolgu) ve <b>stride</b>'ı (adım) değiştir; çıktı boyutu formülle birlikte değişsin.</p>
       </div>
@@ -1231,10 +1271,45 @@ input[type=range]{min-height:28px;margin:0}
       </div>
     </section>
 
+    <!-- ══════════ 23 · Katmanlar ══════════ -->
+    <section id="m-lay" hidden>
+      <div class="head">
+        <div class="eyebrow"><span>Modül 23 · Derin öğrenme</span><span class="chip">KATMANLAR</span></div>
+        <h2>Çizgilerden Şekle</h2>
+        <p>Aynı girdiyi okuyan nöronlar yan yana durunca bir <b>layer</b> (katman) olur; girdiyle çıkış arasındakilere <b>hidden layer</b> (gizli katman) denir. Ağırlıkları biz kurduk: her nöronun ne yaptığı tek tek görünsün diye.</p>
+      </div>
+      <div class="stage">
+        <canvas id="c-lay" aria-label="Katmanlı ağ: nöronlar, bağlantılar ve çıkış haritası"></canvas>
+        <div class="bar">
+          <label class="ctl"><span class="lab">Gizli nöron</span><input type="range" id="lay-n" min="3" max="8" step="1" value="4"><output id="lay-no">4</output></label>
+          <div class="seg" role="group" aria-label="Gizli katman aktivasyonu">
+            <button id="lay-step" aria-pressed="true">Basamak</button>
+            <button id="lay-sig" aria-pressed="false">Sigmoid</button>
+            <button id="lay-lin" aria-pressed="false">Yok</button>
+          </div>
+          <button class="btn" id="lay-next">Sonraki nokta</button>
+          <span class="hint">Haritaya tıkla → nokta ağdan geçer · düğüme tıkla → hesabı.</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k">Yapı</span><span class="v" id="lay-arch">—</span></div>
+          <div class="stat"><span class="k">Parametre</span><span class="v" id="lay-par">—</span></div>
+          <div class="stat"><span class="k">Doğru bilinen</span><span class="v" id="lay-acc">—</span></div>
+          <div class="stat"><span class="k">Seçili noktada ŷ</span><span class="v" id="lay-y">—</span></div>
+        </div>
+      </div>
+      <div class="ask">
+        <span class="tag">Derste sor</span>
+        <div>
+          <p>Gizli nöronu 3'ten 8'e çıkarın: üçgen sekizgene döndü. Çıkış nöronu doğu ve kuzeyi hiç görmüyor; o hâlde neye bakarak "kapsama var" diyor?</p>
+          <p>Sonra aktivasyonu « Yok » yapın: aynı ağ, aynı ağırlıklar, ama harita tek renk. Nöronlardan yalnız aktivasyonu söktük; ağ neden birden bütün işe yaramaz hâle geldi?</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ══════════ 14 · Çok katmanlı ağ ══════════ -->
     <section id="m-mlp" hidden>
       <div class="head">
-        <div class="eyebrow"><span>Modül 22 · Derin öğrenme</span><span class="chip">GİZLİ KATMAN</span></div>
+        <div class="eyebrow"><span>Modül 24 · Derin öğrenme</span><span class="chip">GİZLİ KATMAN</span></div>
         <h2>Tek Doğru Yetmiyorsa İkincisini Ekle</h2>
         <p>Perceptron XOR'da çaresiz kalmıştı: tek nöron tek doğru çizer, XOR dört bölge ister. Çözüm nöronu akıllandırmak değil, araya bir <b>hidden layer</b> (gizli katman) koymak.</p>
       </div>
@@ -2245,7 +2320,7 @@ const CONTENT={
             "Learning rate'i küçültürsün, örneğin 10'a bölersin. Artan kayıp çoğunlukla çukurun iki yanı arasında sekip uzaklaşmanın işareti."],
            ["Learning rate sabitken adımlar dibe yaklaşınca neden kısalıyor?",
             "Adım = learning rate × eğim. Dipte eğim küçülüyor, çarpım da küçülüyor."]],
-    next:"Modül 22 · Gizli katman — aynı iniş, bu kez yüzlerce ağırlığın olduğu bir arazide."
+    next:"Modül 24 · Gizli katmanı eğitmek — aynı iniş, bu kez yüzlerce ağırlığın olduğu bir arazide."
   }},
 
 /* ══ 10 ══ */
@@ -2453,6 +2528,53 @@ const CONTENT={
     next:"Modül 02 · Metre ile kilometre — PCA'yı bozan ölçek sorununun kendisi orada."
   }},
 
+/* ══ 21 ══ */
+"m-neu":{ pick:"Veri seti",
+  sets:[
+    {name:"Balon turu", x:"rüzgar", xu:"km/sa", y:"görüş", yu:"km", cls:["Uçar","İptal"], gen:"balon",
+     note:"Yirmi sabah: rüzgar hızı, görüş mesafesi ve o sabah balonlar kalktı mı. Nöron w₁ = +1 ile başlıyor, yani rüzgarı iyi bir şey sanıyor: 20 sabahın 10'u doğru. « Örnek ağırlıklar » (w₁ = −4, w₂ = 3, b = 0.5) yirmisini de biliyor."},
+    {name:"Kredi onayı", x:"gelir", xu:"bin ₺", y:"borç oranı", yu:"%", cls:["Onay","Ret"], gen:"kredi",
+     note:"Yirmi başvuru: aylık gelir ve gelirin yüzde kaçının borca gittiği. Burada işaretler ters: gelire artı, borca eksi ağırlık (w₁ = 4, w₂ = −5, b = 0.5) yirmisini de doğru biliyor."},
+    {name:"Lamba devresi", x:"anahtar A", xu:"", y:"anahtar B", yu:"", cls:["Yanar","Söner"], gen:"and",
+     note:"Seri bağlı iki anahtar: lamba yalnız ikisi de açıkken yanar (AND). Girdi yalnız 0 ya da 1. Nöron b = −0.5 ile başlıyor ve 'en az biri açık' diyor (OR, paralel bağlantı); b = −1.5 AND'i kurar."}
+  ],
+  lesson:{
+    q:"Bir yapay nöron içeride tam olarak ne hesaplıyor?",
+    short:"Üç iş yapar. Her girdiyi kendi ağırlığıyla çarpar. Çarpımları toplayıp üstüne bir bias ekler. Çıkan sayıyı bir aktivasyon fonksiyonundan geçirip cevaba çevirir. Ağırlık 'bu girdi ne kadar önemli', bias 'hiçbir şey duymadan önceki eğilim', aktivasyon 'toplamı nasıl bir cevaba çevireyim' sorusunun cevabı.",
+    idea:["Nöron yalnız sayı anlar. Balon örneğinde bir sabah iki sayıdır: rüzgar 12 km/sa, görüş 7 km. Tablodaki her sütun bir girdi olur. Fotoğrafta her pikselin parlaklığı bir girdidir; 28 × 28 piksellik bir rakam resmi 784 sayıdır. Metin bile sayıya çevrilir, örneğin hangi kelimenin kaç kez geçtiği sayılarak. Bu sayılar nörona girmeden önce benzer aralıklara ölçeklenir (Modül 02). Yoksa metreyle yazılan bir girdi, kilometreyle yazılanı ezer.",
+          "Her girdinin bir ağırlığı var. Ağırlık o girdinin sesinin ne kadar yüksek çıkacağını söyler. Artı ağırlık 'bu arttıkça evete yaklaş', eksi ağırlık 'bu arttıkça hayıra yaklaş' demek. Sıfıra yakın ağırlık 'bu girdiyi duymuyorum' demek. Nöron çarpımları toplar ve üstüne sabit bir sayı ekler: <b>bias</b> (sabit terim). Bias girdiden bağımsızdır; nöronun hiçbir şey duymadan önceki eğilimidir. Bir jüri düşün: her üyenin oyu farklı ağırlıkla sayılıyor, başkan da baştan birkaç puan ekliyor ya da düşüyor. Ortaya tek bir sayı çıkar: <b>weighted sum</b> (ağırlıklı toplam), kısaca z.",
+          "Son adım z'yi bir cevaba çevirmek. Bunu yapan fonksiyona <b>activation function</b> (aktivasyon fonksiyonu) denir. Basamak 'z sıfırın üstündeyse 1, değilse 0' der; bu hâliyle nöronun adı perceptron (Modül 22). Sigmoid z'yi 0 ile 1 arasına yumuşakça sıkıştırır ve bir olasılık verir; lojistik regresyon tam olarak budur (Modül 06). <b>ReLU</b> eksiyi sıfırlar, artıyı olduğu gibi geçirir; bugünkü ağların gizli katmanlarında en çok bu kullanılır. Hiç aktivasyon koymazsan nöron doğrusal regresyona döner (Modül 03). Yani daha önce gördüğün üç model, aynı nöronun üç farklı aktivasyonlu hâli.",
+          "Haritadaki pembe çizgi z = 0 doğrusu, yani nöronun karar sınırı. Ağırlıklar bu doğrunun yönünü, bias yerini belirler. Aktivasyonu ne seçersen seç doğru aynı yerde kalır; aktivasyon yalnız doğrunun iki yanındaki geçişin biçimini değiştirir. Bu yüzden tek nöron, ağırlıkları ne olursa olsun, düzlemi tek bir düz çizgiyle ikiye böler. Lamba devresinde AND'i de OR'u da kurabilirsin. Ama 'ya biri ya öteki' (XOR) için tek çizgi yetmez. Çözüm nöronları yan yana ve art arda dizmek: Modül 23."],
+    read:[["Sol: nöronun içi","Soldan sağa: tablodaki ham değer (rüzgar 12 km/sa), ölçeklenmiş girdi (0.40), ağırlıklı bağlantılar, Σ düğümü ve z, aktivasyon kutusu, çıktı ŷ. Bağlantının kalınlığı ağırlığın büyüklüğü, rengi işareti: camgöbeği artı, turuncu eksi. En alttaki '1' bias'ın girdisi: bias, değeri hep 1 olan bir girdinin ağırlığı gibi davranır. Alttaki iki satır hesabın kendisi."],
+          ["Aktivasyon kutusu","İçindeki eğri seçili aktivasyon fonksiyonu, pembe nokta z'nin eğrinin neresine düştüğü. Ağırlıkları değiştirdikçe nokta eğrinin üstünde kayar."],
+          ["Sağ: harita","Her nokta bir örnek, rengi gerçek sınıfı. Zemin nöronun cevabı; sigmoid'de renk koyulaştıkça nöron daha emin. Pembe doğru z = 0, kırmızı halkalı noktalar nöronun yanlış bildikleri. Haritaya tıklayınca o konum girdi olur; kesikli çizgiler x₁ ve x₂'yi eksende gösterir."],
+          ["Göstergeler","« Girdi » nörona giren iki ölçekli sayı. « Doğru bilinen » örneklerden kaçının doğru tarafta kaldığı. Aktivasyonu değiştirince bu sayı değişmez, çünkü karar hep z'nin işaretinden çıkar."]],
+    terms:[["artificial neuron","yapay nöron","girdileri ağırlıkla çarpıp toplayan, sonucu bir fonksiyondan geçiren hesap birimi"],
+           ["weight","ağırlık","bir girdinin toplamdaki payını ve yönünü belirleyen sayı"],
+           ["bias","sabit terim","girdiden bağımsız eklenen sayı; karar sınırını paralel kaydırır"],
+           ["weighted sum","ağırlıklı toplam","z = w₁·x₁ + w₂·x₂ + b"],
+           ["activation function","aktivasyon fonksiyonu","z'yi çıktıya çeviren fonksiyon: basamak, sigmoid, tanh, ReLU"],
+           ["ReLU","—","eksiyi sıfırlayıp artıyı aynen geçiren aktivasyon: max(0, z)"]],
+    life:["Telefonundaki yüz tanıma, çeviri, öneri sistemleri milyonlarca böyle nöronun birleşimi. Her biri yine yalnız çarpıp topluyor ve sonucu bir aktivasyondan geçiriyor.",
+          "Tek nöron tek başına da iş görür. Spam filtresi ya da kredi skoru gibi 'iki sınıf, sınır kabaca düz' sorunlarında sigmoid nöron, yani lojistik regresyon, hâlâ ilk denenen model."],
+    trap:"'Yapay nöron beyindeki nöronun kopyası' sanma. Adı oradan geliyor, ama yaptığı iş bir çarpma, bir toplama ve bir fonksiyon. Bir de ölçeklemeyi unutma: girdilerden biri 0–1, öteki 0–5000 aralığındaysa ikincisinin ağırlığı minicik, birincininki kocaman olmak zorunda kalır ve eğitim zorlaşır.",
+    fig:{at:2, cap:"Bir sabahın kararı: ham değerler ölçeklenip girdi oluyor, her biri kendi ağırlığıyla çarpılıyor, Σ bias'la birlikte topluyor (z = 1.0), sigmoid bunu 0.73'e çeviriyor. Sayılar aşağıdaki elle hesapla aynı."},
+    ex:{t:"Bir sabahın kararı",
+      s:["Girdi: rüzgar 12 km/sa, görüş 7 km. Ölçekle (rüzgar 0–30, görüş 0–10): x₁ = 12 / 30 = <b>0.40</b>, x₂ = 7 / 10 = <b>0.70</b>.",
+         "Ağırlıklar: w₁ = −4 (rüzgar kötü haber), w₂ = 3 (görüş iyi haber), bias b = 0.5.",
+         "Ağırlıklı toplam: z = −4 · 0.40 + 3 · 0.70 + 0.5 = −1.6 + 2.1 + 0.5 = <b>1.0</b>.",
+         "Aktivasyon: basamak(1.0) = <b>1</b>, uçar. Sigmoid(1.0) = 1 / (1 + e⁻¹) = 1 / 1.37 = <b>0.73</b>, yani %73 uçar. ReLU(1.0) = <b>1.0</b>.",
+         "Rüzgar 21 km/sa olsaydı: x₁ = 0.70, z = −2.8 + 2.1 + 0.5 = <b>−0.2</b>. Basamak 0 der (iptal), sigmoid 0.45, ReLU 0."],
+      end:"Üç sayı, bir toplam, bir fonksiyon: nöronun bütün işi bu. Öğrenmek, bu üç sayıyı veriye bakarak ayarlamak demek."},
+    check:[["Aktivasyonu basamaktan sigmoid'e çevirdin. Haritadaki sınır neden yerinden oynamadı?",
+            "Sınır z = 0 doğrusu ve onu yalnız ağırlıklarla bias belirler. Sigmoid z = 0'da tam 0.5 verir, basamak da orada 0'dan 1'e atlar. İkisi kararı aynı yerde değiştirir; yalnız geçişin keskinliği farklı."],
+           ["Lamba devresinde w₁ = w₂ = 1. Hangi b ile OR, hangi b ile AND olur?",
+            "OR için toplam tek anahtar açıkken (1) artı, hiçbiri açık değilken (0) eksi olmalı: b = −0.5. AND için iki anahtar açıkken (2) artı, tek açıkken (1) eksi olmalı: b = −1.5."],
+           ["Bu nöronda kaç parametre var? 784 piksellik bir resme bakan tek nöronda kaç tane olur?",
+            "İki ağırlık ve bir bias: 3. 784 girdili nöronda 784 ağırlık ve 1 bias: 785."]],
+    next:"Modül 22 · Tek nöron öğreniyor — bu üç sayıyı elle değil, veriden bulan ilk algoritma."
+  }},
+
 /* ══ 15 ══ */
 "m-per":{ pick:"Veri seti", ui:false,
   sets:[
@@ -2464,9 +2586,9 @@ const CONTENT={
   lesson:{
     q:"Tek bir yapay nöron neyi öğrenebilir, neyi asla öğrenemez?",
     short:"Bir nöron düzleme tek bir düz çizgi çeker: bir yanı bir sınıf, öteki yanı öteki. İki grup tek çizgiyle ayrılabiliyorsa öğrenir. Ayrılamıyorsa (XOR gibi) ne kadar eğitsen de asla öğrenemez.",
-    idea:["1958'de tasarlanan <b>perceptron</b>, yapay nöronun atası. Yaptığı şey basit: girdileri ağırlıklarla çarpıp toplar. Sonuç sıfırın üstündeyse 'bir sınıf', altındaysa 'öteki' der. Geometride bu, düzleme tek bir düz çizgi çekmek demek. Öğrenme kuralı da çocuk kadar sade. Yanlış sınıfladığı her örnekte ağırlıkları o örneğe doğru biraz iter. Doğru bildiği örnekler hiçbir şeyi değiştirmez. Ağırlıkların baktığı yönü gösteren oka <b>weight vector</b> (ağırlık vektörü) deniyor; karar çizgisi her zaman ona diktir.",
+    idea:["1958'de tasarlanan <b>perceptron</b>, yapay nöronun atası; Modül 21'deki nöronun basamak aktivasyonlu hâli. Yaptığı şey basit: girdileri ağırlıklarla çarpıp toplar. Sonuç sıfırın üstündeyse 'bir sınıf', altındaysa 'öteki' der. Geometride bu, düzleme tek bir düz çizgi çekmek demek. Öğrenme kuralı da çocuk kadar sade. Yanlış sınıfladığı her örnekte ağırlıkları o örneğe doğru biraz iter. Doğru bildiği örnekler hiçbir şeyi değiştirmez. Ağırlıkların baktığı yönü gösteren oka <b>weight vector</b> (ağırlık vektörü) deniyor; karar çizgisi her zaman ona diktir.",
           "Bir teorem güzel bir söz veriyor. Veri <b>linearly separable</b> (doğrusal ayrılabilir) ise, yani iki grubun arasına düz bir çizgi çekilebiliyorsa, perceptron sonlu sayıda düzeltmeden sonra mutlaka durur. Sözün verilmediği kısım daha önemli: veri ayrılamıyorsa algoritma hiç durmaz. Çizgi sonsuza kadar bir o yana bir bu yana salınır. 'Güncelleme' sayacına bak; XOR'da durmadan artıyor.",
-          "XOR, yani 'ya biri ya öteki, ikisi birden değil', bu sınırın en küçük örneği. İlaç verisinde A tek başına iyi, B tek başına iyi; ikisi birlikte kötü, hiçbiri de kötü. Dört köşe çaprazlama duruyor ve hiçbir tek çizgi onları ayıramıyor. 1969'da bu sınırın gösterilmesi sinir ağlarına ilgiyi yıllarca dondurdu. Çözüm nöronu akıllandırmak değil, araya bir katman daha koymaktı: Modül 22."],
+          "XOR, yani 'ya biri ya öteki, ikisi birden değil', bu sınırın en küçük örneği. İlaç verisinde A tek başına iyi, B tek başına iyi; ikisi birlikte kötü, hiçbiri de kötü. Dört köşe çaprazlama duruyor ve hiçbir tek çizgi onları ayıramıyor. 1969'da bu sınırın gösterilmesi sinir ağlarına ilgiyi yıllarca dondurdu. Çözüm nöronu akıllandırmak değil, nöronları yan yana ve art arda dizmekti: Modül 23."],
     read:[["Yarı düzlemler","Soluk renkli iki bölge modelin iki kararı. Pembe doğru karar sınırı. Ondan çıkan kısa çizgi ağırlık vektörü; sınır her zaman bu çizgiye dik durur, çünkü ağırlıklar 'hangi yöne bakılacağını' söyler. Kesikli gri çizgi son düzeltmeden önceki sınır; köşedeki kutu o düzeltmenin hesabını yazar."],
           ["Kırmızı halkalar","Şu anda yanlış sınıflanan örnekler. Eğitim tam olarak bu halkalar bitene kadar sürer; XOR'da hiç bitmez."],
           ["Göstergeler","'Güncelleme' kaç kez düzeltme yapıldığı. Ayrılabilir veride bir yerde durur; XOR'da durmadan artar. Asıl ders bu sayaçta."]],
@@ -2491,7 +2613,54 @@ const CONTENT={
             "Evet: x₁ + x₂ = 1.5. (1, 1) için toplam 2, çizginin üstünde; öteki üç köşe altında."],
            ["Ağırlık vektörü karar sınırına göre nasıl durur?",
             "Sınıra dik durur ve +1 tarafını gösterir. w · x + b = 0 doğrusunun yönünü w belirler."]],
-    next:"Modül 22 · Gizli katman — bu ekrandaki başarısızlığın çözümü."
+    next:"Modül 23 · Çizgilerden şekle — bu ekrandaki başarısızlığın çözümü: nöronları yan yana ve art arda dizmek."
+  }},
+
+/* ══ 23 ══ */
+"m-lay":{ pick:"Veri seti",
+  sets:[
+    {name:"Tek istasyon", x:"doğu (km)", y:"kuzey (km)", cls:["Çekiyor","Çekmiyor"], gen:"tek",
+     note:"Bir baz istasyonu, kapsama alanı 3 km yarıçaplı bir daire; 160 rastgele konum. Bir gizli katman yetiyor: her nöron bir kenar, çıkış 'hepsinin iç yanı'. 3 nöronla (üçgen) 138'i, 8 nöronla (sekizgen) 158'i doğru."},
+    {name:"İki istasyon", x:"doğu (km)", y:"kuzey (km)", cls:["Çekiyor","Çekmiyor"], gen:"iki", p1:"1. istasyonun çokgeni", p2:"2. istasyonun çokgeni",
+     note:"İki ayrı daire. İkinci gizli katmandaki iki nöron birer çokgen kuruyor, çıkış 'en az biri' diyor (OR). 6 nöronla 160 konumun 155'i doğru."},
+    {name:"Kurye bölgesi", x:"doğu (km)", y:"kuzey (km)", cls:["Kurye","Kurye değil"], gen:"halka", p1:"büyük çokgen", p2:"küçük çokgen",
+     note:"Depoya 1.7 km'den yakın siparişi müşteri kendisi alıyor, 3.8 km'den uzağa kargo gidiyor; aradaki halka kuryenin. Çıkış büyük çokgene +6, küçüğüne −6 ağırlık veriyor. 3 nöronla 125, 8 nöronla 155 doğru."}
+  ],
+  lesson:{
+    q:"Tek nöron tek doğru çiziyorsa, daire ya da halka gibi bir bölgeyi ağ nasıl çiziyor?",
+    short:"Nöronları yan yana koyarsın; bu bir katmandır ve her nöron kendi doğrusunu çizer. Sonraki katman bu doğruların cevaplarını birleştirir: 'hepsinin iç yanı' bir çokgen, 'şu çokgen ya da bu' iki bölge, 'büyüğün içi ama küçüğün dışı' bir halka. Katman katman: doğru, şekil, karar.",
+    idea:["Modül 21'deki nöron tek bir doğru çizebiliyordu. Aynı iki girdiyi okuyan birkaç nöronu yan yana koyalım. Her birinin kendi ağırlıkları olduğu için her biri başka bir doğru çizer. Yan yana duran bu nöronlara <b>layer</b> (katman) denir. Katmandaki her nöron girdinin tamamını okur; buna <b>fully connected</b> (tam bağlı) katman diyoruz. Bir sınıfın aynı soruyu okuyup her öğrencinin kendi cevabını yazması gibi.",
+          "Katmanın çıktısı yeni bir sayı listesidir. Kapsama örneğinde girdi iki sayıydı: doğu ve kuzey. Dört nöronlu katmandan sonra dört sayı oldu; her biri 'kendi doğrumun iç yanında mıyım' sorusunun cevabı. Çıkış nöronu artık doğuya, kuzeye bakmıyor; bu dört sayıya bakıyor. Kuralı da basit: dördü de 1 ise kapsama var. Sonuç, dört doğrunun çevrelediği bir kare. Girdiyle çıkış arasındaki bu katmanlara <b>hidden layer</b> (gizli katman) denir, çünkü çıktısını dışarıdan kimse görmez; ağın kendi iç notlarıdır.",
+          "Bir katman daha eklersen ne olur? İki istasyonlu örnekte birinci gizli katman doğruları çiziyor. İkinci gizli katmandaki her nöron kendi doğrularını toplayıp bir çokgen kuruyor. Çıkış nöronu 'en az biri' diyor. Kurye bölgesinde çıkış küçük çokgene eksi ağırlık veriyor ve ortada bir delik açılıyor. Her katman bir öncekinin çıktısını hammadde gibi kullanıyor: önce çizgi, sonra şekil, sonra karar. Girdiden çıkışa katman katman yapılan bu hesaba <b>forward pass</b> (ileri yayılım) denir. 'Derin öğrenme'deki derinlik de bu katman sayısı.",
+          "Aktivasyon neden şart? « Yok »u seçince harita tek renk oluyor. Aktivasyonsuz nöron yalnız çarpıp toplar. Çarpıp topladığın bir sonucu yeniden çarpıp toplarsan elinde yine tek bir 'çarp ve topla' kalır. Örneğin h = 2x ve ŷ = 3h ise ŷ = 6x: iki katman tek bir nörona indi. Kaç katman eklersen ekle, aktivasyon yoksa ağ en fazla tek bir doğru çizer. Kıvrımı aktivasyon getirir."],
+    read:[["Sol: ağın kendisi","Her sütun bir katman: girdi, gizli katmanlar, çıkış. Bağlantının kalınlığı ağırlığın büyüklüğü, rengi işareti (camgöbeği artı, turuncu eksi); soluk kıl çizgiler 0 ağırlıklı bağlantılar. Her nöronun bir de bias'ı var; çizilmedi, alttaki satırda yazıyor."],
+          ["Küçük kareler","Her kare o nöronun haritası: bütün düzlemde ne cevap verdiği. Gizli nöronda mor yerler 1, boş yerler 0; çıkışta renk sınıf. Karenin içindeki pembe nokta seçili konum, yanındaki sayı o konumdaki değer."],
+          ["Alt satır","Seçili nöronun hesabı, seçili noktanın sayılarıyla. Bir düğüme tıklayınca o nörona geçer; başta çıkış seçili. Haritada da o nöron pembe çizilir: kenar nöronuysa doğrusu, ikinci katmandaysa çokgeni."],
+          ["Sağ: harita","Zemin çıkışın olasılığı, mor ince çizgiler birinci gizli katmanın doğruları. Noktaların rengi gerçek sınıf, kırmızı halkalılar ağın yanlış bildikleri. Pembe halka seçili nokta: haritaya tıkla ya da « Sonraki nokta »ya bas."],
+          ["Göstergeler","« Yapı » katman başına nöron sayısı (2 → 4 → 1). « Parametre » bütün ağırlıkların ve bias'ların sayısı. « Doğru bilinen » 160 konumdan kaçının doğru bölgede kaldığı."]],
+    terms:[["layer","katman","aynı girdiyi okuyan, yan yana duran nöronlar"],
+           ["hidden layer","gizli katman","girdi ile çıkış arasındaki katman; çıktısı dışarıdan görünmez"],
+           ["fully connected","tam bağlı","katmandaki her nöronun önceki katmanın her nöronuna bağlı olması"],
+           ["forward pass","ileri yayılım","girdiden çıkışa katman katman yapılan hesap"],
+           ["architecture","mimari","katman sayısı ve her katmandaki nöron sayısı, örneğin 2 → 4 → 1"]],
+    life:["El yazısı rakam tanıyan klasik bir ağ: 784 piksel girdi, 128 nöronluk bir gizli katman, 10 çıkış (her rakama bir tane). Parametre sayısı: 784 · 128 + 128 + 128 · 10 + 10 = 101 770.",
+          "Büyük dil modelleri de katmanlardan oluşur; yalnız katman sayısı onlarca, parametre sayısı milyarlarca. Her soruda yapılan hesabın özü bu ekrandaki ileri yayılım."],
+    trap:"Gizli nöronların hep böyle düzenli, tek tek anlamı olan doğrular çizdiğini sanma. Burada ağırlıkları biz elle yazdık ki her nöronun işi görünsün. Eğitilmiş bir ağda nöronlar karmakarışık doğrular çizer ve çoğunun tek başına bir anlamı yoktur; iş birlikte görülür. Bir de 'daha çok katman, daha iyi' değil: parametre arttıkça eğitmek de aşırı öğrenmeden (Modül 11) korunmak da zorlaşır.",
+    fig:{at:1, cap:"Üç gizli nöron üç doğru çiziyor, çıkış 'üçü de 1 mi' diye soruyor. A noktasında gizli katman (1, 1, 1) diyor: içeride. B noktası h₃'ün doğrusunun dış yanında kalıyor, gizli katman (1, 1, 0) diyor: dışarıda. Sayılar aşağıdaki elle hesapla aynı."},
+    ex:{t:"Üç nöronla bir üçgen",
+      s:["Gizli katman: h₁ = basamak(x₂ − 0.2), h₂ = basamak(2x₁ − x₂ − 0.2), h₃ = basamak(−2x₁ − x₂ + 1.8). Her biri bir doğrunun iç yanında 1 der.",
+         "Çıkış: ŷ = basamak(h₁ + h₂ + h₃ − 2.5). Üçü de 1 ise 3 − 2.5 = 0.5 > 0, yani 1. Biri bile 0 ise 2 − 2.5 < 0, yani 0.",
+         "A = (0.5, 0.4). h₁: 0.4 − 0.2 = 0.2 → 1. h₂: 1.0 − 0.4 − 0.2 = 0.4 → 1. h₃: −1.0 − 0.4 + 1.8 = 0.4 → 1. Gizli katman (1, 1, 1), ŷ = <b>1</b>: içeride.",
+         "B = (0.8, 0.6). h₁: 0.6 − 0.2 = 0.4 → 1. h₂: 1.6 − 0.6 − 0.2 = 0.8 → 1. h₃: −1.6 − 0.6 + 1.8 = −0.4 → 0. Gizli katman (1, 1, 0), ŷ = <b>0</b>: dışarıda.",
+         "Parametre: her gizli nöronda 2 ağırlık ve 1 bias, üç nöronda 9. Çıkışta 3 ağırlık ve 1 bias, 4. Toplam <b>13</b>, yani 4 · 3 + 1."],
+      end:"Gizli katman iki sayılık girdiyi üç sayılık yeni bir girdiye çevirdi. Çıkış nöronu o üç sayıya bakarak karar verdi; üçgenin kendisini hiç görmedi."},
+    check:[["Girdisi 2, gizli katmanı 6 nöron, çıkışı 1 nöron olan ağda kaç parametre var?",
+            "Gizli katman: 6 · (2 + 1) = 18. Çıkış: 6 + 1 = 7. Toplam 25, yani 4 · 6 + 1."],
+           ["Aktivasyonu kaldırınca harita neden tek renk oldu?",
+            "Aktivasyonsuz katmanlar üst üste binince tek bir 'çarp ve topla'ya iner; ağ en fazla tek doğru çizer. Bu kurulumda kenar nöronlarının ağırlıkları birbirini tam götürüyor, o tek nöronun iki ağırlığı bile 0 çıkıyor."],
+           ["Halka için neden ikinci gizli katman kullandık?",
+            "Halka 'büyük dairenin içi ve küçüğün dışı'. Birinci katman doğruları çiziyor, ikinci katman bu doğrulardan iki çokgen kuruyor, çıkış ikisini eksi ağırlıkla birleştiriyor. Tek gizli katman da çok sayıda nöronla halkayı yaklaşık çizebilir, ama iş bölümü aynı işi daha az nöronla ve anlaşılır biçimde yapıyor."]],
+    next:"Modül 24 · Gizli katmanı eğitmek — bu ağırlıkları elle değil, backpropagation ile veriden bulmak."
   }},
 
 /* ══ 16 ══ */
@@ -2507,7 +2676,7 @@ const CONTENT={
   lesson:{
     q:"Tek çizgi yetmiyorsa çare nöronu büyütmek mi, çoğaltmak mı?",
     short:"Çoğaltmak. Girdiyle çıktı arasına birkaç nöronluk bir gizli katman koyarsın; her nöron kendi çizgisini çeker, çıkış nöronu bu çizgileri birleştirip eğri sınırlar kurar. XOR için iki çizgi yeter.",
-    idea:["Perceptron tek çizgi çekiyordu. Peki iki perceptron alıp ikisinin çıktısını üçüncü bir nörona verirsek? İlk iki nöron iki çizgi çeker. Üçüncüsü 'birinin sağında ve ötekinin solunda olanlar' gibi birleşimler kurar. Artık sınır kırılabilir, eğrilebilir. Aradaki bu katmana <b>hidden layer</b> (gizli katman), ağın tamamına <b>MLP</b> (çok katmanlı ağ) deniyor. Bir montaj bandı gibi: ilk işçiler basit parçalar üretir, sonrakiler onları birleştirir. Sol paneldeki ince çizgiler tek tek gizli nöronların çizgileri.",
+    idea:["Modül 23'te gizli nöronların ağırlıklarını elle yazmıştık; burada ağ onları kendisi buluyor. Perceptron tek çizgi çekiyordu. Peki iki perceptron alıp ikisinin çıktısını üçüncü bir nörona verirsek? İlk iki nöron iki çizgi çeker. Üçüncüsü 'birinin sağında ve ötekinin solunda olanlar' gibi birleşimler kurar. Artık sınır kırılabilir, eğrilebilir. Aradaki bu katmana <b>hidden layer</b> (gizli katman), ağın tamamına <b>MLP</b> (çok katmanlı ağ) deniyor. Bir montaj bandı gibi: ilk işçiler basit parçalar üretir, sonrakiler onları birleştirir. Sol paneldeki ince çizgiler tek tek gizli nöronların çizgileri.",
           "Bu kadar ağırlığı kim ayarlıyor? <b>backpropagation</b> (geri yayılım). Çıkıştaki hata zincir kuralıyla geriye doğru dağıtılır ve her ağırlığa 'bu hatada senin payın şu kadar' denir. Maçı kaybeden bir takımın hocasının her oyuncuya kendi payını söylemesi gibi. Sonra her ağırlık kendi eğimi yönünde bir gradient descent adımı atar (Modül 14). Bütün eğitim verisinin üzerinden bir tam geçişe <b>epoch</b> (devir) deniyor. Sağ paneldeki eğri devir devir hatanın düşüşü.",
           "En öğretici gözlem şu: XOR için 2 gizli nöron teorik olarak yeterli, ama bazı rastgele başlangıçlardan hiç çözüme varamıyor. 'Sıfırla'ya birkaç kez basıp dene. 3 nöronda çoğunlukla, 4 nöronda her seferinde çözüyor. Yani 'yeterince güçlü olmak' ile 'eğitimle o güce ulaşabilmek' ayrı şeyler. Modern ağların gereğinden fazla parametreyle kurulmasının bir sebebi bu."],
     read:[["Sol panel","Renkli bölgeler ağın olasılık haritası; renk koyulaştıkça model daha emin. İnce mor çizgiler gizli nöronların tek tek çizgileri, uçlarındaki h1, h2… numaraları sağdaki diyagramla aynı. Eğitim boyunca yerlerini nasıl bulduklarına bak."],
@@ -2519,7 +2688,7 @@ const CONTENT={
            ["backpropagation","geri yayılım","hatayı geriye doğru dağıtıp her ağırlığın payını hesaplamak"],
            ["epoch","devir","bütün eğitim verisi üzerinden bir tam geçiş"]],
     life:["Bugünün bütün derin öğrenmesi bu iskeletin büyütülmüş hâli: aynı ileri hesap, aynı geri yayılım, aynı gradient descent.",
-          "Tablo verisinde küçük bir MLP hâlâ iyi bir başlangıç modeli. Görüntüde ise yerini convolution katmanlarına bırakır; nedenini Modül 23'te göreceksin."],
+          "Tablo verisinde küçük bir MLP hâlâ iyi bir başlangıç modeli. Görüntüde ise yerini convolution katmanlarına bırakır; nedenini Modül 25'te göreceksin."],
     trap:"Nöron eklemek her derde deva değil. Learning rate yanlışsa (çok büyükse kayıp zıplar, çok küçükse hiç ilerlemez) ağ kaç nöronlu olsa öğrenmez. Bir de aynı ağ farklı başlangıçla farklı sonuç verir; tek bir koşuya bakıp 'çalışıyor' ya da 'çalışmıyor' deme.",
     fig:{at:0, cap:"İki gizli nöron iki paralel çizgi çekiyor: h₁ 'en az biri 1', h₂ 'ikisi birden 1'. Çıkış 'h₁ ama h₂ değil' diyor ve aradaki şerit XOR'un 1 bölgesi oluyor. Ağırlıkları aşağıdaki hesapta tek tek sınıyoruz."},
     ex:{t:"XOR'u iki gizli nöronla elle çöz",
@@ -2535,7 +2704,7 @@ const CONTENT={
             "İki doğrusal katman tek bir doğrusal katmana eşittir. Ağ yine tek çizgi çekerdi ve XOR'u çözemezdi. Doğrusal olmayan aktivasyon şart."],
            ["Kayıp 0.69'da takılı kaldı. Ne demek?",
             "0.69 ≈ ln 2: model her örneğe %50 diyor, yazı tura. Başka bir başlangıçla ya da daha çok gizli nöronla yeniden dene."]],
-    next:"Modül 23 · Filtre gezdirmek — görüntüde neden bu mimarinin yetmediği."
+    next:"Modül 25 · Filtre gezdirmek — görüntüde neden bu mimarinin yetmediği."
   }},
 
 /* ══ 17 ══ */
@@ -2785,6 +2954,8 @@ const FIGS={
 "m-mlr":`<svg viewBox="0 0 640 312" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bina yaşı ile fiyat ilişkisini merkeze uzaklık gruplarına göre karşılaştıran çizim."><text x="80" y="70" fill="var(--ink)" font-size="14">fiyat (milyon ₺)</text><text x="480" y="24" fill="var(--ink)" font-size="14" font-weight="700">merkeze uzaklık</text><circle cx="485" cy="44" r="5" fill="var(--a)"/><text x="499" y="49" fill="var(--ink)" font-size="14">0–7 km</text><circle cx="485" cy="62" r="5" fill="var(--c)"/><text x="499" y="67" fill="var(--ink)" font-size="14">7–13 km</text><circle cx="485" cy="80" r="5" fill="var(--b)"/><text x="499" y="85" fill="var(--ink)" font-size="14">13–20 km</text><g stroke="var(--grid)" stroke-width="1"><line x1="80" y1="86" x2="470" y2="86"/><line x1="80" y1="119.4" x2="470" y2="119.4"/><line x1="80" y1="152.8" x2="470" y2="152.8"/><line x1="80" y1="186.2" x2="470" y2="186.2"/><line x1="80" y1="219.6" x2="470" y2="219.6"/><line x1="80" y1="253" x2="470" y2="253"/><line x1="80" y1="86" x2="80" y2="253"/><line x1="158" y1="86" x2="158" y2="253"/><line x1="236" y1="86" x2="236" y2="253"/><line x1="314" y1="86" x2="314" y2="253"/><line x1="392" y1="86" x2="392" y2="253"/><line x1="470" y1="86" x2="470" y2="253"/></g><g stroke="var(--ink-soft)" stroke-width="1.8"><line x1="80" y1="86" x2="80" y2="253"/><line x1="80" y1="253" x2="470" y2="253"/></g><g fill="var(--ink-soft)" font-size="13" text-anchor="end"><text x="72" y="257">0</text><text x="72" y="223.6">2</text><text x="72" y="190.2">4</text><text x="72" y="156.8">6</text><text x="72" y="123.4">8</text><text x="72" y="90">10</text></g><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="80" y="275">0</text><text x="158" y="275">10</text><text x="236" y="275">20</text><text x="314" y="275">30</text><text x="392" y="275">40</text><text x="470" y="275">50</text></g><text x="275" y="297" fill="var(--ink)" font-size="14" text-anchor="middle">bina yaşı (yıl)</text><line x1="80" y1="219.6" x2="470" y2="106" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="8 7"/><text x="480" y="105" fill="var(--ink-soft)" font-size="14">tek başına:</text><text x="480" y="122" fill="var(--ink-soft)" font-size="14">yaş ↑ fiyat ↑</text><g fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="306.2" y1="111.2" x2="462.2" y2="137.4" stroke="var(--a)"/><line x1="189.2" y1="150.7" x2="345.2" y2="176.6" stroke="var(--c)"/><line x1="87.8" y1="191.6" x2="243.8" y2="216.7" stroke="var(--b)"/></g><g fill="var(--a)"><circle cx="314" cy="108.5" r="5.5"/><circle cx="337.4" cy="123.3" r="5.5"/><circle cx="360.8" cy="115.3" r="5.5"/><circle cx="384.2" cy="129.8" r="5.5"/><circle cx="407.6" cy="123.1" r="5.5"/><circle cx="431" cy="138.9" r="5.5"/><circle cx="454.4" cy="131.9" r="5.5"/></g><g fill="var(--c)"><circle cx="197" cy="157" r="5.5"/><circle cx="220.4" cy="150" r="5.5"/><circle cx="243.8" cy="163.9" r="5.5"/><circle cx="267.2" cy="157" r="5.5"/><circle cx="290.6" cy="171.7" r="5.5"/><circle cx="314" cy="165.6" r="5.5"/><circle cx="337.4" cy="180.4" r="5.5"/></g><g fill="var(--b)"><circle cx="95.6" cy="188" r="5.5"/><circle cx="119" cy="202.6" r="5.5"/><circle cx="142.4" cy="195.7" r="5.5"/><circle cx="165.8" cy="211.2" r="5.5"/><circle cx="189.2" cy="203.2" r="5.5"/><circle cx="212.6" cy="217.7" r="5.5"/><circle cx="236" cy="210.6" r="5.5"/></g><text x="480" y="166" fill="var(--accent)" font-size="14">aynı uzaklıkta:</text><text x="480" y="183" fill="var(--accent)" font-size="14">yaş ↑ fiyat ↓</text></svg>`,
 "m-pca":`<svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PCA, veriyi en çok değişen bileşene izdüşürerek iki boyutu tek sayıya indirger."><text x="187" y="53" fill="var(--ink-soft)" font-size="14">kilo (z)</text><text x="282" y="214" fill="var(--ink-soft)" font-size="14" text-anchor="end">boy (z)</text><g fill="none" stroke="var(--ink-soft)" stroke-width="1.5"><path d="M78 168H282M180 66V270"/><path d="M129 164V172M180 164V172M231 164V172M176 117H184M176 168H184M176 219H184"/></g><text x="82" y="190" fill="var(--ink-soft)" font-size="13">−2</text><text x="278" y="190" fill="var(--ink-soft)" font-size="13" text-anchor="end">2</text><text x="187" y="75" fill="var(--ink-soft)" font-size="13">2</text><text x="187" y="270" fill="var(--ink-soft)" font-size="13">−2</text><path d="M97 251L263 85" fill="none" stroke="var(--accent)" stroke-width="2.5"/><path d="M263 85L253 89L259 95Z" fill="var(--accent)"/><path d="M162 150L198 186" fill="none" stroke="var(--ink-soft)" stroke-width="1.8"/><text x="275" y="95" fill="var(--ink)" font-size="14" font-weight="700">1. bileşen · %92</text><text x="153" y="147" fill="var(--ink)" font-size="14" font-weight="700" text-anchor="end">2. bileşen · %8</text><g fill="none" stroke="var(--bad)" stroke-opacity="0.6" stroke-width="1.5"><path d="M105 230L111.5 236.5"/><path d="M136 235.8L124.1 223.9"/><path d="M118 199.7L133.1 214.9"/><path d="M151.2 207.7L145.7 202.3"/><path d="M140 185.7L151.2 196.8"/><path d="M172.4 192.9L163.8 184.2"/><path d="M170.6 169.4L174.6 173.4"/><path d="M199.8 180.6L183.6 164.4"/><path d="M182.5 145.3L192.6 155.4"/><path d="M202.4 154.3L198 150"/><path d="M197.3 124L210.7 137.3"/><path d="M227.2 135.9L219.7 128.3"/><path d="M216.4 99.8L232.3 115.7" stroke-width="2.5"/><path d="M255.4 113.5L244.9 103.1"/></g><g fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="111.5" cy="236.5" r="4"/><circle cx="124.1" cy="223.9" r="4"/><circle cx="133.1" cy="214.9" r="4"/><circle cx="145.7" cy="202.3" r="4"/><circle cx="151.2" cy="196.8" r="4"/><circle cx="163.8" cy="184.2" r="4"/><circle cx="174.6" cy="173.4" r="4"/><circle cx="183.6" cy="164.4" r="4"/><circle cx="192.6" cy="155.4" r="4"/><circle cx="198" cy="150" r="4"/><circle cx="210.7" cy="137.3" r="4"/><circle cx="219.7" cy="128.3" r="4"/><circle cx="232.3" cy="115.7" r="4"/><circle cx="244.9" cy="103.1" r="4"/></g><g fill="var(--a)"><circle cx="105" cy="230" r="5.5"/><circle cx="136" cy="235.8" r="5.5"/><circle cx="118" cy="199.7" r="5.5"/><circle cx="151.2" cy="207.7" r="5.5"/><circle cx="140" cy="185.7" r="5.5"/><circle cx="172.4" cy="192.9" r="5.5"/><circle cx="170.6" cy="169.4" r="5.5"/><circle cx="199.8" cy="180.6" r="5.5"/><circle cx="182.5" cy="145.3" r="5.5"/><circle cx="202.4" cy="154.3" r="5.5"/><circle cx="197.3" cy="124" r="5.5"/><circle cx="227.2" cy="135.9" r="5.5"/><circle cx="216.4" cy="99.8" r="5.5"/><circle cx="255.4" cy="113.5" r="5.5"/></g><text x="208" y="95" fill="var(--bad)" font-size="14" text-anchor="end">kaybolan bilgi</text><path d="M444 20V324" fill="none" stroke="var(--line)" stroke-width="1.5"/><text x="548" y="34" fill="var(--ink)" font-size="14" font-weight="700" text-anchor="middle">nokta başına</text><text x="548" y="52" fill="var(--ink)" font-size="14" font-weight="700" text-anchor="middle">1 sayı</text><path d="M572 83V253M568 83H576M568 168H576M568 253H576" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><text x="557" y="87" fill="var(--ink-soft)" font-size="13" text-anchor="end">2.5</text><text x="557" y="173" fill="var(--ink-soft)" font-size="13" text-anchor="end">0</text><text x="557" y="258" fill="var(--ink-soft)" font-size="13" text-anchor="end">−2.5</text><g fill="var(--a)"><circle cx="572" cy="232.6" r="3.5"/><circle cx="572" cy="220.7" r="3.5"/><circle cx="572" cy="212.2" r="3.5"/><circle cx="572" cy="200.3" r="3.5"/><circle cx="572" cy="195.2" r="3.5"/><circle cx="572" cy="183.3" r="3.5"/><circle cx="572" cy="173.1" r="3.5"/><circle cx="572" cy="164.6" r="3.5"/><circle cx="572" cy="156.1" r="3.5"/><circle cx="572" cy="151" r="3.5"/><circle cx="572" cy="139.1" r="3.5"/><circle cx="572" cy="130.6" r="3.5"/><circle cx="572" cy="118.7" r="3.5"/><circle cx="572" cy="106.8" r="3.5"/></g><text x="548" y="300" fill="var(--ink)" font-size="14" text-anchor="middle">2 sayı → 1 sayı</text></svg>`,
 "m-per":`<svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Perceptronun AND verisini tek bir doğruyla ayırabildiğini, XOR verisini ise ayıramadığını gösteren iki panelli şema."><g fill="var(--ink)"><text x="160" y="27" text-anchor="middle" font-size="15" font-weight="700">AND · doğrusal ayrılabilir</text><text x="480" y="27" text-anchor="middle" font-size="15" font-weight="700">XOR · ayrılamaz</text></g><path d="M320 12V308" stroke="var(--line)" stroke-width="1.5"/><g><rect x="50" y="35" width="220" height="220" fill="none" stroke="var(--line)" stroke-width="1.5"/><path d="M118.8 35H270V186.3Z" fill="var(--a)" fill-opacity="0.16"/><path d="M50 35V255H270" fill="none" stroke="var(--ink-soft)" stroke-width="2"/><path d="M91.3 252V258M228.8 252V258M48 76.3H52M48 213.8H52" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M118.8 35L270 186.3" stroke="var(--accent)" stroke-width="2.5"/><g fill="var(--ink-soft)" font-size="13"><text x="91.3" y="272" text-anchor="middle">0</text><text x="228.8" y="272" text-anchor="middle">1</text><text x="40" y="81" text-anchor="middle">1</text><text x="40" y="218" text-anchor="middle">0</text><text x="160" y="289" text-anchor="middle" font-size="14">x₁</text><text x="31" y="151" text-anchor="middle" font-size="14">x₂</text></g><path d="M84.3 206.8H98.3V220.8H84.3Z M84.3 69.3H98.3V83.3H84.3Z M221.8 206.8H235.8V220.8H221.8Z" fill="none" stroke="var(--b)" stroke-width="2.5"/><circle cx="228.8" cy="76.3" r="7" fill="var(--a)"/><text x="160" y="306" text-anchor="middle" fill="var(--ink)" font-size="14">tek çizgi yeter</text><path d="M225 300L230 305L240 293" fill="none" stroke="var(--good)" stroke-width="2.5"/></g><g transform="translate(320 0)"><rect x="50" y="35" width="220" height="220" fill="none" stroke="var(--line)" stroke-width="1.5"/><path d="M50 35V255H270" fill="none" stroke="var(--ink-soft)" stroke-width="2"/><path d="M91.3 252V258M228.8 252V258M48 76.3H52M48 213.8H52" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M50 145H270" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="5 4" stroke-opacity="0.85"/><path d="M50 103.8L201.3 255" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="7 3 2 3" stroke-opacity="0.85"/><text x="267" y="139" text-anchor="end" fill="var(--ink-soft)" font-size="13">deneme 1</text><text x="128" y="172" fill="var(--ink-soft)" font-size="13">deneme 2</text><circle cx="228.8" cy="76.3" r="10" fill="none" stroke="var(--bad)" stroke-width="1.5"/><circle cx="228.8" cy="213.8" r="10" fill="none" stroke="var(--bad)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13"><text x="91.3" y="272" text-anchor="middle">0</text><text x="228.8" y="272" text-anchor="middle">1</text><text x="40" y="81" text-anchor="middle">1</text><text x="40" y="218" text-anchor="middle">0</text><text x="160" y="289" text-anchor="middle" font-size="14">x₁</text><text x="31" y="151" text-anchor="middle" font-size="14">x₂</text></g><path d="M84.3 206.8H98.3V220.8H84.3Z M221.8 69.3H235.8V83.3H221.8Z" fill="none" stroke="var(--b)" stroke-width="2.5"/><circle cx="91.3" cy="76.3" r="7" fill="var(--a)"/><circle cx="228.8" cy="213.8" r="7" fill="var(--a)"/><text x="160" y="306" text-anchor="middle" fill="var(--ink)" font-size="14">hiçbir tek çizgi ayıramaz</text></g><circle cx="254" cy="319" r="5.5" fill="var(--a)"/><text x="267" y="323" fill="var(--ink)" font-size="14">sınıf 1</text><path d="M333 313H344V324H333Z" fill="none" stroke="var(--b)" stroke-width="2.5"/><text x="352" y="323" fill="var(--ink)" font-size="14">sınıf 0</text></svg>`,
+"m-neu":`<svg viewBox="0 0 640 296" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bir yapay nöronun hesabı: rüzgar ve görüş ölçeklenip girdi oluyor, ağırlıklarla çarpılıp bias ile toplanıyor, z = 1.0 sigmoid fonksiyonundan geçip 0.73 oluyor."><g fill="var(--ink-soft)" font-size="14" text-anchor="middle"><text x="62" y="22">ham değer</text><text x="170" y="22">girdi x</text><text x="250" y="22">ağırlık</text><text x="335" y="22">toplam</text><text x="445" y="22">aktivasyon</text><text x="562" y="22">çıktı</text></g><g fill="var(--ink-soft)" font-size="13" text-anchor="end"><text x="120" y="76">rüzgar</text><text x="120" y="161">görüş</text><text x="120" y="250">sabit</text></g><g fill="var(--ink)" font-size="14" text-anchor="end"><text x="120" y="96">12 km/sa</text><text x="120" y="181">7 km</text></g><g stroke="var(--ink-soft)" stroke-width="1.5"><path d="M126 86H141M126 171H141"/></g><g fill="var(--ink-soft)"><polygon points="148,86 140,82 140,90"/><polygon points="148,171 140,167 140,175"/></g><path d="M170 86L335 165" stroke="var(--b)" stroke-width="5" stroke-opacity="0.85"/><path d="M170 171L335 165" stroke="var(--a)" stroke-width="4" stroke-opacity="0.85"/><path d="M170 245L335 165" stroke="var(--a)" stroke-width="1.8" stroke-opacity="0.85"/><g fill="var(--surface-2)" stroke="var(--ink-soft)" stroke-width="1.5"><circle cx="170" cy="86" r="22"/><circle cx="170" cy="171" r="22"/><circle cx="170" cy="245" r="15"/></g><circle cx="335" cy="165" r="28" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="1.8"/><g fill="var(--ink)" font-size="14" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="170" y="91">0.40</text><text x="170" y="176">0.70</text><text x="170" y="250">1</text><text x="266" y="108">w₁ = −4</text><text x="250" y="157">w₂ = 3</text><text x="270" y="232">b = 0.5</text></g><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="170" y="56">x₁</text><text x="170" y="141">x₂</text></g><text x="335" y="173" text-anchor="middle" font-size="22" fill="var(--ink)">Σ</text><text x="335" y="216" text-anchor="middle" font-size="15" fill="var(--accent)" font-family="IBM Plex Mono, ui-monospace, monospace">z = 1.0</text><path d="M363 165H391M490 165H530" stroke="var(--ink-soft)" stroke-width="1.5"/><polygon points="398,165 390,161 390,169" fill="var(--ink-soft)"/><polygon points="537,165 529,161 529,169" fill="var(--ink-soft)"/><rect x="400" y="130" width="90" height="70" rx="6" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><path d="M445 134V196M404 192H486" stroke="var(--line)" stroke-width="1"/><path d="M408 191.6L415.4 191L422.8 189.5L430.2 185.6L433.9 182.2L437.6 177.5L441.3 171.6L445 165L448.7 158.4L452.4 152.5L456.1 147.8L459.8 144.4L467.2 140.5L474.6 139L482 138.4" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="452.4" cy="152.5" r="5" fill="var(--accent)"/><text x="445" y="222" text-anchor="middle" font-size="14" fill="var(--ink-soft)">sigmoid</text><circle cx="562" cy="165" r="24" fill="var(--a)" fill-opacity="0.25" stroke="var(--ink)" stroke-width="1.8"/><text x="562" y="170" text-anchor="middle" font-size="15" fill="var(--ink)" font-family="IBM Plex Mono, ui-monospace, monospace">0.73</text><text x="562" y="131" text-anchor="middle" font-size="14" fill="var(--ink-soft)">ŷ</text><text x="562" y="210" text-anchor="middle" font-size="14" fill="var(--ink)">uçar · %73</text><text x="320" y="282" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="IBM Plex Mono, ui-monospace, monospace">z = −4 · 0.40 + 3 · 0.70 + 0.5 = 1.0 → sigmoid(1.0) = 0.73</text></svg>`,
+"m-lay":`<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Üç gizli nöronlu ağ: her gizli nöron bir doğru çiziyor, çıkış üçünün de 1 olduğu üçgende içeride diyor; A noktası içeride, B noktası dışarıda."><g fill="var(--ink)" font-size="15" font-weight="700" text-anchor="middle"><text x="150" y="20">ağ: 2 → 3 → 1</text><text x="470" y="20">düzlemde</text></g><path d="M312 10V292" stroke="var(--line)" stroke-width="1.5"/><path d="M40 85L150 50" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4"/><g fill="none" stroke-opacity="0.85"><path d="M40 175L150 50" stroke="var(--a)" stroke-width="2"/><path d="M40 85L150 130" stroke="var(--a)" stroke-width="3.5"/><path d="M40 175L150 130" stroke="var(--b)" stroke-width="2"/><path d="M40 85L150 210" stroke="var(--b)" stroke-width="3.5"/><path d="M40 175L150 210" stroke="var(--b)" stroke-width="2"/><path d="M150 50L262 130M150 130L262 130M150 210L262 130" stroke="var(--a)" stroke-width="2"/></g><g fill="var(--surface-2)" stroke="var(--ink)" stroke-width="1.8"><circle cx="40" cy="85" r="18"/><circle cx="40" cy="175" r="18"/><circle cx="150" cy="50" r="18"/><circle cx="150" cy="130" r="18"/><circle cx="150" cy="210" r="18"/><circle cx="262" cy="130" r="20"/></g><g fill="var(--ink)" font-size="14" text-anchor="middle"><text x="40" y="90">x₁</text><text x="40" y="180">x₂</text><text x="150" y="55">h₁</text><text x="150" y="135">h₂</text><text x="150" y="215">h₃</text><text x="262" y="135">ŷ</text></g><text x="262" y="96" text-anchor="middle" font-size="13" fill="var(--ink-soft)">üçü de 1 mi?</text><g font-size="14" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><g fill="var(--ink-soft)"><text x="120" y="250">h₁</text><text x="150" y="250">h₂</text><text x="180" y="250">h₃</text><text x="240" y="250">ŷ</text></g><g fill="var(--ink)"><text x="70" y="272">A</text><text x="120" y="272">1</text><text x="150" y="272">1</text><text x="180" y="272">1</text><text x="210" y="272">→</text><text x="240" y="272">1</text><text x="70" y="294">B</text><text x="120" y="294">1</text><text x="150" y="294">1</text><text x="210" y="294">→</text></g><g fill="var(--accent)"><text x="180" y="294">0</text><text x="240" y="294">0</text></g></g><rect x="350" y="34" width="240" height="240" fill="none" stroke="var(--line)" stroke-width="1.5"/><polygon points="398,226 542,226 470,82" fill="var(--a)" fill-opacity="0.18"/><g stroke="var(--c)" stroke-width="2"><path d="M350 226H590"/><path d="M374 274L494 34"/><path d="M566 274L446 34"/></g><g fill="var(--c)" font-size="14"><text x="586" y="218" text-anchor="end">h₁</text><text x="500" y="52">h₂</text><text x="440" y="52" text-anchor="end">h₃</text></g><circle cx="470" cy="178" r="6.5" fill="var(--a)"/><circle cx="542" cy="130" r="6.5" fill="var(--b)"/><g fill="var(--ink)" font-size="14"><text x="481" y="183">A</text><text x="553" y="135">B</text></g><g fill="var(--ink-soft)" font-size="13"><text x="470" y="292" text-anchor="middle">x₁</text><text x="338" y="158" text-anchor="middle">x₂</text></g></svg>`,
 "m-poly":`<svg viewBox="0 0 640 326" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Polinom regresyonda baz terimlerinin ağırlıklı toplamının tek bir eğri oluşturduğunu gösteren dört panel."><rect x="16" y="16" width="137" height="238" rx="8" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><rect x="173" y="16" width="137" height="238" rx="8" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><rect x="330" y="16" width="137" height="238" rx="8" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><rect x="487" y="16" width="137" height="238" rx="8" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><text x="84.5" y="37" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">w₀ · 1</text><text x="241.5" y="37" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">w₁ · x</text><text x="398.5" y="37" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">w₂ · x²</text><text x="555.5" y="37" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">ŷ</text><path d="M44 135 L126 135" fill="none" stroke="var(--line)" stroke-width="1.5"/><path d="M201 135 L283 135" fill="none" stroke="var(--line)" stroke-width="1.5"/><path d="M358 135 L440 135" fill="none" stroke="var(--line)" stroke-width="1.5"/><path d="M515 135 L597 135" fill="none" stroke="var(--line)" stroke-width="1.5"/><text x="41" y="60" text-anchor="end" font-size="13" fill="var(--ink-soft)">1.6</text><text x="41" y="199" text-anchor="end" font-size="13" fill="var(--ink-soft)">−1.2</text><text x="198" y="60" text-anchor="end" font-size="13" fill="var(--ink-soft)">1.6</text><text x="198" y="199" text-anchor="end" font-size="13" fill="var(--ink-soft)">−1.2</text><text x="355" y="60" text-anchor="end" font-size="13" fill="var(--ink-soft)">1.6</text><text x="355" y="199" text-anchor="end" font-size="13" fill="var(--ink-soft)">−1.2</text><text x="512" y="60" text-anchor="end" font-size="13" fill="var(--ink-soft)">1.6</text><text x="512" y="199" text-anchor="end" font-size="13" fill="var(--ink-soft)">−1.2</text><path d="M44 105 L48.1 105 L52.2 105 L56.3 105 L60.4 105 L64.5 105 L68.6 105 L72.7 105 L76.8 105 L80.9 105 L85 105 L89.1 105 L93.2 105 L97.3 105 L101.4 105 L105.5 105 L109.6 105 L113.7 105 L117.8 105 L121.9 105 L126 105" fill="none" stroke="var(--a)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M201 155 L205.1 153 L209.2 151 L213.3 149 L217.4 147 L221.5 145 L225.6 143 L229.7 141 L233.8 139 L237.9 137 L242 135 L246.1 133 L250.2 131 L254.3 129 L258.4 127 L262.5 125 L266.6 123 L270.7 121 L274.8 119 L278.9 117 L283 115" fill="none" stroke="var(--c)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M358 180 L362.1 171.4 L366.2 163.8 L370.3 157.1 L374.4 151.2 L378.5 146.3 L382.6 142.2 L386.7 139.1 L390.8 136.8 L394.9 135.4 L399 135 L403.1 135.5 L407.2 136.8 L411.3 139.1 L415.4 142.2 L419.5 146.3 L423.6 151.2 L427.7 157.1 L431.8 163.8 L435.9 171.4 L440 180" fill="none" stroke="var(--b)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M515 170 L519.1 159.5 L523.2 149.8 L527.3 141.1 L531.4 133.2 L535.5 126.3 L539.6 120.2 L543.7 115.1 L547.8 110.8 L551.9 107.5 L556 105 L560.1 103.5 L564.2 102.8 L568.3 103.1 L572.4 104.2 L576.5 106.3 L580.6 109.2 L584.7 113.1 L588.8 117.8 L592.9 123.5 L597 130" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="519.1" cy="157" r="4" fill="var(--ink-soft)"/><circle cx="531.4" cy="137.2" r="4" fill="var(--ink-soft)"/><circle cx="543.7" cy="111.6" r="4" fill="var(--ink-soft)"/><circle cx="556" cy="107.5" r="4" fill="var(--ink-soft)"/><circle cx="568.3" cy="99.1" r="4" fill="var(--ink-soft)"/><circle cx="580.6" cy="112.7" r="4" fill="var(--ink-soft)"/><circle cx="592.9" cy="121.5" r="4" fill="var(--ink-soft)"/><text x="163" y="143" text-anchor="middle" font-size="22" fill="var(--ink-soft)">+</text><text x="320" y="143" text-anchor="middle" font-size="22" fill="var(--ink-soft)">+</text><text x="477" y="143" text-anchor="middle" font-size="22" fill="var(--ink-soft)">=</text><text x="44" y="216" text-anchor="middle" font-size="13" fill="var(--ink-soft)">−1</text><text x="126" y="216" text-anchor="middle" font-size="13" fill="var(--ink-soft)">1</text><text x="201" y="216" text-anchor="middle" font-size="13" fill="var(--ink-soft)">−1</text><text x="283" y="216" text-anchor="middle" font-size="13" fill="var(--ink-soft)">1</text><text x="358" y="216" text-anchor="middle" font-size="13" fill="var(--ink-soft)">−1</text><text x="440" y="216" text-anchor="middle" font-size="13" fill="var(--ink-soft)">1</text><text x="515" y="216" text-anchor="middle" font-size="13" fill="var(--ink-soft)">−1</text><text x="597" y="216" text-anchor="middle" font-size="13" fill="var(--ink-soft)">1</text><text x="84.5" y="240" text-anchor="middle" font-size="14" fill="var(--ink)">w₀ = 0.6</text><text x="241.5" y="240" text-anchor="middle" font-size="14" fill="var(--ink)">w₁ = 0.4</text><text x="398.5" y="240" text-anchor="middle" font-size="14" fill="var(--ink)">w₂ = −0.9</text><text x="555.5" y="240" text-anchor="middle" font-size="14" fill="var(--ink)">tek bir eğri</text><text x="320" y="310" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="13" fill="var(--ink)">ŷ = 0.6 + 0.4·x − 0.9·x²   → hâlâ w'lere göre doğrusal</text></svg>`,
 "m-reg":`<svg viewBox="0 0 640 274" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="L2 çemberi ve L1 elması, cezanın katsayıları küçültmesini ve lasso'nun bir katsayıyı sıfırlamasını gösterir."><circle cx="108" cy="184" r="55.2" fill="var(--a)" fill-opacity="0.15" stroke="var(--a)" stroke-width="2"/><polygon points="488.4,184 424,119.6 359.6,184 424,248.4" fill="var(--b)" fill-opacity="0.15" stroke="var(--b)" stroke-width="2"/><g fill="none" stroke="var(--ink-soft)" stroke-width="1.5"><ellipse cx="218.4" cy="147.2" rx="78.9" ry="55.8" transform="rotate(40 218.4 147.2)"/><ellipse cx="218.4" cy="147.2" rx="52.9" ry="37.4" transform="rotate(40 218.4 147.2)"/><ellipse cx="218.4" cy="147.2" rx="30.5" ry="21.6" transform="rotate(40 218.4 147.2)"/><ellipse cx="534.4" cy="147.2" rx="82.5" ry="58.4" transform="rotate(40 534.4 147.2)"/><ellipse cx="534.4" cy="147.2" rx="55.4" ry="39.1" transform="rotate(40 534.4 147.2)"/><ellipse cx="534.4" cy="147.2" rx="32" ry="22.6" transform="rotate(40 534.4 147.2)"/></g><g fill="none" stroke="var(--ink-soft)" stroke-width="1.5"><path d="M25.2 184 H301.2 M108 64.4 V257.6 M340.2 184 H616.2 M424 64.4 V257.6"/></g><g fill="var(--ink)"><text x="163.2" y="27" text-anchor="middle" font-size="16" font-weight="700">L2 · ridge</text><text x="479.2" y="27" text-anchor="middle" font-size="16" font-weight="700">L1 · lasso</text><text x="114" y="59" font-size="13">w₂</text><text x="306" y="179" font-size="13">w₁</text><text x="430" y="59" font-size="13">w₂</text><text x="632" y="179" text-anchor="end" font-size="13">w₁</text><text x="218.4" y="72" text-anchor="middle" font-size="13">cezasız en iyi</text><text x="534.4" y="72" text-anchor="middle" font-size="13">cezasız en iyi</text><text x="104" y="109" text-anchor="end" font-size="13">w₁, w₂ küçüldü</text><text x="104" y="124" text-anchor="end" font-size="13">ama sıfır değil</text><text x="493" y="235" font-size="13">w₂ = 0</text><text x="493" y="250" font-size="13">öznitelik atıldı</text></g><g fill="none" stroke="var(--ink)" stroke-width="1.8"><path d="M214.4 147.2 H222.4 M218.4 143.2 V151.2 M530.4 147.2 H538.4 M534.4 143.2 V151.2"/></g><circle cx="156.8" cy="158.7" r="6" fill="var(--accent)"/><circle cx="488.4" cy="184" r="6" fill="var(--accent)"/></svg>`,
 "m-scale":`<svg viewBox="0 0 640 274" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Boy değerlerinin ham, min–max ve z-score cetvellerinde aynı sıralama ve oranla gösterimi."><rect x="267.5" y="188" width="161" height="27" fill="var(--a)" fill-opacity="0.12"/><g stroke="var(--grid)" stroke-width="1.5"><line x1="243" y1="41" x2="243" y2="215"/><line x1="292" y1="41" x2="292" y2="215"/><line x1="348" y1="41" x2="348" y2="215"/><line x1="376" y1="41" x2="376" y2="215"/><line x1="481" y1="41" x2="481" y2="215"/></g><g fill="var(--ink)"><text x="12" y="38" font-size="15" font-weight="700">ham: boy</text><text x="12" y="55" font-size="13" fill="var(--ink-soft)">(cm)</text><text x="12" y="125" font-size="15" font-weight="700">min–max:</text><text x="12" y="142" font-size="13" fill="var(--ink-soft)">(x − min) / (max − min)</text><text x="12" y="212" font-size="15" font-weight="700">z-score:</text><text x="12" y="229" font-size="13" fill="var(--ink-soft)">(x − ortalama) / std</text></g><g stroke="var(--ink-soft)" stroke-width="1.8"><line x1="208" y1="41" x2="488" y2="41"/><line x1="208" y1="128" x2="488" y2="128"/><line x1="208" y1="215" x2="488" y2="215"/></g><g stroke="var(--ink-soft)" stroke-width="1.5"><path d="M208 35v12 M278 35v12 M348 35v12 M418 35v12 M488 35v12"/><path d="M243 122v12 M362 122v12 M481 122v12"/><path d="M267.5 209v12 M348 209v12 M428.5 209v12"/></g><g fill="var(--ink-soft)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" text-anchor="middle"><text x="208" y="64">150</text><text x="278" y="64">160</text><text x="348" y="64">170</text><text x="418" y="64">180</text><text x="488" y="64">190</text><text x="243" y="151">0</text><text x="362" y="151">0.5</text><text x="481" y="151">1</text><text x="267.5" y="238">−1</text><text x="348" y="238">0</text><text x="428.5" y="238">+1</text><text x="267.5" y="255" fill="var(--ink-soft)" font-size="13">(158.5 cm)</text><text x="348" y="255" fill="var(--ink-soft)" font-size="13">(170 cm)</text><text x="428.5" y="255" fill="var(--ink-soft)" font-size="13">(181.5 cm)</text></g><g fill="var(--a)"><circle cx="243" cy="41" r="6"/><circle cx="292" cy="41" r="6"/><circle cx="348" cy="41" r="6"/><circle cx="376" cy="41" r="6"/><circle cx="481" cy="41" r="6"/><circle cx="243" cy="128" r="6"/><circle cx="292" cy="128" r="6"/><circle cx="348" cy="128" r="6"/><circle cx="376" cy="128" r="6"/><circle cx="481" cy="128" r="6"/><circle cx="243" cy="215" r="6"/><circle cx="292" cy="215" r="6"/><circle cx="348" cy="215" r="6"/><circle cx="376" cy="215" r="6"/><circle cx="481" cy="215" r="6"/></g><g fill="var(--a)" font-size="14" text-anchor="middle"><text x="243" y="25">A</text><text x="292" y="25">B</text><text x="348" y="25">C</text><text x="376" y="25">D</text><text x="481" y="25">E</text><text x="243" y="112">A</text><text x="292" y="112">B</text><text x="348" y="112">C</text><text x="376" y="112">D</text><text x="481" y="112">E</text><text x="243" y="199">A</text><text x="292" y="199">B</text><text x="348" y="199">C</text><text x="376" y="199">D</text><text x="481" y="199">E</text></g></svg>`,
@@ -3305,6 +3476,273 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
      set:2, hl:["#gd-s","#gd-lr"], run(){setR("#gd-lr",200);setPressed("#gd-run",true);}}
   ],
        stop:()=>{if(timer){clearInterval(timer);timer=0;runBtn("#gd-run",false,"Koştur");}}});
+})();
+
+/* ═════════════ 21 · Yapay nöron ═════════════ */
+(function(){
+  const cv=$("#c-neu"), {ctx,fit}=setupCanvas(cv);
+  /* Ham tablolar burada, adlar CONTENT'te. Satır = [x₁, x₂, sınıf]; sınıf 1 = cls[0].
+     Girdi nörona girmeden [lo, hi] → [0, 1] ölçeklenir (Modül 02): nöronun gördüğü
+     sayı haritadaki konumun kendisi. Etiketler « Örnek ağırlıklar »la ayrılabilir
+     (sınıra en yakın sabah z = 0.18 uzakta). Satırlar sınıfa göre dönüşümlü: « Sonraki
+     örnek » bir uçan bir iptal sabahı gösteriyor. init bilerek kötü: balonda w₁ = +1,
+     yani "rüzgar arttıkça uçuş iyi"; lamba devresinde b = −0.5, yani OR. */
+  const DS=SETS("m-neu"); let dsi=0; const S=()=>DS[dsi];
+  const DATA={
+    balon:{lo:[0,0],hi:[30,10],dg:[0,1],init:[1,1,-1],good:[-4,3,.5],
+      rows:[[12,7,1],[25,8,0],[5,4,1],[22,5,0],[8,9,1],[16,3,0],[15,8,1],[28,9.5,0],[20,9.5,1],[10,1.5,0],
+            [3,2,1],[30,6,0],[10,5,1],[19,4,0],[17,6.5,1],[24,2,0],[6,6.5,1],[13,2.5,0],[14,9.5,1],[7,0.5,0]]},
+    kredi:{lo:[10,0],hi:[110,80],dg:[0,0],init:[1,1,-1],good:[4,-5,.5],
+      rows:[[60,20,1],[30,40,0],[45,10,1],[20,25,0],[85,35,1],[50,55,0],[100,50,1],[65,70,0],[35,5,1],[40,45,0],
+            [70,30,1],[14,14,0],[55,25,1],[90,75,0],[95,15,1],[25,60,0],[28,4,1],[45,50,0],[75,45,1],[80,65,0]]},
+    and:{lo:[0,0],hi:[1,1],dg:[0,0],bin:true,view:[-.35,1.35],init:[1,1,-.5],good:[1,1,-1.5],
+      rows:[[0,0,0],[1,0,0],[0,1,0],[1,1,1]]}
+  };
+  const D=()=>DATA[S().gen];
+  let w=[1,1,-1], act="step", sel={i:0,u:0,v:0}, GM=null;
+  const F={step:z=>z>=0?1:0, sig:z=>1/(1+Math.exp(-z)), relu:z=>Math.max(0,z), lin:z=>z};
+  const FN={step:"basamak", sig:"sigmoid", relu:"ReLU", lin:"yok"};
+  const scl=(r,k)=>(r-D().lo[k])/(D().hi[k]-D().lo[k]);
+  const pts=()=>D().rows.map(r=>({u:scl(r[0],0), v:scl(r[1],1), t:r[2], r}));
+  const zf=(u,v)=>w[0]*u+w[1]*v+w[2];
+  /* eksi işareti U+2212; −0.00 yazılmaz */
+  const sg=(v,d=2)=>{const r=+v.toFixed(d); return (r<0?"−":"")+Math.abs(r).toFixed(d);};
+  const pm=(v,d=1)=>{const r=+v.toFixed(d); return (r<0?"− ":"+ ")+Math.abs(r).toFixed(d);};
+  const cur=()=>{ if(sel.i>=0){ const p=pts()[sel.i]; if(p) return p; } return {u:sel.u, v:sel.v, t:null, r:null}; };
+  /* ham değer: tablodaki satırsa olduğu gibi, haritadan seçilmiş serbest noktaysa geri ölçeklenmiş */
+  const rawTxt=(p,k)=>{ const d=D(), val=p.r?p.r[k]:d.lo[k]+(k?p.v:p.u)*(d.hi[k]-d.lo[k]);
+    if(d.bin) return Math.round(val)?"açık (1)":"kapalı (0)";
+    const s=p.r?String(val):val.toFixed(d.dg[k]), unit=k?S().yu:S().xu;
+    return unit==="%"?"%"+s:s+" "+unit; };
+  const yTxt=(z)=>act==="step"?String(F.step(z)):sg(F[act](z),2);
+  const fitSize=(t,maxW,sz,min=10)=>{ ctx.save(); let s=sz;
+    ctx.font=`600 ${s}px "IBM Plex Mono", monospace`;
+    while(s>min && ctx.measureText(t).width>maxW){ s-=.5; ctx.font=`600 ${s}px "IBM Plex Mono", monospace`; }
+    ctx.restore(); return s; };
+  const arrow=(x0,y0,x1,y1)=>{ const a=Math.atan2(y1-y0,x1-x0);
+    ctx.save(); ctx.strokeStyle=css("--ink-soft"); ctx.fillStyle=css("--ink-soft"); ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1-6*Math.cos(a),y1-6*Math.sin(a)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x1-8*Math.cos(a-.4),y1-8*Math.sin(a-.4));
+    ctx.lineTo(x1-8*Math.cos(a+.4),y1-8*Math.sin(a+.4)); ctx.closePath(); ctx.fill(); ctx.restore(); };
+
+  /* 640 px ve üstünde: solda nöronun içi, sağda girdi uzayı haritası. Altında yalnız
+     nöron (harita gizli); girdi « Sonraki örnek »le değişir. */
+  const geo=()=>{ const W=cv.__w, H=cv.__h, wide=W>=640, DW=wide?Math.round(W*.57):W;
+    const mx0=DW+52, mx1=W-14, my0=16, my1=H-36, [v0,v1]=D().view||[-.04,1.04];
+    return {W,H,wide,DW,mx0,mx1,my0,my1,
+      MX:u=>mx0+(u-v0)/(v1-v0)*(mx1-mx0), MY:v=>my1-(v-v0)/(v1-v0)*(my1-my0),
+      IU:x=>v0+(x-mx0)/(mx1-mx0)*(v1-v0), IV:y=>v0+(my1-y)/(my1-my0)*(v1-v0)}; };
+
+  /* ── sol: nöronun içi ── */
+  function drawNeuron(g,p,z){
+    const DW=g.DW, H=g.H, top=34, bot=H-64;
+    const xr=DW*.205, xi=DW*.30, xs=DW*.585, xa=DW*.775, xo=DW*.93;
+    const Y=f=>top+(bot-top)*f, yIn=[Y(.10),Y(.52)], yb=Y(.94), ys=Y(.52);
+    /* kısa tuvalde (rehber açık, ~600 px pencere) düğümler küçülür; x₁/x₂ etiketi başlık
+       satırına değecekse çizilmez (aynı ad göstergede ve alttaki hesapta yazıyor) */
+    const rN=clamp(Math.min(DW*.034,(bot-top)*.12),12,19), rS=rN+5, rO=rN+3, tags=yIn[0]-rN-9>=28;
+    const tf=10.5;
+    label(ctx,"ham değer",xr,14,css("--ink-soft"),"right",tf);
+    label(ctx,"girdi x",xi,14,css("--ink-soft"),"center",tf);
+    label(ctx,"ağırlık w",(xi+xs)/2,14,css("--ink-soft"),"center",tf);
+    label(ctx,"toplam",xs,14,css("--ink-soft"),"center",tf);
+    label(ctx,"aktivasyon",xa,14,css("--ink-soft"),"center",tf);
+    label(ctx,"çıktı",xo,14,css("--ink-soft"),"center",tf);
+    /* bağlantılar: kalınlık |w|, renk işaret (camgöbeği +, turuncu −) */
+    const edge=(y0,wt)=>{ const a=Math.min(1,Math.abs(wt)/4);
+      ctx.save(); ctx.strokeStyle=hexA(wt>=0?"--a":"--b",.35+.55*a); ctx.lineWidth=1.2+Math.min(5,Math.abs(wt)*1.1);
+      ctx.beginPath(); ctx.moveTo(xi+rN,y0); ctx.lineTo(xs-rS,ys); ctx.stroke(); ctx.restore(); };
+    edge(yIn[0],w[0]); edge(yIn[1],w[1]); edge(yb,w[2]);
+    /* w₁ ve b üstten/alttan gelip Σ'da birleşiyor: etiketleri kaynağa yakın, w₂'ninki ortada */
+    const wl=(y0,txt2,t)=>legend(ctx,xi+rN+(xs-rS-xi-rN)*t,y0+(ys-y0)*t,[[txt2,"--ink"]],{size:11,align:"center"});
+    wl(yIn[0],"w₁ = "+sg(w[0],1),.40); wl(yIn[1],"w₂ = "+sg(w[1],1),.55); wl(yb,"b = "+sg(w[2],1),.40);
+    /* ham değer → ölçekli girdi */
+    [[S().x,rawTxt(p,0),p.u,"x₁"],[S().y,rawTxt(p,1),p.v,"x₂"]].forEach(([nm,rv,xv,tag],k)=>{
+      const y0=yIn[k];
+      label(ctx,nm,xr,y0-9,css("--ink-soft"),"right",11);
+      label(ctx,rv,xr,y0+8,css("--ink"),"right",11.5);
+      arrow(xr+5,y0,xi-rN-3,y0);
+      disc(ctx,xi,y0,rN,css("--surface"),css("--ink-soft"));
+      label(ctx,xv.toFixed(2),xi,y0,css("--ink"),"center",rN>16?11.5:rN>=14?10.5:9.5);
+      if(tags) label(ctx,tag,xi,y0-rN-9,css("--ink-soft"),"center",11);
+    });
+    label(ctx,"sabit",xr,yb,css("--ink-soft"),"right",11);
+    disc(ctx,xi,yb,rN*.72,css("--surface-2"),css("--ink-soft"));
+    label(ctx,"1",xi,yb,css("--ink"),"center",11.5);
+    /* Σ düğümü */
+    disc(ctx,xs,ys,rS,css("--surface-2"),css("--ink"));
+    label(ctx,"Σ",xs,ys+1,css("--ink"),"center",17);
+    label(ctx,"z = "+sg(z,2),xs,ys+rS+14,css("--accent"),"center",12);
+    /* aktivasyon kutusu: seçili fonksiyonun eğrisi, pembe nokta z'nin düştüğü yer */
+    const aw=clamp(DW*.15,56,92), ah=clamp((bot-top)*.36,46,74), ax=xa-aw/2, ay=ys-ah/2;
+    arrow(xs+rS+2,ys,ax-2,ys);
+    ctx.save(); ctx.fillStyle=css("--surface-2"); ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5;
+    ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(ax,ay,aw,ah,6); else ctx.rect(ax,ay,aw,ah); ctx.fill(); ctx.stroke(); ctx.restore();
+    const ZR=5, [f0,f1]=act==="relu"?[-.4,5.2]:act==="lin"?[-5.5,5.5]:[-.12,1.12], pd=6;
+    const PX=t=>ax+pd+(t+ZR)/(2*ZR)*(aw-2*pd), PY=f=>ay+ah-pd-(f-f0)/(f1-f0)*(ah-2*pd);
+    ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(PX(0),ay+3); ctx.lineTo(PX(0),ay+ah-3); ctx.moveTo(ax+3,PY(0)); ctx.lineTo(ax+aw-3,PY(0)); ctx.stroke();
+    ctx.strokeStyle=css("--ink"); ctx.lineWidth=1.8; ctx.lineJoin="round"; ctx.beginPath();
+    for(let i=0;i<=60;i++){ const t=-ZR+2*ZR*i/60, f=clamp(F[act](t),f0,f1);
+      i?ctx.lineTo(PX(t),PY(f)):ctx.moveTo(PX(t),PY(f)); }
+    ctx.stroke(); ctx.restore();
+    const zc=clamp(z,-ZR,ZR);
+    disc(ctx,PX(zc),PY(clamp(F[act](zc),f0,f1)),4.5,css("--accent"),css("--surface"));
+    label(ctx,act==="lin"?"yok: ŷ = z":FN[act],xa,ay+ah+13,css("--ink-soft"),"center",11);
+    /* çıktı */
+    arrow(ax+aw+2,ys,xo-rO-2,ys);
+    disc(ctx,xo,ys,rO,hexA(z>=0?"--a":"--b",.28),css("--ink"));
+    const yt=yTxt(z);
+    label(ctx,yt,xo,ys,css("--ink"),"center",yt.length>4?10:11.5);
+    label(ctx,"ŷ",xo,ys-rO-9,css("--ink-soft"),"center",11);
+    label(ctx,S().cls[z>=0?0:1],xo,ys+rO+14,css("--ink"),"center",11.5);
+    /* hesabın kendisi: iki satır */
+    const l1=`z = ${sg(w[0],1)}·${p.u.toFixed(2)} ${pm(w[1],1)}·${p.v.toFixed(2)} ${pm(w[2],1)} = ${sg(z,2)}`;
+    const l2=(act==="lin"?`ŷ = z = ${yt}`:`ŷ = ${FN[act]}(${sg(z,2)}) = ${yt}`)+` → ${S().cls[z>=0?0:1]}`;
+    const mw=DW-24;
+    label(ctx,l1,12,H-40,css("--ink"),"left",fitSize(l1,mw,12.5));
+    label(ctx,l2,12,H-18,css("--accent"),"left",fitSize(l2,mw,12.5));
+  }
+
+  /* ── sağ: girdi uzayı. Zemin nöronun çıktısı, pembe doğru z = 0 ── */
+  const lo=document.createElement("canvas"), lox=lo.getContext("2d");
+  function segment(v0,v1){ const out=[], ok=(u,v)=>{
+      if(u<v0-1e-9||u>v1+1e-9||v<v0-1e-9||v>v1+1e-9) return;
+      if(out.some(q=>Math.abs(q[0]-u)<1e-9&&Math.abs(q[1]-v)<1e-9)) return; out.push([u,v]); };
+    if(Math.abs(w[1])>1e-9){ ok(v0,-(w[0]*v0+w[2])/w[1]); ok(v1,-(w[0]*v1+w[2])/w[1]); }
+    if(Math.abs(w[0])>1e-9){ ok(-(w[1]*v0+w[2])/w[0],v0); ok(-(w[1]*v1+w[2])/w[0],v1); }
+    return out.length>=2?[out[0],out[1]]:null; }
+  function drawMap(g,P,p,z){
+    const {mx0,mx1,my0,my1}=g, mw=mx1-mx0, mh=my1-my0;
+    /* hücre başına bir piksel, yumuşatarak büyütme (m-knn yolu) */
+    const cols=Math.max(2,Math.ceil(mw/4)), rows=Math.max(2,Math.ceil(mh/4));
+    lo.width=cols; lo.height=rows;
+    const img=lox.createImageData(cols,rows), d=img.data, A=rgbOf("--a"), B=rgbOf("--b");
+    for(let j=0;j<rows;j++) for(let i=0;i<cols;i++){
+      const zz=zf(g.IU(mx0+(i+.5)*mw/cols),g.IV(my0+(j+.5)*mh/rows)), o=(j*cols+i)*4;
+      let c, al;
+      if(act==="step"){ c=zz>=0?A:B; al=.20; }
+      else if(act==="sig"){ const y=F.sig(zz); c=y>=.5?A:B; al=.05+.33*Math.abs(y-.5)*2; }
+      else if(act==="relu"){ if(zz>0){ c=A; al=.06+.34*Math.min(1,zz/3); } else { c=B; al=.07; } }
+      else { c=zz>=0?A:B; al=.05+.35*Math.min(1,Math.abs(zz)/3); }
+      d[o]=c[0]; d[o+1]=c[1]; d[o+2]=c[2]; d[o+3]=Math.round(al*255);
+    }
+    lox.putImageData(img,0,0);
+    ctx.save(); ctx.imageSmoothingEnabled=true; ctx.drawImage(lo,0,0,cols,rows,mx0,my0,mw,mh); ctx.restore();
+    ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    for(let k=0;k<=10;k++){ const t=k/10;
+      ctx.beginPath(); ctx.moveTo(g.MX(t),g.MY(0)); ctx.lineTo(g.MX(t),g.MY(1)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(g.MX(0),g.MY(t)); ctx.lineTo(g.MX(1),g.MY(t)); ctx.stroke(); }
+    ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.strokeRect(mx0,my0,mw,mh); ctx.restore();
+    const [v0,v1]=D().view||[-.04,1.04], sgm=segment(v0,v1);
+    if(sgm){ ctx.save(); ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.6;
+      ctx.beginPath(); ctx.moveTo(g.MX(sgm[0][0]),g.MY(sgm[0][1])); ctx.lineTo(g.MX(sgm[1][0]),g.MY(sgm[1][1])); ctx.stroke(); ctx.restore(); }
+    /* örnekler: renk gerçek sınıf, kırmızı halka nöronun yanlış bildiği */
+    const bin=!!D().bin, r=bin?10:6.5;
+    P.forEach(q=>{ const wrong=(zf(q.u,q.v)>=0?1:0)!==q.t;
+      disc(ctx,g.MX(q.u),g.MY(q.v),r,css(q.t?"--a":"--b"),wrong?css("--bad"):css("--surface"));
+      if(bin) label(ctx,`(${q.r[0]}, ${q.r[1]})`,g.MX(q.u),g.MY(q.v)+(q.v>.5?-22:22),css("--ink-soft"),"center",11); });
+    /* seçili girdi: kesikli çizgiler x₁ ve x₂'yi eksende gösterir */
+    const sx=g.MX(p.u), sy=g.MY(p.v);
+    ctx.save(); ctx.strokeStyle=hexA("--accent",.6); ctx.lineWidth=1.3; ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx,my1); ctx.moveTo(sx,sy); ctx.lineTo(mx0,sy); ctx.stroke();
+    ctx.setLineDash([]); ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.2;
+    ctx.beginPath(); ctx.arc(sx,sy,r+5,0,7); ctx.stroke(); ctx.restore();
+    label(ctx,p.u.toFixed(2),sx,my1+10,css("--accent"),"center",10.5);
+    label(ctx,p.v.toFixed(2),mx0-4,sy,css("--accent"),"right",10.5);
+    const rng=k=>bin?"":` (${D().lo[k]}–${D().hi[k]} ${k?S().yu:S().xu})`;
+    label(ctx,S().x+rng(0)+" →",mx1,my1+25,css("--ink-soft"),"right",11);
+    ylabel(ctx,S().y+rng(1)+" →",mx0-40,my0,my1,css("--ink-soft"),11);
+    /* lejant en tenha köşeye */
+    /* lamba devresinde dört köşe de dolu: üst ve alt ortalar da aday */
+    const lw=150, lh=56, mc=(mx0+mx1)/2, cand=[[mx0+8,my0+12,"left"],[mx1-8,my0+12,"right"],[mx0+8,my1-40,"left"],[mx1-8,my1-40,"right"],[mc,my0+12,"center"],[mc,my1-40,"center"]];
+    let best=cand[0], bn=1e9;
+    cand.forEach(c=>{ const x0=c[2]==="right"?c[0]-lw:c[2]==="center"?c[0]-lw/2:c[0], y0=c[1]-10;
+      const k=P.filter(q=>{const px=g.MX(q.u),py=g.MY(q.v);return px>x0-8&&px<x0+lw+8&&py>y0-8&&py<y0+lh+8;}).length
+        +((sx>x0-10&&sx<x0+lw+10&&sy>y0-10&&sy<y0+lh+10)?3:0);
+      if(k<bn){bn=k;best=c;} });
+    legend(ctx,best[0],best[1],[[S().cls[0],"--a"],[S().cls[1],"--b"],["sınır: z = 0","--accent"]],{size:11,align:best[2]});
+  }
+
+  function draw(){
+    if(!fit()) return;
+    const g=geo(); GM=g;
+    const W=g.W, H=g.H, P=pts(), p=cur(), z=zf(p.u,p.v), dec=z>=0?1:0;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,W,H);
+    drawNeuron(g,p,z);
+    if(g.wide){
+      ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(g.DW+4,10); ctx.lineTo(g.DW+4,H-10); ctx.stroke(); ctx.restore();
+      drawMap(g,P,p,z);
+    }
+    /* göstergeler çizimden bağımsız: dar yerleşimde de yazılır */
+    const ok=P.filter(q=>(zf(q.u,q.v)>=0?1:0)===q.t).length;
+    txt("#neu-x",`${p.u.toFixed(2)}, ${p.v.toFixed(2)}`);
+    txt("#neu-z",sg(z,2));
+    txt("#neu-y",yTxt(z));
+    const de=$("#neu-d"); de.textContent=S().cls[dec?0:1]; de.className="v"+(p.t===null?"":p.t===dec?" ok":" bd");
+    const ae=$("#neu-acc"); ae.textContent=`${ok} / ${P.length}`;
+    ae.className="v "+(ok===P.length?"ok":ok>=P.length*.75?"wr":"bd");
+    cv.setAttribute("aria-label",`Yapay nöron, ${S().name}. Girdi: ${S().x} ${rawTxt(p,0)} (x₁ = ${p.u.toFixed(2)}), `+
+      `${S().y} ${rawTxt(p,1)} (x₂ = ${p.v.toFixed(2)}). z = ${sg(w[0],1)}·${p.u.toFixed(2)} ${pm(w[1],1)}·${p.v.toFixed(2)} ${pm(w[2],1)} = ${sg(z,2)}. `+
+      `Aktivasyon ${FN[act]}, ŷ = ${yTxt(z)}, karar ${S().cls[dec?0:1]}. Doğru bilinen ${ok} / ${P.length}. `+
+      `Sınır: ${sg(w[0],1)}·x₁ ${pm(w[1],1)}·x₂ ${pm(w[2],1)} = 0.`);
+  }
+
+  /* ── kontroller ── */
+  const syncSliders=()=>{
+    [["#neu-w1","#neu-w1o",0],["#neu-w2","#neu-w2o",1],["#neu-b","#neu-bo",2]].forEach(([s,o,k])=>{
+      const el=$(s); if(el) el.value=String(Math.round(w[k]*10)); txt(o,sg(w[k],1)); }); };
+  const onW=(k,o)=>e=>{ w[k]=+e.target.value/10; txt(o,sg(w[k],1)); draw(); };
+  $("#neu-w1").oninput=onW(0,"#neu-w1o"); $("#neu-w2").oninput=onW(1,"#neu-w2o"); $("#neu-b").oninput=onW(2,"#neu-bo");
+  const setAct=(a)=>{ act=a;
+    [["step","#neu-step"],["sig","#neu-sig"],["relu","#neu-relu"],["lin","#neu-lin"]].forEach(([k,s])=>$(s).setAttribute("aria-pressed",String(k===a)));
+    draw(); };
+  $("#neu-step").onclick=()=>setAct("step"); $("#neu-sig").onclick=()=>setAct("sig");
+  $("#neu-relu").onclick=()=>setAct("relu"); $("#neu-lin").onclick=()=>setAct("lin");
+  $("#neu-good").onclick=()=>{ w=D().good.slice(); syncSliders(); draw(); };
+  $("#neu-next").onclick=()=>{ const n=D().rows.length; sel={i:sel.i>=0?(sel.i+1)%n:0,u:0,v:0}; draw(); };
+  /* haritaya tıkla / sürükle: 14 px içindeki örnek seçilir, yoksa o konum serbest girdi
+     olur. Lamba devresinde girdi yalnız 0 ya da 1: en yakın köşe. */
+  let dragging=false;
+  const pick=(e)=>{ const g=GM; if(!g||!g.wide) return false;
+    const q=pointerPos(cv,e);
+    if(q.x<g.mx0-8||q.x>g.mx1+8||q.y<g.my0-8||q.y>g.my1+8) return false;
+    const P=pts(); let bi=-1, bd=1e9;
+    P.forEach((t,i)=>{ const d=(g.MX(t.u)-q.x)**2+(g.MY(t.v)-q.y)**2; if(d<bd){bd=d;bi=i;} });
+    if(D().bin||bd<14*14) sel={i:bi,u:0,v:0};
+    else sel={i:-1,u:clamp(g.IU(q.x),0,1),v:clamp(g.IV(q.y),0,1)};
+    draw(); return true; };
+  cv.addEventListener("pointerdown",e=>{ if(e.button===0&&pick(e)) dragging=true; });
+  cv.addEventListener("pointermove",e=>{ if(dragging) pick(e); });
+  ["pointerup","pointerleave","pointercancel"].forEach(t=>cv.addEventListener(t,()=>{dragging=false;}));
+  function useSet(i){ dsi=clamp(i,0,DS.length-1); w=D().init.slice(); sel={i:0,u:0,v:0};
+    txt("#neu-w1l","w₁ · "+S().x); txt("#neu-w2l","w₂ · "+S().y); syncSliders(); draw(); }
+  const good=()=>{ setR("#neu-w1",D().good[0]*10); setR("#neu-w2",D().good[1]*10); setR("#neu-b",D().good[2]*10); };
+
+  reg({id:"m-neu",draw,space:()=>press("#neu-next"),init:()=>useSet(0),
+    scenarioLabel:CONTENT["m-neu"].pick,
+    scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
+    steps:[
+    {t:"Girdi: tablodan bir satır",d:"Balon turu. Haritadaki her nokta bir sabah; seçili sabahta rüzgar 12 km/sa, görüş 7 km. Nöron bu iki sayıyı girdi olarak alır, ama önce 0–1 aralığına ölçekler (Modül 02): x₁ = 12 / 30 = 0.40, x₂ = 7 / 10 = 0.70. Sinir ağının girdisi her zaman sayıdır: tablo sütunu, piksel parlaklığı, kelime sayısı.",
+     set:0, hl:["#neu-x"], run(){setPressed("#neu-step",true);}},
+    {t:"Ağırlık: girdinin sesi",d:"Nöron w₁ = +1 ile başlamıştı: 'rüzgar arttıkça uçuş iyi' sanıyordu. Rüzgarın ağırlığını −4'e, görüşünkünü 3'e çektik. Rüzgar bağlantısı kalınlaştı ve turuncuya döndü: eksi ağırlık 'bu girdi arttıkça toplam düşer' demek. Haritada sınır döndü, ama 20 sabahın hâlâ yalnız 12'si doğru.",
+     set:0, hl:["#neu-w1","#neu-w2","#neu-acc"], run(){setPressed("#neu-step",true);setR("#neu-w1",-40);setR("#neu-w2",30);}},
+    {t:"Toplam ve bias",d:"z = w₁·x₁ + w₂·x₂ + b. Yön doğru, ama çizgi yanlış yerde. Bias girdiye bağlı olmayan sabit terim: nöronun hiçbir şey duymadan önceki eğilimi. b = 0.5 yaptık; sınır eğimini değiştirmeden paralel kaydı ve 20 sabahın 20'si doğru tarafa düştü.",
+     set:0, hl:["#neu-b","#neu-acc"], run(){setPressed("#neu-step",true);good();}},
+    {t:"Aktivasyon: basamak",d:"Seçili sabah için z = −4.0·0.40 + 3.0·0.70 + 0.5 = 1.00. Basamak fonksiyonu z ≥ 0 ise 1, değilse 0 der: ŷ = 1, uçar. Basamaklı nöronun bir adı var: <b>perceptron</b>. Modül 22'de bu ağırlıkları kendi kendine bulacak.",
+     set:0, hl:["#neu-z","#neu-y"], run(){setPressed("#neu-step",true);good();}},
+    {t:"Sigmoid: yüzde kaç?",d:"Aynı z = 1.00 bu kez S biçimli eğriden geçti: ŷ = 0.73, yani %73 'uçar'. Bu, lojistik regresyonun ta kendisi (Modül 06). Haritaya bakın: sınır yerinden kıpırdamadı, yalnız iki yanındaki geçiş yumuşadı.",
+     set:0, hl:["#neu-y"], run(){setPressed("#neu-sig",true);good();}},
+    {t:"ReLU: eksiyi sıfırla",d:"ReLU eksi toplamı 0 yapar, artıyı olduğu gibi geçirir: burada ŷ = 1.00. Olasılık vermez; bugünkü ağların gizli katmanlarında en çok kullanılan aktivasyon budur. Haritada sınırın bir yanı düz (hep 0), öteki yanı rampa.",
+     set:0, hl:["#neu-y"], run(){setPressed("#neu-relu",true);good();}},
+    {t:"Aktivasyon yok",d:"ŷ = z: nöron yalnız çarpıp topluyor, yani doğrusal regresyon (Modül 03). « Doğru bilinen » dört aktivasyonda da aynı kaldı, çünkü karar hep z'nin işaretinden çıkıyor. Aktivasyon sınırı oynatmaz; sınırın etrafındaki cevabın biçimini değiştirir.",
+     set:0, hl:["#neu-acc"], run(){setPressed("#neu-lin",true);good();}},
+    {t:"Bir nöron, bir doğru",d:"Kredi onayı: gelir ve borç oranı. « Örnek ağırlıklar » gelire artı, borca eksi ağırlık verdi; 20 başvurunun 20'si doğru. Ama hangi sayıları seçersen seç, tek nöronun sınırı hep düz bir çizgidir.",
+     set:1, hl:["#neu-good","#neu-acc"], run(){setPressed("#neu-sig",true);press("#neu-good");}},
+    {t:"Lamba devresi: OR'dan AND'e",d:"Seri bağlı iki anahtar: lamba yalnız ikisi de açıkken yanar (AND). Nöron w₁ = w₂ = 1, b = −0.5 ile 'en az biri açık' diyordu, yani OR: 4 durumun yalnız 2'si doğru. b'yi −1.5'e indirdik: AND, dördü de doğru. Peki 'ya biri ya öteki' (XOR)? Hiçbir w ve b ile olmaz. Modül 22 bunu gösterecek, Modül 23 çözecek.",
+     set:2, hl:["#neu-b","#neu-acc"], run(){setPressed("#neu-step",true);setR("#neu-b",-15);}}
+  ]});
 })();
 
 /* ═════════════ 4 · Perceptron ═════════════ */
@@ -7146,7 +7584,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   reg({id:"m-mlp",draw,space:run,init:()=>{$("#mlp-ho").textContent=hid;$("#mlp-lro").textContent=lr.toFixed(2);newData();},
     stop:()=>{if(timer){clearInterval(timer);timer=0;setRun(false);}},
     steps:[
-    {t:"Perceptron'un yenildiği veri",d:"XOR: köşegen köşeler aynı sınıf. Modül 21'de tek nöron bu veride sonsuza kadar salınıyordu. Şimdi araya bir hidden layer koyuyoruz. Sağ üstte ağın kendisi: iki girdi (x₁, x₂), gizli nöronlar, bir çıkış (ŷ). Çizgi kalınlığı ağırlığın büyüklüğü, rengi işareti.",
+    {t:"Perceptron'un yenildiği veri",d:"XOR: köşegen köşeler aynı sınıf. Modül 22'de tek nöron bu veride sonsuza kadar salınıyordu. Şimdi araya bir hidden layer koyuyoruz. Sağ üstte ağın kendisi: iki girdi (x₁, x₂), gizli nöronlar, bir çıkış (ŷ). Çizgi kalınlığı ağırlığın büyüklüğü, rengi işareti.",
      run(){setPressed("#mlp-run",false);setPressed("#mlp-xor",true);setR("#mlp-h",1);setR("#mlp-lr",100);setPressed("#mlp-lines",true);}},
     {t:"Tek gizli nöron yetmiyor",d:"Eğitim başladı: tek doğru ileri geri gidiyor, doğruluk %75'te çakılıyor, kayıp 0.5 civarında donup kalıyor. Bir doğru düzlemi ikiye böler; XOR dört bölge ister.",
      hl:["#mlp-acc","#mlp-loss"], run(){setR("#mlp-h",1);setPressed("#mlp-run",true);}},
@@ -7163,6 +7601,296 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   ],});
 })();
 
+
+/* ═════════════ 23 · Katmanlar: çizgilerden şekle ═════════════ */
+(function(){
+  const cv=$("#c-lay"), {ctx,fit}=setupCanvas(cv);
+  const DS=SETS("m-lay"); let dsi=0; const S=()=>DS[dsi];
+  /* Ağırlıkları biz kuruyoruz ki her nöronun işi görünsün. Harita 0..1 (1 birim = 10 km).
+     Birinci gizli katmanın her nöronu bir çokgen kenarı: iç yanında 1. İkinci katman
+     (ya da tek bölgede çıkış) kendi kenarlarını toplar, "hepsi 1 mi" der (AND); çıkış
+     bölgeleri OR ya da "büyüğün içi, küçüğün dışı" diye birleştirir. Çokgenin merkezden
+     kenara uzaklığı iç ve dış teğet çokgenin ortası: r = R·(1 + cos(π/n))/2. */
+  const GEO={
+    tek:{shapes:[{c:[.5,.5],R:.30}], out:"one"},
+    iki:{shapes:[{c:[.30,.64],R:.21},{c:[.71,.34],R:.18}], out:"or"},
+    halka:{shapes:[{c:[.5,.5],R:.38},{c:[.5,.5],R:.17}], out:"ring"}
+  };
+  /* Kazançlar: kenar nöronu KS, birleştiren nöron KG. KS = 20'de sigmoid kipinde çokgenin
+     köşeleri içe çöküyordu ve nöron arttıkça doğru bilinen DÜŞÜYORDU (tek bölge: 5 nöron
+     152 → 8 nöron 146). 40'ta geçiş ~1 km, eğri basamağınkini izliyor. */
+  const KS=40, KG=6, N=160;
+  let n=4, act="step", net=[], pts=[], order=[], sel={i:0,u:.5,v:.5}, pk=null, ver=0, GM=null;
+  const G=()=>GEO[S().gen];
+  const truth=(u,v)=>{ const g=G(), d=g.shapes.map(q=>Math.hypot(u-q.c[0],v-q.c[1])<q.R);
+    return g.out==="one"?d[0]:g.out==="or"?(d[0]||d[1]):(d[0]&&!d[1]); };
+  /* tohumlu üreteç: veri her açılışta aynı, göstergedeki sayılar derste de aynı */
+  const rng=(a)=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  function sample(){
+    const r=rng(7+dsi); pts=[];
+    for(let i=0;i<N;i++){ const u=.03+.94*r(), v=.03+.94*r(); pts.push({u,v,t:truth(u,v)?1:0}); }
+    /* « Sonraki nokta » sırası: bir içeride, bir dışarıda */
+    const A=[], B=[]; pts.forEach((p,i)=>(p.t?A:B).push(i)); order=[];
+    for(let k=0;k<Math.max(A.length,B.length);k++){ if(k<A.length) order.push(A[k]); if(k<B.length) order.push(B[k]); }
+    sel={i:order[0],u:0,v:0};
+  }
+  function build(){
+    const g=G(), L1=[];
+    g.shapes.forEach(q=>{ const r=q.R*(1+Math.cos(Math.PI/n))/2;
+      for(let i=0;i<n;i++){ const th=-Math.PI/2+2*Math.PI*i/n, nx=Math.cos(th), ny=Math.sin(th);
+        L1.push({w:[-KS*nx,-KS*ny], b:KS*(r+nx*q.c[0]+ny*q.c[1]), q, th, r}); } });
+    const and=(k)=>{ const w=new Array(L1.length).fill(0); for(let i=0;i<n;i++) w[k*n+i]=KG; return {w,b:-KG*(n-.5)}; };
+    net=g.out==="one"?[L1,[and(0)]]:[L1,[and(0),and(1)],[{w:[KG,g.out==="or"?KG:-KG],b:-KG*.5}]];
+    if(pk&&(pk.c>net.length||pk.k>=net[pk.c-1].length)) pk=null;
+    ver++;
+  }
+  /* gizli katmanlar seçili aktivasyonla, çıkış hep sigmoid: olasılık verir */
+  const AF={step:z=>z>=0?1:0, sig:z=>1/(1+Math.exp(-z)), lin:z=>z};
+  const AN={step:"basamak", sig:"sigmoid", lin:"yok"};
+  function fwd(u,v){ const Z=[], H=[[u,v]];
+    net.forEach((layer,li)=>{ const x=H[H.length-1], last=li===net.length-1;
+      const z=layer.map(nu=>{ let s=nu.b; for(let j=0;j<x.length;j++) s+=nu.w[j]*x[j]; return s; });
+      Z.push(z); H.push(z.map(t=>last?AF.sig(t):AF[act](t))); });
+    return {Z,H}; }
+  const prob=(u,v)=>fwd(u,v).H[net.length][0];
+  const cur=()=>sel.i>=0&&pts[sel.i]?pts[sel.i]:{u:sel.u,v:sel.v,t:null};
+  const sg=(v,d=1)=>{const r=+v.toFixed(d); return (r<0?"−":"")+Math.abs(r).toFixed(d);};
+  const pm=(v,d=1)=>{const r=+v.toFixed(d); return (r<0?"− ":"+ ")+Math.abs(r).toFixed(d);};
+  const SUB="₀₁₂₃₄₅₆₇₈₉", sub=(i)=>String(i).split("").map(c=>SUB[+c]).join("");
+  const nm=(c,k)=>c===net.length?"ŷ":c===1?"h"+sub(k+1):"g"+sub(k+1);
+  const sizes=()=>[2,...net.map(l=>l.length)];
+  const params=()=>net.reduce((s,l,li)=>s+l.length*(sizes()[li]+1),0);
+  const fitSize=(t,maxW,sz,min=9.5)=>{ ctx.save(); let s=sz;
+    ctx.font=`600 ${s}px "IBM Plex Mono", monospace`;
+    while(s>min && ctx.measureText(t).width>maxW){ s-=.5; ctx.font=`600 ${s}px "IBM Plex Mono", monospace`; }
+    ctx.restore(); return s; };
+
+  /* her nöronun küçük haritası: T×T hücre, bir kez hesaplanır (ağ / aktivasyon / tema değişince) */
+  const T=28; let tkey="", thumbs=[];
+  function buildThumbs(){
+    const key=[ver,act,css("--c"),css("--a"),css("--b")].join("|");
+    if(key===tkey) return; tkey=key;
+    const grids=net.map(l=>l.map(()=>new Float64Array(T*T)));
+    for(let j=0;j<T;j++) for(let i=0;i<T;i++){ const f=fwd((i+.5)/T,1-(j+.5)/T);
+      for(let li=0;li<net.length;li++) for(let k=0;k<net[li].length;k++) grids[li][k][j*T+i]=f.H[li+1][k]; }
+    const C=rgbOf("--c"), Ac=rgbOf("--a"), Bc=rgbOf("--b");
+    thumbs=grids.map((l,li)=>l.map(gr=>{
+      const c=document.createElement("canvas"); c.width=T; c.height=T;
+      const x=c.getContext("2d"), img=x.createImageData(T,T), d=img.data, last=li===net.length-1;
+      let mx=1; if(act==="lin"&&!last){ mx=0; for(let q=0;q<gr.length;q++) mx=Math.max(mx,Math.abs(gr[q])); mx=mx||1; }
+      for(let q=0;q<T*T;q++){ const v=gr[q], o=q*4; let col, al;
+        if(last){ col=v>=.5?Ac:Bc; al=.10+.55*Math.abs(v-.5)*2; }
+        else if(act==="lin"){ col=v>=0?C:Bc; al=.06+.62*Math.abs(v)/mx; }
+        else { col=C; al=.05+.68*v; }
+        d[o]=col[0]; d[o+1]=col[1]; d[o+2]=col[2]; d[o+3]=Math.round(al*255); }
+      x.putImageData(img,0,0); return c; }));
+  }
+  /* büyük harita: çıkış olasılığı (m-mlp'nin regionLayer yolu) */
+  const lo=document.createElement("canvas"), lox=lo.getContext("2d");
+  const rc=document.createElement("canvas"), rcx=rc.getContext("2d"); let rkey="";
+  function region(g){
+    const mw=g.mx1-g.mx0, mh=g.my1-g.my0;
+    const key=[ver,act,Math.round(mw),Math.round(mh),css("--a"),css("--b")].join("|");
+    if(key===rkey) return rc;
+    const cols=Math.max(2,Math.ceil(mw/4)), rows=Math.max(2,Math.ceil(mh/4));
+    lo.width=cols; lo.height=rows;
+    const img=lox.createImageData(cols,rows), d=img.data, A=rgbOf("--a"), B=rgbOf("--b");
+    for(let j=0;j<rows;j++) for(let i=0;i<cols;i++){
+      const pr=prob((i+.5)/cols,1-(j+.5)/rows), c=pr>=.5?A:B, o=(j*cols+i)*4;
+      d[o]=c[0]; d[o+1]=c[1]; d[o+2]=c[2]; d[o+3]=Math.round((.05+.30*Math.abs(pr-.5)*2)*255);
+    }
+    lox.putImageData(img,0,0);
+    const dpr=window.devicePixelRatio||1;
+    rc.width=Math.round(mw*dpr); rc.height=Math.round(mh*dpr);
+    rcx.setTransform(dpr,0,0,dpr,0,0); rcx.clearRect(0,0,mw,mh);
+    rcx.imageSmoothingEnabled=true; rcx.drawImage(lo,0,0,cols,rows,0,0,mw,mh);
+    rkey=key; return rc;
+  }
+  /* w·x + b = 0 doğrusunun [0,1]² içindeki parçası */
+  function cut(w0,w1,b){ const out=[], ok=(x,y)=>{
+      if(x<-1e-9||x>1+1e-9||y<-1e-9||y>1+1e-9) return;
+      if(out.some(q=>Math.abs(q[0]-x)<1e-9&&Math.abs(q[1]-y)<1e-9)) return; out.push([x,y]); };
+    if(Math.abs(w1)>1e-9){ ok(0,-b/w1); ok(1,-(w0+b)/w1); }
+    if(Math.abs(w0)>1e-9){ ok(-b/w0,0); ok(-(w1+b)/w0,1); }
+    return out.length>=2?[out[0],out[1]]:null; }
+
+  /* 640 px ve üstünde: solda ağ, sağda harita. Altında yalnız ağ (« Sonraki nokta »). */
+  const geo=()=>{ const W=cv.__w, H=cv.__h, wide=W>=640, DW=wide?Math.round(W*.58):W;
+    const mx0=DW+40, mx1=W-14, my0=14, my1=H-32;
+    return {W,H,wide,DW,mx0,mx1,my0,my1,
+      MX:u=>mx0+u*(mx1-mx0), MY:v=>my1-v*(my1-my0), IU:x=>(x-mx0)/(mx1-mx0), IV:y=>(my1-y)/(my1-my0)}; };
+
+  function drawNet(g,f){
+    const DW=g.DW, H=g.H, top=36, bot=H-58, cols=net.length+1, sz=sizes();
+    const left=34, right=DW-60, xs=Array.from({length:cols},(_,c)=>left+(right-left)*c/(cols-1));
+    const gap=(right-left)/(cols-1);
+    const nodes=sz.map((m,c)=>{ const pitch=(bot-top)/m;
+      const s=c===0?0:c===cols-1?Math.min(46,bot-top-24):clamp(pitch-6,12,40);
+      return Array.from({length:m},(_,k)=>({c,k,x:xs[c],y:top+pitch*(k+.5),s,pitch})); });
+    g.nodes=nodes;
+    const rIn=15;
+    const titles=["girdi",...net.slice(0,-1).map((_,i)=>gap<130?"gizli "+(i+1):"gizli katman "+(i+1)),"çıkış"];
+    titles.forEach((t,c)=>label(ctx,t,xs[c],14,css(c===0||c===cols-1?"--ink-soft":"--c"),"center",10.5));
+    /* bağlantılar: renk işaret, kalınlık |w| (katman içinde göreli); 0 ağırlık soluk kıl çizgi */
+    for(let c=1;c<cols;c++){
+      const L=net[c-1], mw=Math.max(...L.map(nu=>Math.max(...nu.w.map(Math.abs))))||1;
+      ctx.save();
+      L.forEach((nu,k)=>{ const t=nodes[c][k];
+        nu.w.forEach((wt,j)=>{ const s0=nodes[c-1][j], x0=c===1?s0.x+rIn:s0.x+s0.s/2, x1=t.x-t.s/2;
+          if(wt===0){ ctx.strokeStyle=css("--grid"); ctx.lineWidth=1; }
+          else { const a=Math.abs(wt)/mw; ctx.strokeStyle=hexA(wt>0?"--a":"--b",.28+.55*a); ctx.lineWidth=.7+2.6*a; }
+          ctx.beginPath(); ctx.moveTo(x0,s0.y); ctx.lineTo(x1,t.y); ctx.stroke(); }); });
+      ctx.restore();
+    }
+    /* girdiler */
+    const u=f.H[0];
+    nodes[0].forEach((t,k)=>{ disc(ctx,t.x,t.y,rIn,css("--surface"),css("--ink-soft"));
+      label(ctx,u[k].toFixed(2),t.x,t.y,css("--ink"),"center",10.5);
+      label(ctx,k?"x₂":"x₁",t.x,t.y-rIn-9,css("--ink-soft"),"center",11); });
+    /* nöronlar: küçük harita + seçili noktanın yeri + o noktadaki değer */
+    buildThumbs();
+    const p=cur();
+    for(let c=1;c<cols;c++) nodes[c].forEach((t,k)=>{
+      const s=t.s, x0=t.x-s/2, y0=t.y-s/2, val=f.H[c][k], last=c===cols-1;
+      ctx.save(); ctx.fillStyle=css("--surface"); ctx.fillRect(x0,y0,s,s);
+      ctx.imageSmoothingEnabled=act!=="step";
+      if(thumbs[c-1]&&thumbs[c-1][k]) ctx.drawImage(thumbs[c-1][k],x0,y0,s,s);
+      const on=last?val>=.5:act==="lin"?val>0:val>=.5;
+      ctx.strokeStyle=on?css("--ink"):css("--line"); ctx.lineWidth=on?1.8:1.2; ctx.strokeRect(x0,y0,s,s);
+      if(pk&&pk.c===c&&pk.k===k){ ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.4; ctx.strokeRect(x0-3,y0-3,s+6,s+6); }
+      ctx.restore();
+      if(s>=14) disc(ctx,x0+p.u*s,y0+(1-p.v)*s,s>=24?2.6:2,css("--accent"));
+      const vs=last?val.toFixed(2):act==="step"?String(val):act==="sig"?val.toFixed(2):sg(val,1);
+      if(last) label(ctx,"ŷ = "+vs,t.x,t.y+s/2+13,css("--accent"),"center",11.5);
+      else if(t.pitch>=17) legend(ctx,x0+s+4,t.y,[[vs,"--ink"]],{size:t.pitch>=24?10.5:9.5,lh:13});
+    });
+    /* seçili nöronun hesabı: iki satır */
+    const c=pk?pk.c:cols-1, k=pk?pk.k:0, nu=net[c-1][k], x=f.H[c-1], z=f.Z[c-1][k], val=f.H[c][k], last=c===cols-1;
+    const fn=last?"sigmoid":act==="lin"?"":AN[act];
+    let inner;
+    if(c===1) inner=`${sg(nu.w[0])}·${x[0].toFixed(2)} ${pm(nu.w[1])}·${x[1].toFixed(2)} ${pm(nu.b)}`;
+    else{ const parts=[]; for(let j=0;j<nu.w.length;){ let e=j; while(e+1<nu.w.length&&nu.w[e+1]===nu.w[j]) e++;
+        const nn=e===j?nm(c-1,j):e===j+1?`${nm(c-1,j)}+${nm(c-1,e)}`:`${nm(c-1,j)}+…+${nm(c-1,e)}`;
+        parts.push({neg:nu.w[j]<0, s:`${Math.abs(nu.w[j])}·${e>j?"("+nn+")":nn}`}); j=e+1; }
+      inner=parts.map((q,i)=>(i?(q.neg?" − ":" + "):(q.neg?"−":""))+q.s).join("")+" "+pm(nu.b); }
+    const vs=last||act==="sig"?val.toFixed(2):act==="step"?String(val):sg(val,1);
+    const fml=fn?`${nm(c,k)} = ${fn}(${inner}) = ${fn}(${sg(z)}) = ${vs}`:`${nm(c,k)} = ${inner} = ${vs}`;
+    const g2=G().out;
+    const what=c===1?(act==="lin"?"aktivasyon yok: çıktısı z'nin kendisi":"kendi doğrusunun iç yanında 1, dış yanında 0"+(act==="sig"?" (yumuşak geçiş)":""))
+      :!last?`${k?S().p2:S().p1}: kendi ${n} kenarının hepsi 1 ise 1 (AND)`
+      :g2==="one"?"bütün kenar nöronları 1 ise içeride (AND)":g2==="or"?"g₁ ya da g₂ 1 ise içeride (OR)":"g₁ 1 ve g₂ 0 ise halkada: eksi ağırlık delik açar";
+    const d1=`seçili nöron ${nm(c,k)} · ${what}`;
+    label(ctx,d1,10,H-36,css("--ink-soft"),"left",fitSize(d1,DW-20,11));
+    label(ctx,fml,10,H-15,css("--accent"),"left",fitSize(fml,DW-20,12));
+  }
+
+  function drawMap(g,f,lin){
+    const {mx0,mx1,my0,my1}=g, mw=mx1-mx0, mh=my1-my0;
+    ctx.drawImage(region(g),mx0,my0,mw,mh);
+    ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    for(let i=0;i<=10;i++){ const t=i/10;
+      ctx.beginPath(); ctx.moveTo(g.MX(t),my0); ctx.lineTo(g.MX(t),my1); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(mx0,g.MY(t)); ctx.lineTo(mx1,g.MY(t)); ctx.stroke(); }
+    ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.strokeRect(mx0,my0,mw,mh); ctx.restore();
+    /* birinci gizli katmanın doğruları; seçili kenar nöronu pembe, seçili bölge nöronunun çokgeni pembe */
+    ctx.save(); ctx.beginPath(); ctx.rect(mx0,my0,mw,mh); ctx.clip();
+    net[0].forEach((nu,k)=>{ const sgm=cut(nu.w[0],nu.w[1],nu.b); if(!sgm) return;
+      const hot=pk&&pk.c===1&&pk.k===k;
+      ctx.strokeStyle=hot?css("--accent"):hexA("--c",.75); ctx.lineWidth=hot?2.8:1.2;
+      ctx.beginPath(); ctx.moveTo(g.MX(sgm[0][0]),g.MY(sgm[0][1])); ctx.lineTo(g.MX(sgm[1][0]),g.MY(sgm[1][1])); ctx.stroke(); });
+    if(pk&&pk.c===2&&net.length===3){
+      ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.8; ctx.beginPath();
+      for(let i=0;i<=n;i++){ const nu=net[0][pk.k*n+(i%n)], R=nu.r/Math.cos(Math.PI/n), a=nu.th+Math.PI/n;
+        const X=g.MX(nu.q.c[0]+R*Math.cos(a)), Y=g.MY(nu.q.c[1]+R*Math.sin(a)); i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }
+      ctx.stroke(); }
+    ctx.restore();
+    pts.forEach(q=>{ const wrong=(prob(q.u,q.v)>=.5?1:0)!==q.t;
+      disc(ctx,g.MX(q.u),g.MY(q.v),4.2,css(q.t?"--a":"--b"),wrong?css("--bad"):css("--surface")); });
+    const p=cur(), sx=g.MX(p.u), sy=g.MY(p.v);
+    ctx.save(); ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(sx,sy,9,0,7); ctx.stroke(); ctx.restore();
+    legend(ctx,mx0+8,my0+12,[[S().cls[0],"--a"],[S().cls[1],"--b"],["gizli katman 1 doğruları","--c"]],{size:11});
+    if(lin) legend(ctx,(mx0+mx1)/2,my1-30,[["aktivasyon yok → ağ tek nörona eşit:","--ink"],[lin,"--accent"]],{size:11,align:"center"});
+    label(ctx,S().x+" →",mx1,my1+16,css("--ink-soft"),"right",11);
+    ylabel(ctx,S().y+" →",mx0-14,my0,my1,css("--ink-soft"),11);
+  }
+
+  function draw(){
+    if(!fit()) return;
+    const g=geo(); GM=g;
+    const W=g.W, H=g.H, p=cur(), f=fwd(p.u,p.v), yh=f.H[net.length][0];
+    ctx.clearRect(0,0,W,H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,W,H);
+    /* aktivasyon yoksa bütün ağ tek bir doğrusal fonksiyon: katsayılarını üç noktadan oku */
+    let lin="";
+    if(act==="lin"){ const zo=(u,v)=>fwd(u,v).Z[net.length-1][0], c0=zo(0,0);
+      lin=`z = ${sg(zo(1,0)-c0,2)}·x₁ ${pm(zo(0,1)-c0,2)}·x₂ ${pm(c0,1)}`; }
+    drawNet(g,f);
+    if(g.wide){
+      ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(g.DW+4,10); ctx.lineTo(g.DW+4,H-10); ctx.stroke(); ctx.restore();
+      drawMap(g,f,lin);
+    }
+    /* göstergeler dalın dışında: dar yerleşimde de yazılır */
+    const ok=pts.filter(q=>(prob(q.u,q.v)>=.5?1:0)===q.t).length;
+    txt("#lay-arch",sizes().join(" → "));
+    txt("#lay-par",String(params()));
+    const ae=$("#lay-acc"); ae.textContent=`${ok} / ${pts.length}`;
+    ae.className="v "+(ok>=pts.length*.95?"ok":ok>=pts.length*.8?"wr":"bd");
+    const ye=$("#lay-y"); ye.textContent=`${yh.toFixed(2)} · ${S().cls[yh>=.5?0:1]}`;
+    ye.className="v"+(p.t===null?"":(yh>=.5?1:0)===p.t?" ok":" bd");
+    const hs=f.H.slice(1,-1).map((h,i)=>`gizli katman ${i+1} = [${h.map(v=>act==="lin"?sg(v,1):act==="sig"?v.toFixed(2):String(v)).join(", ")}]`).join(", ");
+    cv.setAttribute("aria-label",`Katmanlı ağ, ${S().name}: ${sizes().join(" → ")}, ${params()} parametre, aktivasyon ${AN[act]}. `+
+      `Doğru bilinen ${ok} / ${pts.length}. Seçili nokta (${p.u.toFixed(2)}, ${p.v.toFixed(2)}): ${hs}, ŷ = ${yh.toFixed(2)}. `+
+      `Çıkış ağırlıkları: ${net[net.length-1][0].w.map(v=>sg(v,0)).join(", ")}.`+(lin?` Eşdeğer tek nöron: ${lin}.`:""));
+  }
+
+  /* ── kontroller ── */
+  $("#lay-n").oninput=e=>{ n=clamp(+e.target.value,3,8); txt("#lay-no",String(n)); build(); draw(); };
+  const setAct=(a)=>{ act=a;
+    [["step","#lay-step"],["sig","#lay-sig"],["lin","#lay-lin"]].forEach(([k,s])=>$(s).setAttribute("aria-pressed",String(k===a)));
+    ver++; draw(); };
+  $("#lay-step").onclick=()=>setAct("step"); $("#lay-sig").onclick=()=>setAct("sig"); $("#lay-lin").onclick=()=>setAct("lin");
+  $("#lay-next").onclick=()=>{ const j=order.indexOf(sel.i); sel={i:order[(j+1)%order.length],u:0,v:0}; draw(); };
+  /* tıklama: düğümse o nöronun hesabı, haritaysa o nokta ağdan geçer (14 px içindeki
+     veri noktasına yapışır). Seçim fare çıkınca KALIR (m-cn kuralı). */
+  let dragging=false;
+  const atMap=(e)=>{ const g=GM; if(!g||!g.wide) return false; const q=pointerPos(cv,e);
+    if(q.x<g.mx0-6||q.x>g.mx1+6||q.y<g.my0-6||q.y>g.my1+6) return false;
+    let bi=-1, bd=14*14;
+    pts.forEach((t,i)=>{ const d=(g.MX(t.u)-q.x)**2+(g.MY(t.v)-q.y)**2; if(d<bd){bd=d;bi=i;} });
+    sel=bi>=0?{i:bi,u:0,v:0}:{i:-1,u:clamp(g.IU(q.x),0,1),v:clamp(g.IV(q.y),0,1)};
+    draw(); return true; };
+  cv.addEventListener("pointerdown",e=>{ if(e.button!==0||!GM) return; const q=pointerPos(cv,e);
+    for(const col of (GM.nodes||[]).slice(1)) for(const t of col){
+      if(Math.abs(q.x-t.x)<=t.s/2+4&&Math.abs(q.y-t.y)<=t.s/2+4){ pk={c:t.c,k:t.k}; draw(); return; } }
+    if(atMap(e)) dragging=true; });
+  cv.addEventListener("pointermove",e=>{ if(dragging) atMap(e); });
+  ["pointerup","pointerleave","pointercancel"].forEach(t=>cv.addEventListener(t,()=>{dragging=false;}));
+  function useSet(i){ dsi=clamp(i,0,DS.length-1); pk=null; sample(); build(); draw(); }
+
+  reg({id:"m-lay",draw,space:()=>press("#lay-next"),init:()=>{ txt("#lay-no",String(n)); useSet(0); },
+    scenarioLabel:CONTENT["m-lay"].pick,
+    scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
+    steps:[
+    {t:"Bir katman: aynı girdiyi okuyan nöronlar",d:"Tek istasyon, 3 gizli nöron. Ortadaki sütun bir <b>layer</b> (katman): üç nöronun üçü de aynı iki girdiyi okuyor, ama her birinin kendi ağırlıkları var. Her biri Modül 21'deki gibi tek bir doğru çiziyor. Küçük karelerde her nöronun kendi haritası: doğrunun iç yanında 1 (mor), dış yanında 0.",
+     set:0, hl:["#lay-n","#lay-arch"], run(){setPressed("#lay-step",true);setR("#lay-n",3);}},
+    {t:"Çıkış nöronu ne görüyor?",d:"Çıkış nöronu doğu ve kuzeyi hiç görmüyor; yalnız üç gizli nöronun 0/1 cevabını görüyor. Kuralı: üçü de 1 ise kapsama var (AND). Ortaya bir üçgen çıktı, 160 noktanın 138'i doğru. Gizli katman girdiyi üç yeni sayıya çevirdi, çıkış o sayılarla karar verdi.",
+     set:0, hl:["#lay-acc"], run(){setPressed("#lay-step",true);setR("#lay-n",3);}},
+    {t:"Daha çok nöron, daha yuvarlak",d:"8 gizli nöron: sekiz doğru, sekizgen. Doğru bilinen 158'e çıktı. Bedeli parametre: her gizli nöronun 2 ağırlığı ve 1 bias'ı var, çıkışın 8 ağırlığı ve 1 bias'ı. 8 · 3 + 9 = 33.",
+     set:0, hl:["#lay-n","#lay-acc","#lay-par"], run(){setPressed("#lay-step",true);setR("#lay-n",8);}},
+    {t:"İleri yayılım",d:"Pembe halkalı nokta ağdan geçiyor: girdi iki sayı, gizli katman sekiz tane 0/1, çıkış tek bir olasılık. Hesap soldan sağa katman katman akıyor; adı <b>forward pass</b> (ileri yayılım). Haritada başka bir noktaya tıklayın ya da « Sonraki nokta »ya basın. Bir düğüme tıklayınca alttaki satır o nöronun hesabını yazar.",
+     set:0, hl:["#lay-next","#lay-y"], run(){setPressed("#lay-step",true);setR("#lay-n",8);press("#lay-next");}},
+    {t:"Sigmoid: yumuşak kenar",d:"Aynı ağırlıklar, basamak yerine sigmoid. Küçük karelerin kenarı yumuşadı, gizli nöronların değerleri artık 0 ile 1 arasında bir sayı. Eğitim yumuşak aktivasyon ister: basamağın eğimi her yerde sıfır, backpropagation ona hangi yöne gideceğini söyleyemez (Modül 24).",
+     set:0, run(){setPressed("#lay-sig",true);setR("#lay-n",8);}},
+    {t:"Aktivasyonu kaldırın",d:"« Yok »: her nöron yalnız çarpıp topluyor. Harita tek renk oldu, ağ herkese 'çekiyor' diyor ve 160 noktanın yalnız 50'sini biliyor. Çarpıp topladığın şeyi yeniden çarpıp toplarsan elde yine bir 'çarp ve topla' kalır: bütün ağ tek bir nörona eşit. Burada o nöronun iki ağırlığı bile 0, çünkü sekiz kenar birbirini götürüyor.",
+     set:0, hl:["#lay-acc"], run(){setPressed("#lay-lin",true);setR("#lay-n",8);}},
+    {t:"İkinci gizli katman",d:"İki istasyon, iki ayrı daire. Birinci gizli katman 12 doğru çiziyor. İkinci gizli katmandaki iki nöronun her biri kendi altı doğrusunu topluyor ve bir çokgen kuruyor (öteki altısına ağırlığı 0, soluk çizgiler). Çıkış 'en az biri' diyor (OR). Katmanlar işi bölüşüyor: doğru → şekil → karar.",
+     set:1, hl:["#lay-arch","#lay-acc"], run(){setPressed("#lay-step",true);setR("#lay-n",6);}},
+    {t:"Delik açmak: eksi ağırlık",d:"Kurye bölgesi: depoya çok yakın siparişi müşteri kendi alıyor, çok uzağa kargo gidiyor; arası kuryenin. İkinci katmanda büyük ve küçük çokgen var. Çıkış büyüğe +6, küçüğe −6 ağırlık veriyor (turuncu bağlantı): 'büyüğün içi ama küçüğün dışı'.",
+     set:2, hl:["#lay-acc"], run(){setPressed("#lay-step",true);setR("#lay-n",6);}},
+    {t:"Ağırlıkları kim buluyor?",d:"Buradaki her ağırlığı biz hesapladık, her nöronun ne yaptığı görünsün diye. Gerçek bir ağda kimse yazmaz: ağırlıklar rastgele başlar, <b>backpropagation</b> onları veriden bulur, bulduğu doğrular da bu kadar düzenli olmaz. Modül 24'te bunu izleyeceğiz.",
+     set:2, hl:["#lay-par"], run(){setPressed("#lay-step",true);setR("#lay-n",6);}}
+  ]});
+})();
 
 /* ═════════════ Küme sayısını seçmek: dirsek ve siluet ═════════════ */
 (function(){
@@ -8428,9 +9156,11 @@ const META=[
   ["18","m-kch",   "elbow yöntemi ve silhouette skoru","Kaç küme var?","Denetimsiz öğrenme","küme sayısı dirsek elbow siluet silhouette wcss inertia k seçimi model selection müşteri segmenti bağ çeşidi yerleşim yerleri"],
   ["19","m-dbs",   "DBSCAN ve hiyerarşik kümeleme","Küme yuvarlak olmak zorunda mı","Denetimsiz öğrenme","dbscan yoğunluk density eps minpts çekirdek nokta core point gürültü noise hiyerarşik hierarchical ward dendrogram aglomeratif hilal moons halka ring küme şekli"],
   ["20","m-pca",   "PCA ile boyut indirgeme","İki sayı yerine bir","Denetimsiz öğrenme","pca ana bileşen principal component boyut indirgeme dimensionality reduction varyans variance özvektör eigenvector izdüşüm projection boy kilo matematik fizik uydu bandı ndvi kızılötesi"],
-  ["21","m-per",   "perceptron ve linear separability","Tek nöron","Derin öğrenme","perceptron nöron neuron xor doğrusal ayrılabilirlik linearly separable yakınsama convergence kalite kontrol ilaç etkileşimi xor"],
-  ["22","m-mlp",   "MLP XOR'u nasıl çözüyor","Gizli katman","Derin öğrenme","çok katmanlı ağ mlp neural network xor gizli katman hidden layer geri yayılım backpropagation epoch tanh sigmoid ilaç etkileşimi baz istasyonu iki ay make_moons"],
-  ["23","m-cn",    "convolution ve feature map","Filtre gezdirmek","Derin öğrenme","konvolüsyon convolution çekirdek kernel filtre filter cnn öznitelik haritası feature map havuzlama pooling relu sobel hava fotoğrafı tarla parseli test deseni sobel"],
+  ["21","m-neu",   "artificial neuron ve activation function","Bir nöron ne hesaplar","Derin öğrenme","yapay nöron artificial neuron nöron neuron girdi input ağırlık weight bias sabit terim ağırlıklı toplam weighted sum aktivasyon activation function basamak step sigmoid relu tanh ölçekleme balon turu rüzgar görüş kredi onayı lamba devresi anahtar and or mantık kapısı"],
+  ["22","m-per",   "perceptron ve linear separability","Tek nöron öğreniyor","Derin öğrenme","perceptron nöron neuron xor doğrusal ayrılabilirlik linearly separable yakınsama convergence kalite kontrol ilaç etkileşimi xor"],
+  ["23","m-lay",   "layer, hidden layer ve forward pass","Çizgilerden şekle","Derin öğrenme","katman layer gizli katman hidden layer ileri yayılım forward pass tam bağlı fully connected mimari architecture parametre sayısı nöron çokgen aktivasyon yok doğrusal baz istasyonu kapsama iki istasyon kurye bölgesi halka derin deep"],
+  ["24","m-mlp",   "MLP XOR'u nasıl çözüyor","Gizli katmanı eğitmek","Derin öğrenme","çok katmanlı ağ mlp neural network xor gizli katman hidden layer geri yayılım backpropagation epoch tanh sigmoid ilaç etkileşimi baz istasyonu iki ay make_moons"],
+  ["25","m-cn",    "convolution ve feature map","Filtre gezdirmek","Derin öğrenme","konvolüsyon convolution çekirdek kernel filtre filter cnn öznitelik haritası feature map havuzlama pooling relu sobel hava fotoğrafı tarla parseli test deseni sobel"],
 ];
 /* ders sırasına dizilmiş modüller — gezinme hep bunun üzerinden */
 const SEQ=META.map(r=>MODULES.find(m=>m.id===r[1])).filter(Boolean);
@@ -8464,6 +9194,14 @@ TH["m-per"]=(c,w,h)=>{thumbBase(c,w,h);
   for(let i=0;i<7;i++)tdot(c,w*.16+(i%4)*15,h*.20+Math.floor(i/4)*14,4,css("--a"));
   for(let i=0;i<7;i++)tdot(c,w*.56+(i%4)*15,h*.62+Math.floor(i/4)*14,4,css("--b"));
   c.strokeStyle=css("--accent");c.lineWidth=2.6;c.beginPath();c.moveTo(0,h*.86);c.lineTo(w,h*.42);c.stroke();};
+TH["m-neu"]=(c,w,h)=>{thumbBase(c,w,h);
+  const sx=w*.46, sy=h*.5;
+  [[h*.28,"--b",3.4],[h*.72,"--a",2.6]].forEach(([y,k,lw])=>{c.strokeStyle=css(k);c.lineWidth=lw;
+    c.beginPath();c.moveTo(w*.14,y);c.lineTo(sx,sy);c.stroke();tdot(c,w*.14,y,7,css("--ink-soft"));});
+  tdot(c,sx,sy,11,css("--ink"));
+  c.strokeStyle=css("--accent");c.lineWidth=2.4;c.beginPath();
+  for(let i=0;i<=24;i++){const t=i/24,x=w*(.62+.24*t),y=h*(.72-.42/(1+Math.exp(-(t-.5)*12)));i?c.lineTo(x,y):c.moveTo(x,y);}
+  c.stroke(); tdot(c,w*.92,h*.30,5,css("--a"));};
 TH["m-km"]=(c,w,h)=>{thumbBase(c,w,h);
   [["--a",.22,.34],["--b",.66,.30],["--c",.46,.72]].forEach(([k,cx,cy])=>{
     for(let i=0;i<7;i++)tdot(c,(cx+(i%3-1)*.075+(i>3?.03:0))*w,(cy+(Math.floor(i/3)-1)*.13)*h,3.6,hexA(k,.85));
@@ -8517,6 +9255,14 @@ TH["m-mlp"]=(c,w,h)=>{thumbBase(c,w,h);
   c.beginPath();c.moveTo(0,h*.82);c.lineTo(w,h*.24);c.stroke();
   [[.26,.26,"--b"],[.74,.74,"--b"],[.74,.26,"--a"],[.26,.74,"--a"]].forEach(([x,y,k])=>{
     for(let i=0;i<4;i++)tdot(c,(x+((i%2)-.5)*.11)*w,(y+(Math.floor(i/2)-.5)*.13)*h,3.3,css(k));});};
+TH["m-lay"]=(c,w,h)=>{thumbBase(c,w,h);
+  const P=[[.30,.80],[.70,.80],[.50,.22]].map(([x,y])=>[x*w,y*h]);
+  c.fillStyle=hexA("--a",.18);c.beginPath();P.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.fill();
+  c.strokeStyle=css("--c");c.lineWidth=1.6;
+  [[0,1],[1,2],[2,0]].forEach(([a,b])=>{const dx=P[b][0]-P[a][0],dy=P[b][1]-P[a][1];
+    c.beginPath();c.moveTo(P[a][0]-dx*.35,P[a][1]-dy*.35);c.lineTo(P[b][0]+dx*.35,P[b][1]+dy*.35);c.stroke();});
+  [[.5,.62],[.43,.70],[.57,.70],[.5,.46]].forEach(([x,y])=>tdot(c,x*w,y*h,3.3,css("--a")));
+  [[.14,.30],[.86,.34],[.16,.90],[.84,.92],[.92,.62]].forEach(([x,y])=>tdot(c,x*w,y*h,3.3,css("--b")));};
 TH["m-kch"]=(c,w,h)=>{thumbBase(c,w,h);
   [["--a",.20,.30],["--b",.70,.26],["--c",.30,.74],["--d",.76,.70]].forEach(([k,cx,cy])=>{
     for(let i=0;i<5;i++)tdot(c,(cx+(i%3-1)*.055)*w,(cy+(Math.floor(i/3)-.5)*.11)*h,3.2,hexA(k,.9));});

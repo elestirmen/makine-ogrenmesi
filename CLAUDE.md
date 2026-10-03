@@ -26,6 +26,8 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   | k-means · WCSS · elbow · silhouette · PCA | k-ortalamalar · küme içi kareli hata · dirsek · siluet · ana bileşen analizi |
   | k-NN · decision tree · logistic/linear regression | k-en yakın komşu · karar ağacı · lojistik/doğrusal regresyon |
   | perceptron · hidden layer · MLP · backpropagation | — · gizli katman · çok katmanlı ağ · geri yayılım |
+  | artificial neuron · weighted sum · bias · activation function · ReLU | yapay nöron · ağırlıklı toplam · sabit terim · aktivasyon fonksiyonu · — |
+  | layer · fully connected · forward pass · architecture | katman · tam bağlı · ileri yayılım · mimari |
   | convolution · kernel · feature map · pooling · ReLU | konvolüsyon · çekirdek · öznitelik haritası · havuzlama · — |
   | decision boundary · linearly separable · z-score · min–max | karar sınırı · doğrusal ayrılabilir · z-skoru · min–maks |
   | SVM · margin · support vector · kernel · hinge loss | destek vektör makinesi · marj · destek vektörü · çekirdek · menteşe kaybı |
@@ -71,7 +73,7 @@ deploy/nginx.conf.example    konteyner içi nginx — yalnız index.html'i yayı
 deploy/deploy.sh             rsync ile sunucuya yükleme
 tools/lint.py                bütünlük denetimi (id, sözleşme, META, renk)
 tools/harness.js             tarayıcısız çalıştırma (DOM/Canvas taklidi)
-tools/behaviour.js           23 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
+tools/behaviour.js           25 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
 tools/contrast.js            tuval etiketlerinin ve figür yazılarının iki temada WCAG kontrastı
 tools/layout.js              (isteğe bağlı) gerçek Chromium'da projeksiyon yerleşimi + figür yazıları
 tools/figspec.md             ders notu figürlerinin kuralları (Codex'e verilen şartname)
@@ -152,6 +154,29 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   ~1.2 sn'de yerine indirir (40 tık × 30 ms; köşede RMSE düşüşü, önceki eğri kesikli gri).
   Yalnız çizim kayar; göstergeler basıldığı anda son değerde, ikinci basış sona atlar.
   Düğme en iyideyken basılırsa hiçbir şey yapmaz, adımlar bu yüzden her seferinde basabilir.
+- **Modül 21 (`m-neu`) nöronun içini açar:** ham değer → ölçekli girdi ([lo, hi] → [0, 1],
+  Modül 02) → ağırlıklı bağlantılar → Σ ve z → aktivasyon kutusu (eğri ve z'nin düştüğü
+  nokta) → ŷ; en altta hesabın kendisi. Aktivasyon (basamak / sigmoid / ReLU / yok) kararı
+  DEĞİŞTİRMEZ: karar hep z ≥ 0, haritadaki sınır z = 0; aktivasyon yalnız sınırın yanındaki
+  geçişi değiştirir (dersin kendisi bu). Tablolar modülün içinde (`DATA`, satır =
+  [x₁, x₂, sınıf]), adlar ve birimler CONTENT'te (`xu` / `yu`). `init` bilerek kötü (balonda
+  w₁ = +1, lambada b = −0.5 yani OR), « Örnek ağırlıklar » `good`. Haritaya tıkla / sürükle:
+  14 px içindeki örnek seçilir, yoksa serbest girdi; lamba devresinde en yakın köşe. 640 px
+  altında harita gizli, girdi « Sonraki örnek »le değişir. Kısa tuvalde (rehber açık, ~600 px
+  pencere) düğümler küçülür, x₁ / x₂ etiketi başlık satırına değecekse çizilmez.
+- **Modül 23 (`m-lay`) ağırlıkları elle kurar** ki her nöronun işi görünsün: birinci gizli
+  katmanın her nöronu düzgün bir çokgenin kenarı (iç yanında 1; merkezden kenara
+  r = R·(1 + cos(π/n))/2), ikinci katman (tek bölgede çıkış) kenarları AND'ler, çıkış
+  bölgeleri OR'lar ya da "büyüğün içi, küçüğün dışı" der (+6 / −6). Çıkış hep sigmoid;
+  seçim gizli katmanlar için (basamak / sigmoid / yok). Kenar kazancı 40: 20'de sigmoid
+  kipinde köşeler içe çöküyor ve nöron arttıkça doğru bilinen DÜŞÜYORDU. « Yok »ta bütün ağ
+  tek bir doğrusal fonksiyona iner; düzgün çokgenin kenar normallerinin toplamı 0 olduğu için
+  o fonksiyonun iki ağırlığı da 0 çıkar (harita tek renk). Eşdeğer nöron üç noktadan okunup
+  haritaya ve `aria-label`'a yazılır. Veri tohumlu (`rng(7+dsi)`, 160 nokta): "138 / 160"
+  derste de aynı, notlardaki sayılar bu yüzden sabit ve `behaviour.js` tam sayıyla sınar.
+  Her nöron kendi küçük haritasıyla çizilir (28 × 28 hücre, ağ / aktivasyon / tema değişince
+  yeniden); düğüme tıklayınca seçilir ve fare çıkınca KALIR (m-cn kuralı): alt satır onun
+  hesabını, harita doğrusunu ya da çokgenini gösterir.
 - `lesson` kutusu: `q` bir soru, `short` sorunun iki üç cümlelik **kısa cevabı**
   (accent şeritli kutuda, hiç bilmeyen biri yalnız bunu okusa da bir şey götürsün),
   `idea` fikir, `read` ekranı okuma rehberi, `terms` İngilizce/Türkçe terim tablosu,
@@ -190,7 +215,7 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   Kutu `mountTools()`'un eklediği « Ders notu » düğmesi
   ya da klavyede `?` ile açılır; `Esc` kapatır (modal açıkken Esc modülü değil kutuyu
   kapatır), perdeye tıklamak da kapatır.
-- **Modül 23 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
+- **Modül 25 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
   çekirdek boyu (3×3/5×5), padding (0/1/2) ve stride (1/2/3) segment düğmelerinde,
   sonuç `⌊(girdi+2·dolgu−çekirdek)/adım⌋+1` formülüyle göstergede. Konvolüsyon
   etikete göre önbellekli (`CACHE`): imlecin her hareketinde yeniden hesaplanırsa
@@ -350,7 +375,7 @@ sed -n '/^<script>/,/^<\/script>/p' index.html | sed '1d;$d' > /tmp/check.js && 
 # tutarlılığı, canvas'ta sabit renk, setInterval↔stop eşleşmesi, önizleme kapsaması
 python3 tools/lint.py index.html
 
-# 23 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
+# 25 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
 # istisna, canvas'a giden NaN ve "draw() bu göstergeye hiç dokunmadı" durumu.
 # Ayrıca CONTENT kapsaması: eksik ders notu, figür, elle hesap, kendini sına, tek veri
 # kümesi, kutuda kalan "undefined".
@@ -358,10 +383,10 @@ python3 tools/lint.py index.html
 # gizleme eşiklerinin altındaki kod yolu hiç çalıştırılmamış olur.
 for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; done
 
-# 23 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
+# 25 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
-node tools/behaviour.js index.html   # 169 denetim: 23 modül + alternatif veri kümeleri
+node tools/behaviour.js index.html   # 199 denetim: 25 modül + alternatif veri kümeleri
 
 # tuvale yazılan her etiket rengini ve ders notu figürlerinin (FIGS) yazı rengini
 # açık VE koyu temada zemine karşı ölç (label(...) / legend(...) çağrılarını ve

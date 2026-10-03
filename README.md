@@ -1,6 +1,6 @@
 # Makine Öğrenmesi Oyun Alanı
 
-Giriş seviyesi lisans Makine Öğrenmesi dersinde **canlı gösterim** için yirmi üç
+Giriş seviyesi lisans Makine Öğrenmesi dersinde **canlı gösterim** için yirmi beş
 etkileşimli deney. Tek HTML dosyası, bağımlılık yok.
 
 **Yayında:** https://ml.perinet.org · https://ml.urgup.keenetic.link
@@ -39,11 +39,13 @@ sağdaki sütun o modülün hangi haftaya denk geldiğini söyler.
 | 19 | Küme yuvarlak olmak zorunda mı | DBSCAN, eps/minPts, hiyerarşik (Ward) | 14 |
 | 20 | İki sayı yerine bir | PCA, boyut indirgeme | 13 |
 | | **Derin öğrenme** | | |
-| 21 | Tek nöron | perceptron, linear separability, XOR sorunu | — |
-| 22 | Gizli katman | MLP, backpropagation, XOR'un çözümü | — |
-| 23 | Filtre gezdirmek | convolution, kernel size, padding, stride, ReLU, pooling | — |
+| 21 | Bir nöron ne hesaplar | artificial neuron: girdi, ağırlık, bias, weighted sum, activation function (basamak, sigmoid, ReLU) | — |
+| 22 | Tek nöron öğreniyor | perceptron, linear separability, XOR sorunu | — |
+| 23 | Çizgilerden şekle | layer, hidden layer, forward pass, parametre sayısı, aktivasyonsuz ağın çökmesi | — |
+| 24 | Gizli katmanı eğitmek | MLP, backpropagation, XOR'un çözümü | — |
+| 25 | Filtre gezdirmek | convolution, kernel size, padding, stride, ReLU, pooling | — |
 
-Son üç modül haftalık programın dışında; dönem sonunda derin öğrenmeye giriş olarak
+Son beş modül haftalık programın dışında; dönem sonunda derin öğrenmeye giriş olarak
 kullanılabilir. 1. ve 7. haftaların (giriş kavramları ve uçtan uca uygulama)
 etkileşimli karşılığı yok: ikisi de ekranda gösterilecek bir mekanizma değil,
 sınıfta yürütülecek bir tartışma ve bir kod oturumu.
@@ -55,8 +57,10 @@ bir kez `İngilizce (Türkçe)` biçiminde açılır. Arama kutusu iki dili de t
 
 Modüller birbirine bağlanır: 03 bir doğru uydurur, 04 ikinci özniteliği ekleyip doğruyu
 düzleme çevirir, 05 ikinci sütunu birincinin karesi yapıp eğri çizer; 11 aynı sütunları
-14. dereceye kadar çoğaltınca ne olduğunu gösterir. 21 perceptron'un XOR'da çaresiz kaldığını
-gösterir, 22 onu çözer. 11 aşırı öğrenmeyi gösterir, 13 çözer. 08 tek ağacın ezberlediğini
+14. dereceye kadar çoğaltınca ne olduğunu gösterir. 21 tek nöronun içini açar (çarp, topla,
+aktivasyondan geçir) ve basamak / sigmoid / yok seçeneğiyle aynı nöronun perceptron, 06 ve 03
+olduğunu gösterir; 22 perceptron'un XOR'da çaresiz kaldığını gösterir, 23 nöronları katman katman
+dizip çokgen, iki bölge ve halka kurar (ağırlıklar elle), 24 aynı ağırlıkları backpropagation ile bulur. 11 aşırı öğrenmeyi gösterir, 13 çözer. 08 tek ağacın ezberlediğini
 gösterir, 09 ormanla düzeltir. 17 k'yı sorar, 18 doğru k'yı nasıl bulacağını anlatır; 19 ise k'nın hiç sorulmadığı yolu gösterir.
 
 ## Derste kullanım
@@ -97,8 +101,10 @@ araya girebilirsiniz.
 | 17 k-means | her merkezin **etki alanı** (bölge = atama kuralı); merkezler yeni yerine kayar |
 | 19 DBSCAN | **çekirdek** (dolu) / sınır (halka) / gürültü (gri), eps komşulukları, fareyle komşu sayısı |
 | 20 PCA | fareyle bir **deneme ekseni** çevrilir; o yöndeki yayılım yazar, en büyüğü 1. bileşen |
-| 21 perceptron | her düzeltmede önceki çizgi kesikli kalır; köşede kuralın kendisi: `w ← w + lr · y · x` |
-| 22 MLP | canlı **ağ diyagramı**: çizgi kalınlığı ağırlık, renk işaret; fareyle ileri yayılım izlenir |
+| 21 yapay nöron | nöronun içi soldan sağa: ham değer → ölçekli girdi → ağırlıklı bağlantı → Σ ve z → aktivasyon eğrisi (z'nin düştüğü yer) → ŷ; altta hesabın kendisi; sağda girdi uzayı ve z = 0 sınırı |
+| 22 perceptron | her düzeltmede önceki çizgi kesikli kalır; köşede kuralın kendisi: `w ← w + lr · y · x` |
+| 23 katmanlar | her nöron **kendi haritasıyla** (küçük kare) çizilir; haritada tıklanan nokta ağdan geçer, düğüme tıklayınca alttaki satır o nöronun hesabını yazar; « Yok » aktivasyonda harita tek renk olur |
+| 24 MLP | canlı **ağ diyagramı**: çizgi kalınlığı ağırlık, renk işaret; fareyle ileri yayılım izlenir |
 
 **Sunum modu.** Şeridin sağındaki *Sunum* düğmesi (klavyede `F`) sol menüyü gizler;
 1280 px'lik perdede tuval 930'dan 1210 px'e çıkar. Aynı düğme (*Menü*) ya da `Esc`
@@ -126,14 +132,16 @@ onunla birlikte değişir. Soyut "x₁ / x₂" yerine gerçek bir ölçüm:
 | 17 k-means | müşteri segmenti · artçı sarsıntılar (uzun kümeler) · uydu pikselleri |
 | 19 DBSCAN | iki hilal · iç içe halka · öbek + gürültü |
 | 20 PCA | boy–kilo · matematik–fizik notu · uydu bantları (bitki örtüsü ekseni) |
-| 21 · 22 | kalite kontrol (ayrılabilir) · ilaç etkileşimi (XOR) · baz istasyonu (halka) |
-| 23 convolution | hava fotoğrafı · tarla parselleri · test deseni · **kendi görüntün** (dosya, sürükle-bırak ya da Ctrl+V) |
+| 21 yapay nöron | balon turu (rüzgar–görüş) · kredi onayı (gelir–borç oranı) · lamba devresi (iki anahtar: OR'dan AND'e) |
+| 22 · 24 | kalite kontrol (ayrılabilir) · ilaç etkileşimi (XOR) · baz istasyonu (halka) |
+| 23 katmanlar | tek istasyon (bir gizli katman, çokgen) · iki istasyon (ikinci gizli katman, OR) · kurye bölgesi (halka: eksi ağırlık delik açar) |
+| 25 convolution | hava fotoğrafı · tarla parselleri · test deseni · **kendi görüntün** (dosya, sürükle-bırak ya da Ctrl+V) |
 
 Kalan modüllerde de en az iki set var (03 ev fiyatı / araç yaşı → negatif eğim,
 02 boy–maaş / otel puanı–yorum / araç yaşı–kilometre, 06 tümör / sınav / balon turu,
 09 kredi onayı / pivot sulama, 18 üç ayrı "kaç küme var" hikâyesi).
 
-**Modül 23 · convolution.** Dört hiperparametre de kontrolde: girdi boyu (64/128/256),
+**Modül 25 · convolution.** Dört hiperparametre de kontrolde: girdi boyu (64/128/256),
 çekirdek boyu (3×3/5×5), padding (0/1/2), stride (1/2/3) — çıktı boyutu
 `⌊(girdi+2·dolgu−çekirdek)/adım⌋+1` formülüyle göstergede yazıyor. Tuvalde girdi,
 `çekirdek ⊙ pencere = çarpımlar → Σ` tablosu ve öznitelik haritası yan yana; pencere

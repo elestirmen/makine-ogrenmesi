@@ -1,4 +1,4 @@
-/* 23 modülün PEDAGOJİK İDDİALARINI sına: çökme değil, ".ask kutusu ve rehberli
+/* 25 modülün PEDAGOJİK İDDİALARINI sına: çökme değil, ".ask kutusu ve rehberli
    adım metni ne vaat ediyor, gösterge ne diyor" karşılaştırması.
    Kural: her chk() bir METİN cümlesinden türetilir. Metin değişirse sınama da değişir.
    Eşikler ölçülerek konmuştur; rastgele veri üreten modüllerde ORTALAMA alınır
@@ -28,7 +28,7 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
 
 /* ── 20 · Çok katmanlı ağ: h=1 XOR'u çözemez, h≥2 çözer ── */
 {
-  console.log("=== Modül 22 · Gizli katman (XOR) ===");
+  console.log("=== Modül 24 · Gizli katman (XOR) ===");
   const r=[];
   for(const h of [1,4]){
     const {el,tick}=boot(F);
@@ -570,7 +570,7 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
 
 /* ── 19 · Perceptron: ayrılabilirde durur, XOR'da durmaz ── */
 {
-  head("Modül 21 · Tek nöron (perceptron)");
+  head("Modül 22 · Tek nöron öğreniyor (perceptron)");
   const go=(btn)=>{const {el,tick}=boot(F); el(btn).click(); el('per-run').click(); tick(900);
     return {m:V(el,'per-m'), u:V(el,'per-u'), raw:T(el,'per-m')};};
   const sep=go('per-sep'), xor=go('per-xor');
@@ -587,7 +587,7 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
    stride 2 → yarısı) — üçü de burada sınanıyor, ayrıca 54 kombinasyonun
    tamamında gösterge formülle karşılaştırılıyor. */
 {
-  head("Modül 23 · Filtre gezdirmek (convolution)");
+  head("Modül 25 · Filtre gezdirmek (convolution)");
   const {el,M}=boot(F);
   const cn=M.find(m=>m.id==='m-cn');
   const setK=(k)=>el(k===3?'cn-k3':'cn-k5').click();
@@ -933,7 +933,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
    ≥%98 doğruluğa medyan 29 epoch, %90'lık dilim 65 epoch; tek bir başlangıç
    2429 epoch sürdü. Tek koşuya değil MEDYANA bakılıyor. */
 {
-  head("Modül 22 · 4 nöron birkaç düzine epoch'ta (adım 4)");
+  head("Modül 24 · 4 nöron birkaç düzine epoch'ta (adım 4)");
   const {el,tick}=boot(F); const ep=[]; let miss=0;
   for(let t=0;t<8;t++){
     el('mlp-xor').click(); S(el,'mlp-h',4); el('mlp-reset').click();
@@ -965,7 +965,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
 
 /* ── 19 · Perceptron: "Tek düzeltme: yanlış taraftaki ilk noktayı bulup çizgiyi itiyor" ── */
 {
-  head("Modül 21 · tek düzeltme (adım 2)");
+  head("Modül 22 · tek düzeltme (adım 2)");
   let moved=0, one=0, N=10;
   for(let t=0;t<N;t++){
     const {el}=boot(F); el('per-sep').click();
@@ -986,6 +986,118 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   for(let t=0;t<6;t++){ el('dt-demo').click(); P(el,'dt-tree',true);
     for(const d of [1,2,3,5]){ S(el,'dt-d',d); try{ dt.draw(); }catch(e){ bad++; } } }
   chk(bad===0, "ağaç görünümü her derinlikte çiziliyor", `${bad} hata`);
+}
+
+/* ── 21 · Yapay nöron: adım metinleri, elle hesap ve veri kümesi notları ──
+   Adımlar senaryo düğmesine basıp (useSet → başlangıç ağırlıkları) kaydırıcıları
+   kullanıcı gibi sürüyor; burada da aynı yol. Kaydırıcı değeri ağırlığın 10 katı. */
+{
+  head("Modül 21 · Bir nöron ne hesaplar (artificial neuron)");
+  const {el,M}=boot(F);
+  const neu=M.find(m=>m.id==='m-neu');
+  const W=(a,b,c)=>{ S(el,'neu-w1',a*10); S(el,'neu-w2',b*10); S(el,'neu-b',c*10); };
+  const acc=()=>T(el,'neu-acc');
+  /* adım 1 + elle hesap: "x₁ = 12 / 30 = 0.40, x₂ = 7 / 10 = 0.70" */
+  neu.__pick(0); P(el,'neu-step',true);
+  chk(T(el,'neu-x')==='0.40, 0.70', "balon: ilk sabahın girdisi 0.40, 0.70 (adım 1)", T(el,'neu-x'));
+  /* not: "w₁ = +1 ile başlıyor ... 20 sabahın 10'u doğru" */
+  chk(acc()==='10 / 20', "balon: başlangıç ağırlıklarıyla 20 sabahın 10'u doğru (not)", acc());
+  /* adım 2: w₁ = −4, w₂ = 3 (b = −1 kalıyor) → "hâlâ yalnız 12'si doğru" */
+  S(el,'neu-w1',-40); S(el,'neu-w2',30);
+  chk(acc()==='12 / 20', "balon: yön doğru ama b = −1 iken 12 / 20 (adım 2)", acc());
+  /* adım 3: b = 0.5 → "20 sabahın 20'si" */
+  S(el,'neu-b',5);
+  chk(acc()==='20 / 20', "balon: b = 0.5 ile 20 / 20 (adım 3)", acc());
+  /* adım 4 + elle hesap: z = 1.00, basamak 1, karar Uçar */
+  chk(T(el,'neu-z')==='1.00'&&T(el,'neu-y')==='1'&&T(el,'neu-d')==='Uçar',
+      "ilk sabah: z = 1.00, basamak ŷ = 1, karar Uçar (adım 4, elle hesap)", `${T(el,'neu-z')} · ${T(el,'neu-y')} · ${T(el,'neu-d')}`);
+  P(el,'neu-sig',true);
+  chk(T(el,'neu-y')==='0.73', "sigmoid(1.00) = 0.73 (adım 5, elle hesap)", T(el,'neu-y'));
+  P(el,'neu-relu',true);
+  chk(T(el,'neu-y')==='1.00', "ReLU(1.00) = 1.00 (adım 6)", T(el,'neu-y'));
+  /* adım 7 + kendini sına 1: aktivasyon sınırı oynatmaz → doğru bilinen ve her örneğin
+     kararı dört aktivasyonda aynı; ŷ'ler de kendi aralığında. Rastgele ağırlıklarla 12 tur. */
+  let same=0, rangeOk=0, linZ=0;
+  for(let t=0;t<12;t++){
+    W(Math.round(Math.random()*80-40)/10, Math.round(Math.random()*80-40)/10, Math.round(Math.random()*60-30)/10);
+    const row=[];
+    for(const a of ['neu-step','neu-sig','neu-relu','neu-lin']){
+      P(el,a,true); const dec=[], ys=[];
+      for(let k=0;k<20;k++){ dec.push(T(el,'neu-d')); ys.push(num(T(el,'neu-y').replace('−','-'))); el('neu-next').click(); }
+      row.push({a, acc:acc(), dec:dec.join(','), ys, z:num(T(el,'neu-z').replace('−','-'))});
+    }
+    if(row.every(r=>r.acc===row[0].acc&&r.dec===row[0].dec)) same++;
+    const [st,sg2,re]=row;
+    if(st.ys.every(v=>v===0||v===1)&&sg2.ys.every(v=>v>=0&&v<=1)&&re.ys.every(v=>v>=0)) rangeOk++;
+    P(el,'neu-lin',true); if(num(T(el,'neu-y').replace('−','-'))===num(T(el,'neu-z').replace('−','-'))) linZ++;
+  }
+  chk(same===12, "aktivasyon değişince karar ve doğru bilinen değişmiyor (adım 7, kendini sına 1)", `${same}/12`);
+  chk(rangeOk===12, "basamak 0/1, sigmoid 0–1, ReLU ≥ 0", `${rangeOk}/12`);
+  chk(linZ===12, "aktivasyon yok: ŷ = z (adım 7)", `${linZ}/12`);
+  /* adım 8: kredi, « Örnek ağırlıklar » 20 / 20 */
+  neu.__pick(1); el('neu-good').click();
+  chk(acc()==='20 / 20', "kredi: örnek ağırlıklarla 20 başvurunun 20'si (adım 8, not)", acc());
+  chk(T(el,'neu-w1o')==='4.0'&&T(el,'neu-w2o')==='−5.0', "kredi: gelire artı, borca eksi ağırlık (not)", `${T(el,'neu-w1o')} · ${T(el,'neu-w2o')}`);
+  /* adım 9 + kendini sına 2: b = −0.5 OR (4'te 2), b = −1.5 AND (4'te 4) */
+  neu.__pick(2); P(el,'neu-step',true);
+  const outs=()=>{ const o=[]; for(let k=0;k<4;k++){ o.push(T(el,'neu-y')); el('neu-next').click(); } return o.join(''); };
+  const orA=acc(), orO=outs();            // satır sırası (0,0) (1,0) (0,1) (1,1)
+  S(el,'neu-b',-15); const andA=acc(), andO=outs();
+  chk(orA==='2 / 4'&&orO==='0111', "lamba: b = −0.5 'en az biri açık' (OR), 4 durumun 2'si doğru (adım 9)", `${orA} · ${orO}`);
+  chk(andA==='4 / 4'&&andO==='0001', "lamba: b = −1.5 AND, dördü de doğru (adım 9)", `${andA} · ${andO}`);
+  /* tek nöron XOR'u kuramaz: kaydırıcıların bütün ızgarasında (w₁, w₂, b) XOR tablosunu
+     veren ağırlık yok. Gösterge AND'e göre saydığı için çıktıyı köşe köşe okuyoruz. */
+  let xorHit=0;
+  for(let a=-50;a<=50;a+=20) for(let c=-50;c<=50;c+=20) for(let b2=-50;b2<=50;b2+=10){
+    S(el,'neu-w1',a); S(el,'neu-w2',c); S(el,'neu-b',b2); if(outs()==='0110') xorHit++; }
+  chk(xorHit===0, "hiçbir w₁, w₂, b XOR'u vermiyor (adım 9, .ask)", `${xorHit} isabet`);
+}
+
+/* ── 23 · Katmanlar: elle kurulmuş ağ — tohumlu veri, sayılar deterministik ── */
+{
+  head("Modül 23 · Çizgilerden şekle (layer / hidden layer)");
+  const {el,M}=boot(F);
+  const lay=M.find(m=>m.id==='m-lay');
+  const AR=()=>el('c-lay').getAttribute('aria-label')||'';
+  const acc=()=>V(el,'lay-acc');
+  const at=(j,n,a)=>{ lay.__pick(j); P(el,a||'lay-step',true); S(el,'lay-n',n);
+    return {acc:acc(), par:V(el,'lay-par'), arch:T(el,'lay-arch')}; };
+  /* adım 1 + elle hesap: 3 nöron → 2 → 3 → 1, 13 parametre */
+  const t3=at(0,3), t8=at(0,8);
+  chk(t3.arch==='2 → 3 → 1'&&t3.par===13, "3 gizli nöron: yapı 2 → 3 → 1, 13 parametre (adım 1, elle hesap)", `${t3.arch} · ${t3.par}`);
+  chk(t3.acc===138, "üçgen: 160 noktanın 138'i doğru (adım 2, not)", t3.acc);
+  chk(t8.acc===158&&t8.par===33, "sekizgen: 158 doğru, 33 parametre (adım 3, not)", `${t8.acc} · ${t8.par}`);
+  chk(at(0,6).par===25, "2 → 6 → 1: 25 parametre (kendini sına 1)", at(0,6).par);
+  /* adım 2: "üçü de 1 ise kapsama var (AND)" — her noktada ŷ ≥ .5 ⇔ gizli katmanın hepsi 1 */
+  at(0,3); let andOk=0;
+  for(let k=0;k<40;k++){ const m=/gizli katman 1 = \[([^\]]*)\], ŷ = (\d+\.\d+)/.exec(AR());
+    if(m&&(m[1].split(', ').every(v=>v==='1'))===(+m[2]>=.5)) andOk++; el('lay-next').click(); }
+  chk(andOk===40, "çıkış 'hepsi 1 mi' diyor: 40 noktanın hepsinde (adım 2)", `${andOk}/40`);
+  /* adım 4: "girdi iki sayı, gizli katman sekiz tane 0/1, çıkış tek bir olasılık" */
+  at(0,8); el('lay-next').click();
+  { const m=/gizli katman 1 = \[([^\]]*)\]/.exec(AR()), v=m?m[1].split(', '):[];
+    chk(v.length===8&&v.every(x=>x==='0'||x==='1'), "8 nöronda gizli katman sekiz tane 0/1 (adım 4)", m?m[1]:'yok'); }
+  /* adım 5: sigmoid'de de çalışıyor ve değerler 0–1 arasında */
+  const sg8=at(0,8,'lay-sig');
+  chk(sg8.acc>=150, "sigmoid kipinde 8 nöron hâlâ ≥ 150 doğru (adım 5)", sg8.acc);
+  /* adım 6 + kendini sına 2: aktivasyon yok → tek renk, 50 / 160, eşdeğer nöronun ağırlıkları 0 */
+  const ln=at(0,8,'lay-lin'), eq=/Eşdeğer tek nöron: z = (\S+)·x₁ [+−] (\S+)·x₂/.exec(AR());
+  let flat=new Set(); for(let k=0;k<30;k++){ flat.add(T(el,'lay-y')); el('lay-next').click(); }
+  chk(ln.acc===50, "aktivasyon yok: 160 noktanın yalnız 50'si (adım 6)", ln.acc);
+  chk(!!eq&&eq[1]==='0.00'&&eq[2]==='0.00', "eşdeğer tek nöronun iki ağırlığı 0 (adım 6)", eq?eq[0]:'yok');
+  chk(flat.size===1, "harita tek renk: her noktada aynı ŷ (adım 6)", [...flat].join(' | '));
+  /* adım 7 + not: iki istasyon, 6 nöron → 2 → 12 → 2 → 1, 65 parametre, 155 doğru */
+  const i6=at(1,6);
+  chk(i6.arch==='2 → 12 → 2 → 1'&&i6.par===65, "iki istasyon: 2 → 12 → 2 → 1, 65 parametre (adım 7)", `${i6.arch} · ${i6.par}`);
+  chk(i6.acc===155, "iki istasyon, 6 nöron: 155 doğru (not)", i6.acc);
+  /* adım 8 + not: kurye — çıkış +6 / −6, 3 nöron 125, 8 nöron 155 */
+  const k3=at(2,3), k8=at(2,8);
+  chk(/Çıkış ağırlıkları: 6, −6\./.test(AR()), "kurye: çıkış büyüğe +6, küçüğe −6 (adım 8)", (/Çıkış ağırlıkları: [^.]*/.exec(AR())||['yok'])[0]);
+  chk(k3.acc===125&&k8.acc===155, "kurye: 3 nöron 125, 8 nöron 155 (not)", `${k3.acc} · ${k8.acc}`);
+  /* not: nöron arttıkça daha yuvarlak — üç kümede de 8 nöron 3 nörondan iyi */
+  const up=[0,1,2].filter(j=>at(j,8).acc>at(j,3).acc).length;
+  chk(up===3, "üç kümede de 8 nöron 3 nörondan daha çok nokta biliyor", `${up}/3`);
+  lay.__pick(0); P(el,'lay-step',true); S(el,'lay-n',4);
 }
 
 console.log(`\n${fail?fail+" DENETİM DÜŞTÜ":"tüm davranış denetimleri geçti"}`);
