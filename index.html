@@ -665,10 +665,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p><b>k = 1</b> yapınca eğitim hatası neden tam olarak sıfır çıkıyor? Bu model iyi mi?</p>
-          <p>Sonra <b>k</b>'yı 21'e çekin: adacıklar kayboluyor, sınır tek bir yumuşak eğriye iniyor ve eğitim hatası %0'dan %4–5'e çıkıyor — model artık tek tek noktaları değil yalnız iki bulutun genel yerini görüyor. İki uç arasındaki tatlı nokta, dönem boyunca konuşacağınız <i>bias–variance</i> dengesi (yanlılık–varyans).</p>
+          <p><b>k = 1</b> yap. Eğitim hatası neden tam olarak sıfır çıkıyor? Sıfır hata, bu modelin iyi olduğu anlamına mı geliyor?</p>
+          <p>Sonra <b>k</b>'yı 21'e çek: adacıklar kayboluyor, sınır yumuşuyor, eğitim hatası %0'dan %4–5'e çıkıyor. Model artık neye bakıyor? k = 1 ile k = 21 arasında hangisini seçerdin, neden?</p>
         </div>
       </div>
     </section>
@@ -697,10 +697,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Derece 14'te eğri bütün eğitim noktalarından geçiyor. Hata sıfıra yakın. Bu modeli sahaya çıkarır mıydınız?</p>
-          <p>Sonra <b>eğitim verisi</b> kaydırıcısını 40'a çekin: aynı yüksek derece artık o kadar çıldırmıyor. <b>Overfitting</b> modelin değil, <i>model karmaşıklığı ile veri miktarı oranının</i> sorunudur.</p>
+          <p>Derece 14'te eğri bütün eğitim noktalarından geçiyor, eğitim hatası sıfıra yakın. « Test RMSE » göstergesine bak. Bu modele yeni bir gün için tahmin yaptırır mıydın?</p>
+          <p>Sonra <b>eğitim verisi</b> kaydırıcısını 40'a çek: aynı yüksek derece artık o kadar savrulmuyor. Değişen ne oldu, model mi, veri mi? Buradan <b>overfitting</b>'in sebebi hakkında ne söyleyebilirsin?</p>
         </div>
       </div>
     </section>
@@ -731,10 +731,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Öğrenme oranını 0.55'in üstüne çıkarın: bu başlangıçtan model ıraksar, hata patlar. Sonra 0.005 yapın: doğru yöne gider ama ders bitene kadar varamaz.</p>
-          <p>Asıl soru şu: soldaki çukurdan başlayınca sağdaki daha derin çukuru <i>hiç göremiyor</i>. Gradient descent neden global minimumu garanti etmez?</p>
+          <p>Öğrenme oranını 0.55'in üstüne çıkar: bu başlangıçtan model ıraksıyor, hata patlıyor. Sonra 0.005 yap: doğru yöne gidiyor ama çok yavaş. İyi bir öğrenme oranını nasıl seçerdin?</p>
+          <p>Soldaki çukurdan başlayınca sağdaki daha derin çukuru hiç göremiyor. Başlangıç noktasını değiştirerek dene. Gradient descent en derin noktayı (global minimum) bulmayı neden garanti etmez?</p>
         </div>
       </div>
     </section>
@@ -760,10 +760,10 @@ input[type=range]{min-height:28px;margin:0}
           </div>
           <button class="btn" id="neu-good">Örnek ağırlıklar</button>
           <button class="btn" id="neu-next">Sonraki örnek</button>
-          <span class="hint">Haritaya tıkla → o nokta girdi olur.</span>
+          <span class="hint">Haritaya ya da resmin pikseline tıkla → yeni girdi.</span>
         </div>
         <div class="stats">
-          <div class="stat"><span class="k">Girdi x₁, x₂</span><span class="v" id="neu-x">—</span></div>
+          <div class="stat"><span class="k" id="neu-xk">Girdi x₁, x₂</span><span class="v" id="neu-x">—</span></div>
           <div class="stat"><span class="k">Toplam z</span><span class="v" id="neu-z">—</span></div>
           <div class="stat"><span class="k">Çıktı ŷ</span><span class="v" id="neu-y">—</span></div>
           <div class="stat"><span class="k">Karar</span><span class="v" id="neu-d">—</span></div>
@@ -771,10 +771,11 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Aktivasyonu Basamak'tan Sigmoid'e, sonra ReLU'ya çevirin. Çıktı ŷ değişiyor, ama haritadaki sınır çizgisi yerinden oynuyor mu? Neden?</p>
-          <p>Sonra « Lamba devresi »nde yalnız b'yi kaydırarak önce OR'u, sonra AND'i kurun. "Ya biri ya öteki" (XOR) için hangi w₁, w₂, b gerekir? Bulamıyorsanız sorun sizde değil: <b>tek nöron tek düz çizgi çizer.</b></p>
+          <p>Aktivasyonu Basamak'tan Sigmoid'e, sonra ReLU'ya çevir. Çıktı ŷ değişiyor; peki haritadaki sınır çizgisi yerinden oynuyor mu? Neden?</p>
+          <p>« Lamba devresi »nde yalnız b'yi kaydırarak önce OR'u, sonra AND'i kur. "Ya biri ya öteki" (XOR) için hangi w₁, w₂, b gerekir? Bulamazsan sorun sende değil; nedenini Modül 22'de göreceksin.</p>
+          <p>« Resim 3×3 »te « Örnek ağırlıklar »a bas, sonra girdi resmindeki çizgiyi piksellere tıklayarak sol sütuna taşı. Nöron artık ne diyor, neden? Aynı deseni resmin her yerinde aramak için ne yapardın?</p>
         </div>
       </div>
     </section>
@@ -808,10 +809,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>"Ayrılamaz veri"ye basıp eğitimi başlatın; çizgi durmadan dönüp duruyor. Perceptron burada neden çaresiz?</p>
-          <p>Cevap tek cümle: <b>tek katman yalnız düz çizgi çizebilir.</b> Derin öğrenmenin varlık sebebi tam olarak bu ekrandaki başarısızlıktır.</p>
+          <p>« Ayrılamaz veri »ye basıp eğitimi başlat: çizgi durmadan dönüyor, güncelleme sayacı hiç durmuyor. Perceptron burada neden çaresiz?</p>
+          <p>XOR'un dört köşesini kâğıda çiz ve onları ayıran tek bir düz çizgi bulmaya çalış. Bulamıyorsan sence çözüm daha uzun eğitmek mi, yoksa modeli değiştirmek mi?</p>
         </div>
       </div>
     </section>
@@ -841,10 +842,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>"Merkezleri yeniden at"a birkaç kez basın: aynı veri, farklı başlangıç, <i>farklı</i> sonuç. k-means neden rastgele başlangıca bu kadar duyarlı?</p>
-          <p>Bir de k'yı 6 yapın; küme içi kareli hata düşer ama kümeler anlamsızlaşır. "Hata azaldı" ile "model iyileşti" aynı şey değil.</p>
+          <p>« Merkezleri yeniden at »a birkaç kez bas: aynı veri, farklı başlangıç, farklı sonuç. k-means neden rastgele başlangıca bu kadar duyarlı?</p>
+          <p>Bir de k'yı 6 yap. Küme içi kareli hata (WCSS) düşüyor; kümeler daha mı anlamlı oldu? "Hata azaldı" ile "model iyileşti" aynı şey mi?</p>
         </div>
       </div>
     </section>
@@ -879,10 +880,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Eşiği elle gezdirirken sağdaki Gini eğrisi zıplaya zıplaya iniyor. Neden düz değil de basamaklı? (Cevap: eşik iki komşu nokta arasında gezerken hiçbir şey değişmez.)</p>
-          <p>Derinliği 5 yapın: ağaç dört-beş yaprağa bölünüp eğitim doğruluğunu %99'a çıkarıyor — 30 noktayı birkaç kutuya hapsediyor. Üstelik derinliği 3'ün üstüne çıkarmak bir şey değiştirmiyor: ağaç, dört noktadan az kalan dalları zaten bölmüyor. Modül 11'de göreceğiniz 14. dereceden polinomla aynı hastalık — <i>aynı hastalığın ağaçtaki yüzü</i>.</p>
+          <p>Eşiği elle gezdirirken sağdaki Gini eğrisi düz bir çizgi değil, basamak basamak iniyor. Neden? (İpucu: eşik iki komşu nokta arasında gezerken hangi noktanın tarafı değişiyor?)</p>
+          <p>Derinliği 5 yap: ağaç eğitim doğruluğunu %99'a çıkarıyor, 30 noktayı birkaç kutuya hapsediyor. Bu ağaca yeni bir ölçüm sorsan güvenir miydin? Modül 11'deki 14. dereceden polinomla bu ağacın ortak noktası ne?</p>
         </div>
       </div>
     </section>
@@ -912,10 +913,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Pozitif oranını %3'e indirin ve eşiği 0.95 yapın: model neredeyse hiçbir şeyi pozitif demiyor, ama doğruluk %97. Bu modeli kabul eder misiniz?</p>
-          <p>Senaryoyu değiştirin: bu bir <b>kanser taraması</b> olsaydı hangi hatayı göze alırdınız, bir <b>spam filtresi</b> olsaydı hangisini? Eşik teknik değil, <i>etik</i> bir karardır.</p>
+          <p>Pozitif oranını %3'e indir ve eşiği 0.95 yap: model neredeyse hiçbir şeye pozitif demiyor, ama doğruluk %97. Bu modeli kullanır mıydın? Hangi gösterge sana gerçeği söylüyor?</p>
+          <p>Senaryoyu değiştir: bu bir <b>kanser taraması</b> olsaydı hangi hatayı göze alırdın, bir <b>spam filtresi</b> olsaydı hangisini? Eşiği kim seçmeli, modeli kuran mı, o işin sahibi mi?</p>
         </div>
       </div>
     </section>
@@ -978,10 +979,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Padding'i 0, stride'ı 1 tutup çekirdeği 5×5 yapın: çıktı 128'den 124'e düşüyor. Şimdi padding'i 2 yapın — 128'e dönüyor. <b>Neden tam olarak 2?</b> (Formül göstergesi cevabı yazıyor.) Sonra stride'ı 2 yapın: çıktı yarıya iniyor ama <i>ağırlık sayısı değişmiyor</i>.</p>
-          <p>Bu filtrenin <b>9 sayısı</b> var; aynı işi tam bağlantılı katmanla yapmak 128×128 girdi için çıktı başına 16.384 ağırlık isterdi (gösterge toplamı yazıyor). CNN'in bütün mucizesi bu <b>ağırlık paylaşımı</b>. Bir de şunu unutmayın: <i>kimse bu sayıları elle yazmıyor</i> — eğitim sırasında <b>gradient descent</b> (Modül 14) onları kendisi buluyor.</p>
+          <p>Padding'i 0, stride'ı 1 tutup çekirdeği 5×5 yap: çıktı 128'den 124'e düşüyor. Şimdi padding'i 2 yap: 128'e dönüyor. Neden tam olarak 2? Göstergedeki formülle kendin hesapla. Sonra stride'ı 2 yap: çıktı yarıya iniyor; ağırlık sayısı değişiyor mu?</p>
+          <p>Bu filtrenin yalnız 9 sayısı var. Aynı işi tam bağlı bir katmanla yapsaydın, 128 × 128'lik girdide her çıktı pikseli için kaç ağırlık gerekirdi? Bu fark, görüntüde neden convolution kullanıldığını nasıl açıklıyor?</p>
         </div>
       </div>
     </section>
@@ -1014,10 +1015,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Neden artıkların <b>karesini</b> alıyoruz? Mutlak değer de olurdu — kare almanın iki sonucu var: büyük hatalar orantısız cezalanır ve çözüm tek bir formülle bulunabilir.</p>
-          <p>Cevabı açtıktan sonra tek bir noktayı kenara, çok uzağa koyun. Kesikli yeşil doğru o tek noktanın peşinden nasıl sürükleniyor? <i>Least squares aykırı değere dayanıksızdır</i> — dönem boyunca karşınıza çıkacak.</p>
+          <p>Neden artıkların <b>karesini</b> alıyoruz? Mutlak değer de olurdu. Kare almak küçük ve büyük hatalara ne yapıyor? (İpucu: 1'in karesi 1, 10'unki 100.)</p>
+          <p>Önce kaydırıcılarla en iyi doğruyu kendin bulmaya çalış, sonra « Least squares çözümü »ne bas: ne kadar yaklaşmıştın? Ardından tek bir noktayı çok uzağa sürükle. Kesikli yeşil doğru ne yapıyor? Tek bir aykırı değerin bütün doğruyu bu kadar oynatması sana least squares hakkında ne söylüyor?</p>
         </div>
       </div>
     </section>
@@ -1052,10 +1053,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
           <p>« Ev · yaş + uzaklık » verisinde yaş tek başına fiyatı <b>artırıyor</b>; merkeze uzaklık modele girince yaşın katsayısı <b>eksiye</b> dönüyor. Hangisi doğru: eski ev daha mı pahalı, daha mı ucuz?</p>
-          <p>İkisi de doğru, çünkü iki ayrı soruya cevap veriyorlar: "eski evler" mi, "aynı semtteki eski evler" mi? Katsayı her zaman <i>öteki öznitelikler sabitken</i> okunur. Bir öznitelik eklemek ötekinin katsayısını değiştiriyorsa bu bir hata değil; soru değişmiştir.</p>
+          <p>İpucu: iki model aynı soruyu mu cevaplıyor? "Eski evler" ile "aynı semtteki eski evler" arasındaki farkı düşün. Bir öznitelik eklemek ötekinin katsayısını neden değiştirebilir?</p>
         </div>
       </div>
     </section>
@@ -1086,10 +1087,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Bu model eğri çiziyor ama adı hâlâ <b>linear</b> regression. Doğrusal olan ne?</p>
-          <p>İpucu: sağdaki tabloya bakın, model sütunları yalnız ağırlıklarla çarpıp topluyor. Sonra « Fidan boyu »nda üç sütuna çıkın: aralığın içinde neredeyse kusursuz olan eğri 24. haftada ne diyor? Veri olmayan yerde bu eğriye güvenir miydiniz?</p>
+          <p>Bu model eğri çiziyor ama adı hâlâ <b>linear</b> regression. Doğrusal olan ne? (İpucu: sağdaki tabloya bak; model sütunlarla ne yapıyor?)</p>
+          <p>« Fidan boyu »nda üç sütuna çık ve « Least squares çözümü »ne bas. Ölçüm aralığının içinde neredeyse kusursuz olan eğri 24. hafta için ne diyor? Veri olmayan yerde bu eğriye güvenir miydin?</p>
         </div>
       </div>
     </section>
@@ -1121,10 +1122,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Aralığı 400'e çekin: maaş özniteliği uzaklığın <b>%99'unu</b> belirliyor. Model "boy"u hiç kullanmıyor. Bu bir model hatası mı, veri hatası mı?</p>
-          <p>Hangi algoritmalar ölçeğe duyarlı, hangileri değil? (İpucu: uzaklık kullanan her şey duyarlı — <i>k-NN, k-means, gradient descent</i>. Karar ağacı değil, çünkü her özniteliğe ayrı eşik koyuyor.)</p>
+          <p>Aralığı 400'e çek: maaş özniteliği uzaklığın <b>%99'unu</b> belirliyor, boy neredeyse hiç sayılmıyor. Bu bir model hatası mı, veri hatası mı? Ölçekleme yöntemini seçince ne değişiyor?</p>
+          <p>Bildiğin modelleri iki gruba ayır: ölçeğe duyarlı olanlar ve olmayanlar. (İpucu: uzaklık hesaplayan bir model ile her özniteliğe ayrı ayrı eşik koyan bir modeli karşılaştır.)</p>
         </div>
       </div>
     </section>
@@ -1153,10 +1154,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p><b>w</b>'yi sonuna kadar büyütün: eğri neredeyse dik bir basamağa dönüşüyor, model her şeye %0 veya %100 diyor. Ayrılabilir veride log loss neden sıfıra <i>yaklaşır ama hiç ulaşmaz</i>?</p>
-          <p>"Karışık veri"ye basın: artık hiçbir w kaybı sıfırlayamıyor. Model emin olamadığını <b>söyleyebiliyor</b> — perceptron bunu yapamıyordu. Bir hekim için hangisi daha kullanışlı?</p>
+          <p><b>w</b>'yi sonuna kadar büyüt: eğri neredeyse dik bir basamağa dönüşüyor, model her şeye %0 ya da %100 diyor. Ayrılabilir veride log loss sıfıra yaklaşıyor ama hiç ulaşmıyor. Neden?</p>
+          <p>« Karışık veri »ye bas: artık hiçbir w kaybı sıfırlayamıyor. Model "emin değilim" diyebiliyor; düz bir "evet / hayır" veren modele göre bu neden işe yarar? Bir hekim için hangisi daha kullanışlı?</p>
         </div>
       </div>
     </section>
@@ -1191,10 +1192,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Ağaç sayısını 1'e indirip 40'a çekin: ormanın OOB eğrisi turuncu kesikli <b>tek ağaç · OOB</b> çizgisinin 2–8 puan yukarısında kapanıyor, 20 ağaçtan sonra birkaç puanlık salınıma iniyor. Eğitim doğruluğu da yükseliyor — ama o, modelin kendi sınavını kendi kâğıdından okuması. Neden kanıt sayılmaz?</p>
-          <p>Bölmede bakılan öznitelik sayısını 2'den 1'e düşürün: <b>tek ağaç (OOB)</b> birkaç puan geriliyor — yani her ağaç tek başına kötüleşiyor. Ormanın OOB'si buna rağmen düşmüyor. <i>Ağaçları tek tek kötüleştiren bir değişiklik topluluğu neden bozmuyor?</i></p>
+          <p>Ağaç sayısını 1'den 40'a çek: ormanın OOB eğrisi turuncu kesikli <b>tek ağaç · OOB</b> çizgisinin 2–8 puan üstüne çıkıyor; eğitim doğruluğu da yükseliyor. Ormanın iyi olduğunu göstermek için hangisine güvenirsin, eğitim doğruluğuna mı, OOB'ye mi? Neden?</p>
+          <p>Bölmede bakılan öznitelik sayısını 2'den 1'e düşür: <b>tek ağaç (OOB)</b> birkaç puan geriliyor, ama ormanın OOB'si düşmüyor. Ağaçları tek tek kötüleştiren bir değişiklik topluluğu neden bozmuyor?</p>
         </div>
       </div>
     </section>
@@ -1229,10 +1230,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Derece 12'de λ'yı en sola alın: eğitim RMSE'si yol boyunca alabileceği en küçük değerde — model 14 noktayı ezberliyor — ama test RMSE'si onun katı. Şimdi λ'yı sağa kaydırıp alt şeritteki yeşil bandı bulun: <b>test RMSE düşerken eğitim RMSE ne yapıyor?</b> Genelleme uğruna eğitim hatasından bilerek fedakârlık ediyoruz.</p>
-          <p>Aynı λ'da L2'den L1'e geçip sağdaki 12 çubuğu sayın: L1 kaç tanesini <b>tam olarak sıfıra</b> indirdi? L2'de gösterge hep <b>12 / 12</b> kalır, çubuklar yalnızca kısalır. Sonra λ'yı sonuna kadar büyütün — gösterge <b>0 / 12</b>, ekranda düz bir çizgi: <i>ceza da aşırıya kaçarsa underfitting başlar.</i></p>
+          <p>Derece 12'de λ'yı en sola al: eğitim RMSE'si en küçük değerinde, ama test RMSE'si onun katı. Şimdi λ'yı sağa kaydırıp alt şeritteki yeşil bandı bul. Test RMSE düşerken eğitim RMSE ne yapıyor? Eğitim hatasını bilerek artırmak neden mantıklı olabilir?</p>
+          <p>Aynı λ'da L2'den L1'e geç ve sağdaki 12 çubuğu say: L1 kaç tanesini tam olarak sıfıra indirdi, L2 kaç tanesini? Sonra λ'yı sonuna kadar büyüt: ekranda ne kaldı, modelin bu hâline ne ad veriyoruz?</p>
         </div>
       </div>
     </section>
@@ -1263,10 +1264,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>k = 5, derece = 8 yapın; <b>en iyi – en kötü kat</b> göstergesindeki iki sayıyı tahtaya yazın, sonra <b>Yeniden karıştır</b>'a basıp altına bir daha yazın. Tek bölme yapsaydınız bu sayılardan biri raporunuza girecekti — hangisinin gireceğini belirleyen şey model miydi, şans mı?</p>
-          <p><b>Yeniden karıştır</b>'a k = 2 iken beş kez, sonra k = 10 iken beş kez basın. Sağdaki soluk yeşil çizgiler önceki karıştırmaların ortalamaları: k = 2'de birbirinden ayrı duruyorlar, k = 10'da neredeyse tek çizgiye biniyorlar. Veri hiç değişmediği hâlde tahminimiz neden kararlı hâle geldi?</p>
+          <p>k = 5, derece = 8 yap. <b>En iyi – en kötü kat</b> göstergesindeki iki sayıyı not al, sonra <b>Yeniden karıştır</b>'a basıp bir daha not al. Tek bir eğitim–test bölmesi yapsaydın bu sayılardan biri raporuna girecekti. Hangisinin gireceğini belirleyen şey model mi, şans mı?</p>
+          <p><b>Yeniden karıştır</b>'a k = 2 iken beş kez, sonra k = 10 iken beş kez bas. Sağdaki soluk yeşil çizgiler önceki karıştırmaların ortalamaları: k = 2'de nasıl duruyorlar, k = 10'da nasıl? Veri hiç değişmediği hâlde tahmin neden kararlı hâle geldi?</p>
         </div>
       </div>
     </section>
@@ -1298,10 +1299,11 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Gizli nöronu 3'ten 8'e çıkarın: üçgen sekizgene döndü. Çıkış nöronu doğu ve kuzeyi hiç görmüyor; o hâlde neye bakarak "kapsama var" diyor?</p>
-          <p>Sonra aktivasyonu « Yok » yapın: aynı ağ, aynı ağırlıklar, ama harita tek renk. Nöronlardan yalnız aktivasyonu söktük; ağ neden birden bütün işe yaramaz hâle geldi?</p>
+          <p>Gizli nöronu 3'ten 8'e çıkar: üçgen sekizgene döndü. Çıkış nöronu doğu ve kuzeyi hiç görmüyor; o hâlde neye bakarak "kapsama var" diyor? (İpucu: çıkış düğümüne tıkla, alttaki hesabı oku.)</p>
+          <p>Aktivasyonu « Yok » yap: aynı ağ, aynı ağırlıklar, ama harita tek renk. Nöronlardan yalnız aktivasyonu söktük; ağ neden bütünüyle işe yaramaz hâle geldi?</p>
+          <p>« Hangi istasyon »da birkaç noktaya tıkla ve çıkıştaki üç yüzdeyi topla. Toplam neden hep 1? "Çekmiyor" nöronu hiçbir girdiye bakmadığı hâlde nasıl işe yarıyor?</p>
         </div>
       </div>
     </section>
@@ -1338,10 +1340,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Gizli nöronu <b>1</b>'e alıp eğitin: doğruluk %75'te çakılıyor, kayıp 0.5 civarında donuyor — yazı-tura çizgisinin (0.69) altında ama sıfırdan çok uzakta. Tek doğru XOR'un dört öbeğinden yalnız birini kesip alabiliyor; kalan üçü için ne diyor?</p>
-          <p>Şimdi <b>2</b> yapın: ekranda iki doğru beliriyor, toplam parametre yalnızca 9. Ama birkaç kez <b>Sıfırla</b>ya basın — üçte bir oranında yine %74'te takılıyor. İki nöron XOR için teorik olarak <i>yeterli</i>; o hâlde neden bazı başlangıçlardan varamıyor? (3 nöronda %95, 4 nöronda her seferinde çözüyor.) <b>İfade gücü ile optimize edilebilirlik aynı şey değil</b> — modern ağların neden ihtiyaçtan fazla parametreyle kurulduğunun cevabı bu ekranda.</p>
+          <p>Gizli nöronu <b>1</b>'e alıp eğit: doğruluk %75'te kalıyor, kayıp 0.5 civarında donuyor; yazı-tura seviyesinin (0.69) altında ama sıfırdan çok uzakta. Tek bir doğru XOR'un dört öbeğinden kaçını doğru ayırabilir?</p>
+          <p>Şimdi <b>2</b> yap; birkaç kez <b>Sıfırla</b>, sonra <b>Eğit</b>'e bas. Bazı denemeler yine %74 civarında takılıyor. İki nöron XOR için yetiyorsa neden bazı başlangıçlardan çözüme varamıyor? 3 ve 4 nöronla da dene: fazladan nöron ne kazandırıyor?</p>
         </div>
       </div>
     </section>
@@ -1371,10 +1373,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Ayrıklığı 100'e çekin: iki ölçüt de gerçek küme sayısını buluyor. Şimdi 20'ye indirin ve birkaç kez <b>Yeni veri</b>'ye basın — elbow düzleşiyor ve önerilen k her seferinde değişiyor. Ölçütler yanılmıyor; bu kararsızlığın kendisi <i>veri gerçekten kümeli değil</i> demenin yolu. Farkı görüyor musunuz?</p>
-          <p>WCSS k büyüdükçe <b>hep</b> düşer, k = nokta sayısında sıfır olur. O hâlde neden en büyük k'yı seçmiyoruz? Silhouette bu soruya neden daha dürüst bir cevap veriyor?</p>
+          <p>Ayrıklığı 100'e çek: iki ölçüt de gerçek küme sayısını buluyor. Şimdi 20'ye indir ve birkaç kez <b>Yeni veri</b>'ye bas: elbow düzleşiyor, önerilen k her seferinde değişiyor. Bu kararsızlık sana veri hakkında ne söylüyor?</p>
+          <p>WCSS k büyüdükçe <b>hep</b> düşer, k nokta sayısına eşit olunca sıfır olur. O hâlde neden en büyük k'yı seçmiyoruz? Silhouette bu soruya neden daha dürüst bir cevap veriyor?</p>
         </div>
       </div>
     </section>
@@ -1406,10 +1408,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Uzamayı 0'a indirin: bulut yuvarlaklaşıyor, iki bileşen kabaca yarı yarıya (%60 civarı — örneklem gürültüsü yüzünden tam %50 çıkmaz). PCA burada hiçbir şey kazandırmıyor. Hangi veride işe yarar, hangisinde yaramaz — tek cümleyle?</p>
-          <p>Dönme açısını değiştirin: eksenler veriyle birlikte dönüyor ama yüzdeler <b>değişmiyor</b>. PCA neden koordinat sisteminin nasıl kurulduğuna bağlı değil? (Modül 02'yi hatırlayın: ya ölçek değişseydi?)</p>
+          <p>Uzamayı 0'a indir: bulut yuvarlaklaşıyor, birinci bileşenin payı %60 civarına iniyor (örneklem gürültüsü yüzünden tam %50 çıkmaz). PCA burada bir şey kazandırıyor mu? Hangi veride işe yarar, hangisinde yaramaz? Tek cümleyle yaz.</p>
+          <p>Dönme açısını değiştir: eksenler veriyle birlikte dönüyor ama yüzdeler <b>değişmiyor</b>. Neden? Peki bir özniteliğin ölçeğini değiştirseydin ne olurdu? (Modül 02'yi hatırla.)</p>
         </div>
       </div>
     </section>
@@ -1438,10 +1440,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Uç değeri sağa kadar çekin: ortalama peşinden gidiyor, medyan neredeyse kıpırdamıyor. Bir mahallenin "ortalama geliri" açıklanırken hangisini duymak istersiniz, neden?</p>
-          <p>Kutu grafiğindeki kırmızı sınırlar Q1−1.5·IQR ve Q3+1.5·IQR. Bu sınırın dışına düşen bir nokta her zaman "hata" mıdır? Hangi durumda tam da aradığımız şeydir?</p>
+          <p>Uç değeri sağa kadar çek: ortalama peşinden gidiyor, medyan neredeyse kıpırdamıyor. Bir mahallenin "ortalama geliri" açıklanırken hangisini duymak isterdin? Neden?</p>
+          <p>Kutu grafiğindeki kırmızı sınırlar Q1 − 1.5·IQR ve Q3 + 1.5·IQR. Bu sınırın dışına düşen bir nokta her zaman bir hata mıdır? Aradığın şeyin tam da o aykırı nokta olduğu bir örnek düşün.</p>
         </div>
       </div>
     </section>
@@ -1474,10 +1476,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Koridorun dışındaki bir noktayı sürükleyin: sınır kıpırdamıyor. Şimdi halkalı bir noktayı sürükleyin: sınır peşinden geliyor. Model noktaların kaçını gerçekten kullanıyor? (<b>Destek vektörü</b> göstergesi sayıyı yazıyor.)</p>
-          <p>C'yi en küçüğe indirin: koridor genişliyor, birkaç nokta içeride kalıyor. En büyüğe çıkarın: koridor daralıyor, model her noktayı doğru bilmeye çalışıyor. Hangisi yeni gelecek veride daha güvenli?</p>
+          <p>Koridorun dışındaki bir noktayı sürükle: sınır kıpırdamıyor. Şimdi halkalı bir noktayı sürükle: sınır peşinden geliyor. Model noktaların kaçını gerçekten kullanıyor? (<b>Destek vektörü</b> göstergesine bak.)</p>
+          <p>C'yi en küçüğe indir: koridor genişliyor, birkaç nokta içeride kalıyor. En büyüğe çıkar: koridor daralıyor, model her noktayı doğru bilmeye çalışıyor. Yeni gelecek veride hangisi daha güvenli olur, neden?</p>
         </div>
       </div>
     </section>
@@ -1506,10 +1508,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Karmaşıklığı 1'den 6'ya çekin: yanlılık hızla düşerken varyans yükseliyor, toplam önce iniyor sonra çıkıyor. Toplamın en düşük olduğu derece hangisi ve neden tam orası?</p>
-          <p>Örnek sayısını artırın: hangi bileşen küçülüyor, hangisi yerinde kalıyor? "Daha çok veri toplayalım" her derde deva mı?</p>
+          <p>Karmaşıklığı 1'den 6'ya çek: yanlılık düşerken varyans yükseliyor, toplam önce iniyor sonra çıkıyor. Toplamın en düşük olduğu derece hangisi? Neden tam orası?</p>
+          <p>Örnek sayısını artır: hangi bileşen küçülüyor, hangisi yerinde kalıyor? "Daha çok veri toplayalım" her derde deva mı?</p>
         </div>
       </div>
     </section>
@@ -1543,10 +1545,10 @@ input[type=range]{min-height:28px;margin:0}
         </div>
       </div>
       <div class="ask">
-        <span class="tag">Derste sor</span>
+        <span class="tag">Dene ve düşün</span>
         <div>
-          <p>İki hilal verisinde k-means'e bakın: kümeleri ortadan, hilalleri enine kesiyor. Neden? k-means aslında hangi soruyu soruyor da bu cevabı veriyor?</p>
-          <p>DBSCAN'de eps'i çok küçültün: her şey gürültü oluyor. Çok büyütün: her şey tek küme. Doğru eps'i kim söyleyecek — veri mi, siz mi?</p>
+          <p>İki hilal verisinde k-means'e bak: hilalleri birbirinden ayırmak yerine ikisini de ortadan, enine kesiyor. Neden? k-means aslında hangi soruyu soruyor da bu cevabı veriyor?</p>
+          <p>DBSCAN'de eps'i çok küçült: her şey gürültü oluyor. Çok büyüt: her şey tek küme. Doğru eps'i kim söyleyecek, veri mi, sen mi? Nasıl seçerdin?</p>
         </div>
       </div>
     </section>
@@ -2536,7 +2538,9 @@ const CONTENT={
     {name:"Kredi onayı", x:"gelir", xu:"bin ₺", y:"borç oranı", yu:"%", cls:["Onay","Ret"], gen:"kredi",
      note:"Yirmi başvuru: aylık gelir ve gelirin yüzde kaçının borca gittiği. Burada işaretler ters: gelire artı, borca eksi ağırlık (w₁ = 4, w₂ = −5, b = 0.5) yirmisini de doğru biliyor."},
     {name:"Lamba devresi", x:"anahtar A", xu:"", y:"anahtar B", yu:"", cls:["Yanar","Söner"], gen:"and",
-     note:"Seri bağlı iki anahtar: lamba yalnız ikisi de açıkken yanar (AND). Girdi yalnız 0 ya da 1. Nöron b = −0.5 ile başlıyor ve 'en az biri açık' diyor (OR, paralel bağlantı); b = −1.5 AND'i kurar."}
+     note:"Seri bağlı iki anahtar: lamba yalnız ikisi de açıkken yanar (AND). Girdi yalnız 0 ya da 1. Nöron b = −0.5 ile başlıyor ve 'en az biri açık' diyor (OR, paralel bağlantı); b = −1.5 AND'i kurar."},
+    {name:"Resim 3×3", x:"orta sütun", xu:"", y:"kenarlar", yu:"", cls:["Dikey çizgi","Değil"], gen:"pix",
+     note:"On küçük resim: ortasında dikey bir çizgi var mı? Dokuz piksel dokuz girdi; ortadaki üç pikselin ağırlığı w₁, kenardaki altısınınki w₂. Başta her boyalı piksel artı puan: 10 resmin 4'ü doğru. « Örnek ağırlıklar » (w₁ = 2, w₂ = −1, b = −4.5) onunu da biliyor. Sol ya da sağ sütundaki çizgiyi ise 'değil' sayıyor, çünkü şablon yalnız ortaya bakıyor."}
   ],
   lesson:{
     q:"Bir yapay nöron içeride tam olarak ne hesaplıyor?",
@@ -2548,7 +2552,8 @@ const CONTENT={
     read:[["Sol: nöronun içi","Soldan sağa: tablodaki ham değer (rüzgar 12 km/sa), ölçeklenmiş girdi (0.40), ağırlıklı bağlantılar, Σ düğümü ve z, aktivasyon kutusu, çıktı ŷ. Bağlantının kalınlığı ağırlığın büyüklüğü, rengi işareti: camgöbeği artı, turuncu eksi. En alttaki '1' bias'ın girdisi: bias, değeri hep 1 olan bir girdinin ağırlığı gibi davranır. Alttaki iki satır hesabın kendisi."],
           ["Aktivasyon kutusu","İçindeki eğri seçili aktivasyon fonksiyonu, pembe nokta z'nin eğrinin neresine düştüğü. Ağırlıkları değiştirdikçe nokta eğrinin üstünde kayar."],
           ["Sağ: harita","Her nokta bir örnek, rengi gerçek sınıfı. Zemin nöronun cevabı; sigmoid'de renk koyulaştıkça nöron daha emin. Pembe doğru z = 0, kırmızı halkalı noktalar nöronun yanlış bildikleri. Haritaya tıklayınca o konum girdi olur; kesikli çizgiler x₁ ve x₂'yi eksende gösterir."],
-          ["Göstergeler","« Girdi » nörona giren iki ölçekli sayı. « Doğru bilinen » örneklerden kaçının doğru tarafta kaldığı. Aktivasyonu değiştirince bu sayı değişmez, çünkü karar hep z'nin işaretinden çıkar."]],
+          ["Resim 3×3","Solda resim satır satır dokuz girdiye açılıyor; camgöbeği çerçeveli üç kare orta sütun. Sağda üç küçük tablo: girdi resmi (bir piksele tıkla, yak ya da söndür), ağırlıklar ve ikisinin çarpımı. Çarpımları topla, b'yi ekle: z. Altta on örnek; çerçeve rengi gerçek sınıf, kırmızı halka nöronun yanlış bildikleri."],
+          ["Göstergeler","« Girdi » nörona giren sayılar: iki ölçekli sayı ya da resmin dokuz pikseli. « Doğru bilinen » örneklerden kaçının doğru tarafta kaldığı. Aktivasyonu değiştirince bu sayı değişmez, çünkü karar hep z'nin işaretinden çıkar."]],
     terms:[["artificial neuron","yapay nöron","girdileri ağırlıkla çarpıp toplayan, sonucu bir fonksiyondan geçiren hesap birimi"],
            ["weight","ağırlık","bir girdinin toplamdaki payını ve yönünü belirleyen sayı"],
            ["bias","sabit terim","girdiden bağımsız eklenen sayı; karar sınırını paralel kaydırır"],
@@ -2571,7 +2576,9 @@ const CONTENT={
            ["Lamba devresinde w₁ = w₂ = 1. Hangi b ile OR, hangi b ile AND olur?",
             "OR için toplam tek anahtar açıkken (1) artı, hiçbiri açık değilken (0) eksi olmalı: b = −0.5. AND için iki anahtar açıkken (2) artı, tek açıkken (1) eksi olmalı: b = −1.5."],
            ["Bu nöronda kaç parametre var? 784 piksellik bir resme bakan tek nöronda kaç tane olur?",
-            "İki ağırlık ve bir bias: 3. 784 girdili nöronda 784 ağırlık ve 1 bias: 785."]],
+            "İki ağırlık ve bir bias: 3. 784 girdili nöronda 784 ağırlık ve 1 bias: 785."],
+           ["« Resim 3×3 »te orta sütundaki çizgi z = 2·3 − 1·0 − 4.5 = 1.5 alıyor. Aynı çizgi sol sütuna kayınca z kaç olur, nöron ne der?",
+            "Orta sütunda 0, kenarlarda 3 boyalı piksel: z = 2·0 − 1·3 − 4.5 = −7.5. Nöron 'değil' der. Şablon yalnız ortaya bakıyor; çizginin yeri değişince tanımıyor. Bu yüzden görüntüde şablonu her yere gezdiren convolution kullanılır (Modül 25)."]],
     next:"Modül 22 · Tek nöron öğreniyor — bu üç sayıyı elle değil, veriden bulan ilk algoritma."
   }},
 
@@ -2624,7 +2631,9 @@ const CONTENT={
     {name:"İki istasyon", x:"doğu (km)", y:"kuzey (km)", cls:["Çekiyor","Çekmiyor"], gen:"iki", p1:"1. istasyonun çokgeni", p2:"2. istasyonun çokgeni",
      note:"İki ayrı daire. İkinci gizli katmandaki iki nöron birer çokgen kuruyor, çıkış 'en az biri' diyor (OR). 6 nöronla 160 konumun 155'i doğru."},
     {name:"Kurye bölgesi", x:"doğu (km)", y:"kuzey (km)", cls:["Kurye","Kurye değil"], gen:"halka", p1:"büyük çokgen", p2:"küçük çokgen",
-     note:"Depoya 1.7 km'den yakın siparişi müşteri kendisi alıyor, 3.8 km'den uzağa kargo gidiyor; aradaki halka kuryenin. Çıkış büyük çokgene +6, küçüğüne −6 ağırlık veriyor. 3 nöronla 125, 8 nöronla 155 doğru."}
+     note:"Depoya 1.7 km'den yakın siparişi müşteri kendisi alıyor, 3.8 km'den uzağa kargo gidiyor; aradaki halka kuryenin. Çıkış büyük çokgene +6, küçüğüne −6 ağırlık veriyor. 3 nöronla 125, 8 nöronla 155 doğru."},
+    {name:"Hangi istasyon", x:"doğu (km)", y:"kuzey (km)", cls:["A istasyonu","B istasyonu","Çekmiyor"], short:["A","B","yok"], gen:"soft",
+     note:"Çok sınıf: çıkış katmanında her sınıfa bir nöron (A, B, çekmiyor) ve softmax. 6 nöronla 160 konumun 157'si doğru, 3 nöronla 134. 'Çekmiyor' nöronu hiçbir girdiye bakmıyor, puanı hep 0; A ya da B 0'ı geçince kazanıyor."}
   ],
   lesson:{
     q:"Tek nöron tek doğru çiziyorsa, daire ya da halka gibi bir bölgeyi ağ nasıl çiziyor?",
@@ -2632,17 +2641,21 @@ const CONTENT={
     idea:["Modül 21'deki nöron tek bir doğru çizebiliyordu. Aynı iki girdiyi okuyan birkaç nöronu yan yana koyalım. Her birinin kendi ağırlıkları olduğu için her biri başka bir doğru çizer. Yan yana duran bu nöronlara <b>layer</b> (katman) denir. Katmandaki her nöron girdinin tamamını okur; buna <b>fully connected</b> (tam bağlı) katman diyoruz. Bir sınıfın aynı soruyu okuyup her öğrencinin kendi cevabını yazması gibi.",
           "Katmanın çıktısı yeni bir sayı listesidir. Kapsama örneğinde girdi iki sayıydı: doğu ve kuzey. Dört nöronlu katmandan sonra dört sayı oldu; her biri 'kendi doğrumun iç yanında mıyım' sorusunun cevabı. Çıkış nöronu artık doğuya, kuzeye bakmıyor; bu dört sayıya bakıyor. Kuralı da basit: dördü de 1 ise kapsama var. Sonuç, dört doğrunun çevrelediği bir kare. Girdiyle çıkış arasındaki bu katmanlara <b>hidden layer</b> (gizli katman) denir, çünkü çıktısını dışarıdan kimse görmez; ağın kendi iç notlarıdır.",
           "Bir katman daha eklersen ne olur? İki istasyonlu örnekte birinci gizli katman doğruları çiziyor. İkinci gizli katmandaki her nöron kendi doğrularını toplayıp bir çokgen kuruyor. Çıkış nöronu 'en az biri' diyor. Kurye bölgesinde çıkış küçük çokgene eksi ağırlık veriyor ve ortada bir delik açılıyor. Her katman bir öncekinin çıktısını hammadde gibi kullanıyor: önce çizgi, sonra şekil, sonra karar. Girdiden çıkışa katman katman yapılan bu hesaba <b>forward pass</b> (ileri yayılım) denir. 'Derin öğrenme'deki derinlik de bu katman sayısı.",
-          "Aktivasyon neden şart? « Yok »u seçince harita tek renk oluyor. Aktivasyonsuz nöron yalnız çarpıp toplar. Çarpıp topladığın bir sonucu yeniden çarpıp toplarsan elinde yine tek bir 'çarp ve topla' kalır. Örneğin h = 2x ve ŷ = 3h ise ŷ = 6x: iki katman tek bir nörona indi. Kaç katman eklersen ekle, aktivasyon yoksa ağ en fazla tek bir doğru çizer. Kıvrımı aktivasyon getirir."],
+          "Aktivasyon neden şart? « Yok »u seçince harita tek renk oluyor. Aktivasyonsuz nöron yalnız çarpıp toplar. Çarpıp topladığın bir sonucu yeniden çarpıp toplarsan elinde yine tek bir 'çarp ve topla' kalır. Örneğin h = 2x ve ŷ = 3h ise ŷ = 6x: iki katman tek bir nörona indi. Kaç katman eklersen ekle, aktivasyon yoksa ağ en fazla tek bir doğru çizer. Kıvrımı aktivasyon getirir.",
+          "Şimdiye kadar çıkışta tek nöron vardı: 'içeride mi, dışarıda mı'. Sınıf ikiden çoksa çıkış katmanına her sınıf için bir nöron koyarsın. « Hangi istasyon »da üç nöron var: A, B ve çekmiyor. Her biri bir puan (z) verir. Puanları yüzdeye çeviren fonksiyonun adı <b>softmax</b>: her puanın üssünü alır, hepsini toplar ve her birini bu toplama böler. Sonuç üç yüzde ve toplamları hep 1. Bir yarışma jürisi düşün: her yarışmacının puanı var, softmax bu puanlardan 'kim kaç şansla kazanır' tablosu çıkarır. Telefonundaki fotoğraf uygulaması 'kedi %92, köpek %7, tavşan %1' derken tam bunu yapıyor."],
     read:[["Sol: ağın kendisi","Her sütun bir katman: girdi, gizli katmanlar, çıkış. Bağlantının kalınlığı ağırlığın büyüklüğü, rengi işareti (camgöbeği artı, turuncu eksi); soluk kıl çizgiler 0 ağırlıklı bağlantılar. Her nöronun bir de bias'ı var; çizilmedi, alttaki satırda yazıyor."],
           ["Küçük kareler","Her kare o nöronun haritası: bütün düzlemde ne cevap verdiği. Gizli nöronda mor yerler 1, boş yerler 0; çıkışta renk sınıf. Karenin içindeki pembe nokta seçili konum, yanındaki sayı o konumdaki değer."],
           ["Alt satır","Seçili nöronun hesabı, seçili noktanın sayılarıyla. Bir düğüme tıklayınca o nörona geçer; başta çıkış seçili. Haritada da o nöron pembe çizilir: kenar nöronuysa doğrusu, ikinci katmandaysa çokgeni."],
           ["Sağ: harita","Zemin çıkışın olasılığı, mor ince çizgiler birinci gizli katmanın doğruları. Noktaların rengi gerçek sınıf, kırmızı halkalılar ağın yanlış bildikleri. Pembe halka seçili nokta: haritaya tıkla ya da « Sonraki nokta »ya bas."],
-          ["Göstergeler","« Yapı » katman başına nöron sayısı (2 → 4 → 1). « Parametre » bütün ağırlıkların ve bias'ların sayısı. « Doğru bilinen » 160 konumdan kaçının doğru bölgede kaldığı."]],
+          ["Hangi istasyon","Çıkışta üç nöron var; yanlarındaki sayılar seçili noktadaki üç yüzde, toplamları 1. Harita en yüksek yüzdenin rengini alıyor: camgöbeği A, yeşil B, turuncu çekmiyor. Bir çıkış düğümüne tıklayınca alt satırda önce o nöronun puanı z, sonra softmax hesabı yazıyor."],
+          ["Göstergeler","« Yapı » katman başına nöron sayısı (2 → 4 → 1). « Parametre » bütün ağırlıkların ve bias'ların sayısı. « Doğru bilinen » 160 konumdan kaçının doğru bölgede kaldığı. « Seçili noktada ŷ » iki sınıfta 'içeride' olasılığı, üç sınıfta en olası sınıfın yüzdesi."]],
     terms:[["layer","katman","aynı girdiyi okuyan, yan yana duran nöronlar"],
            ["hidden layer","gizli katman","girdi ile çıkış arasındaki katman; çıktısı dışarıdan görünmez"],
            ["fully connected","tam bağlı","katmandaki her nöronun önceki katmanın her nöronuna bağlı olması"],
            ["forward pass","ileri yayılım","girdiden çıkışa katman katman yapılan hesap"],
-           ["architecture","mimari","katman sayısı ve her katmandaki nöron sayısı, örneğin 2 → 4 → 1"]],
+           ["architecture","mimari","katman sayısı ve her katmandaki nöron sayısı, örneğin 2 → 4 → 1"],
+           ["output layer","çıkış katmanı","ağın son katmanı; iki sınıfta tek nöron, çok sınıfta her sınıfa bir nöron"],
+           ["softmax","—","puanları toplamı 1 olan olasılıklara çeviren çıkış fonksiyonu: her puanın üssü bölü üslerin toplamı"]],
     life:["El yazısı rakam tanıyan klasik bir ağ: 784 piksel girdi, 128 nöronluk bir gizli katman, 10 çıkış (her rakama bir tane). Parametre sayısı: 784 · 128 + 128 + 128 · 10 + 10 = 101 770.",
           "Büyük dil modelleri de katmanlardan oluşur; yalnız katman sayısı onlarca, parametre sayısı milyarlarca. Her soruda yapılan hesabın özü bu ekrandaki ileri yayılım."],
     trap:"Gizli nöronların hep böyle düzenli, tek tek anlamı olan doğrular çizdiğini sanma. Burada ağırlıkları biz elle yazdık ki her nöronun işi görünsün. Eğitilmiş bir ağda nöronlar karmakarışık doğrular çizer ve çoğunun tek başına bir anlamı yoktur; iş birlikte görülür. Bir de 'daha çok katman, daha iyi' değil: parametre arttıkça eğitmek de aşırı öğrenmeden (Modül 11) korunmak da zorlaşır.",
@@ -2659,7 +2672,9 @@ const CONTENT={
            ["Aktivasyonu kaldırınca harita neden tek renk oldu?",
             "Aktivasyonsuz katmanlar üst üste binince tek bir 'çarp ve topla'ya iner; ağ en fazla tek doğru çizer. Bu kurulumda kenar nöronlarının ağırlıkları birbirini tam götürüyor, o tek nöronun iki ağırlığı bile 0 çıkıyor."],
            ["Halka için neden ikinci gizli katman kullandık?",
-            "Halka 'büyük dairenin içi ve küçüğün dışı'. Birinci katman doğruları çiziyor, ikinci katman bu doğrulardan iki çokgen kuruyor, çıkış ikisini eksi ağırlıkla birleştiriyor. Tek gizli katman da çok sayıda nöronla halkayı yaklaşık çizebilir, ama iş bölümü aynı işi daha az nöronla ve anlaşılır biçimde yapıyor."]],
+            "Halka 'büyük dairenin içi ve küçüğün dışı'. Birinci katman doğruları çiziyor, ikinci katman bu doğrulardan iki çokgen kuruyor, çıkış ikisini eksi ağırlıkla birleştiriyor. Tek gizli katman da çok sayıda nöronla halkayı yaklaşık çizebilir, ama iş bölümü aynı işi daha az nöronla ve anlaşılır biçimde yapıyor."],
+           ["Üç çıkış nöronunun puanları z = (2, 1, 0). Softmax hangi yüzdeleri verir?",
+            "Üsler: e² = 7.39, e¹ = 2.72, e⁰ = 1. Toplam 11.11. Yüzdeler: 7.39 / 11.11 = 0.67, 2.72 / 11.11 = 0.24, 1 / 11.11 = 0.09. Toplamları 1; en yüksek puan en büyük payı alıyor ama ötekiler sıfır olmuyor."]],
     next:"Modül 24 · Gizli katmanı eğitmek — bu ağırlıkları elle değil, backpropagation ile veriden bulmak."
   }},
 
@@ -3496,19 +3511,32 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       rows:[[60,20,1],[30,40,0],[45,10,1],[20,25,0],[85,35,1],[50,55,0],[100,50,1],[65,70,0],[35,5,1],[40,45,0],
             [70,30,1],[14,14,0],[55,25,1],[90,75,0],[95,15,1],[25,60,0],[28,4,1],[45,50,0],[75,45,1],[80,65,0]]},
     and:{lo:[0,0],hi:[1,1],dg:[0,0],bin:true,view:[-.35,1.35],init:[1,1,-.5],good:[1,1,-1.5],
-      rows:[[0,0,0],[1,0,0],[0,1,0],[1,1,1]]}
+      rows:[[0,0,0],[1,0,0],[0,1,0],[1,1,1]]},
+    /* 3×3 resim, satır satır 9 piksel (1 boyalı, 0 boş): "ortada dikey çizgi var mı?"
+       Dokuz ağırlık iki kaydırıcıya bağlı: orta sütun (x₂, x₅, x₈) w₁, kenardaki altı
+       piksel w₂. Sol ve sağ sütundaki çizgiler bilerek "değil": şablon yalnız ortaya
+       bakıyor, yer değişince tanımıyor (convolution'a köprü, Modül 25). */
+    pix:{pix:true,init:[1,1,-1],good:[2,-1,-4.5],
+      rows:[["010010010",1],["000111000",0],["110010010",1],["100100100",0],["010010011",1],
+            ["100010001",0],["111111111",0],["010111010",0],["000000000",0],["001001001",0]]}
   };
-  const D=()=>DATA[S().gen];
-  let w=[1,1,-1], act="step", sel={i:0,u:0,v:0}, GM=null;
+  const D=()=>DATA[S().gen], PIX=()=>!!D().pix, MID=[1,4,7];
+  let w=[1,1,-1], act="step", sel={i:0,u:0,v:0,img:null}, GM=null;
+  /* resimde z = w₁·(orta sütundaki boyalı piksel) + w₂·(kenardakiler) + b */
+  const sums=(img)=>{ let m=0, s=0; img.forEach((v,i)=>{ if(MID.includes(i)) m+=v; else s+=v; }); return [m,s]; };
+  const imgTxt=(img)=>[0,3,6].map(i=>img.slice(i,i+3).join("")).join(" ");
   const F={step:z=>z>=0?1:0, sig:z=>1/(1+Math.exp(-z)), relu:z=>Math.max(0,z), lin:z=>z};
   const FN={step:"basamak", sig:"sigmoid", relu:"ReLU", lin:"yok"};
   const scl=(r,k)=>(r-D().lo[k])/(D().hi[k]-D().lo[k]);
-  const pts=()=>D().rows.map(r=>({u:scl(r[0],0), v:scl(r[1],1), t:r[2], r}));
+  const pts=()=>PIX()?D().rows.map(r=>({img:r[0].split("").map(Number), t:r[1], r}))
+                     :D().rows.map(r=>({u:scl(r[0],0), v:scl(r[1],1), t:r[2], r}));
   const zf=(u,v)=>w[0]*u+w[1]*v+w[2];
+  const zOf=(p)=>{ if(p.img){ const [m,s]=sums(p.img); return w[0]*m+w[1]*s+w[2]; } return zf(p.u,p.v); };
   /* eksi işareti U+2212; −0.00 yazılmaz */
   const sg=(v,d=2)=>{const r=+v.toFixed(d); return (r<0?"−":"")+Math.abs(r).toFixed(d);};
   const pm=(v,d=1)=>{const r=+v.toFixed(d); return (r<0?"− ":"+ ")+Math.abs(r).toFixed(d);};
-  const cur=()=>{ if(sel.i>=0){ const p=pts()[sel.i]; if(p) return p; } return {u:sel.u, v:sel.v, t:null, r:null}; };
+  const cur=()=>{ if(sel.i>=0){ const p=pts()[sel.i]; if(p) return p; }
+    return PIX()?{img:(sel.img||new Array(9).fill(0)).slice(), t:null, r:null}:{u:sel.u, v:sel.v, t:null, r:null}; };
   /* ham değer: tablodaki satırsa olduğu gibi, haritadan seçilmiş serbest noktaysa geri ölçeklenmiş */
   const rawTxt=(p,k)=>{ const d=D(), val=p.r?p.r[k]:d.lo[k]+(k?p.v:p.u)*(d.hi[k]-d.lo[k]);
     if(d.bin) return Math.round(val)?"açık (1)":"kapalı (0)";
@@ -3541,18 +3569,21 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     /* kısa tuvalde (rehber açık, ~600 px pencere) düğümler küçülür; x₁/x₂ etiketi başlık
        satırına değecekse çizilmez (aynı ad göstergede ve alttaki hesapta yazıyor) */
     const rN=clamp(Math.min(DW*.034,(bot-top)*.12),12,19), rS=rN+5, rO=rN+3, tags=yIn[0]-rN-9>=28;
-    const tf=10.5;
-    label(ctx,"ham değer",xr,14,css("--ink-soft"),"right",tf);
+    const tf=10.5, pix=!!p.img;
+    if(pix) label(ctx,"resim",DW*.12,14,css("--ink-soft"),"center",tf);
+    else label(ctx,"ham değer",xr,14,css("--ink-soft"),"right",tf);
     label(ctx,"girdi x",xi,14,css("--ink-soft"),"center",tf);
     label(ctx,"ağırlık w",(xi+xs)/2,14,css("--ink-soft"),"center",tf);
     label(ctx,"toplam",xs,14,css("--ink-soft"),"center",tf);
     label(ctx,"aktivasyon",xa,14,css("--ink-soft"),"center",tf);
     label(ctx,"çıktı",xo,14,css("--ink-soft"),"center",tf);
     /* bağlantılar: kalınlık |w|, renk işaret (camgöbeği +, turuncu −) */
-    const edge=(y0,wt)=>{ const a=Math.min(1,Math.abs(wt)/4);
+    const edge=(x0,y0,wt)=>{ const a=Math.min(1,Math.abs(wt)/4);
       ctx.save(); ctx.strokeStyle=hexA(wt>=0?"--a":"--b",.35+.55*a); ctx.lineWidth=1.2+Math.min(5,Math.abs(wt)*1.1);
-      ctx.beginPath(); ctx.moveTo(xi+rN,y0); ctx.lineTo(xs-rS,ys); ctx.stroke(); ctx.restore(); };
-    edge(yIn[0],w[0]); edge(yIn[1],w[1]); edge(yb,w[2]);
+      ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(xs-rS,ys); ctx.stroke(); ctx.restore(); };
+    if(pix) drawPixInputs(g,p,{top,bot,xi,xs,ys,rS,edge});
+    else{
+    edge(xi+rN,yIn[0],w[0]); edge(xi+rN,yIn[1],w[1]); edge(xi+rN,yb,w[2]);
     /* w₁ ve b üstten/alttan gelip Σ'da birleşiyor: etiketleri kaynağa yakın, w₂'ninki ortada */
     const wl=(y0,txt2,t)=>legend(ctx,xi+rN+(xs-rS-xi-rN)*t,y0+(ys-y0)*t,[[txt2,"--ink"]],{size:11,align:"center"});
     wl(yIn[0],"w₁ = "+sg(w[0],1),.40); wl(yIn[1],"w₂ = "+sg(w[1],1),.55); wl(yb,"b = "+sg(w[2],1),.40);
@@ -3569,6 +3600,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     label(ctx,"sabit",xr,yb,css("--ink-soft"),"right",11);
     disc(ctx,xi,yb,rN*.72,css("--surface-2"),css("--ink-soft"));
     label(ctx,"1",xi,yb,css("--ink"),"center",11.5);
+    }
     /* Σ düğümü */
     disc(ctx,xs,ys,rS,css("--surface-2"),css("--ink"));
     label(ctx,"Σ",xs,ys+1,css("--ink"),"center",17);
@@ -3597,11 +3629,86 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     label(ctx,"ŷ",xo,ys-rO-9,css("--ink-soft"),"center",11);
     label(ctx,S().cls[z>=0?0:1],xo,ys+rO+14,css("--ink"),"center",11.5);
     /* hesabın kendisi: iki satır */
-    const l1=`z = ${sg(w[0],1)}·${p.u.toFixed(2)} ${pm(w[1],1)}·${p.v.toFixed(2)} ${pm(w[2],1)} = ${sg(z,2)}`;
+    const [pm1,ps1]=pix?sums(p.img):[0,0];
+    const l1=pix?`orta ${pm1}, kenar ${ps1} boyalı piksel → z = ${sg(w[0],1)}·${pm1} ${pm(w[1],1)}·${ps1} ${pm(w[2],1)} = ${sg(z,2)}`
+               :`z = ${sg(w[0],1)}·${p.u.toFixed(2)} ${pm(w[1],1)}·${p.v.toFixed(2)} ${pm(w[2],1)} = ${sg(z,2)}`;
     const l2=(act==="lin"?`ŷ = z = ${yt}`:`ŷ = ${FN[act]}(${sg(z,2)}) = ${yt}`)+` → ${S().cls[z>=0?0:1]}`;
     const mw=DW-24;
     label(ctx,l1,12,H-40,css("--ink"),"left",fitSize(l1,mw,12.5));
     label(ctx,l2,12,H-18,css("--accent"),"left",fitSize(l2,mw,12.5));
+  }
+
+  /* ── resim kipinde sol: 3×3 resim satır satır dokuz girdiye açılıyor (kare = piksel) ── */
+  function drawPixInputs(g,p,o){
+    const {top,bot,xi,xs,ys,rS,edge}=o, DW=g.DW, pitch=(bot-top)/10, Y=k=>top+pitch*(k+.5);
+    const sq=clamp(pitch-5,6,16), cs=clamp(Math.min(DW*.045,(bot-top)/5.5),9,22), cx=DW*.12;
+    const ix0=cx-1.5*cs, iy0=ys-1.5*cs;
+    ctx.save(); ctx.lineWidth=1;
+    p.img.forEach((v,k)=>{ const x=ix0+(k%3)*cs, y=iy0+Math.floor(k/3)*cs;
+      ctx.fillStyle=v?css("--ink"):css("--surface"); ctx.fillRect(x,y,cs,cs);
+      ctx.strokeStyle=css("--line"); ctx.strokeRect(x+.5,y+.5,cs-1,cs-1); });
+    ctx.restore();
+    label(ctx,"satır satır",cx,iy0+3*cs+13,css("--ink-soft"),"center",10.5);
+    label(ctx,"→ 9 girdi",cx,iy0+3*cs+27,css("--ink-soft"),"center",10.5);
+    /* bağlantılar: orta sütun w₁, kenardaki altı piksel w₂, en altta bias */
+    for(let k=0;k<9;k++) edge(xi+sq/2,Y(k),MID.includes(k)?w[0]:w[1]);
+    edge(xi+sq/2,Y(9),w[2]);
+    ctx.save();
+    for(let k=0;k<9;k++){ const y=Y(k), mid=MID.includes(k);
+      ctx.fillStyle=p.img[k]?css("--ink"):css("--surface"); ctx.fillRect(xi-sq/2,y-sq/2,sq,sq);
+      ctx.strokeStyle=mid?css("--a"):css("--ink-soft"); ctx.lineWidth=mid?2.2:1.2; ctx.strokeRect(xi-sq/2,y-sq/2,sq,sq); }
+    ctx.restore();
+    if(pitch>=17) for(let k=0;k<9;k++) label(ctx,"x"+"₁₂₃₄₅₆₇₈₉"[k],xi-sq/2-5,Y(k),css("--ink-soft"),"right",10);
+    disc(ctx,xi,Y(9),Math.max(5,sq*.6),css("--surface-2"),css("--ink-soft"));
+    if(sq>=10) label(ctx,"1",xi,Y(9),css("--ink"),"center",10);
+    /* üç kaydırıcı = üç sayı; kısa tuvalde Σ'ya değmesin diye tek satır */
+    if(ys-rS-top>=56) legend(ctx,xs,top+6,[["w₁ = "+sg(w[0],1)+" · orta","--ink"],["w₂ = "+sg(w[1],1)+" · kenar","--ink"],["b = "+sg(w[2],1),"--ink"]],{size:11,align:"center"});
+    else legend(ctx,xs,top-6,[[`w₁ ${sg(w[0],1)} · w₂ ${sg(w[1],1)} · b ${sg(w[2],1)}`,"--ink"]],{size:10,align:"center"});
+  }
+  /* ── resim kipinde sağ: girdi × ağırlık = çarpımlar; altta on örnek (tıkla) ── */
+  function drawPix(g,P,p,z){
+    const x0=g.DW+24, pw=g.W-14-x0, H=g.H;
+    const gs=clamp(Math.min((pw-36)/3,H-150),60,120), cs=gs/3, gy=30, gx=[x0,x0+gs+18,x0+2*(gs+18)];
+    const wk=k=>MID.includes(k)?w[0]:w[1], fs=cs>=30?11:9.5, wide=gs>=96;
+    /* hücre dar kalınca "−1.0" yerine "−1": kısa tuvalde sayılar birbirine biniyordu */
+    const cf=(v)=>cs>=30||!Number.isInteger(+v.toFixed(1))?sg(v,1):sg(v,0);
+    label(ctx,wide?"girdi (tıkla)":"girdi",gx[0]+gs/2,16,css("--accent"),"center",10.5);
+    label(ctx,wide?"ağırlık w":"w",gx[1]+gs/2,16,css("--ink-soft"),"center",10.5);
+    label(ctx,wide?"girdi × ağırlık":"girdi × w",gx[2]+gs/2,16,css("--ink-soft"),"center",10.5);
+    g.cells=[]; let sp=0;
+    ctx.save(); ctx.lineWidth=1;
+    for(let k=0;k<9;k++){ const dx=(k%3)*cs, dy=gy+Math.floor(k/3)*cs, v=p.img[k], wt=wk(k), pr=v*wt; sp+=pr;
+      ctx.fillStyle=v?css("--ink"):css("--surface"); ctx.fillRect(gx[0]+dx,dy,cs,cs);
+      g.cells.push({x:gx[0]+dx,y:dy,s:cs,k});
+      ctx.fillStyle=css("--surface"); ctx.fillRect(gx[1]+dx,dy,cs,cs);
+      ctx.fillStyle=hexA(wt>=0?"--a":"--b",.12+.5*Math.min(1,Math.abs(wt)/5)); ctx.fillRect(gx[1]+dx,dy,cs,cs);
+      ctx.fillStyle=css("--surface"); ctx.fillRect(gx[2]+dx,dy,cs,cs);
+      if(pr!==0){ ctx.fillStyle=hexA(pr>0?"--a":"--b",.12+.5*Math.min(1,Math.abs(pr)/5)); ctx.fillRect(gx[2]+dx,dy,cs,cs); }
+      ctx.strokeStyle=css("--line"); gx.forEach(x=>ctx.strokeRect(x+dx+.5,dy+.5,cs-1,cs-1));
+    }
+    ctx.strokeStyle=css("--ink-soft"); ctx.lineWidth=1.5; gx.forEach(x=>ctx.strokeRect(x,gy,gs,gs));
+    ctx.restore();
+    for(let k=0;k<9;k++){ const dx=(k%3)*cs+cs/2, dy=gy+Math.floor(k/3)*cs+cs/2, pr=p.img[k]*wk(k);
+      label(ctx,cf(wk(k)),gx[1]+dx,dy,css("--ink"),"center",fs);
+      if(pr!==0) label(ctx,cf(pr),gx[2]+dx,dy,css("--ink"),"center",fs);
+      else label(ctx,"0",gx[2]+dx,dy,css("--ink-soft"),"center",fs); }
+    label(ctx,"×",gx[0]+gs+9,gy+gs/2,css("--ink-soft"),"center",14);
+    label(ctx,"=",gx[1]+gs+9,gy+gs/2,css("--ink-soft"),"center",14);
+    const st=`çarpımların toplamı ${sg(sp,1)}, + b (${sg(w[2],1)}) → z = ${sg(z,2)}`;
+    label(ctx,st,x0,gy+gs+16,css("--ink"),"left",fitSize(st,pw,11.5));
+    /* örnekler: çerçeve gerçek sınıf, kırmızı halka nöronun yanlış bildiği, altı çizili seçili */
+    const ey=gy+gs+40, ts=clamp((pw-54)/10,12,30), ty=ey+12;
+    label(ctx,"örnekler (tıkla)",x0,ey,css("--ink-soft"),"left",10.5);
+    g.thumbs=[];
+    ctx.save();
+    P.forEach((q,j)=>{ const tx=x0+j*(ts+6), c=ts/3, wrong=(zOf(q)>=0?1:0)!==q.t;
+      q.img.forEach((v,k)=>{ ctx.fillStyle=v?css("--ink"):css("--surface"); ctx.fillRect(tx+(k%3)*c,ty+Math.floor(k/3)*c,c,c); });
+      ctx.strokeStyle=css(q.t?"--a":"--b"); ctx.lineWidth=2; ctx.strokeRect(tx,ty,ts,ts);
+      if(wrong){ ctx.strokeStyle=css("--bad"); ctx.lineWidth=2; ctx.strokeRect(tx-3,ty-3,ts+6,ts+6); }
+      if(j===sel.i){ ctx.fillStyle=css("--accent"); ctx.fillRect(tx,ty+ts+5,ts,3); }
+      g.thumbs.push({x:tx,y:ty,s:ts,j}); });
+    ctx.restore();
+    if(ty+ts+20<H-6) legendRow(ctx,x0,ty+ts+20,[[S().cls[0],"--a"],[S().cls[1],"--b"],["kırmızı halka: yanlış","--bad"]],10.5,pw);
   }
 
   /* ── sağ: girdi uzayı. Zemin nöronun çıktısı, pembe doğru z = 0 ── */
@@ -3667,26 +3774,30 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   function draw(){
     if(!fit()) return;
     const g=geo(); GM=g;
-    const W=g.W, H=g.H, P=pts(), p=cur(), z=zf(p.u,p.v), dec=z>=0?1:0;
+    const W=g.W, H=g.H, P=pts(), p=cur(), z=zOf(p), dec=z>=0?1:0;
     ctx.clearRect(0,0,W,H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,W,H);
     drawNeuron(g,p,z);
     if(g.wide){
       ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1;
       ctx.beginPath(); ctx.moveTo(g.DW+4,10); ctx.lineTo(g.DW+4,H-10); ctx.stroke(); ctx.restore();
-      drawMap(g,P,p,z);
+      if(p.img) drawPix(g,P,p,z); else drawMap(g,P,p,z);
     }
     /* göstergeler çizimden bağımsız: dar yerleşimde de yazılır */
-    const ok=P.filter(q=>(zf(q.u,q.v)>=0?1:0)===q.t).length;
-    txt("#neu-x",`${p.u.toFixed(2)}, ${p.v.toFixed(2)}`);
+    const ok=P.filter(q=>(zOf(q)>=0?1:0)===q.t).length;
+    txt("#neu-xk",p.img?"Girdi x₁ … x₉":"Girdi x₁, x₂");
+    txt("#neu-x",p.img?imgTxt(p.img):`${p.u.toFixed(2)}, ${p.v.toFixed(2)}`);
     txt("#neu-z",sg(z,2));
     txt("#neu-y",yTxt(z));
     const de=$("#neu-d"); de.textContent=S().cls[dec?0:1]; de.className="v"+(p.t===null?"":p.t===dec?" ok":" bd");
     const ae=$("#neu-acc"); ae.textContent=`${ok} / ${P.length}`;
     ae.className="v "+(ok===P.length?"ok":ok>=P.length*.75?"wr":"bd");
-    cv.setAttribute("aria-label",`Yapay nöron, ${S().name}. Girdi: ${S().x} ${rawTxt(p,0)} (x₁ = ${p.u.toFixed(2)}), `+
-      `${S().y} ${rawTxt(p,1)} (x₂ = ${p.v.toFixed(2)}). z = ${sg(w[0],1)}·${p.u.toFixed(2)} ${pm(w[1],1)}·${p.v.toFixed(2)} ${pm(w[2],1)} = ${sg(z,2)}. `+
-      `Aktivasyon ${FN[act]}, ŷ = ${yTxt(z)}, karar ${S().cls[dec?0:1]}. Doğru bilinen ${ok} / ${P.length}. `+
-      `Sınır: ${sg(w[0],1)}·x₁ ${pm(w[1],1)}·x₂ ${pm(w[2],1)} = 0.`);
+    const [m,s]=p.img?sums(p.img):[0,0];
+    cv.setAttribute("aria-label",`Yapay nöron, ${S().name}. `+(p.img
+      ?`Girdi resmi ${imgTxt(p.img)}: orta sütunda ${m}, kenarlarda ${s} boyalı piksel. z = ${sg(w[0],1)}·${m} ${pm(w[1],1)}·${s} ${pm(w[2],1)} = ${sg(z,2)}. `
+      :`Girdi: ${S().x} ${rawTxt(p,0)} (x₁ = ${p.u.toFixed(2)}), ${S().y} ${rawTxt(p,1)} (x₂ = ${p.v.toFixed(2)}). `+
+       `z = ${sg(w[0],1)}·${p.u.toFixed(2)} ${pm(w[1],1)}·${p.v.toFixed(2)} ${pm(w[2],1)} = ${sg(z,2)}. `)+
+      `Aktivasyon ${FN[act]}, ŷ = ${yTxt(z)}, karar ${S().cls[dec?0:1]}. Doğru bilinen ${ok} / ${P.length}.`+
+      (p.img?"":` Sınır: ${sg(w[0],1)}·x₁ ${pm(w[1],1)}·x₂ ${pm(w[2],1)} = 0.`));
   }
 
   /* ── kontroller ── */
@@ -3701,12 +3812,21 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   $("#neu-step").onclick=()=>setAct("step"); $("#neu-sig").onclick=()=>setAct("sig");
   $("#neu-relu").onclick=()=>setAct("relu"); $("#neu-lin").onclick=()=>setAct("lin");
   $("#neu-good").onclick=()=>{ w=D().good.slice(); syncSliders(); draw(); };
-  $("#neu-next").onclick=()=>{ const n=D().rows.length; sel={i:sel.i>=0?(sel.i+1)%n:0,u:0,v:0}; draw(); };
+  $("#neu-next").onclick=()=>{ const n=D().rows.length; sel={i:sel.i>=0?(sel.i+1)%n:0,u:0,v:0,img:null}; draw(); };
   /* haritaya tıkla / sürükle: 14 px içindeki örnek seçilir, yoksa o konum serbest girdi
-     olur. Lamba devresinde girdi yalnız 0 ya da 1: en yakın köşe. */
+     olur. Lamba devresinde girdi yalnız 0 ya da 1: en yakın köşe. Resimde girdi
+     resminin bir pikseline tıklamak onu yakar / söndürür (resim artık serbest girdi),
+     alttaki küçük resimlerden birine tıklamak o örneği seçer. */
   let dragging=false;
+  const inR=(q,c,m=0)=>q.x>=c.x-m&&q.x<=c.x+c.s+m&&q.y>=c.y-m&&q.y<=c.y+c.s+m;
   const pick=(e)=>{ const g=GM; if(!g||!g.wide) return false;
     const q=pointerPos(cv,e);
+    if(PIX()){
+      const c=(g.cells||[]).find(c=>inR(q,c));
+      if(c){ const img=cur().img; img[c.k]=img[c.k]?0:1; sel={i:-1,u:0,v:0,img}; draw(); return false; }
+      const t=(g.thumbs||[]).find(c=>inR(q,c,3));
+      if(t){ sel={i:t.j,u:0,v:0,img:null}; draw(); }
+      return false; }
     if(q.x<g.mx0-8||q.x>g.mx1+8||q.y<g.my0-8||q.y>g.my1+8) return false;
     const P=pts(); let bi=-1, bd=1e9;
     P.forEach((t,i)=>{ const d=(g.MX(t.u)-q.x)**2+(g.MY(t.v)-q.y)**2; if(d<bd){bd=d;bi=i;} });
@@ -3716,7 +3836,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   cv.addEventListener("pointerdown",e=>{ if(e.button===0&&pick(e)) dragging=true; });
   cv.addEventListener("pointermove",e=>{ if(dragging) pick(e); });
   ["pointerup","pointerleave","pointercancel"].forEach(t=>cv.addEventListener(t,()=>{dragging=false;}));
-  function useSet(i){ dsi=clamp(i,0,DS.length-1); w=D().init.slice(); sel={i:0,u:0,v:0};
+  function useSet(i){ dsi=clamp(i,0,DS.length-1); w=D().init.slice(); sel={i:0,u:0,v:0,img:null};
     txt("#neu-w1l","w₁ · "+S().x); txt("#neu-w2l","w₂ · "+S().y); syncSliders(); draw(); }
   const good=()=>{ setR("#neu-w1",D().good[0]*10); setR("#neu-w2",D().good[1]*10); setR("#neu-b",D().good[2]*10); };
 
@@ -3741,7 +3861,11 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     {t:"Bir nöron, bir doğru",d:"Kredi onayı: gelir ve borç oranı. « Örnek ağırlıklar » gelire artı, borca eksi ağırlık verdi; 20 başvurunun 20'si doğru. Ama hangi sayıları seçersen seç, tek nöronun sınırı hep düz bir çizgidir.",
      set:1, hl:["#neu-good","#neu-acc"], run(){setPressed("#neu-sig",true);press("#neu-good");}},
     {t:"Lamba devresi: OR'dan AND'e",d:"Seri bağlı iki anahtar: lamba yalnız ikisi de açıkken yanar (AND). Nöron w₁ = w₂ = 1, b = −0.5 ile 'en az biri açık' diyordu, yani OR: 4 durumun yalnız 2'si doğru. b'yi −1.5'e indirdik: AND, dördü de doğru. Peki 'ya biri ya öteki' (XOR)? Hiçbir w ve b ile olmaz. Modül 22 bunu gösterecek, Modül 23 çözecek.",
-     set:2, hl:["#neu-b","#neu-acc"], run(){setPressed("#neu-step",true);setR("#neu-b",-15);}}
+     set:2, hl:["#neu-b","#neu-acc"], run(){setPressed("#neu-step",true);setR("#neu-b",-15);}},
+    {t:"Resim de bir girdi",d:"3×3'lük bir resim: her piksel bir sayı (boyalı 1, boş 0), satır satır okununca 9 girdi. Gri tonlu bir resimde bu sayı parlaklıktır. 28 × 28'lik bir rakam resmi aynı yolla 784 girdi olur. Dokuz ağırlığı iki kaydırıcıya bağladık: ortadaki üç piksele w₁, kenardaki altısına w₂. Başta her boyalı piksel artı puandı ve nöron neredeyse her resme 'dikey çizgi' diyordu (10 resmin 4'ü doğru). « Örnek ağırlıklar » ortaya artı, kenarlara eksi verdi: onu da doğru. Sağdaki ağırlık tablosuna bakın; ağırlıklar da bir resim, nöronun aradığı desen.",
+     set:3, hl:["#neu-x","#neu-acc"], run(){setPressed("#neu-step",true);press("#neu-good");}},
+    {t:"Yer değişince tanımıyor",d:"Sol sütundaki çizgiyi seçtik. O da dikey bir çizgi, ama nöron 'değil' diyor: şablonu yalnız ortaya bakıyor, kenardaki her boyalı piksel ona eksi puan. Aynı şablonu resmin her yerinde gezdirmek gerekiyor; bunun adı <b>convolution</b> (Modül 25). Girdi resminin piksellerine tıklayıp kendi resmini de deneyebilirsin.",
+     set:3, hl:["#neu-d"], run(){setPressed("#neu-step",true);press("#neu-good");press("#neu-next");press("#neu-next");press("#neu-next");}}
   ]});
 })();
 
@@ -7614,24 +7738,31 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const GEO={
     tek:{shapes:[{c:[.5,.5],R:.30}], out:"one"},
     iki:{shapes:[{c:[.30,.64],R:.21},{c:[.71,.34],R:.18}], out:"or"},
-    halka:{shapes:[{c:[.5,.5],R:.38},{c:[.5,.5],R:.17}], out:"ring"}
+    halka:{shapes:[{c:[.5,.5],R:.38},{c:[.5,.5],R:.17}], out:"ring"},
+    /* çok sınıf: çıkış katmanında üç nöron (A, B, çekmiyor) ve softmax. "Çekmiyor"
+       nöronunun bütün ağırlıkları 0, bias'ı 0: hep 0 puan verir; A ya da B'nin puanı
+       0'ı geçince onlar kazanır. Bölgeler "iki istasyon"la aynı, veri ayrı tohumdan. */
+    soft:{shapes:[{c:[.30,.64],R:.21},{c:[.71,.34],R:.18}], out:"soft"}
   };
   /* Kazançlar: kenar nöronu KS, birleştiren nöron KG. KS = 20'de sigmoid kipinde çokgenin
      köşeleri içe çöküyordu ve nöron arttıkça doğru bilinen DÜŞÜYORDU (tek bölge: 5 nöron
      152 → 8 nöron 146). 40'ta geçiş ~1 km, eğri basamağınkini izliyor. */
   const KS=40, KG=6, N=160;
   let n=4, act="step", net=[], pts=[], order=[], sel={i:0,u:.5,v:.5}, pk=null, ver=0, GM=null;
-  const G=()=>GEO[S().gen];
-  const truth=(u,v)=>{ const g=G(), d=g.shapes.map(q=>Math.hypot(u-q.c[0],v-q.c[1])<q.R);
-    return g.out==="one"?d[0]:g.out==="or"?(d[0]||d[1]):(d[0]&&!d[1]); };
+  const G=()=>GEO[S().gen], SOFT=()=>G().out==="soft";
+  /* sınıf sırası S().cls ile aynı: iki sınıfta 0 = içeride, 1 = dışarıda */
+  const kOf=(u,v)=>{ const g=G(), d=g.shapes.map(q=>Math.hypot(u-q.c[0],v-q.c[1])<q.R);
+    if(g.out==="soft") return d[0]?0:d[1]?1:2;
+    return (g.out==="one"?d[0]:g.out==="or"?(d[0]||d[1]):(d[0]&&!d[1]))?0:1; };
+  const CK=()=>SOFT()?["--a","--d","--b"]:["--a","--b"];
   /* tohumlu üreteç: veri her açılışta aynı, göstergedeki sayılar derste de aynı */
   const rng=(a)=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
   function sample(){
     const r=rng(7+dsi); pts=[];
-    for(let i=0;i<N;i++){ const u=.03+.94*r(), v=.03+.94*r(); pts.push({u,v,t:truth(u,v)?1:0}); }
-    /* « Sonraki nokta » sırası: bir içeride, bir dışarıda */
-    const A=[], B=[]; pts.forEach((p,i)=>(p.t?A:B).push(i)); order=[];
-    for(let k=0;k<Math.max(A.length,B.length);k++){ if(k<A.length) order.push(A[k]); if(k<B.length) order.push(B[k]); }
+    for(let i=0;i<N;i++){ const u=.03+.94*r(), v=.03+.94*r(); pts.push({u,v,k:kOf(u,v)}); }
+    /* « Sonraki nokta » sırası: sınıflar sırayla (bir içeride, bir dışarıda …) */
+    const by=CK().map(()=>[]); pts.forEach((p,i)=>by[p.k].push(i)); order=[];
+    for(let j=0;j<N;j++) by.forEach(b=>{ if(j<b.length) order.push(b[j]); });
     sel={i:order[0],u:0,v:0};
   }
   function build(){
@@ -7640,24 +7771,29 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       for(let i=0;i<n;i++){ const th=-Math.PI/2+2*Math.PI*i/n, nx=Math.cos(th), ny=Math.sin(th);
         L1.push({w:[-KS*nx,-KS*ny], b:KS*(r+nx*q.c[0]+ny*q.c[1]), q, th, r}); } });
     const and=(k)=>{ const w=new Array(L1.length).fill(0); for(let i=0;i<n;i++) w[k*n+i]=KG; return {w,b:-KG*(n-.5)}; };
-    net=g.out==="one"?[L1,[and(0)]]:[L1,[and(0),and(1)],[{w:[KG,g.out==="or"?KG:-KG],b:-KG*.5}]];
+    net=g.out==="one"?[L1,[and(0)]]
+       :g.out==="soft"?[L1,[and(0),and(1),{w:new Array(L1.length).fill(0),b:0}]]
+       :[L1,[and(0),and(1)],[{w:[KG,g.out==="or"?KG:-KG],b:-KG*.5}]];
     if(pk&&(pk.c>net.length||pk.k>=net[pk.c-1].length)) pk=null;
     ver++;
   }
-  /* gizli katmanlar seçili aktivasyonla, çıkış hep sigmoid: olasılık verir */
+  /* gizli katmanlar seçili aktivasyonla; çıkış olasılık verir: tek nöronsa sigmoid,
+     birden çok sınıfsa softmax (puanların üssü, toplamı 1 olacak biçimde bölünmüş) */
   const AF={step:z=>z>=0?1:0, sig:z=>1/(1+Math.exp(-z)), lin:z=>z};
+  const softmax=(z)=>{ const m=Math.max(...z), e=z.map(t=>Math.exp(t-m)), s=e.reduce((a,b)=>a+b,0); return e.map(t=>t/s); };
   const AN={step:"basamak", sig:"sigmoid", lin:"yok"};
   function fwd(u,v){ const Z=[], H=[[u,v]];
     net.forEach((layer,li)=>{ const x=H[H.length-1], last=li===net.length-1;
       const z=layer.map(nu=>{ let s=nu.b; for(let j=0;j<x.length;j++) s+=nu.w[j]*x[j]; return s; });
-      Z.push(z); H.push(z.map(t=>last?AF.sig(t):AF[act](t))); });
+      Z.push(z); H.push(last&&SOFT()?softmax(z):z.map(t=>last?AF.sig(t):AF[act](t))); });
     return {Z,H}; }
-  const prob=(u,v)=>fwd(u,v).H[net.length][0];
-  const cur=()=>sel.i>=0&&pts[sel.i]?pts[sel.i]:{u:sel.u,v:sel.v,t:null};
+  const predK=(h)=>SOFT()?h.indexOf(Math.max(...h)):(h[0]>=.5?0:1);
+  const outH=(u,v)=>fwd(u,v).H[net.length], predAt=(u,v)=>predK(outH(u,v));
+  const cur=()=>sel.i>=0&&pts[sel.i]?pts[sel.i]:{u:sel.u,v:sel.v,k:null};
   const sg=(v,d=1)=>{const r=+v.toFixed(d); return (r<0?"−":"")+Math.abs(r).toFixed(d);};
   const pm=(v,d=1)=>{const r=+v.toFixed(d); return (r<0?"− ":"+ ")+Math.abs(r).toFixed(d);};
   const SUB="₀₁₂₃₄₅₆₇₈₉", sub=(i)=>String(i).split("").map(c=>SUB[+c]).join("");
-  const nm=(c,k)=>c===net.length?"ŷ":c===1?"h"+sub(k+1):"g"+sub(k+1);
+  const nm=(c,k)=>c===net.length?(SOFT()?`p(${S().short[k]})`:"ŷ"):c===1?"h"+sub(k+1):"g"+sub(k+1);
   const sizes=()=>[2,...net.map(l=>l.length)];
   const params=()=>net.reduce((s,l,li)=>s+l.length*(sizes()[li]+1),0);
   const fitSize=(t,maxW,sz,min=9.5)=>{ ctx.save(); let s=sz;
@@ -7668,18 +7804,19 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   /* her nöronun küçük haritası: T×T hücre, bir kez hesaplanır (ağ / aktivasyon / tema değişince) */
   const T=28; let tkey="", thumbs=[];
   function buildThumbs(){
-    const key=[ver,act,css("--c"),css("--a"),css("--b")].join("|");
+    const key=[ver,act,css("--c"),css("--a"),css("--b"),css("--d")].join("|");
     if(key===tkey) return; tkey=key;
     const grids=net.map(l=>l.map(()=>new Float64Array(T*T)));
     for(let j=0;j<T;j++) for(let i=0;i<T;i++){ const f=fwd((i+.5)/T,1-(j+.5)/T);
       for(let li=0;li<net.length;li++) for(let k=0;k<net[li].length;k++) grids[li][k][j*T+i]=f.H[li+1][k]; }
-    const C=rgbOf("--c"), Ac=rgbOf("--a"), Bc=rgbOf("--b");
-    thumbs=grids.map((l,li)=>l.map(gr=>{
+    const C=rgbOf("--c"), Ac=rgbOf("--a"), Bc=rgbOf("--b"), KC=CK().map(rgbOf), soft=SOFT();
+    thumbs=grids.map((l,li)=>l.map((gr,kk)=>{
       const c=document.createElement("canvas"); c.width=T; c.height=T;
       const x=c.getContext("2d"), img=x.createImageData(T,T), d=img.data, last=li===net.length-1;
       let mx=1; if(act==="lin"&&!last){ mx=0; for(let q=0;q<gr.length;q++) mx=Math.max(mx,Math.abs(gr[q])); mx=mx||1; }
       for(let q=0;q<T*T;q++){ const v=gr[q], o=q*4; let col, al;
-        if(last){ col=v>=.5?Ac:Bc; al=.10+.55*Math.abs(v-.5)*2; }
+        if(last&&soft){ col=KC[kk]; al=.05+.68*v; }
+        else if(last){ col=v>=.5?Ac:Bc; al=.10+.55*Math.abs(v-.5)*2; }
         else if(act==="lin"){ col=v>=0?C:Bc; al=.06+.62*Math.abs(v)/mx; }
         else { col=C; al=.05+.68*v; }
         d[o]=col[0]; d[o+1]=col[1]; d[o+2]=col[2]; d[o+3]=Math.round(al*255); }
@@ -7690,14 +7827,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const rc=document.createElement("canvas"), rcx=rc.getContext("2d"); let rkey="";
   function region(g){
     const mw=g.mx1-g.mx0, mh=g.my1-g.my0;
-    const key=[ver,act,Math.round(mw),Math.round(mh),css("--a"),css("--b")].join("|");
+    const key=[ver,act,Math.round(mw),Math.round(mh),css("--a"),css("--b"),css("--d")].join("|");
     if(key===rkey) return rc;
     const cols=Math.max(2,Math.ceil(mw/4)), rows=Math.max(2,Math.ceil(mh/4));
     lo.width=cols; lo.height=rows;
-    const img=lox.createImageData(cols,rows), d=img.data, A=rgbOf("--a"), B=rgbOf("--b");
+    const img=lox.createImageData(cols,rows), d=img.data, KC=CK().map(rgbOf), K=KC.length;
     for(let j=0;j<rows;j++) for(let i=0;i<cols;i++){
-      const pr=prob((i+.5)/cols,1-(j+.5)/rows), c=pr>=.5?A:B, o=(j*cols+i)*4;
-      d[o]=c[0]; d[o+1]=c[1]; d[o+2]=c[2]; d[o+3]=Math.round((.05+.30*Math.abs(pr-.5)*2)*255);
+      /* renk en olası sınıf, koyuluk eminlik (iki sınıfta |2p − 1|, üçte (pmax − 1/3)/(2/3)) */
+      const h=outH((i+.5)/cols,1-(j+.5)/rows), kp=predK(h), c=KC[kp], o=(j*cols+i)*4;
+      const cf=K===2?Math.abs(h[0]-.5)*2:(h[kp]-1/K)/(1-1/K);
+      d[o]=c[0]; d[o+1]=c[1]; d[o+2]=c[2]; d[o+3]=Math.round((.05+.30*cf)*255);
     }
     lox.putImageData(img,0,0);
     const dpr=window.devicePixelRatio||1;
@@ -7725,7 +7864,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const left=34, right=DW-60, xs=Array.from({length:cols},(_,c)=>left+(right-left)*c/(cols-1));
     const gap=(right-left)/(cols-1);
     const nodes=sz.map((m,c)=>{ const pitch=(bot-top)/m;
-      const s=c===0?0:c===cols-1?Math.min(46,bot-top-24):clamp(pitch-6,12,40);
+      const s=c===0?0:c===cols-1&&m===1?Math.min(46,bot-top-24):clamp(pitch-6,12,40);
       return Array.from({length:m},(_,k)=>({c,k,x:xs[c],y:top+pitch*(k+.5),s,pitch})); });
     g.nodes=nodes;
     const rIn=15;
@@ -7755,13 +7894,14 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ctx.save(); ctx.fillStyle=css("--surface"); ctx.fillRect(x0,y0,s,s);
       ctx.imageSmoothingEnabled=act!=="step";
       if(thumbs[c-1]&&thumbs[c-1][k]) ctx.drawImage(thumbs[c-1][k],x0,y0,s,s);
-      const on=last?val>=.5:act==="lin"?val>0:val>=.5;
+      const on=last&&SOFT()?k===predK(f.H[c]):act==="lin"&&!last?val>0:val>=.5;
       ctx.strokeStyle=on?css("--ink"):css("--line"); ctx.lineWidth=on?1.8:1.2; ctx.strokeRect(x0,y0,s,s);
-      if(pk&&pk.c===c&&pk.k===k){ ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.4; ctx.strokeRect(x0-3,y0-3,s+6,s+6); }
+      if(pk?pk.c===c&&pk.k===k:last&&k===0){ ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.4; ctx.strokeRect(x0-3,y0-3,s+6,s+6); }
       ctx.restore();
       if(s>=14) disc(ctx,x0+p.u*s,y0+(1-p.v)*s,s>=24?2.6:2,css("--accent"));
       const vs=last?val.toFixed(2):act==="step"?String(val):act==="sig"?val.toFixed(2):sg(val,1);
-      if(last) label(ctx,"ŷ = "+vs,t.x,t.y+s/2+13,css("--accent"),"center",11.5);
+      if(last&&SOFT()) legend(ctx,x0+s+5,t.y,[[`${S().short[k]} ${vs}`,"--ink"]],{size:10.5,lh:13});
+      else if(last) label(ctx,"ŷ = "+vs,t.x,t.y+s/2+13,css("--accent"),"center",11.5);
       else if(t.pitch>=17) legend(ctx,x0+s+4,t.y,[[vs,"--ink"]],{size:t.pitch>=24?10.5:9.5,lh:13});
     });
     /* seçili nöronun hesabı: iki satır */
@@ -7774,12 +7914,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         parts.push({neg:nu.w[j]<0, s:`${Math.abs(nu.w[j])}·${e>j?"("+nn+")":nn}`}); j=e+1; }
       inner=parts.map((q,i)=>(i?(q.neg?" − ":" + "):(q.neg?"−":""))+q.s).join("")+" "+pm(nu.b); }
     const vs=last||act==="sig"?val.toFixed(2):act==="step"?String(val):sg(val,1);
-    const fml=fn?`${nm(c,k)} = ${fn}(${inner}) = ${fn}(${sg(z)}) = ${vs}`:`${nm(c,k)} = ${inner} = ${vs}`;
+    let fml=fn?`${nm(c,k)} = ${fn}(${inner}) = ${fn}(${sg(z)}) = ${vs}`:`${nm(c,k)} = ${inner} = ${vs}`;
     const g2=G().out;
     const what=c===1?(act==="lin"?"aktivasyon yok: çıktısı z'nin kendisi":"kendi doğrusunun iç yanında 1, dış yanında 0"+(act==="sig"?" (yumuşak geçiş)":""))
       :!last?`${k?S().p2:S().p1}: kendi ${n} kenarının hepsi 1 ise 1 (AND)`
       :g2==="one"?"bütün kenar nöronları 1 ise içeride (AND)":g2==="or"?"g₁ ya da g₂ 1 ise içeride (OR)":"g₁ 1 ve g₂ 0 ise halkada: eksi ağırlık delik açar";
-    const d1=`seçili nöron ${nm(c,k)} · ${what}`;
+    let d1=`seçili nöron ${nm(c,k)} · ${what}`;
+    /* softmax: önce bu nöronun puanı z, sonra puanların üssüyle yüzde */
+    if(last&&SOFT()){ const zn=nm(c,k).replace("p(","z("), zs=f.Z[c-1];
+      d1=`${zn} = ${inner} = ${sg(z)}`;
+      fml=`${nm(c,k)} = exp(${sg(z)}) / (${zs.map(v=>"exp("+sg(v)+")").join(" + ")}) = ${val.toFixed(2)}`; }
     label(ctx,d1,10,H-36,css("--ink-soft"),"left",fitSize(d1,DW-20,11));
     label(ctx,fml,10,H-15,css("--accent"),"left",fitSize(fml,DW-20,12));
   }
@@ -7804,12 +7948,13 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         const X=g.MX(nu.q.c[0]+R*Math.cos(a)), Y=g.MY(nu.q.c[1]+R*Math.sin(a)); i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }
       ctx.stroke(); }
     ctx.restore();
-    pts.forEach(q=>{ const wrong=(prob(q.u,q.v)>=.5?1:0)!==q.t;
-      disc(ctx,g.MX(q.u),g.MY(q.v),4.2,css(q.t?"--a":"--b"),wrong?css("--bad"):css("--surface")); });
+    const KC=CK();
+    pts.forEach(q=>{ const wrong=predAt(q.u,q.v)!==q.k;
+      disc(ctx,g.MX(q.u),g.MY(q.v),4.2,css(KC[q.k]),wrong?css("--bad"):css("--surface")); });
     const p=cur(), sx=g.MX(p.u), sy=g.MY(p.v);
     ctx.save(); ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(sx,sy,9,0,7); ctx.stroke(); ctx.restore();
-    legend(ctx,mx0+8,my0+12,[[S().cls[0],"--a"],[S().cls[1],"--b"],["gizli katman 1 doğruları","--c"]],{size:11});
-    if(lin) legend(ctx,(mx0+mx1)/2,my1-30,[["aktivasyon yok → ağ tek nörona eşit:","--ink"],[lin,"--accent"]],{size:11,align:"center"});
+    legend(ctx,mx0+8,my0+12,[[S().cls[0],"--a"],[S().cls[1],SOFT()?"--d":"--b"],SOFT()&&[S().cls[2],"--b"],["gizli katman 1 doğruları","--c"]],{size:11});
+    if(lin) legend(ctx,(mx0+mx1)/2,my1-30,[[SOFT()?"aktivasyon yok → her çıkış tek nörona eşit:":"aktivasyon yok → ağ tek nörona eşit:","--ink"],[lin,"--accent"]],{size:11,align:"center"});
     label(ctx,S().x+" →",mx1,my1+16,css("--ink-soft"),"right",11);
     ylabel(ctx,S().y+" →",mx0-14,my0,my1,css("--ink-soft"),11);
   }
@@ -7817,12 +7962,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   function draw(){
     if(!fit()) return;
     const g=geo(); GM=g;
-    const W=g.W, H=g.H, p=cur(), f=fwd(p.u,p.v), yh=f.H[net.length][0];
+    const W=g.W, H=g.H, p=cur(), f=fwd(p.u,p.v), yv=f.H[net.length], kp=predK(yv);
     ctx.clearRect(0,0,W,H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,W,H);
     /* aktivasyon yoksa bütün ağ tek bir doğrusal fonksiyon: katsayılarını üç noktadan oku */
     let lin="";
     if(act==="lin"){ const zo=(u,v)=>fwd(u,v).Z[net.length-1][0], c0=zo(0,0);
-      lin=`z = ${sg(zo(1,0)-c0,2)}·x₁ ${pm(zo(0,1)-c0,2)}·x₂ ${pm(c0,1)}`; }
+      lin=`${SOFT()?"z("+S().short[0]+")":"z"} = ${sg(zo(1,0)-c0,2)}·x₁ ${pm(zo(0,1)-c0,2)}·x₂ ${pm(c0,1)}`; }
     drawNet(g,f);
     if(g.wide){
       ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1;
@@ -7830,16 +7975,17 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       drawMap(g,f,lin);
     }
     /* göstergeler dalın dışında: dar yerleşimde de yazılır */
-    const ok=pts.filter(q=>(prob(q.u,q.v)>=.5?1:0)===q.t).length;
+    const ok=pts.filter(q=>predAt(q.u,q.v)===q.k).length;
     txt("#lay-arch",sizes().join(" → "));
     txt("#lay-par",String(params()));
     const ae=$("#lay-acc"); ae.textContent=`${ok} / ${pts.length}`;
     ae.className="v "+(ok>=pts.length*.95?"ok":ok>=pts.length*.8?"wr":"bd");
-    const ye=$("#lay-y"); ye.textContent=`${yh.toFixed(2)} · ${S().cls[yh>=.5?0:1]}`;
-    ye.className="v"+(p.t===null?"":(yh>=.5?1:0)===p.t?" ok":" bd");
+    /* iki sınıfta "içeride" olasılığı, üç sınıfta en olası sınıfın yüzdesi */
+    const ye=$("#lay-y"); ye.textContent=`${yv[SOFT()?kp:0].toFixed(2)} · ${S().cls[kp]}`;
+    ye.className="v"+(p.k===null?"":kp===p.k?" ok":" bd");
     const hs=f.H.slice(1,-1).map((h,i)=>`gizli katman ${i+1} = [${h.map(v=>act==="lin"?sg(v,1):act==="sig"?v.toFixed(2):String(v)).join(", ")}]`).join(", ");
     cv.setAttribute("aria-label",`Katmanlı ağ, ${S().name}: ${sizes().join(" → ")}, ${params()} parametre, aktivasyon ${AN[act]}. `+
-      `Doğru bilinen ${ok} / ${pts.length}. Seçili nokta (${p.u.toFixed(2)}, ${p.v.toFixed(2)}): ${hs}, ŷ = ${yh.toFixed(2)}. `+
+      `Doğru bilinen ${ok} / ${pts.length}. Seçili nokta (${p.u.toFixed(2)}, ${p.v.toFixed(2)}): ${hs}, ŷ = ${SOFT()?"["+yv.map(v=>v.toFixed(2)).join(", ")+"]":yv[0].toFixed(2)}. `+
       `Çıkış ağırlıkları: ${net[net.length-1][0].w.map(v=>sg(v,0)).join(", ")}.`+(lin?` Eşdeğer tek nöron: ${lin}.`:""));
   }
 
@@ -7887,8 +8033,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
      set:1, hl:["#lay-arch","#lay-acc"], run(){setPressed("#lay-step",true);setR("#lay-n",6);}},
     {t:"Delik açmak: eksi ağırlık",d:"Kurye bölgesi: depoya çok yakın siparişi müşteri kendi alıyor, çok uzağa kargo gidiyor; arası kuryenin. İkinci katmanda büyük ve küçük çokgen var. Çıkış büyüğe +6, küçüğe −6 ağırlık veriyor (turuncu bağlantı): 'büyüğün içi ama küçüğün dışı'.",
      set:2, hl:["#lay-acc"], run(){setPressed("#lay-step",true);setR("#lay-n",6);}},
+    {t:"Çok sınıf: softmax",d:"Hangi istasyon? Artık üç sınıf var ve çıkış katmanında üç nöron: A, B ve çekmiyor. Her biri bir puan (z) veriyor; <b>softmax</b> her puanın üssünü alıp toplama bölüyor, üç yüzdenin toplamı hep 1. Haritanın rengi en yüksek yüzdeli sınıf. 'Çekmiyor' nöronunun bütün ağırlıkları 0, puanı hep 0: A ya da B'nin puanı 0'ı geçince onlar kazanıyor. Bir çıkış düğümüne tıklayıp hesabı okuyun.",
+     set:3, hl:["#lay-arch","#lay-y"], run(){setPressed("#lay-step",true);setR("#lay-n",6);}},
     {t:"Ağırlıkları kim buluyor?",d:"Buradaki her ağırlığı biz hesapladık, her nöronun ne yaptığı görünsün diye. Gerçek bir ağda kimse yazmaz: ağırlıklar rastgele başlar, <b>backpropagation</b> onları veriden bulur, bulduğu doğrular da bu kadar düzenli olmaz. Modül 24'te bunu izleyeceğiz.",
-     set:2, hl:["#lay-par"], run(){setPressed("#lay-step",true);setR("#lay-n",6);}}
+     set:3, hl:["#lay-par"], run(){setPressed("#lay-step",true);setR("#lay-n",6);}}
   ]});
 })();
 

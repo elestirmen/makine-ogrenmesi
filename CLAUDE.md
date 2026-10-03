@@ -28,6 +28,7 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   | perceptron · hidden layer · MLP · backpropagation | — · gizli katman · çok katmanlı ağ · geri yayılım |
   | artificial neuron · weighted sum · bias · activation function · ReLU | yapay nöron · ağırlıklı toplam · sabit terim · aktivasyon fonksiyonu · — |
   | layer · fully connected · forward pass · architecture | katman · tam bağlı · ileri yayılım · mimari |
+  | output layer · softmax | çıkış katmanı · — |
   | convolution · kernel · feature map · pooling · ReLU | konvolüsyon · çekirdek · öznitelik haritası · havuzlama · — |
   | decision boundary · linearly separable · z-score · min–max | karar sınırı · doğrusal ayrılabilir · z-skoru · min–maks |
   | SVM · margin · support vector · kernel · hinge loss | destek vektör makinesi · marj · destek vektörü · çekirdek · menteşe kaybı |
@@ -56,7 +57,8 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   `--accent` zeminine yazan metin `--on-accent` / `--on-accent-soft` kullanır —
   koyu temada beyaz yazı okunmuyor (kontrast 2.8), token koyu mürekkebe geçiyor.
 - **Pedagoji zorunlu.** Her modülün üç ayrı metin katmanı var ve hiçbiri boş bırakılmaz:
-  `.ask` kutusu (hocanın derste soracağı iki soru), `steps` (rehberli anlatım) ve
+  `.ask` kutusu (« Dene ve düşün »: öğrencinin ekranda deneyip kendisi cevaplayacağı
+  iki soru), `steps` (rehberli anlatım) ve
   `CONTENT[id].lesson` — « Ders notu » düğmesinin açtığı kutu. Ders notunun içinde de
   düz yazının yanında üç zorunlu parça var: **figür** (`FIGS[id]` + `lesson.fig`),
   **elle hesap** (`lesson.ex`) ve **kendini sına** (`lesson.check`). Ayrıca her modülde
@@ -164,6 +166,12 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   14 px içindeki örnek seçilir, yoksa serbest girdi; lamba devresinde en yakın köşe. 640 px
   altında harita gizli, girdi « Sonraki örnek »le değişir. Kısa tuvalde (rehber açık, ~600 px
   pencere) düğümler küçülür, x₁ / x₂ etiketi başlık satırına değecekse çizilmez.
+  « Resim 3×3 » (`pix`) girdinin resim de olabileceğini gösterir: 9 piksel 9 girdi,
+  dokuz ağırlık iki kaydırıcıya bağlı (orta sütun w₁, kenarlar w₂) ki nöron hâlâ üç
+  sayıyla oynansın. Haritanın yerinde girdi × ağırlık = çarpım tabloları ve on örnek;
+  piksele tıklamak onu yakar / söndürür. Piksel "boyalı 1 / boş 0" diye anlatılır:
+  açık temada boyalı piksel koyu çizildiği için "parlak" demek yanlış kaçıyordu. Sol
+  ve sağ sütundaki çizgiler bilerek "değil": şablon yer değişince tanımıyor (Modül 25'e köprü).
 - **Modül 23 (`m-lay`) ağırlıkları elle kurar** ki her nöronun işi görünsün: birinci gizli
   katmanın her nöronu düzgün bir çokgenin kenarı (iç yanında 1; merkezden kenara
   r = R·(1 + cos(π/n))/2), ikinci katman (tek bölgede çıkış) kenarları AND'ler, çıkış
@@ -176,7 +184,11 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   derste de aynı, notlardaki sayılar bu yüzden sabit ve `behaviour.js` tam sayıyla sınar.
   Her nöron kendi küçük haritasıyla çizilir (28 × 28 hücre, ağ / aktivasyon / tema değişince
   yeniden); düğüme tıklayınca seçilir ve fare çıkınca KALIR (m-cn kuralı): alt satır onun
-  hesabını, harita doğrusunu ya da çokgenini gösterir.
+  hesabını, harita doğrusunu ya da çokgenini gösterir. « Hangi istasyon » (`soft`) çok
+  sınıflı çıkış: üç çıkış nöronu (A, B, çekmiyor) ve softmax; "çekmiyor" nöronunun bütün
+  ağırlıkları ve bias'ı 0 (puanı hep 0, öteki ikisi 0'ı geçince kazanır). Sınıflar
+  `pts[].k` (S().cls sırası), renkler `CK()`: A `--a`, B `--d`, çekmiyor `--b`. Seçili
+  çıkışın alt satırı önce z'yi, sonra `exp(z) / Σ exp` hesabını yazar.
 - `lesson` kutusu: `q` bir soru, `short` sorunun iki üç cümlelik **kısa cevabı**
   (accent şeritli kutuda, hiç bilmeyen biri yalnız bunu okusa da bir şey götürsün),
   `idea` fikir, `read` ekranı okuma rehberi, `terms` İngilizce/Türkçe terim tablosu,
@@ -195,8 +207,14 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
     hiç kendi eliyle hesaplamadan geçiyordu. Her sayı doğrulanmış olmalı (tek bir
     yanlış ara sonuç öğrenciye formülü yanlış öğretir); figürdeki sayılar örnekle aynı.
   - **`check` (kendini sına)** 2–3 kavram sorusu; cevap `<details>` içinde, öğrenci
-    önce kendisi düşünür. `.ask` kutusundaki sorular hocanın derste sorduklarıdır,
-    bunlar evde tek başına çalışana.
+    önce kendisi düşünür.
+  - **`.ask` (« Dene ve düşün »)** uygulama öğrencinin eline de verildiği için
+    öğrenciye yazılır (eskiden etiketi « Derste sor »du ve hocaya yazılmıştı: "siz"
+    hitabı, "tahtaya yazın", kutunun içinde cevap). Kural: "sen" hitabı; her paragraf
+    ekranda yapılacak bir deney (hangi kaydırıcı, hangi düğme) ve bir "neden?"
+    sorusu; cevap kutuda VERİLMEZ, gerekirse parantez içinde ipucu (cevap ders
+    notunda ve « Kendini sına »da). Deneyin gözlemi olan sayılar ("doğruluk %75'te
+    kalıyor") öğrenci doğru yerde mi diye kalır; `behaviour.js` onları sınar.
   - **Figür** (`FIGS[id]`) bir ders kitabı şeması: mekanizmayı tuvalden bağımsız, tek
     bakışta, `ex` ile aynı sayılarla gösterir (k = 3 → Uçak, k = 7 → Kuş; Gini 0.50 →
     0.32; 5×5 girdi ⊛ 3×3 çekirdek). Satır içi SVG, `viewBox` genişliği 640; renk YALNIZ
@@ -386,7 +404,7 @@ for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; 
 # 25 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). ~1 dk sürer.
-node tools/behaviour.js index.html   # 199 denetim: 25 modül + alternatif veri kümeleri
+node tools/behaviour.js index.html   # 208 denetim: 25 modül + alternatif veri kümeleri
 
 # tuvale yazılan her etiket rengini ve ders notu figürlerinin (FIGS) yazı rengini
 # açık VE koyu temada zemine karşı ölç (label(...) / legend(...) çağrılarını ve

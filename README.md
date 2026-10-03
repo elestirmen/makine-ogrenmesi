@@ -39,9 +39,9 @@ sağdaki sütun o modülün hangi haftaya denk geldiğini söyler.
 | 19 | Küme yuvarlak olmak zorunda mı | DBSCAN, eps/minPts, hiyerarşik (Ward) | 14 |
 | 20 | İki sayı yerine bir | PCA, boyut indirgeme | 13 |
 | | **Derin öğrenme** | | |
-| 21 | Bir nöron ne hesaplar | artificial neuron: girdi, ağırlık, bias, weighted sum, activation function (basamak, sigmoid, ReLU) | — |
+| 21 | Bir nöron ne hesaplar | artificial neuron: girdi (tablo satırı ya da resmin pikselleri), ağırlık, bias, weighted sum, activation function (basamak, sigmoid, ReLU) | — |
 | 22 | Tek nöron öğreniyor | perceptron, linear separability, XOR sorunu | — |
-| 23 | Çizgilerden şekle | layer, hidden layer, forward pass, parametre sayısı, aktivasyonsuz ağın çökmesi | — |
+| 23 | Çizgilerden şekle | layer, hidden layer, forward pass, parametre sayısı, aktivasyonsuz ağın çökmesi, çok sınıflı çıkış ve softmax | — |
 | 24 | Gizli katmanı eğitmek | MLP, backpropagation, XOR'un çözümü | — |
 | 25 | Filtre gezdirmek | convolution, kernel size, padding, stride, ReLU, pooling | — |
 
@@ -75,6 +75,11 @@ tek satırlık özetleri, İngilizce–Türkçe terim tablosu, gerçek hayattaki
 o konuda **sık yapılan hata** ve cevabı tıklayınca açılan üç **kendini sına** sorusu. Öğrenci kaydırıcıyı çevirip hiçbir şey anlamadan
 geçmesin diye var; kutunun altındaki *Adım adım anlat* düğmesi doğrudan rehberli
 anlatımı başlatır.
+
+**Dene ve düşün.** Her modülün altındaki kutu öğrenciye yazılmıştır: ekranda yapılacak
+bir deney (hangi kaydırıcı, hangi düğme) ve "neden?" sorusu. Cevap kutuda verilmez;
+gerekirse ipucu parantez içindedir, açıklaması ders notunda. Uygulama öğrencilere
+ödev ya da ön çalışma olarak verilebilir.
 
 **Adım adım modu.** *Ders notu*'nun hemen yanındaki *Adım adım* düğmesi: hoca ileri
 bastıkça tuval sırayla kurulur ve tuvalin **üstündeki** şeritte o adımın ne gösterdiği
@@ -132,9 +137,9 @@ onunla birlikte değişir. Soyut "x₁ / x₂" yerine gerçek bir ölçüm:
 | 17 k-means | müşteri segmenti · artçı sarsıntılar (uzun kümeler) · uydu pikselleri |
 | 19 DBSCAN | iki hilal · iç içe halka · öbek + gürültü |
 | 20 PCA | boy–kilo · matematik–fizik notu · uydu bantları (bitki örtüsü ekseni) |
-| 21 yapay nöron | balon turu (rüzgar–görüş) · kredi onayı (gelir–borç oranı) · lamba devresi (iki anahtar: OR'dan AND'e) |
+| 21 yapay nöron | balon turu (rüzgar–görüş) · kredi onayı (gelir–borç oranı) · lamba devresi (iki anahtar: OR'dan AND'e) · **resim 3×3** (9 piksel = 9 girdi, ağırlıklar da bir resim; yer değişince tanımıyor) |
 | 22 · 24 | kalite kontrol (ayrılabilir) · ilaç etkileşimi (XOR) · baz istasyonu (halka) |
-| 23 katmanlar | tek istasyon (bir gizli katman, çokgen) · iki istasyon (ikinci gizli katman, OR) · kurye bölgesi (halka: eksi ağırlık delik açar) |
+| 23 katmanlar | tek istasyon (bir gizli katman, çokgen) · iki istasyon (ikinci gizli katman, OR) · kurye bölgesi (halka: eksi ağırlık delik açar) · hangi istasyon (çıkışta üç nöron, **softmax**) |
 | 25 convolution | hava fotoğrafı · tarla parselleri · test deseni · **kendi görüntün** (dosya, sürükle-bırak ya da Ctrl+V) |
 
 Kalan modüllerde de en az iki set var (03 ev fiyatı / araç yaşı → negatif eğim,

@@ -1100,5 +1100,44 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   lay.__pick(0); P(el,'lay-step',true); S(el,'lay-n',4);
 }
 
+/* ── 21 · Yapay nöron · « Resim 3×3 »: piksel girdi, şablon ağırlık (adım 10–11, not) ── */
+{
+  head("Modül 21 · resim girdi (3×3 piksel)");
+  const {el,M}=boot(F);
+  const neu=M.find(m=>m.id==='m-neu');
+  neu.__pick(3); P(el,'neu-step',true);
+  /* not: "Başta her boyalı piksel artı puan: 10 resmin 4'ü doğru" */
+  chk(T(el,'neu-acc')==='4 / 10', "resim: başlangıçta 10 resmin 4'ü doğru (not, adım 10)", T(el,'neu-acc'));
+  chk(T(el,'neu-x')==='010 010 010', "ilk örnek: dokuz piksel, ortada dikey çizgi", T(el,'neu-x'));
+  el('neu-good').click();
+  chk(T(el,'neu-acc')==='10 / 10'&&T(el,'neu-w1o')==='2.0'&&T(el,'neu-w2o')==='−1.0'&&T(el,'neu-bo')==='−4.5',
+      "örnek ağırlıklar w₁ = 2, w₂ = −1, b = −4.5 onunu da biliyor (not)", `${T(el,'neu-acc')} · ${T(el,'neu-w1o')} ${T(el,'neu-w2o')} ${T(el,'neu-bo')}`);
+  chk(T(el,'neu-z')==='1.50'&&T(el,'neu-d')==='Dikey çizgi', "orta çizgi: z = 2·3 − 1·0 − 4.5 = 1.50 (kendini sına 4)", `${T(el,'neu-z')} · ${T(el,'neu-d')}`);
+  for(let k=0;k<3;k++) el('neu-next').click();   // 4. örnek: sol sütundaki çizgi
+  chk(T(el,'neu-x')==='100 100 100'&&T(el,'neu-z')==='−7.50'&&T(el,'neu-d')==='Değil',
+      "sol sütundaki çizgi: z = −7.50, 'Değil' — şablon yer değişince tanımıyor (adım 11, kendini sına 4)", `${T(el,'neu-x')} · ${T(el,'neu-z')} · ${T(el,'neu-d')}`);
+}
+
+/* ── 23 · Katmanlar · « Hangi istasyon »: çıkışta üç nöron ve softmax (adım 9, not) ── */
+{
+  head("Modül 23 · çok sınıf: softmax");
+  const {el,M}=boot(F);
+  const lay=M.find(m=>m.id==='m-lay');
+  const AR=()=>el('c-lay').getAttribute('aria-label')||'';
+  lay.__pick(3); P(el,'lay-step',true);
+  S(el,'lay-n',3); const a3=V(el,'lay-acc');
+  S(el,'lay-n',6); const a6=V(el,'lay-acc');
+  chk(T(el,'lay-arch')==='2 → 12 → 3'&&V(el,'lay-par')===75, "çıkışta üç nöron: 2 → 12 → 3, 75 parametre", `${T(el,'lay-arch')} · ${V(el,'lay-par')}`);
+  chk(a6===157&&a3===134, "6 nöronla 157, 3 nöronla 134 doğru (not)", `${a3} · ${a6}`);
+  /* adım 9 + .ask: "üç yüzdenin toplamı hep 1"; en büyük yüzde göstergedeki sınıf */
+  let sumOk=0, kinds=new Set();
+  for(let k=0;k<30;k++){ const m=/ŷ = \[([\d.]+), ([\d.]+), ([\d.]+)\]/.exec(AR());
+    if(m&&Math.abs(+m[1]+ +m[2]+ +m[3]-1)<=0.011) sumOk++;
+    kinds.add(T(el,'lay-y').replace(/^[\d.]+ · /,'')); el('lay-next').click(); }
+  chk(sumOk===30, "softmax: üç yüzdenin toplamı her noktada 1 (adım 9)", `${sumOk}/30`);
+  chk(kinds.size===3, "« Sonraki nokta » üç sınıfı da gösteriyor", [...kinds].join(', '));
+  lay.__pick(0); S(el,'lay-n',4);
+}
+
 console.log(`\n${fail?fail+" DENETİM DÜŞTÜ":"tüm davranış denetimleri geçti"}`);
 process.exit(fail?1:0);
