@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/icon.png" alt="makine-ogrenmesi simgesi" width="120"></p>
+
 # Makine Öğrenmesi Oyun Alanı
 
 Giriş seviyesi lisans Makine Öğrenmesi dersinde **canlı gösterim** için yirmi altı
