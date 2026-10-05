@@ -256,6 +256,23 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   başladığı anda ekran boşalıyor. Kendi görüntüsü dosya / sürükle-bırak / yapıştır
   ile geliyor ve griye çevrilip anında işleniyor (renkli görüntüde çekirdek
   3×3×3 = 27 ağırlık olur; bu not ders notunda yazıyor).
+- **Kontrol çubuğu tutarlılığı (2026-10-05 taraması):** modüller arası aynı iş aynı
+  adla ve aynı yerde yapılır; hoca "bazısında var bazısında yok" demişti.
+  - **Artıklar:** altı regresyon modülünün hepsinde (`m-lin`, `m-mlr`, `m-poly`, `m-fit`,
+    `m-reg`, `m-cv`) « Artıklar » anahtarı (`XXX-res`) var: her noktadan eğriye inen
+    kırmızı çubuk (`hexA("--bad",.45)`, 2 px). Açık başlar; yalnız `m-reg`'de kapalı
+    (λ en küçükteki kesikli kırmızı referans eğrisiyle karışıyor). `m-cv`'de çubuklar
+    yalnız test katında (kat hatası onların karesi), `m-fit` ve `m-reg`'de yalnız
+    eğitim noktalarında (test noktaları soluk, lejant "artık (eğitim)" der).
+  - **Veri düğmeleri üç ad:** « Yeni veri » (veriyi yeniden üret; eski « Yeni örneklem »,
+    « Yeniden örnekle », « Yeni sahne » kalktı), « Örnek veri » (boş tuvale hazır nokta
+    yükle: knn, km, dt; `m-dig`'de « Örnek rakam »), « Temizle » (noktaları sil). Ağırlık /
+    durum sıfırlayan düğme « Sıfırla » (gd, mlp, lay). Düzenlenebilir tuvali olan her
+    modülde « Temizle » bulunur (pca ve dbs'ye eklendi).
+  - **`.hint` her modülde** bir satır: tuval etkileşimi varsa onu ("tıkla → nokta ekle"),
+    yoksa hangi kaydırıcının neyi oynattığını söyler.
+  - **Veri kümesi seçici hep araç şeridinde** (`scenarios`); `ui:false` ile çubukta kendi
+    düğmelerini kuran modül kalmadı (`m-per` ve `m-mlp` taşındı; adımlar `set:` kullanır).
 - Veri kümesi seçici, `.stage` kartının **içinde**, tuvalin üstündeki `.tools`
   şeridine girer (alt `.bar`'ın simetriği: aynı zemin, aynı hairline) ve
   uygulamanın kendi "birini seç" bileşenini — birleşik `.seg` — kullanır.

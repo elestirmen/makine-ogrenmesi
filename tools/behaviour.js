@@ -31,8 +31,8 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   console.log("=== Modül 23 · Gizli katman (XOR) ===");
   const r=[];
   for(const h of [1,4]){
-    const {el,tick}=boot(F);
-    el('mlp-xor').click();
+    const {el,tick,M}=boot(F);
+    M.find(x=>x.id==='m-mlp').__pick(0);        // PK() aşağıda const (TDZ)
     const hs=el('mlp-h'); hs.value=String(h); hs.dispatchEvent({type:'input'});
     el('mlp-reset').click();
     el('mlp-run').click();      // setInterval kuyruğa girer
@@ -571,9 +571,9 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
 /* ── 19 · Perceptron: ayrılabilirde durur, XOR'da durmaz ── */
 {
   head("Modül 22 · Tek nöron öğreniyor (perceptron)");
-  const go=(btn)=>{const {el,tick}=boot(F); el(btn).click(); el('per-run').click(); tick(900);
+  const go=(j)=>{const {el,tick,M}=boot(F); M.find(x=>x.id==='m-per').__pick(j); el('per-run').click(); tick(900);
     return {m:V(el,'per-m'), u:V(el,'per-u'), raw:T(el,'per-m')};};
-  const sep=go('per-sep'), xor=go('per-xor');
+  const sep=go(0), xor=go(1);
   console.log(`       ayrılabilir: yanlış=${sep.raw} güncelleme=${sep.u}`);
   console.log(`       XOR        : yanlış=${xor.raw} güncelleme=${xor.u}`);
   chk(sep.m===0, "ayrılabilir veride yanlış sınıflanan sıfıra düşüyor (yakınsama teoremi)", sep.raw);
@@ -934,9 +934,9 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
    2429 epoch sürdü. Tek koşuya değil MEDYANA bakılıyor. */
 {
   head("Modül 23 · 4 nöron birkaç düzine epoch'ta (adım 4)");
-  const {el,tick}=boot(F); const ep=[]; let miss=0;
+  const {el,tick,M}=boot(F); const ep=[]; let miss=0;
   for(let t=0;t<8;t++){
-    el('mlp-xor').click(); S(el,'mlp-h',4); el('mlp-reset').click();
+    PK(M,'m-mlp',0); S(el,'mlp-h',4); el('mlp-reset').click();
     P(el,'mlp-run',true);
     let got=-1;
     for(let k=0;k<400;k++){ tick(1); if(V(el,'mlp-acc')>=98){ got=V(el,'mlp-ep'); break; } }
@@ -968,7 +968,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   head("Modül 22 · tek düzeltme (adım 2)");
   let moved=0, one=0, N=10;
   for(let t=0;t<N;t++){
-    const {el}=boot(F); el('per-sep').click();
+    const {el,M}=boot(F); PK(M,'m-per',0);
     const w0=T(el,'per-w'), m0=V(el,'per-m');
     el('per-step').click();
     if(m0>0){ if(V(el,'per-u')===1) one++; if(T(el,'per-w')!==w0) moved++; }

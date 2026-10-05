@@ -687,8 +687,10 @@ input[type=range]{min-height:28px;margin:0}
           <label class="ctl"><span class="lab">Derece</span><input type="range" id="fit-d" min="1" max="14" step="1" value="3"><output id="fit-do">3</output></label>
           <label class="ctl"><span class="lab">Gürültü</span><input type="range" id="fit-n" min="0" max="30" step="1" value="12"><output id="fit-no">.12</output></label>
           <label class="ctl"><span class="lab">Eğitim verisi</span><input type="range" id="fit-m" min="6" max="40" step="1" value="14"><output id="fit-mo">14</output></label>
-          <button class="btn" id="fit-new">Yeni örneklem</button>
+          <button class="btn" id="fit-res" aria-pressed="true">Artıklar</button>
+          <button class="btn" id="fit-new">Yeni veri</button>
           <button class="btn primary" id="fit-sweep" aria-pressed="false">Dereceyi tara</button>
+          <span class="hint">Derece kaydırıcısını sürükle → pembe eğri ve sağdaki iki hata eğrisi birlikte değişir.</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">Derece</span><span class="v" id="fit-vd">3</span></div>
@@ -720,7 +722,7 @@ input[type=range]{min-height:28px;margin:0}
           <label class="ctl"><span class="lab">Başlangıç</span><input type="range" id="gd-x0" min="-300" max="480" step="1" value="-230"><output id="gd-x0o">-2.30</output></label>
           <button class="btn" id="gd-step">Tek adım</button>
           <button class="btn primary" id="gd-run" aria-pressed="false">Koştur</button>
-          <button class="btn" id="gd-reset">Başa dön</button>
+          <button class="btn" id="gd-reset">Sıfırla</button>
           <span class="hint">Eğriye tıklayarak da başlangıç noktası seçebilirsin.</span>
         </div>
         <div class="stats">
@@ -798,9 +800,8 @@ input[type=range]{min-height:28px;margin:0}
           <label class="ctl"><span class="lab" lang="en">Learning rate</span><input type="range" id="per-lr" min="1" max="100" step="1" value="20"><output id="per-lro">0.20</output></label>
           <button class="btn" id="per-step">Tek düzeltme</button>
           <button class="btn primary" id="per-run" aria-pressed="false">Eğit</button>
-          <button class="btn" id="per-sep">Ayrılabilir veri</button>
-          <button class="btn" id="per-xor">Ayrılamaz veri (XOR)</button>
           <button class="btn" id="per-clr">Temizle</button>
+          <span class="hint">Tuvale tıkla → seçili sınıftan nokta ekle · sürükle → taşı</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">Güncelleme</span><span class="v" id="per-u">0</span></div>
@@ -812,7 +813,7 @@ input[type=range]{min-height:28px;margin:0}
       <div class="ask">
         <span class="tag">Dene ve düşün</span>
         <div>
-          <p>« Ayrılamaz veri »ye basıp eğitimi başlat: çizgi durmadan dönüyor, güncelleme sayacı hiç durmuyor. Perceptron burada neden çaresiz?</p>
+          <p>Veri setini « İlaç etkileşimi »ne alıp eğitimi başlat: çizgi durmadan dönüyor, güncelleme sayacı hiç durmuyor. Perceptron burada neden çaresiz?</p>
           <p>XOR'un dört köşesini kâğıda çiz ve onları ayıran tek bir düz çizgi bulmaya çalış. Bulamıyorsan sence çözüm daha uzun eğitmek mi, yoksa modeli değiştirmek mi?</p>
         </div>
       </div>
@@ -834,6 +835,7 @@ input[type=range]{min-height:28px;margin:0}
           <button class="btn" id="km-seed">Merkezleri yeniden at</button>
           <button class="btn" id="km-demo">Örnek veri</button>
           <button class="btn" id="km-clr">Temizle</button>
+          <span class="hint">Tuvale tıkla → nokta ekle · sürükle → taşı</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">Yineleme</span><span class="v" id="km-i">0</span></div>
@@ -902,8 +904,9 @@ input[type=range]{min-height:28px;margin:0}
           <label class="ctl"><span class="lab">Karar eşiği</span><input type="range" id="cm-t" min="1" max="99" step="1" value="50"><output id="cm-to">0.50</output></label>
           <label class="ctl"><span class="lab">Model gücü</span><input type="range" id="cm-sep" min="0" max="70" step="1" value="34"><output id="cm-sepo">0.34</output></label>
           <label class="ctl"><span class="lab">Pozitif oranı</span><input type="range" id="cm-pr" min="3" max="50" step="1" value="35"><output id="cm-pro">%35</output></label>
-          <button class="btn" id="cm-new">Yeni örneklem</button>
+          <button class="btn" id="cm-new">Yeni veri</button>
           <button class="btn primary" id="cm-sweep" aria-pressed="false">Eşiği tara</button>
+          <span class="hint">Soldaki skor dağılımına tıkla → eşik oraya gitsin.</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">Doğruluk</span><span class="v" id="cm-acc">—</span></div>
@@ -965,7 +968,7 @@ input[type=range]{min-height:28px;margin:0}
           <button class="btn" id="cn-pool" aria-pressed="false">2×2 max pooling</button>
           <button class="btn" id="cn-bank" aria-pressed="false">Filtre bankası</button>
           <button class="btn primary" id="cn-play" aria-pressed="false">Pencereyi gezdir</button>
-          <button class="btn" id="cn-newimg">Yeni sahne</button>
+          <button class="btn" id="cn-newimg">Yeni veri</button>
           <button class="btn" id="cn-load">Görüntü yükle</button>
           <input type="file" id="cn-file" accept="image/*" hidden>
           <span class="hint">Kendi görüntünü tuvale sürükleyip bırakabilir ya da <kbd>Ctrl</kbd>+<kbd>V</kbd> ile yapıştırabilirsin.</span>
@@ -1000,7 +1003,7 @@ input[type=range]{min-height:28px;margin:0}
         <div class="bar">
           <label class="ctl"><span class="lab">Eğim a</span><input type="range" id="lin-a" min="-600" max="600" step="1" value="60"><output id="lin-ao">0.030</output></label>
           <label class="ctl"><span class="lab">Kesişim b</span><input type="range" id="lin-b" min="-150" max="250" step="1" value="20"><output id="lin-bo">2.00</output></label>
-          <button class="btn" id="lin-res" aria-pressed="true">Artıkları göster</button>
+          <button class="btn" id="lin-res" aria-pressed="true">Artıklar</button>
           <button class="btn" id="lin-sq" aria-pressed="false">Kareler</button>
           <button class="btn primary" id="lin-fit">Least squares çözümü</button>
           <button class="btn" id="lin-new">Yeni veri</button>
@@ -1041,6 +1044,7 @@ input[type=range]{min-height:28px;margin:0}
             <button id="mlr-v1" aria-pressed="false"><span id="mlr-v1n">fiyat–alan</span></button>
             <button id="mlr-v2" aria-pressed="false"><span id="mlr-v2n">fiyat–yaş</span></button>
           </div>
+          <button class="btn" id="mlr-res" aria-pressed="true">Artıklar</button>
           <button class="btn primary" id="mlr-fit">Least squares çözümü</button>
           <button class="btn" id="mlr-new">Yeni veri</button>
           <span class="hint">Soldaki buluta sürükle → çevir · sağdaki haritaya tıkla → katsayı seç.</span>
@@ -1074,6 +1078,7 @@ input[type=range]{min-height:28px;margin:0}
         <div class="bar">
           <label class="ctl"><span class="lab">Derece</span><input type="range" id="poly-d" min="1" max="10" step="1" value="1"><output id="poly-do">x</output></label>
           <button class="btn primary" id="poly-fit">Least squares çözümü</button>
+          <button class="btn" id="poly-res" aria-pressed="true">Artıklar</button>
           <button class="btn" id="poly-t" aria-pressed="false">Terimler</button>
           <button class="btn" id="poly-new">Yeni veri</button>
           <button class="btn" id="poly-clr">Temizle</button>
@@ -1146,6 +1151,7 @@ input[type=range]{min-height:28px;margin:0}
           <button class="btn primary" id="lg-fit" aria-pressed="false">Eğit</button>
           <button class="btn" id="lg-new">Yeni veri</button>
           <button class="btn" id="lg-hard" aria-pressed="false">Karışık veri</button>
+          <span class="hint">Ağırlık ve bias kaydırıcılarını sürükle → sigmoid eğrisi, karar sınırı ve log loss birlikte değişir.</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">Log loss</span><span class="v" id="lg-loss">—</span></div>
@@ -1218,7 +1224,8 @@ input[type=range]{min-height:28px;margin:0}
           </div>
           <label class="ctl"><span class="lab">Derece</span><input type="range" id="reg-d" min="1" max="14" step="1" value="12"><output id="reg-do">12</output></label>
           <label class="ctl"><span class="lab">Gürültü</span><input type="range" id="reg-n" min="0" max="30" step="1" value="12"><output id="reg-no">0.12</output></label>
-          <button class="btn" id="reg-new">Yeni örneklem</button>
+          <button class="btn" id="reg-res" aria-pressed="false">Artıklar</button>
+          <button class="btn" id="reg-new">Yeni veri</button>
           <button class="btn primary" id="reg-sweep" aria-pressed="false">λ'yı tara</button>
           <span class="hint">Alt şeride tıkla → λ oraya gitsin. Çubukların üstünde gez → katsayının değeri.</span>
         </div>
@@ -1252,6 +1259,7 @@ input[type=range]{min-height:28px;margin:0}
           <label class="ctl"><span class="lab">Model karmaşıklığı</span><input type="range" id="cv-d" min="1" max="12" step="1" value="3"><output id="cv-do">3</output></label>
           <label class="ctl"><span class="lab">Veri miktarı</span><input type="range" id="cv-n" min="30" max="150" step="5" value="60"><output id="cv-no">60</output></label>
           <button class="btn primary" id="cv-run" aria-pressed="false">Çapraz doğrula</button>
+          <button class="btn" id="cv-res" aria-pressed="true">Artıklar</button>
           <button class="btn" id="cv-shuf">Yeniden karıştır</button>
           <button class="btn" id="cv-new">Yeni veri</button>
           <span class="hint">Bir kat çubuğuna ya da bir noktaya tıkla → o kat test olsun.</span>
@@ -1359,11 +1367,6 @@ input[type=range]{min-height:28px;margin:0}
         <div class="bar">
           <label class="ctl"><span class="lab">Gizli nöron</span><input type="range" id="mlp-h" min="1" max="8" step="1" value="4"><output id="mlp-ho">4</output></label>
           <label class="ctl"><span class="lab" lang="en">Learning rate</span><input type="range" id="mlp-lr" min="5" max="300" step="5" value="100"><output id="mlp-lro">1.00</output></label>
-          <div class="seg" role="group" aria-label="Veri seti">
-            <button id="mlp-xor" aria-pressed="true">XOR</button>
-            <button id="mlp-ring" aria-pressed="false">İç içe halkalar</button>
-            <button id="mlp-moon" aria-pressed="false">İki ay</button>
-          </div>
           <button class="btn primary" id="mlp-run" aria-pressed="false">Eğit</button>
           <button class="btn" id="mlp-reset">Sıfırla</button>
           <button class="btn" id="mlp-new">Yeni veri</button>
@@ -1402,6 +1405,7 @@ input[type=range]{min-height:28px;margin:0}
           <label class="ctl"><span class="lab">Ayrıklık</span><input type="range" id="kch-sep" min="10" max="100" step="1" value="70"><output id="kch-sepo">0.70</output></label>
           <button class="btn primary" id="kch-best">Önerilen k'ya geç</button>
           <button class="btn" id="kch-new">Yeni veri</button>
+          <span class="hint">k kaydırıcısını sürükle → soldaki kümeler, elbow eğrisi ve silhouette birlikte değişir.</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">Seçili k</span><span class="v" id="kch-k2">3</span></div>
@@ -1437,6 +1441,7 @@ input[type=range]{min-height:28px;margin:0}
             <button id="pca-c2" aria-pressed="false">2 bileşen</button>
           </div>
           <button class="btn" id="pca-new">Yeni veri</button>
+          <button class="btn" id="pca-clr">Temizle</button>
           <span class="hint">Noktaları sürükleyip eksenlerin nasıl döndüğünü görebilirsin.</span>
         </div>
         <div class="stats">
@@ -1536,7 +1541,7 @@ input[type=range]{min-height:28px;margin:0}
           <label class="ctl"><span class="lab">Karmaşıklık</span><input type="range" id="bv-d" min="1" max="6" step="1" value="1"><output id="bv-do">1</output></label>
           <label class="ctl"><span class="lab">Model</span><input type="range" id="bv-m" min="4" max="40" step="1" value="20"><output id="bv-mo">20</output></label>
           <label class="ctl"><span class="lab">Örnek</span><input type="range" id="bv-n" min="12" max="60" step="1" value="24"><output id="bv-no">24</output></label>
-          <button class="btn" id="bv-new">Yeniden örnekle</button>
+          <button class="btn" id="bv-new">Yeni veri</button>
           <span class="hint">Her ince çizgi ayrı bir örneklemden eğitilmiş bir model.</span>
         </div>
         <div class="stats">
@@ -1573,6 +1578,7 @@ input[type=range]{min-height:28px;margin:0}
           <label class="ctl"><span class="lab">eps</span><input type="range" id="db-eps" min="2" max="30" step="1" value="8"><output id="db-epso">0.08</output></label>
           <label class="ctl"><span class="lab" lang="en">minPts</span><input type="range" id="db-mp" min="2" max="12" step="1" value="4"><output id="db-mpo">4</output></label>
           <button class="btn" id="db-new">Yeni veri</button>
+          <button class="btn" id="db-clr">Temizle</button>
           <span class="hint">Sol panele tıkla → nokta ekle · sürükle → taşı</span>
         </div>
         <div class="stats">
@@ -2617,12 +2623,12 @@ const CONTENT={
   }},
 
 /* ══ 15 ══ */
-"m-per":{ pick:"Veri seti", ui:false,
+"m-per":{ pick:"Veri seti",
   sets:[
     {name:"Kalite kontrol", x:"parça ağırlığı sapması", y:"titreşim (mm/s)", cls:["Sağlam","Kusurlu"], gen:"sep",
-     note:"Ayrılabilir veri: sağlam ve kusurlu parçalar tek bir doğruyla ayrılıyor. Perceptron burada kesin durur — « Ayrılabilir veri » düğmesi."},
+     note:"Ayrılabilir veri: sağlam ve kusurlu parçalar tek bir doğruyla ayrılıyor. Perceptron burada kesin durur."},
     {name:"İlaç etkileşimi", x:"A ilacı dozu", y:"B ilacı dozu", cls:["İyileşme","Yan etki"], gen:"xor",
-     note:"XOR düzeni: A tek başına iyi, B tek başına iyi, ikisi birlikte ya da hiçbiri kötü. Hiçbir doğru bunu ayıramaz — « Ayrılamaz veri » düğmesi."}
+     note:"XOR düzeni: A tek başına iyi, B tek başına iyi, ikisi birlikte ya da hiçbiri kötü. Hiçbir doğru bunu ayıramaz."}
   ],
   lesson:{
     q:"Tek bir yapay nöron neyi öğrenebilir, neyi asla öğrenemez?",
@@ -2751,12 +2757,12 @@ const CONTENT={
   }},
 
 /* ══ 16 ══ */
-"m-mlp":{ pick:"Veri seti", ui:false,
+"m-mlp":{ pick:"Veri seti",
   sets:[
     {name:"İlaç etkileşimi (XOR)", x:"A ilacı dozu", y:"B ilacı dozu", gen:"xor",
-     note:"Perceptron'un çözemediği veri. İki gizli nöron iki doğru çizip düzlemi dört bölgeye ayırıyor — « XOR » düğmesi."},
+     note:"Perceptron'un çözemediği veri. İki gizli nöron iki doğru çizip düzlemi dört bölgeye ayırıyor."},
     {name:"Baz istasyonu (halka)", x:"doğu (km)", y:"kuzey (km)", gen:"ring",
-     note:"Kapsama alanı bir daire. Ağ, dört-beş doğruyu birleştirip kapalı bir eğri kurmak zorunda — « İç içe halkalar » düğmesi."},
+     note:"Kapsama alanı bir daire. Ağ, dört-beş doğruyu birleştirip kapalı bir eğri kurmak zorunda."},
     {name:"İki ay", x:"öznitelik x₁", y:"öznitelik x₂", gen:"moon",
      note:"Girintili tek parça sınır. Kasıtlı olarak geometrik bir sınama deseni: scikit-learn'deki make_moons budur, her öğreticide karşınıza çıkar."}
   ],
@@ -3243,7 +3249,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 /* ═════════════ 2 · Aşırı öğrenme ═════════════ */
 (function(){
   const cv=$("#c-fit"), {ctx,fit}=setupCanvas(cv);
-  let deg=3, noise=.12, mTrain=14, tr=[], te=[], sweeping=0;
+  let deg=3, noise=.12, mTrain=14, tr=[], te=[], sweeping=0, showR=true;
   /* üç somut eğri (m-reg ve m-cv ile aynı liste): sıcaklık, doygunluk, titreşim */
   const DS=SETS("m-fit"); let dsi=0;
   const S=()=>DS[dsi];
@@ -3335,12 +3341,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.beginPath();ctx.strokeStyle=css("--accent");ctx.lineWidth=3;ctx.lineJoin="round";
     for(let i=0;i<=400;i++){const x=-1+2*i/400;const yy=Y(evalp(w,x));i?ctx.lineTo(X(x),yy):ctx.moveTo(X(x),yy);}
     ctx.stroke();
+    // artıklar: eğitim noktasından eğriye inen kırmızı çubuk (eğitim hatasının kendisi)
+    if(showR){ ctx.save(); ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
+      tr.forEach(q=>{ ctx.beginPath(); ctx.moveTo(X(q.x),Y(q.y)); ctx.lineTo(X(q.x),Y(clamp(evalp(w,q.x),-3,3))); ctx.stroke(); });
+      ctx.restore(); }
     // test noktaları (soluk)
     te.forEach(q=>disc(ctx,X(q.x),Y(q.y),2.6,hexA("--ink-soft",.45)));
     // eğitim noktaları
     tr.forEach(q=>disc(ctx,X(q.x),Y(q.y),6,css("--a"),css("--surface")));
     ctx.restore();
-    legend(ctx,p+8,p+14,[["eğitim noktası","--a"],["gerçek ilişki","--ink-soft"],[`${deg}. derece polinom`,"--accent"]],{size:12,lh:17});
+    legend(ctx,p+8,p+14,[["eğitim noktası","--a"],["gerçek ilişki","--ink-soft"],[`${deg}. derece polinom`,"--accent"],showR&&["artık (eğitim)","--bad"]],{size:12,lh:17});
     label(ctx,S().x+" →",p+pw/2,p+ph+16,css("--ink-soft"),"center",11);
     ylabel(ctx,S().y+" →",p-15,p,p+ph,css("--ink-soft"),11);
 
@@ -3406,6 +3416,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   $("#fit-n").oninput=e=>{noise=+e.target.value/100;$("#fit-no").textContent=noise.toFixed(2);sample();draw();};
   $("#fit-m").oninput=e=>{mTrain=+e.target.value;$("#fit-mo").textContent=mTrain;sample();draw();};
   $("#fit-new").onclick=()=>{sample();draw();};
+  $("#fit-res").onclick=e=>{showR=!showR;e.currentTarget.setAttribute("aria-pressed",String(showR));draw();};
   function sweep(){
     if(sweeping){clearInterval(sweeping);sweeping=0;runBtn("#fit-sweep",false,"Dereceyi tara");return;}
     let d=1; runBtn("#fit-sweep",true,"Durdur");
@@ -3878,7 +3889,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const cv=$("#c-per"), {ctx,fit}=setupCanvas(cv);
   let pts=[], cls=1, lr=.2, w=[0.6,-0.4], b=0, upd=0, timer=0, cursor=0, focus=-1, last=null;
   /* iki somut veri kümesi: kalite kontrol (ayrılabilir) ve ilaç etkileşimi (XOR).
-     Anahtar iki bar düğmesi — « Ayrılabilir veri » ve « Ayrılamaz veri ». */
+     Araç şeridindeki ortak seçiciden seçilir (scenarios); eskiden çubukta iki ayrı düğmeydi. */
   const DS=SETS("m-per"); let dsi=0;
   const S=()=>DS[dsi];
   const names=()=>{txt("#per-an","+1 · "+S().cls[0]); txt("#per-bn","−1 · "+S().cls[1]);};
@@ -4026,17 +4037,18 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     q.forEach(([u,v,c])=>{for(let i=0;i<9;i++)pts.push({u:clamp(u+gauss()*.06,.03,.97),v:clamp(v+gauss()*.06,.03,.97),c});});
     draw();
   }
-  $("#per-sep").onclick=sep; $("#per-xor").onclick=xor;
   reg({id:"m-per",draw,space:run,init:sep,undo:()=>ed.undo(),
+    scenarios:DS.map((d,i)=>({name:d.name,apply(){i?xor():sep();}})),
+    scenarioLabel:CONTENT["m-per"].pick,
     steps:[
     {t:"Ayrılabilir veri",d:"Kalite kontrol verisi: sağlam ve kusurlu parçalar ağırlık–titreşim düzleminde tek bir doğruyla ayrılabiliyor. Perceptron yanlış taraftaki her örnekte çizgiyi biraz itiyor.",
-     run(){setPressed("#per-run",false);press("#per-sep");}},
+     set:0, run(){setPressed("#per-run",false);}},
     {t:"Tek düzeltme",d:"« Tek düzeltme »ye basın: perceptron yanlış taraftaki ilk noktayı buluyor ve çizgiyi ona doğru itiyor. Kesikli çizgi düzeltmeden önceki hâli; köşedeki kutu kuralın kendisini yazıyor: <b>w ← w + lr · y · x</b>. Doğru bilinen noktalar hiçbir şey değiştirmiyor.",
      hl:["#per-step","#per-w"], run(){setPressed("#per-run",false);press("#per-step");}},
     {t:"Eğit · durur",d:"Eğitim başladı. Her güncellemede çizgi biraz dönüyor; yanlış sınıflanan sıfıra düşünce güncellemeler kesiliyor — perceptron yakınsama teoremi tam olarak bunu vaat eder.",
      hl:["#per-m","#per-u"], run(){setPressed("#per-run",true);}},
     {t:"Ayrılamaz veri",d:"İlaç etkileşimi: A tek başına iyi, B tek başına iyi, ikisi birlikte ya da hiçbiri kötü — yani XOR. Hiçbir doğru bu dörtlüyü ayıramaz; çizgi durmadan dönüp duruyor, güncelleme sayacı hiç durmuyor.",
-     hl:["#per-u"], run(){press("#per-xor");setPressed("#per-run",true);}},
+     set:1, hl:["#per-u"], run(){setPressed("#per-run",true);}},
     {t:"Tek katmanın sınırı",d:"Bu başarısızlık kaza değil, mimarinin sonucu: tek katman yalnız düz çizgi çizebilir. Derin öğrenmenin varlık sebebi bu ekrandır.",
      hl:["#per-m"], run(){}}
   ],
@@ -5538,7 +5550,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   /* a1, a2 normalize eğim (eksenler 0..1). Kesişim ayrı bir kaydırıcı DEĞİL: düzlem her
      zaman ortalama noktadan (x̄₁, x̄₂, ȳ) geçiyor, Modül 03'teki (x̄, ȳ)'nin iki boyutlusu.
      Böylece iki sıfır = yatay düzlem = "herkese ortalama fiyat", R² tam 0. */
-  let pts=[], a1=0, a2=0, shown=false, fitClipped=false, ver=0;
+  let pts=[], a1=0, a2=0, shown=false, fitClipped=false, ver=0, showR=true;
   const R=1.5;                                   // kaydırıcı aralığı = sağdaki haritanın penceresi
   /* bakış: th düşey eksen çevresinde dönüş, ph yukarıdan bakış. Yan bakışlarda (ph = 0)
      x₂ yönünde bakılır: x₂'nin sabit olduğu çizgiler PARALEL, eğimleri a₁ — katsayının
@@ -5702,8 +5714,8 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const pz=pts.map(q2=>({q:q2, h:yh(q2.u1,q2.u2), a:P(q2.u1,q2.u2,q2.v)}));
     const under=pz.filter(z=>z.q.v<z.h).sort((x,y)=>y.a.d-x.a.d), over=pz.filter(z=>z.q.v>=z.h).sort((x,y)=>y.a.d-x.a.d);
     const dot=(z)=>{const B2=P(z.q.u1,z.q.u2,clamp(z.h,-.3,1.3));
-      ctx.strokeStyle=hexA("--bad",.5); ctx.lineWidth=1.8;
-      ctx.beginPath(); ctx.moveTo(z.a.x,z.a.y); ctx.lineTo(B2.x,B2.y); ctx.stroke();
+      if(showR){ ctx.strokeStyle=hexA("--bad",.5); ctx.lineWidth=1.8;
+        ctx.beginPath(); ctx.moveTo(z.a.x,z.a.y); ctx.lineTo(B2.x,B2.y); ctx.stroke(); }
       disc(ctx,z.a.x,z.a.y,5.5,css(TER[terc(z.q.u2)]),css("--surface"));};
     ctx.save(); ctx.beginPath(); ctx.rect(0,by0-8,split-(wide?6:0),H-by0+8); ctx.clip();
     ctx.lineCap="round";
@@ -5878,6 +5890,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     if(view==="v3"){ if(vt) vt=null; th=VW.v3[0]; ph=VW.v3[1]; }
     demo(); }
   $("#mlr-new").onclick=demo;
+  $("#mlr-res").onclick=e=>{showR=!showR;e.currentTarget.setAttribute("aria-pressed",String(showR));draw();};
   reg({id:"m-mlr",draw,space:applyOls,init:()=>useSet(0),stop:()=>stopAnim(),
     scenarioLabel:CONTENT["m-mlr"].pick,
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
@@ -5907,7 +5920,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const S=()=>DS[dsi];
   /* pts: {u, v}. u = x'in ölçeklenmiş hâli: ölçüm aralığı [lo, hi] → [−1, 1]. Tuval ekseni
      bundan geniş, kenarlar gri: veri yok. v = y'nin eksen aralığındaki yeri (0..1). */
-  let pts=[], deg=1, showT=false, hov=1, ver=0;
+  let pts=[], deg=1, showT=false, showR=true, hov=1, ver=0;
   /* Eğri KENDİLİĞİNDEN oturmaz (m-lin kuralı): wc ekrandaki modelin ağırlıkları. Yeni
      veride düz çizgi (her x'e ortalama, R² = 0); sütun eklenince yeni ağırlık 0'dan başlar
      ve eğri kıpırdamaz; nokta eklenince eğri yerinde kalır. « Least squares çözümü » o anki
@@ -6043,6 +6056,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     if(ghost&&w){ ctx.strokeStyle=hexA("--ink-soft",.85); ctx.lineWidth=2; ctx.setLineDash([7,6]); ctx.beginPath();
       for(let i=0;i<=160;i++){const u=z.zl+(z.zh-z.zl)*i/160, yy=Y(clamp(evw(ghost,u),-2,3)); i?ctx.lineTo(X(u),yy):ctx.moveTo(X(u),yy);}
       ctx.stroke(); ctx.setLineDash([]); }
+    /* artıklar: her noktadan eğriye inen kırmızı çubuk (m-lin ile aynı dil) */
+    if(showR&&w){ ctx.save(); ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
+      pts.forEach(q=>{ ctx.beginPath(); ctx.moveTo(X(q.u),Y(q.v)); ctx.lineTo(X(q.u),Y(clamp(evw(w,q.u),-2,3))); ctx.stroke(); });
+      ctx.restore(); }
     if(w){
       /* terimler: w₀ seviyesi ve ona eklenen tek tek terimler; kalın eğri hepsinin toplamı */
       if(showT){
@@ -6213,6 +6230,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     draw(); };
   $("#poly-d").oninput=e=>setDeg(+e.target.value);
   $("#poly-t").onclick=e=>{showT=!showT; e.currentTarget.setAttribute("aria-pressed",String(showT)); draw();};
+  $("#poly-res").onclick=e=>{showR=!showR; e.currentTarget.setAttribute("aria-pressed",String(showR)); draw();};
   $("#poly-new").onclick=()=>{ed.reset();sample();draw();};
   $("#poly-clr").onclick=()=>{ed.reset();pts=[];ver++;flat();draw();};
   function useSet(i){ dsi=clamp(i,0,DS.length-1); ed.reset(); sample(); draw(); }
@@ -6826,7 +6844,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const NTR=14, NTE=60, LN=101;
   const lamAt=(i)=>Math.pow(10,-4+5*i/100);          // λ ∈ [1e-4 , 10], logaritmik
   const ZTOL=1e-9;                                   // bunun altı "tam olarak sıfır" sayılır
-  let deg=12, noise=.12, li=12, mode="l2", tr=[], te=[], ver=0, sweepT=0, hoverJ=-1, LAY=null;
+  let deg=12, noise=.12, li=12, mode="l2", tr=[], te=[], ver=0, sweepT=0, hoverJ=-1, LAY=null, showR=false;
 
   function lamTxt(v){
     if(v>=10) return v.toFixed(0);
@@ -6977,11 +6995,15 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.beginPath();ctx.strokeStyle=css("--accent");ctx.lineWidth=3.2;ctx.lineJoin="round";
     for(let i=0;i<=400;i++){const x=-1+2*i/400,yy=Y(predict(D,F,x));i?ctx.lineTo(X(x),yy):ctx.moveTo(X(x),yy);}
     ctx.stroke();
+    /* artıklar (eğitim): kesikli kırmızı referans eğrisiyle karışmasın diye kapalı başlar */
+    if(showR){ ctx.save(); ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
+      tr.forEach(q=>{ ctx.beginPath(); ctx.moveTo(X(q.x),Y(q.y)); ctx.lineTo(X(q.x),Y(clamp(predict(D,F,q.x),-3,3))); ctx.stroke(); });
+      ctx.restore(); }
     te.forEach(q=>disc(ctx,X(q.x),Y(q.y),2.6,hexA("--ink-soft",.45)));
     tr.forEach(q=>disc(ctx,X(q.x),Y(q.y),6,css("--a"),css("--surface")));
     ctx.restore();
     legend(ctx,p+8,p+14,[["eğitim noktası","--a"],["gerçek ilişki","--ink-soft"],
-      [`${deg}. derece · ${mode==="l1"?"L1":"L2"} · λ=${lamTxt(lam)}`,"--accent"],showRef&&["kesikli kırmızı: λ en küçükken","--bad"]],{size:12,lh:17});
+      [`${deg}. derece · ${mode==="l1"?"L1":"L2"} · λ=${lamTxt(lam)}`,"--accent"],showRef&&["kesikli kırmızı: λ en küçükken","--bad"],showR&&["artık (eğitim)","--bad"]],{size:12,lh:17});
     label(ctx,S().x+" →",p+pw,p+ph+16,css("--ink-soft"),"right",11);
     ylabel(ctx,S().y+" →",p-15,p,p+ph,css("--ink-soft"),11);
 
@@ -7125,6 +7147,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   $("#reg-d").oninput=e=>{deg=+e.target.value;$("#reg-do").textContent=deg;hoverJ=-1;draw();};
   $("#reg-n").oninput=e=>{noise=+e.target.value/100;$("#reg-no").textContent=noise.toFixed(2);sample();draw();};
   $("#reg-new").onclick=()=>{sample();draw();};
+  $("#reg-res").onclick=e=>{showR=!showR;e.currentTarget.setAttribute("aria-pressed",String(showR));draw();};
 
   function runSweep(){
     if(sweepT){clearInterval(sweepT);sweepT=0;runBtn("#reg-sweep",false,"λ'yı tara");return;}
@@ -7158,7 +7181,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 /* ═════════════ 13 · Çapraz doğrulama ═════════════ */
 (function(){
   const cv=$("#c-cv"), {ctx,fit}=setupCanvas(cv);
-  let K=5, deg=3, N=60, D=[], cur=0, ver=0, timer=0, hist=[];
+  let K=5, deg=3, N=60, D=[], cur=0, ver=0, timer=0, hist=[], showR=true;
   const NOISE=.12;
   /* kat renkleri: k=2 → teal/turuncu, k=5 → beş belirgin renk */
   const FC=["--a","--b","--c","--d","--bad","--ink-soft","--good","--warn","--accent","--ink"];
@@ -7261,12 +7284,13 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.stroke();
     for(let i=0;i<n;i++) if(R.fold[i]!==cur)
       disc(ctx,X(D[i].x),Y(D[i].y),3.4,hexA(col(R.fold[i]),.34));
-    ctx.save();ctx.strokeStyle=hexA("--ink",.32);ctx.lineWidth=1.6;
-    for(let i=0;i<n;i++){
-      if(R.fold[i]!==cur) continue;
-      ctx.beginPath();ctx.moveTo(X(D[i].x),Y(D[i].y));ctx.lineTo(X(D[i].x),cy(Y(evalp(w,D[i].x))));ctx.stroke();
-    }
-    ctx.restore();
+    /* artıklar: test katındaki her noktadan eğriye inen kırmızı çubuk — kat hatası bunların karesinden */
+    if(showR){ ctx.save(); ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
+      for(let i=0;i<n;i++){
+        if(R.fold[i]!==cur) continue;
+        ctx.beginPath();ctx.moveTo(X(D[i].x),Y(D[i].y));ctx.lineTo(X(D[i].x),cy(Y(evalp(w,D[i].x))));ctx.stroke();
+      }
+      ctx.restore(); }
     for(let i=0;i<n;i++) if(R.fold[i]===cur)
       disc(ctx,X(D[i].x),Y(D[i].y),6.5,css(col(cur)),css("--surface"));
     ctx.restore();
@@ -7366,6 +7390,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   $("#cv-d").oninput=e=>{deg=+e.target.value;$("#cv-do").textContent=deg;hist=[];draw();};
   $("#cv-n").oninput=e=>{N=+e.target.value;$("#cv-no").textContent=N;sample();draw();};
   $("#cv-new").onclick=()=>{cur=0;sample();draw();};
+  $("#cv-res").onclick=e=>{showR=!showR;e.currentTarget.setAttribute("aria-pressed",String(showR));draw();};
   $("#cv-shuf").onclick=()=>{
     reshuffle();
     const R=compute();
@@ -7686,17 +7711,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     },33);
   }
   /* ── kontroller ── */
-  const setSet=(k)=>{
-    kind=k;
-    [["xor","#mlp-xor"],["ring","#mlp-ring"],["moon","#mlp-moon"]]
-      .forEach(([n,s])=>$(s).setAttribute("aria-pressed",String(n===k)));
-    newData();
-  };
+  const KINDS=["xor","ring","moon"];                 // CONTENT sets sırası
+  const setSet=(k)=>{ kind=k; newData(); };
   $("#mlp-h").oninput=e=>{hid=+e.target.value;$("#mlp-ho").textContent=hid;resetNet();};
   $("#mlp-lr").oninput=e=>{lr=+e.target.value/100;$("#mlp-lro").textContent=lr.toFixed(2);};
-  $("#mlp-xor").onclick=()=>setSet("xor");
-  $("#mlp-ring").onclick=()=>setSet("ring");
-  $("#mlp-moon").onclick=()=>setSet("moon");
   $("#mlp-run").onclick=run;
   $("#mlp-reset").onclick=()=>resetNet();
   $("#mlp-new").onclick=()=>newData();
@@ -7709,11 +7727,14 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   });
   cv.addEventListener("pointerleave",()=>{if(hover){hover=null;draw();}});
 
-  reg({id:"m-mlp",draw,space:run,init:()=>{$("#mlp-ho").textContent=hid;$("#mlp-lro").textContent=lr.toFixed(2);newData();},
+  reg({id:"m-mlp",draw,space:run,
+    scenarios:DS.map((d,i)=>({name:d.name,apply(){setSet(KINDS[i]);}})),
+    scenarioLabel:CONTENT["m-mlp"].pick,
+    init:()=>{$("#mlp-ho").textContent=hid;$("#mlp-lro").textContent=lr.toFixed(2);newData();},
     stop:()=>{if(timer){clearInterval(timer);timer=0;setRun(false);}},
     steps:[
     {t:"Perceptron'un yenildiği veri",d:"XOR: köşegen köşeler aynı sınıf. Modül 22'de tek nöron bu veride sonsuza kadar salınıyordu. Şimdi araya bir hidden layer koyuyoruz. Sağ üstte ağın kendisi: iki girdi (x₁, x₂), gizli nöronlar, bir çıkış (ŷ). Çizgi kalınlığı ağırlığın büyüklüğü, rengi işareti.",
-     run(){setPressed("#mlp-run",false);setPressed("#mlp-xor",true);setR("#mlp-h",1);setR("#mlp-lr",100);setPressed("#mlp-lines",true);}},
+     set:0, run(){setPressed("#mlp-run",false);setR("#mlp-h",1);setR("#mlp-lr",100);setPressed("#mlp-lines",true);}},
     {t:"Tek gizli nöron yetmiyor",d:"Eğitim başladı: tek doğru ileri geri gidiyor, doğruluk %75'te çakılıyor, kayıp 0.5 civarında donup kalıyor. Bir doğru düzlemi ikiye böler; XOR dört bölge ister.",
      hl:["#mlp-acc","#mlp-loss"], run(){setR("#mlp-h",1);setPressed("#mlp-run",true);}},
     {t:"İkinci nöron kapıyı açıyor",d:"Nöron 2: iki doğru düzlemi dört parçaya böler, çıkış katmanı bunları birleştirir. Genelde kayıp sıfıra iner — ama üç denemeden birinde %74'te takılı kalıyor. Takılırsa Sıfırla'ya basıp tekrar eğitin.",
@@ -7723,9 +7744,9 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     {t:"İleri yayılımı izleyin",d:"Fareyi sol paneldeki bir noktanın üstüne götürün: sağdaki ağda her gizli nöron o nokta için kendi cevabını rengiyle veriyor (mavi artı, turuncu eksi), ŷ düğümü de olasılığı. İmleci bir mor doğrunun üstünden geçirin: o numaralı nöronun rengi tam o anda dönüyor — her gizli nöron kendi doğrusunun hangi yanında olduğunu söylüyor.",
      run(){setPressed("#mlp-lines",true);}},
       {t:"Eğri sınır, düz doğrulardan",d:"İç içe halkalar ve 6 nöron. Sınır bir çember gibi görünüyor ama aslında altı doğrunun kesiştiği bir çokgen — ağ diyagramında altı düğüm, sol panelde altı doğru.",
-     run(){setR("#mlp-h",6);setPressed("#mlp-ring",true);setPressed("#mlp-run",true);}},
+     set:1, run(){setR("#mlp-h",6);setPressed("#mlp-run",true);}},
     {t:"İki ay",d:"Zor veri: kayıp yavaş iniyor. Öğrenme oranını 2.00'ye çıkarın — Modül 14'teki aynı ödünleşme, bu kez ağ üzerinde.",
-     run(){setR("#mlp-h",4);setPressed("#mlp-moon",true);setR("#mlp-lr",200);setPressed("#mlp-run",true);}}
+     set:2, run(){setR("#mlp-h",4);setR("#mlp-lr",200);setPressed("#mlp-run",true);}}
   ],});
 })();
 
@@ -8641,6 +8662,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const setK=(k)=>{keep=k;$("#pca-c1").setAttribute("aria-pressed",k===1);$("#pca-c2").setAttribute("aria-pressed",k===2);draw();};
   $("#pca-c1").onclick=()=>setK(1); $("#pca-c2").onclick=()=>setK(2);
   $("#pca-new").onclick=demo;
+  $("#pca-clr").onclick=()=>{ed.reset();pts=[];draw();};
   function useSet(i){ dsi=clamp(i,0,DS.length-1); demo(); }
   reg({id:"m-pca",draw,space:demo,init:demo,undo:()=>ed.undo(),
     scenarioLabel:CONTENT["m-pca"].pick,
@@ -9467,6 +9489,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   $("#db-dbscan").onclick=()=>setRight("dbscan");
   $("#db-hier").onclick=()=>setRight("hier");
   $("#db-new").onclick=demo;
+  $("#db-clr").onclick=()=>{ed.reset();pts=[];compute();draw();};
   function useSet(i){ dsi=clamp(i,0,DS.length-1); demo(); }
   reg({id:"m-dbs",draw,space:demo,init:demo,undo:()=>{const r=ed.undo();compute();draw();return r;},
     scenarioLabel:CONTENT["m-dbs"].pick,
