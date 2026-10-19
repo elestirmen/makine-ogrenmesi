@@ -444,6 +444,54 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   mod.__pick(0);
 }
 
+/* ── 05 · Artık grafiği ("röntgen") ve « Elektrik · sıcaklık » (Hafta 5 senaryo 3) ──
+   aria-label: "Artık grafiği: kenarlarda ortalama 41 MWh, ortada −81 MWh; artı/eksi 3 kez
+   değişiyor (rastgele olsa ~9); desen var: gülümseme." ve "Parabolün dibi (en az tüketim):
+   17.7 °C." 200 örneklemle ölçülen değerler not'ta: elektrik R² 0.48 → 0.93, gülümseme %92,
+   x² desensiz %99; sıcaklık kubbe %88, x² desensiz %96. Burada 60 tur. */
+{
+  head("Modül 09 · artık grafiği ve « Elektrik · sıcaklık »");
+  const {el,M}=boot(F); const mod=M.find(m=>m.id==='m-poly');
+  const AR=()=>el('c-poly').getAttribute('aria-label')||'';
+  const sv=(s)=>num(String(s).replace(/−/g,'-'));
+  const share=(a,f)=>a.filter(f).length/a.length;
+  P(el,'poly-vr',true);
+  const run=(k,N)=>{ mod.__pick(k); const R={1:[],2:[],4:[]};
+    for(let t=0;t<N;t++){ el('poly-new').click();
+      for(const d of [1,2,4]){ S(el,'poly-d',d); el('poly-fit').click(); const a=AR();
+        const ex=/model (−?[\d.]+) \S+, gerçek (−?[\d.]+)/.exec(a)||[], dv=/\(en az tüketim\): (−?[\d.]+)/.exec(a), hv=/\(en sıcak saat\): (\d\d):(\d\d)/.exec(a);
+        R[d].push({r2:V(el,'poly-r2'), pat:(/desen var: ([^.;]+)\./.exec(a)||[])[1]||'yok', art:/Artık grafiği: /.test(a),
+          vx:dv?sv(dv[1]):hv?(+hv[1]+hv[2]/60):NaN, pe:sv(ex[1]), te:sv(ex[2])}); } }
+    return R; };
+  const E=run(3,60), H=run(0,60);
+  const col=(a,k)=>a.map(x=>x[k]);
+  console.log(`       elektrik: R² ${mean(col(E[1],'r2')).toFixed(3)} → ${mean(col(E[2],'r2')).toFixed(3)} · gülümseme ${share(E[1],x=>x.pat==='gülümseme').toFixed(2)} · x² desensiz ${share(E[2],x=>x.pat==='yok').toFixed(2)} · dip medyan ${med(col(E[2],'vx')).toFixed(1)} °C`);
+  console.log(`       elektrik 42 °C: doğru ${med(col(E[1],'pe')).toFixed(0)} · x² ${med(col(E[2],'pe')).toFixed(0)} · x⁴ sapma medyan ${med(E[4].map(x=>Math.abs(x.pe-x.te))).toFixed(0)} · gerçek ${E[1][0].te}`);
+  console.log(`       sıcaklık: kubbe ${share(H[1],x=>x.pat==='kubbe').toFixed(2)} · x² desensiz ${share(H[2],x=>x.pat==='yok').toFixed(2)} · tepe medyan ${med(col(H[2],'vx').filter(Number.isFinite)).toFixed(2)} saat`);
+  chk(E[1].every(x=>x.art), "artık grafiği görünümünde desen özeti hesaplanıyor (aria-label)");
+  /* adım 10, not: "düz doğrunun R²'si ortalama 0.48 … artıklar %92'sinde gülümsüyor" */
+  chk(mean(col(E[1],'r2'))>.4&&mean(col(E[1],'r2'))<.56, "Elektrik: düz doğrunun R²'si 0.5 civarı (adım 10, not)", mean(col(E[1],'r2')).toFixed(3));
+  chk(share(E[1],x=>x.pat==='gülümseme')>=.8, "Elektrik: düz doğrunun artıkları gülümsüyor — iki uç artı, orta eksi (adım 10, not)", share(E[1],x=>x.pat==='gülümseme').toFixed(2));
+  /* adım 11, not: "x² ile R² 0.93, desen kayboluyor, parabolün dibi 17–18 °C" · "18 °C civarında" */
+  chk(mean(col(E[2],'r2'))>.9, "Elektrik: x² ile R² 0.9'un üstünde (adım 11, not 0.93)", mean(col(E[2],'r2')).toFixed(3));
+  chk(share(E[2],x=>x.pat==='yok')>=.9, "Elektrik: x² ile artıklarda belirgin desen yok (adım 11)", share(E[2],x=>x.pat==='yok').toFixed(2));
+  chk(Math.abs(med(col(E[2],'vx'))-18)<1&&share(E[2],x=>Math.abs(x.vx-18)<2)>=.9, "Elektrik: parabolün dibi 18 °C civarında (adım 11, not)", `medyan ${med(col(E[2],'vx')).toFixed(1)} °C`);
+  /* adım 12, not: "42 °C'de doğru 655 MWh der, x²'li model 1931 (formüldeki gerçek 1937);
+     4. derecede bu tahmin yine savruluyor" · Kendini sına 1 */
+  const d2=E[2].map(x=>Math.abs(x.pe-x.te)), d4=E[4].map(x=>Math.abs(x.pe-x.te));
+  chk(Math.abs(E[2][0].te-1937)<1, "Elektrik: 42 °C'nin gerçek değeri formülden 1937 MWh (not)", String(E[2][0].te));
+  chk(med(d2)<150, "Elektrik: x²'li modelin 42 °C tahmini gerçeğe yakın (adım 12)", `medyan sapma ${med(d2).toFixed(0)} MWh`);
+  chk(med(col(E[1],'pe'))<900, "Elektrik: düz doğru 42 °C'de tüketimi çok az söylüyor (not 655)", med(col(E[1],'pe')).toFixed(0));
+  chk(med(d4)>3*med(d2), "Elektrik: 4. derecede 42 °C tahmini yine savruluyor (not)", `${med(d2).toFixed(0)} → ${med(d4).toFixed(0)} MWh`);
+  /* sıcaklık notu: "doğrunun artıkları kubbe çiziyor … (%88); x² ile desen kayboluyor ve
+     parabolün tepesi 15:00 civarına oturuyor" */
+  chk(share(H[1],x=>x.pat==='kubbe')>=.75, "Gün içi sıcaklık: doğrunun artıkları kubbe çiziyor (not)", share(H[1],x=>x.pat==='kubbe').toFixed(2));
+  chk(share(H[2],x=>x.pat==='yok')>=.85, "Gün içi sıcaklık: x² ile artıklarda desen kayboluyor (not)", share(H[2],x=>x.pat==='yok').toFixed(2));
+  const hv=col(H[2],'vx').filter(Number.isFinite);
+  chk(hv.length>=50&&Math.abs(med(hv)-15)<0.75, "Gün içi sıcaklık: parabolün tepesi 15:00 civarında (not)", `medyan ${med(hv).toFixed(2)} saat`);
+  P(el,'poly-vm',true); mod.__pick(0);
+}
+
 /* ── 02 · Ölçekleme: ".ask: aralığı 400'e çekin, maaş uzaklığın %99'unu belirliyor" ── */
 {
   head("Modül 02 · Metre ile kilometre (ölçekleme)");
@@ -608,6 +656,61 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   console.log(`       derece 14 eğitim RMSE ort ${mean(trQ).toExponential(2)} (max ${Math.max(...trQ).toExponential(2)})`);
   chk(Math.max(...trQ)<0.005, "14. derece eğri bütün eğitim noktalarından geçiyor (QR)",
       `max ${Math.max(...trQ).toExponential(2)}`);
+}
+
+/* ── 03 · Temel model, test R² ve öğrenme eğrisi (Hafta 3 Soru 4, Hafta 4 teşhis) ──
+   Test R² ve rozet tek örneklemden okunuyor (20 tur, medyan / pay). Öğrenme eğrisi
+   tohumlu (21 örneklemin medyanı): aynı veri kümesi + gürültü + derecede birebir aynı
+   sayılar, o yüzden tek okuma yeterli; eşikler ölçülen değerlerin çevresinde. */
+{
+  head("Modül 03 · temel model, test R² ve öğrenme eğrisi");
+  const {el,M}=boot(F); const mf=M.find(m=>m.id==='m-fit');
+  const AR=()=>el('c-fit').getAttribute('aria-label')||'';
+  const sv=(s)=>num(String(s).replace(/−/g,'-'));
+  const N=20; P(el,'fit-byd',true);
+  /* adım 3: "« Test R² » eksiye düştü: model … temel modelden bile kötü" (20/20 ölçüldü) */
+  let neg=0;
+  for(let t=0;t<N;t++){ mf.__pick(0); S(el,'fit-n',12); S(el,'fit-m',14); S(el,'fit-d',14); if(sv(T(el,'fit-vr2'))<0) neg++; }
+  chk(neg>=19, "14. derecede test R² eksi: temel modelden kötü (adım 3)", `${neg}/${N}`);
+  /* adım 6 ve Kendini sına 3 (Hafta 3 Soru 4): titreşimde düz doğru — test hatası temel
+     modele neredeyse eşit, R² sıfıra yakın, rozet « Yetersiz ». Ölçüm: medyan 0.01, 20/20. */
+  const r2=[]; let yet=0;
+  for(let t=0;t<N;t++){ mf.__pick(2); S(el,'fit-m',14); S(el,'fit-d',1); r2.push(sv(T(el,'fit-vr2'))); if(T(el,'fit-vs')==='Yetersiz') yet++; }
+  console.log(`       titreşim 1. derece: test R² medyan ${med(r2).toFixed(3)} · « Yetersiz » ${yet}/${N}`);
+  chk(Math.abs(med(r2))<0.15, "titreşimde 1. derece: test R² sıfıra yakın (adım 6)", `medyan ${med(r2).toFixed(3)}`);
+  chk(yet>=19, "titreşimde 1. derece: rozet « Yetersiz » (adım 6, Soru 4)", `${yet}/${N}`);
+  /* ders notu · Göstergeler: "test hatası temel modele çok yakınsa (test R² 0.2'nin altında)
+     da « Yetersiz » der". Üç veri kümesi × derece 1–14: R² < 0.2 olan her durumda rozet
+     Yetersiz ya da (ezber R²'yi de eksiye indirir) Aşırı öğrenme olmalı. */
+  let low=0, wrong=0;
+  for(const j of [0,1,2]) for(let t=0;t<4;t++){ mf.__pick(j); S(el,'fit-m',14);
+    for(let d=1;d<=14;d++){ S(el,'fit-d',d); if(sv(T(el,'fit-vr2'))<0.2){ low++; if(T(el,'fit-vs')==='Dengede') wrong++; } } }
+  chk(low>0&&wrong===0, "test R² 0.2'nin altındayken rozet hiçbir zaman « Dengede » demiyor (ders notu · Göstergeler)", `${low} durumda ${wrong} yanlış`);
+  /* öğrenme eğrisi (adım 7–8, .ask, ders notu). aria-label: "20 örnekte eğitim 0.057, test 22.823; …" */
+  P(el,'fit-byn',true);
+  const lc=()=>{ const a=AR(), g=(m)=>{const r=new RegExp(m+' örnekte eğitim (\\d+\\.\\d+), test (\\d+(?:\\.\\d+)?(?:e\\+?\\d+)?)').exec(a); return r?{tr:+r[1],te:+r[2]}:{tr:NaN,te:NaN};};
+    return {a20:g(20),a50:g(50),a100:g(100),a200:g(200),base:num((/Temel model test RMSE ([\d.]+)/.exec(a)||[])[1])}; };
+  mf.__pick(0); S(el,'fit-n',12); S(el,'fit-m',14); S(el,'fit-d',14); const V14=lc();
+  const gap=(e)=>e.te-e.tr;
+  console.log(`       sıcaklık 14. derece: 20 → ${V14.a20.tr}/${V14.a20.te} · 50 → ${V14.a50.tr}/${V14.a50.te} · 100 → ${V14.a100.tr}/${V14.a100.te} · 200 → ${V14.a200.tr}/${V14.a200.te}`);
+  /* "20 örnekte eğitim hatası sıfıra yakın, test hatası ölçeğin dışında" (ölçek tavanı 1.26) */
+  chk(V14.a20.tr<0.08&&V14.a20.te>1.26, "öğrenme eğrisi 14. derece: 20 örnekte eğitim sıfıra yakın, test ölçeğin dışında (adım 7)", `${V14.a20.tr} / ${V14.a20.te}`);
+  /* "Örnek arttıkça boşluk kapanıyor; 200 örnekte iki eğri de gürültü tabanına (0.12) iniyor" */
+  chk(gap(V14.a20)>gap(V14.a50)&&gap(V14.a50)>gap(V14.a100)&&gap(V14.a100)>gap(V14.a200)&&gap(V14.a200)<0.03,
+      "öğrenme eğrisi 14. derece: boşluk veri arttıkça kapanıyor (adım 7)", `boşluk ${gap(V14.a20).toFixed(2)} → ${gap(V14.a50).toFixed(3)} → ${gap(V14.a100).toFixed(3)} → ${gap(V14.a200).toFixed(3)}`);
+  chk(Math.abs(V14.a200.te-0.12)<0.02&&Math.abs(V14.a200.tr-0.12)<0.02, "200 örnekte iki eğri de gürültü tabanında (adım 7)", `${V14.a200.tr} / ${V14.a200.te}`);
+  /* "eğri titremesin": tohumlu — « Yeni veri » ve derece gidip gelince aynı sayılar */
+  const before=AR(); el('fit-new').click(); S(el,'fit-d',4); S(el,'fit-d',14);
+  chk(AR()===before, "öğrenme eğrisi « Yeni veri » ve derece gidip gelince değişmiyor (titremiyor)");
+  /* adım 8: "Titreşim, 1. derece: iki eğri baştan birbirine yakın ve 0.5 civarında, temel
+     model çizgisinin hemen altında birleşiyor; 200 örnekte de aynı yerdeler" */
+  mf.__pick(2); S(el,'fit-n',12); S(el,'fit-d',1); const V1=lc();
+  console.log(`       titreşim 1. derece: 20 → ${V1.a20.tr}/${V1.a20.te} · 200 → ${V1.a200.tr}/${V1.a200.te} · temel ${V1.base}`);
+  chk(gap(V1.a20)<0.06&&Math.abs(gap(V1.a200))<0.02, "öğrenme eğrisi 1. derece: iki eğri baştan yakın, sonda birleşik (adım 8)", `boşluk ${gap(V1.a20).toFixed(3)} → ${gap(V1.a200).toFixed(3)}`);
+  chk(V1.a200.te>0.45&&V1.a200.te<0.55&&V1.a200.te<V1.base&&V1.a200.te>0.9*V1.base,
+      "0.5 civarında, temel model çizgisinin hemen altında (adım 8)", `test ${V1.a200.te} · temel ${V1.base}`);
+  chk(Math.abs(V1.a50.te-V1.a200.te)<0.02, "veri eklemek hiçbir şey değiştirmiyor (adım 8)", `50 → ${V1.a50.te}, 200 → ${V1.a200.te}`);
+  P(el,'fit-byd',true);
 }
 
 /* ── 12 · Gradyan inişi: kaydırıcının ULAŞABİLDİĞİ bir değerde ıraksamalı ── */
@@ -1347,6 +1450,49 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   for(let t=0;t<6;t++){ el('cv-new').click(); s2.push(spread(2)); s10.push(spread(10)); }
   console.log(`       karıştırma ortalamalarının std'si: k=2 → ${mean(s2).toFixed(4)} · k=10 → ${mean(s10).toFixed(4)}`);
   chk(mean(s10)<mean(s2)*0.75, "k büyüyünce karıştırmadan karıştırmaya ortalama daha kararlı", `${mean(s2).toFixed(4)} → ${mean(s10).toFixed(4)}`);
+}
+
+/* ── 05 · Zaman sırası (TimeSeriesSplit) ve « Kafe satışı » (Hafta 4 senaryo 3) ──
+   Bölmenin kendisi aria-label'dan ("2. tur: eğitim 1–20, doğrulama 21–30, …") okunuyor.
+   Kafe oranları 20 örneklemin ortalaması; 100 örneklemle ölçülen değerler not'ta:
+   1. derece 54 ↔ 80 (1.49 kat), 2. derece 54 ↔ 149 (2.76 kat), 10. derece 31 ↔ ~4100
+   bardak. 16–20 örneklemlik koşularda 2. derecenin oranı 2.6–2.8 arasında oynadı. */
+{
+  head("Modül 05 · zaman sırası (TimeSeriesSplit) ve kafe satışı");
+  const {el,M,tick}=boot(F); const mc=M.find(m=>m.id==='m-cv');
+  const AR=()=>el('c-cv').getAttribute('aria-label')||'';
+  /* adım 6 ve ders notu: "eğitim hep doğrulamadan önce … her turda doğrulama bir dilim ileri
+     kayıyor, eğitim penceresi büyüyor" */
+  mc.__pick(3); S(el,'cv-n',60); S(el,'cv-k',5); S(el,'cv-d',2); P(el,'cv-ts',true);
+  el('cv-run').click(); const tu=[];
+  for(let k=0;k<5;k++){ const m=/(\d+)\. tur: eğitim 1–(\d+), doğrulama (\d+)–(\d+)/.exec(AR()); tu.push(m?{tr:+m[2],a:+m[3],b:+m[4]}:null); tick(1); }
+  const okT=tu.every(Boolean)&&tu.every(x=>x.a===x.tr+1)&&tu.every((x,i)=>!i||(x.tr>tu[i-1].tr&&x.a===tu[i-1].b+1))&&tu[4].b===60;
+  console.log(`       turlar: `+tu.map(x=>x?`eğitim 1–${x.tr} → doğrulama ${x.a}–${x.b}`:'?').join(' · '));
+  chk(okT, "zaman sırası: eğitim hep doğrulamadan önce, pencere ileri kayıyor, eğitim büyüyor (adım 6)");
+  /* ders notu · Bölme: "Zaman sırası karıştırılmaz: « Yeniden karıştır » turları değiştirmez" */
+  /* karşılaştırma çizgisi (karıştırılmış KFold) karıştırmayla değişir; zaman sırasının kendisi değişmez */
+  const tsPart=()=>AR().split('; karıştırılmış KFold')[0];
+  const m0=T(el,'cv-vm'), a0=tsPart(); el('cv-shuf').click(); el('cv-shuf').click();
+  chk(T(el,'cv-vm')===m0&&tsPart()===a0, "zaman sırasında « Yeniden karıştır » turları ve notu değiştirmiyor (ders notu · Bölme)", `${m0} → ${T(el,'cv-vm')}`);
+  /* ders notu · Bölme: "Yalnız zamanı olan veride açılır; reklam bütçesi zaman değil" */
+  mc.__pick(1); el('cv-ts').click();
+  chk(el('cv-ts').disabled===true&&el('cv-kf').getAttribute('aria-pressed')==='true'&&/karıştırılmış \(KFold\)/.test(AR()),
+      "reklam bütçesinde « Zaman sırası » kapalı, bölme « Karıştır »a dönüyor (ders notu · Bölme)");
+  mc.__pick(0);
+  chk(el('cv-ts').disabled===false, "zamanı olan veride « Zaman sırası » yeniden açık");
+  /* not ve adım 5–7 */
+  mc.__pick(3); S(el,'cv-k',5); S(el,'cv-n',60);
+  const kf={1:[],2:[],10:[]}, ts={1:[],2:[],10:[]};
+  for(let t=0;t<20;t++){ el('cv-new').click();
+    for(const d of [1,2,10]){ S(el,'cv-d',d); P(el,'cv-kf',true); kf[d].push(V(el,'cv-vm')); P(el,'cv-ts',true); ts[d].push(V(el,'cv-vm')); } }
+  const r1=mean(ts[1])/mean(kf[1]), r2=mean(ts[2])/mean(kf[2]);
+  console.log(`       kafe (20 örneklem): 1. derece ${mean(kf[1]).toFixed(1)} ↔ ${mean(ts[1]).toFixed(1)} (${r1.toFixed(2)} kat) · 2. derece ${mean(kf[2]).toFixed(1)} ↔ ${mean(ts[2]).toFixed(1)} (${r2.toFixed(2)} kat) · 10. derece ${mean(kf[10]).toFixed(1)} ↔ ${mean(ts[10]).toFixed(0)}`);
+  chk(mean(kf[2])>48&&mean(kf[2])<63, "kafe, 2. derece: karıştırılmış KFold 55 bardak civarı (adım 5, not)", mean(kf[2]).toFixed(1));
+  chk(mean(ts[2])>125&&mean(ts[2])<175, "kafe, 2. derece: zaman sırası 150 bardak civarı (adım 6, not 149)", mean(ts[2]).toFixed(1));
+  chk(r2>2.35&&r2<3.3, "kafe, 2. derece: zaman sırası KFold'un iki buçuk ile üç katı arası (adım 6, not 2.8)", r2.toFixed(2));
+  chk(r1>1.3&&r1<1.75, "kafe, düz doğru: 1.5 kat (not)", r1.toFixed(2));
+  chk(mean(ts[10])>1000, "kafe, 10. derece: zaman sırasında binlerce bardak (adım 7, not)", mean(ts[10]).toFixed(0));
+  chk(mean(kf[10])<mean(kf[2])&&mean(kf[10])>22&&mean(kf[10])<40, "kafe, 10. derece: karıştırılmış KFold 30 civarı, 2. dereceden iyi görünüyor (adım 7, not)", mean(kf[10]).toFixed(1));
 }
 
 /* ── 19 · Perceptron: "Tek düzeltme: yanlış taraftaki ilk noktayı bulup çizgiyi itiyor" ── */
