@@ -9,6 +9,17 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
 - **Tek dosya, sıfır bağımlılık.** `index.html` içinde HTML + CSS + JS. Build adımı yok,
   npm yok, framework yok. Amaç: dosyayı sunucuya kopyala, çalışsın.
 - **Vanilla JS + Canvas 2D.** Grafik kütüphanesi eklenmez; her modül kendi çizimini yapar.
+- **Kaynak: ders sunumları.** `pptx/Hafta-00 … Hafta-14` (git'e girmez, root sahipli) dersin
+  asıl metni. Modül sırası, gösterim, terimler ve örnek sayıları sunuma uyar; bu dosyadaki
+  bir kural sunumla çelişirse sunum geçerlidir (2026-10-19'da hoca istedi). Gösterim:
+  `ŷ = β₀ + β₁x` (kesme terimi önde), çoklu `ŷ = β₀ + β₁x₁ + β₂x₂`, maliyet `J(θ)`, türev
+  `J′(θ)`, güncelleme `θ ← θ − α · J′(θ)`, olasılık `p̂ = σ(z)`, regularization gücü `α`
+  (scikit-learn alpha; learning rate de α — ayrı modüllerde, sunum da böyle). "Eğim"
+  yalnız doğrunun katsayısıdır (β₁); maliyetin eğimine **türev** denir. Örneklem std
+  `n − 1` ile. Hata matrisi scikit-learn düzeninde: satır gerçek, sütun tahmin,
+  `[[TN, FP], [FN, TP]]`. Yunan sembolü büyük harfli etikette `<span class="sym">`
+  içinde (β → Β, B'ye benziyor). Hafta hafta karşılaştırma raporları ve slayt metinleri:
+  `/var/tmp/ml-sunum/`.
 - **Arayüz dili Türkçe, terimler İngilizce.** Cümlenin dili Türkçedir; *adlandırılmış*
   yöntem, metrik ve olgu adları İngilizce yazılır ve modül başına **bir kez**,
   `.head` paragrafında `<b>English</b> (Türkçe)` biçiminde açılır. Sonraki geçişlerde
@@ -19,28 +30,36 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   |---|---|
   | bagging · bootstrap · out-of-bag (OOB) · random forest | torbalama · yerine koyarak örnekleme · torba dışı · rastgele orman |
   | overfitting · underfitting · bias–variance | aşırı öğrenme · yetersiz öğrenme · yanlılık–varyans |
-  | regularization · ridge · lasso · sparsity | düzenlileştirme · L2 · L1 · seyreklik |
-  | gradient descent · learning rate · epoch | gradyan inişi · öğrenme oranı · devir |
-  | precision · recall · confusion matrix · log loss | kesinlik · duyarlılık · konfüzyon matrisi · log-kayıp |
-  | cross-validation (k-fold) · least squares | çapraz doğrulama · en küçük kareler |
-  | k-means · WCSS · elbow · silhouette · PCA | k-ortalamalar · küme içi kareli hata · dirsek · siluet · ana bileşen analizi |
-  | k-NN · decision tree · logistic/linear regression | k-en yakın komşu · karar ağacı · lojistik/doğrusal regresyon |
+  | regularization · Ridge · Lasso · sparsity · α | düzenlileştirme · L2 · L1 · seyreklik · — |
+  | gradient descent · learning rate · cost function · derivative · epoch | gradyan inişi · öğrenme oranı · maliyet fonksiyonu · türev · devir |
+  | precision · recall · specificity · confusion matrix · log-loss | kesinlik · duyarlılık · özgüllük · hata matrisi · log-kayıp |
+  | cross-validation (k-fold) · validation fold · LOOCV · least squares | çapraz doğrulama · doğrulama katı · birini dışarıda bırak · en küçük kareler |
+  | intercept · R² · MAE · MSE · RMSE | kesme terimi · belirlilik katsayısı · ortalama mutlak hata · ortalama kare hata · kök ortalama kare hata |
+  | WCSS · elbow · silhouette · centroid · PCA | küme içi kareler toplamı · dirsek · siluet · küme merkezi · ana bileşen analizi |
+  | KNN · decision tree · logistic/linear regression | k en yakın komşu · karar ağacı · lojistik/doğrusal regresyon |
+  | impurity · Gini gain · information gain · ensemble | safsızlık · Gini kazancı · bilgi kazancı (entropiyle) · topluluk |
+  | explained variance ratio · eigenvalue · PC1 | açıklanan varyans oranı · özdeğer · 1. bileşen |
   | perceptron · hidden layer · MLP · backpropagation | — · gizli katman · çok katmanlı ağ · geri yayılım |
   | artificial neuron · weighted sum · bias · activation function · ReLU | yapay nöron · ağırlıklı toplam · sabit terim · aktivasyon fonksiyonu · — |
   | layer · fully connected · forward pass · architecture | katman · tam bağlı · ileri yayılım · mimari |
   | output layer · softmax · pixel · MNIST | çıkış katmanı · — · piksel · — |
   | neural network playground · epoch | sinir ağı oyun alanı · devir |
   | convolution · kernel · feature map · pooling · ReLU | konvolüsyon · çekirdek · öznitelik haritası · havuzlama · — |
-  | decision boundary · linearly separable · z-score · min–max | karar sınırı · doğrusal ayrılabilir · z-skoru · min–maks |
+  | decision boundary · linearly separable | karar sınırı · doğrusal ayrılabilir |
   | SVM · margin · support vector · kernel · hinge loss | destek vektör makinesi · marj · destek vektörü · çekirdek · menteşe kaybı |
-  | DBSCAN · eps · minPts · core point · hierarchical clustering | yoğunluk temelli kümeleme · komşuluk yarıçapı · en az komşu · çekirdek nokta · hiyerarşik kümeleme |
-  | mean · median · IQR · outlier · robust | ortalama · medyan · çeyrekler açıklığı · aykırı değer · dayanıklı |
+  | DBSCAN · eps · min_samples · core point · hierarchical clustering · dendrogram | yoğunluk temelli kümeleme · komşuluk yarıçapı · en az komşu · çekirdek nokta · hiyerarşik kümeleme · ağaç diyagramı |
+  | IQR · outlier | çeyrekler açıklığı · aykırı değer |
   | bias–variance decomposition · irreducible error | yanlılık–varyans ayrışması · indirgenemez hata |
-  | multiple linear regression · confounding · multicollinearity | çoklu doğrusal regresyon · karıştırıcı etki · çoklu doğrusallık |
-  | polynomial regression · degree · design matrix · feature engineering · extrapolation | polinom regresyon · derece · tasarım matrisi · öznitelik türetme · veri dışı tahmin |
+  | multiple linear regression · confounding variable · multicollinearity | çoklu doğrusal regresyon · karıştırıcı değişken · çoklu doğrusal bağlantı |
+  | polynomial regression · degree · design matrix · feature engineering · extrapolation | polinom regresyon · derece · tasarım matrisi · öznitelik türetme · ekstrapolasyon |
+
+  **Sunumun Türkçe önde yazdığı terimler** (`<b>Türkçe</b> (English)`): ortalama (mean),
+  medyan (median), standart sapma, dayanıklı (robust), standartlaştırma (z-skoru),
+  normalizasyon (min-maks), kümeleme, k-ortalamalar (k-means; adımları **ata / güncelle**,
+  tur **iterasyon**). SVM benzetmesi "iki köy arasındaki en geniş yol" (koridor değil).
 
   **Türkçe kalan sözcükler** (calque değil, cümlenin dokusu): eşik, öznitelik, katsayı,
-  eğim, kesişim, ağırlık, artık, hata, doğruluk, küme, merkez, ağaç, derinlik, yaprak,
+  eğim, kesme terimi, ağırlık, artık, hata, doğruluk, küme, merkez, ağaç, derinlik, yaprak,
   bölme, nokta, sınıf, olasılık, varyans, gürültü, veri. Bunlar İngilizceye çevrilirse
   metin Türkçe–İngilizce karışımına döner.
 
@@ -110,35 +129,36 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   paylaşır: aynı veri dört modülde, dört ayrı ders. `note` alanı ders notu kutusunda
   görünür, bu yüzden **ölçülmüş** olmalı — "en iyi derece çoğunlukla 5" gibi bir
   cümle `tools/behaviour.js`'te sınanır.
-- **Modül 03 (`m-lin`) cevabı gizli başlatır.** Least squares doğrusu (yeşil
+- **Modül 06 (`m-lin`) cevabı gizli başlatır.** Least squares doğrusu (yeşil
   kesikli) ve sağ paneldeki dip işareti yalnız « Least squares çözümü »nden sonra
   çizilir; yeni veri, veri kümesi değişimi ve « Temizle » cevabı yeniden gizler.
   Eskiden ikisi açılışta ekrandaydı ve öğrenci kaydırıcıya dokunmadan cevabı
   görüyordu. Düğmeden önceki deneme kesikli gri çizgi olarak SSE'siyle kalır.
-  Sağdaki hata eğrisi **öğrencinin kesişimiyle** çizilir (`sse(A, b)`), cevabın
-  kesişimiyle değil: yön gösterir, cevabı vermez. Denklem iki biçimde yazılır,
-  `y = 0.030x + 2.00, yani fiyat = 0.030 · alan + 2.00`, ikisi de verinin biriminde
-  (`sets[].eq`: eksenler 0'dan başlar, `y = a·(yr/xr)·x + b·yr`); kaydırıcı
+  Sağdaki hata eğrisi **öğrencinin kesme terimiyle** çizilir (`sse(A, b)`), cevabın
+  kesme terimiyle değil: yön gösterir, cevabı vermez. Denklem iki biçimde yazılır,
+  `ŷ = 2.00 + 0.030x, yani fiyat = 2.00 + 0.030 · alan` (sunumdaki sıra: β₀ önde),
+  ikisi de verinin biriminde (`sets[].eq`: eksenler 0'dan başlar; kodda a = β₁, b = β₀,
+  `ŷ = b·yr + a·(yr/xr)·x`); kaydırıcı
   çıktıları aynı iki katsayıyı gösterir. Düğme sonucu **iki saniyede, formülün üç
   adımıyla** getirir (`setInterval`, 67 tık × 30 ms): doğru önce ortalama noktadan
-  (x̄, ȳ) geçecek kadar kayar, sonra orada döner, en sonda kesişim okunur; adımlar
+  (x̄, ȳ) geçecek kadar kayar, sonra orada döner, en sonda kesme terimi okunur; adımlar
   köşede kalır. Yalnız çizim kayar: a, b, kaydırıcılar ve göstergeler basıldığı
   anda son değerde (m-km kuralı). Animasyonda ikinci basış sona atlar. Tuval metni sahte DOM'da okunmadığı için
   denklem ve "gizli mi" durumu tuvalin `aria-label`'ına da yazılır, `behaviour.js`
   oradan sınar.
-- **Modül 04 (`m-mlr`) m-lin'in iki öznitelikli hâli, aynı kurallarla:** cevap gizli
+- **Modül 07 (`m-mlr`) m-lin'in iki öznitelikli hâli, aynı kurallarla:** cevap gizli
   başlar, « Least squares çözümü » düzlemi ~0.9 sn'de yerine kaydırır (yalnız çizim;
-  a₁, a₂ ve göstergeler hemen son değerde, ikinci basış sona atlar). Kesişim kaydırıcısı
-  **yok**: düzlem hep ortalama noktadan geçer (b = ȳ − a₁x̄₁ − a₂x̄₂), böylece iki sıfır
-  = yatay düzlem = R² tam 0 ve SSE yalnız (a₁, a₂)'ye bağlı bir kase olur; sağ panel o
-  kaseyi haritalar (tıkla → katsayı seç), içi boş halka a₂ = 0 çizgisinin en iyisi, yani
-  Modül 03'ün cevabı. Sol panel 3B; « fiyat–alan » bakışı tam yandan (φ = 0) gösterir:
-  x₂'nin üç dilimindeki çizgiler paralel, eğimleri a₁ — "öteki sabitken"in resmi. 3B
+  β₁, β₂ ve göstergeler hemen son değerde, ikinci basış sona atlar). Kesme terimi kaydırıcısı
+  **yok**: düzlem hep ortalama noktadan geçer (β₀ = ȳ − β₁x̄₁ − β₂x̄₂), böylece iki sıfır
+  = yatay düzlem = R² tam 0 ve SSE yalnız (β₁, β₂)'ye bağlı bir kase olur; sağ panel o
+  kaseyi haritalar (tıkla → katsayı seç), içi boş halka β₂ = 0 çizgisinin en iyisi, yani
+  Modül 06'nın cevabı. Sol panel 3B; « fiyat–alan » bakışı tam yandan (φ = 0) gösterir:
+  x₂'nin üç dilimindeki çizgiler paralel, eğimleri β₁ — "öteki sabitken"in resmi. 3B
   açı veri kümesine göre (`sets[].eq.v3`): düzlem izleyiciye doğru yükselince bakış
   açısıyla birbirini götürüp tek çizgiye iniyordu. Üç küme üç ders: bağımsız öznitelik
   (katsayı değişmez), birlikte büyüyen (yarısı ötekine geçer, katsayı oynar), karıştırıcı
   (işaret döner). "Tek başına" R²'si ve denklemler `aria-label`'da; `behaviour.js` oradan okur.
-- **Modül 05 (`m-poly`) x'i ölçekler:** ölçüm aralığı [lo, hi] → [−1, 1]; ham saatle x⁴
+- **Modül 09 (`m-poly`) x'i ölçekler:** ölçüm aralığı [lo, hi] → [−1, 1]; ham saatle x⁴
   100 bini geçer (ders notunun tuzağı). Derece kaydırıcıyla 1–10; çözücü QR (m-fit gibi):
   normal denklemler 10. derecede, gri kenara eklenmiş noktalarla (u¹⁰ ≈ 270) pivotu
   yitirip "nokta yetmiyor" diyordu. 5. dereceden sonra tablo ve köşedeki denklem ortadaki
@@ -158,6 +178,13 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   ~1.2 sn'de yerine indirir (40 tık × 30 ms; köşede RMSE düşüşü, önceki eğri kesikli gri).
   Yalnız çizim kayar; göstergeler basıldığı anda son değerde, ikinci basış sona atlar.
   Düğme en iyideyken basılırsa hiçbir şey yapmaz, adımlar bu yüzden her seferinde basabilir.
+- **Modül 12 (`m-reg`) en iyi α'yı test noktalarına bakmadan seçer:** eğitim noktalarında
+  5 katlı CV (yeşil kesikli eğri, yeşil bant, « En iyi α · CV »); kırmızı test eğrisi
+  yalnız sonucu görmek için. Eskiden bant test eğrisinin dibiydi, yani modül kendi ders
+  notunun "sık yapılan hata"sını yapıyordu (Hafta 8: "α yalnız eğitimde, CV ile seçilir").
+  14 noktada CV gürültülü: 20 örneklemde seçilen α'nın test hatası test dibinin medyan
+  1.2–1.5 katı, arada bir 10 katı; ders notu bunu söylüyor. LOOCV denendi, daha iyi değil.
+  Ceza ortalama kare hataya ekleniyor; sunumun formülü toplamı kullanır (α'lar n kat farklı).
 - **Modül 21 (`m-neu`) nöronun içini açar:** ham değer → ölçekli girdi ([lo, hi] → [0, 1],
   Modül 02) → ağırlıklı bağlantılar → Σ ve z → aktivasyon kutusu (eğri ve z'nin düştüğü
   nokta) → ŷ; en altta hesabın kendisi. Aktivasyon (basamak / sigmoid / ReLU / yok) kararı
@@ -376,7 +403,7 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
 
    **Önce İngilizcesi, sonra Türkçesi.** 3. alan menüde (rail, giriş kartları,
    sayfalayıcı, ders notu başlığı) kalın ilk satırdır ve İngilizce terimle başlar
-   (`k-NN ile sınıflandırma`); 4. alan gri ikinci satırdır, Türkçe addır
+   (`KNN ile sınıflandırma`); 4. alan gri ikinci satırdır, Türkçe addır
    (`Komşuna bak`). İkisi eskiden ters sıradaydı: kalın satırda yalnız Türkçe ad
    duruyordu, öğrenci teknik adı gri satırdan okuyordu. Yeni modülde 3. alana
    Türkçe sözcükle başlama; başlayacaksan terimin İngilizcesini öne al.
@@ -386,7 +413,16 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    Yani yeni bir modülü dosyanın sonuna yazıp `META`'da müfredatın ortasına
    koyabilirsin. Numaralar `META` sırasıyla aynı gitmeli (01, 02, …) ve bölümün
    `.eyebrow` içindeki "Modül NN · Grup" metni bu satırla birebir aynı olmalı.
-   Grup adı `GROUPS` dizisinde geçmeli, yoksa modül menüde görünmez.
+   Grup adı `GROUPS` dizisinde geçmeli, yoksa modül menüde görünmez. **Grup = dersin
+   haftası** ("Hafta 9"; sunumu olmayan sinir ağı modülleri "Ek · Sinir ağları"):
+   rail'de yalnız "HAFTA 9", giriş sayfasında `GTITLE`'daki sunum başlığıyla
+   ("Hafta 9 · K-Nearest Neighbors"). Sıra sunumun sırası: Hafta 2 istatistik ve
+   ölçekleme (01–02), 3 overfitting (03), 4 bias–variance ve CV (04–05), 5 linear
+   regression, düzlem, gradient descent, polinom (06–09), 6 logistic (10), 8 metrikler
+   ve regularization (11–12), 9 KNN (13), 10 ağaç (14), 11 orman (15), 12 SVM (16),
+   13 PCA (17), 14 kümeleme (18–20), Ek (21–26). Modül eklenip numaralar kayınca
+   metindeki "Modül NN'de" atıflarının ekleri de değişir (03'te → 09'da); bir atıf
+   artık geriye bakıyorsa ("göreceğiz" → "gördün") cümle de değişir.
    Etiketler yalnız arama içindir, ekranda görünmez.
 4. `CONTENT`'e bir kayıt ekle: en az iki `sets` girdisi (her birinde `name` + `note`)
    ve tam bir `lesson` (`q`, `idea`, `read` ≥ 2 satır, `terms` ≥ 2 terim, `life`, `trap`,
@@ -410,7 +446,7 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    - Çalıştır düğmeleri de anahtardır: eğitim koşarken tekrar basmak onu DURDURUR.
      `tick(n)` yeterli değilse ölçüm yarı eğitilmiş modelden okunur. Bitişi düğme
      metninden doğrula (`"Eğit"`e döndü mü) ve dönmediyse sürmeye devam et —
-     `m-log`'un (Modül 06) iç sayacı 400 tık, `tick(400)` tam sınırda kalıp kırılganlık üretti.
+     `m-log`'un (Modül 10) iç sayacı 400 tık, `tick(400)` tam sınırda kalıp kırılganlık üretti.
 
 ## Doğrulama
 
@@ -435,7 +471,7 @@ for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; 
 # 26 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). oyun alanı canlı eğitim koştuğu için ~3 dk sürer.
-node tools/behaviour.js index.html   # 202 denetim: 26 modül + alternatif veri kümeleri, ~3 dk
+node tools/behaviour.js index.html   # 203 denetim: 26 modül + alternatif veri kümeleri, ~3 dk
 
 # tuvale yazılan her etiket rengini ve ders notu figürlerinin (FIGS) yazı rengini
 # açık VE koyu temada zemine karşı ölç (label(...) / legend(...) çağrılarını ve
