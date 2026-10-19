@@ -145,12 +145,13 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
     const eqU=eqOf(AR(),'Senin doğrun'), ao=sv(T(el,'lin-ao')), bo=sv(T(el,'lin-bo'));
     const t0=alive();
     el('lin-fit').click();                             // "Least squares çözümü" — animasyon başlar
-    const after=AR(), ghost=/Son tahminin kesikli çizgide, SSE (\d+\.\d+)/.exec(after);
+    /* SSE verinin biriminde (milyon ₺², puan²) ve üç anlamlı basamakla: 100'ün üstü tamsayı */
+    const after=AR(), ghost=/Son tahminin kesikli çizgide, SSE (\d+(?:\.\d+)?)/.exec(after);
     r.push({bad, got:V(el,'lin-sse'), best:V(el,'lin-best'), st:T(el,'lin-st'), stBad,
       hidden:/henüz gizli/.test(hid)&&!/Least squares:/.test(hid),
       open:/Least squares:/.test(after), ghost:ghost?+ghost[1]:NaN,
       eqOk:!!eqU&&Math.abs(eqU.A-ao)<1e-9&&Math.abs(eqU.B-bo)<1e-9&&eqU.A===eqU.A2&&eqU.B===eqU.B2});
-    const ch=/Adım adım çözüm: SSE (\d+\.\d+) → (\d+\.\d+) → (\d+\.\d+)/.exec(after);
+    const ch=/Adım adım çözüm: SSE (\d+(?:\.\d+)?) → (\d+(?:\.\d+)?) → (\d+(?:\.\d+)?)/.exec(after);
     r[t].chain=ch?[+ch[1],+ch[2],+ch[3]]:null;
     /* animasyon yalnız ÇİZİM: göstergeler tık beklemeden son değerde (yukarıda okundu);
        67 tıkta (× 30 ms ≈ 2 sn) biter */
@@ -204,8 +205,48 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(share(ev,0.02,0.05)>=0.75, "Ev fiyatı: eğim çoğunlukla 0.02–0.05 milyon ₺/m² (not)", `pay ${share(ev,0.02,0.05).toFixed(2)}`);
   chk(share(ca,1,3)>=0.75, "Çalışma → not: eğim çoğunlukla 1–3 puan/saat (not)", `pay ${share(ca,1,3).toFixed(2)}`);
   chk(share(ar,-110,-50)>=0.75, "Araç yaşı: her yıl çoğunlukla 50–110 bin ₺ düşüş (not)", `pay ${share(ar,-110,-50).toFixed(2)}`);
-  chk(ar.every(v=>v<0), "Araç yaşı: formül eğimi her seferinde eksi buluyor (adım 6)", `${ar.filter(v=>v>=0).length}/40 artı`);
+  chk(ar.every(v=>v<0), "Araç yaşı: formül eğimi her seferinde eksi buluyor (adım 9)", `${ar.filter(v=>v>=0).length}/40 artı`);
   pick(0);
+}
+
+/* ── 06 · « Beş öğrenci » (Hafta 5'in elle çözümü), temel model, RMSE ve R² ──
+   Sabit veri: sayılar BİREBİR sunumdaki gibi çıkmalı (ŷ = 44 + 4x, SSE 6, RMSE 1.10,
+   SST 646, R² 0.9907, temel RMSE 11.4). SSE / RMSE verinin biriminde (puan², puan). */
+{
+  head("Modül 06 · Beş öğrenci, temel model, RMSE ve R²");
+  const {el,M,tick}=boot(F); const mod=M.find(x=>x.id==='m-lin');
+  const AR=()=>el('c-lin').getAttribute('aria-label')||'';
+  mod.__pick(3); P(el,'lin-base',false);
+  chk(/henüz gizli/.test(AR())&&T(el,'lin-n')==='5', "beş öğrenci: beş nokta, cevap başta gizli (m-lin kuralı)", T(el,'lin-n'));
+  el('lin-fit').click(); tick(70);
+  /* not ve adım 6: "« Least squares çözümü » ŷ = 44 + 4x verir: SSE 6, RMSE 1.10 puan, R² 0.9907" */
+  chk(/Least squares: ŷ = 44 \+ 4x, yani not = 44 \+ 4 · saat\./.test(AR())&&T(el,'lin-ao')==='4'&&T(el,'lin-bo')==='44',
+      "least squares ŷ = 44 + 4x, kaydırıcılar 4 ve 44 (not, adım 6)", `${T(el,'lin-bo')} + ${T(el,'lin-ao')}x`);
+  chk(T(el,'lin-sse')==='6.00'&&T(el,'lin-best')==='6.00', "SSE 6 = 1 + 0 + 4 + 0 + 1 (not, elle hesap)", T(el,'lin-sse'));
+  chk(T(el,'lin-rmse')==='1.10'&&T(el,'lin-ru')==='puan', "RMSE √(6 / 5) ≈ 1.10 puan (not, adım 6)", `${T(el,'lin-rmse')} ${T(el,'lin-ru')}`);
+  chk(T(el,'lin-r2')==='0.9907'&&/En iyi/.test(T(el,'lin-st')), "R² 0.9907 ve Durum 'En iyi' (not)", T(el,'lin-r2'));
+  /* adım 7: "turuncu karelerin toplamı SST = 646 … R² = 1 − 6 / 646 = 0.9907 … temel modelin RMSE'si 11.4" */
+  P(el,'lin-base',true);
+  chk(/Temel model ŷ = 68: SST 646, RMSE 11\.4 puan\./.test(AR()), "temel model herkese 68 der: SST 646, RMSE 11.4 puan (adım 7, not)");
+  chk(/R² = 1 − SSE\/SST = 1 − 6\.00\/646 = 0\.9907\./.test(AR()), "köşede R² = 1 − 6/646 = 0.9907 (adım 7)");
+  /* adım 8: "Eğimi 0, kesme terimini 68 yapın … SSE = SST = 646 ve R² tam 0 … ters yöne: R² eksiye" */
+  S(el,'lin-a',0); S(el,'lin-b',68);
+  chk(T(el,'lin-r2')==='0.0000'&&T(el,'lin-sse')==='646', "eğim 0, kesme terimi 68: SSE = SST = 646, R² tam 0 (adım 8)", `SSE ${T(el,'lin-sse')} · R² ${T(el,'lin-r2')}`);
+  S(el,'lin-a',-10);
+  chk(V(el,'lin-r2')<0, "eğim ters yöne dönünce R² eksiye düşüyor, doğru ortalamadan kötü (adım 8)", T(el,'lin-r2'));
+  /* not: "Bu küme sabit: « Yeni veri » aynı beş öğrenciyi getirir" */
+  el('lin-new').click(); el('lin-fit').click(); tick(70);
+  chk(T(el,'lin-best')==='6.00'&&T(el,'lin-r2')==='0.9907', "« Yeni veri » aynı beş öğrenciyi geri getiriyor (not)", T(el,'lin-best'));
+  /* ders notu · Göstergeler: "RMSE = √(SSE / n)" ve "R² = 1 − SSE / SST" — üç rastgele kümede
+     gösterge ile köşedeki satır aynı şeyi söylüyor (üç anlamlı basamağın yuvarlama payıyla) */
+  let bad=0, n=0;
+  for(const j of [0,1,2]){ mod.__pick(j);
+    for(let t=0;t<5;t++){ el('lin-new').click(); S(el,'lin-a',30+10*t); S(el,'lin-b',30); n++;
+      const sse=V(el,'lin-sse'), k=V(el,'lin-n'), rm=V(el,'lin-rmse'), r2=V(el,'lin-r2');
+      const m=/SST (\d+(?:\.\d+)?), RMSE/.exec(AR()), sst=m?+m[1]:NaN;
+      if(!(Math.abs(Math.sqrt(sse/k)-rm)<=0.02*rm) || !(Math.abs(1-sse/sst-r2)<=0.02*Math.max(1,Math.abs(r2)))) bad++; } }
+  chk(bad===0, "RMSE = √(SSE / n) ve R² = 1 − SSE / SST üç kümede tutarlı (ders notu · Göstergeler)", `${bad}/${n}`);
+  mod.__pick(0); P(el,'lin-base',false);
 }
 
 /* ── 04 · Çoklu doğrusal regresyon: düzlem, "öteki sabitken", karıştırıcı etki ── */
@@ -431,6 +472,62 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
      doğruluk farkı 20.4–27.8 puan. Eşikler ölçülen en düşüğün altına konuldu. */
   chk(mean(H)>mean(E)*1.8, "karışık veride hiçbir w kaybı sıfırlayamıyor", `${mean(E).toFixed(3)} → ${mean(H).toFixed(3)}`);
   chk(mean(HA)<mean(EA)-10, "karışık veride doğruluk da düşüyor", `%${mean(EA).toFixed(1)} → %${mean(HA).toFixed(1)}`);
+}
+
+/* ── 10 · Lojistik · odds, logit, odds ratio, birimli eksen, « Doğru uydur » (Hafta 6) ──
+   Tuval metni sahte DOM'da okunmuyor; seçili x'in hesabı ve doğru uydurma satırları
+   tuvalin aria-label'ında. PK() dosyada daha aşağıda const (TDZ): seçici burada kurulur. */
+{
+  head("Modül 10 · odds, logit, odds ratio ve « Doğru uydur »");
+  const {el,M,tick}=boot(F); const pick=(j)=>M.find(x=>x.id==='m-log').__pick(j);
+  const AR=()=>el('c-log').getAttribute('aria-label')||'';
+  /* adım 5: "β₀ = −2.8, β₁ = 0.050. 60 saat: z = 0.20, p̂ = 0.55. Odds = 1.22 … Logit = 0.20, z'nin kendisi" */
+  pick(1); P(el,'lg-lin',false); S(el,'lg-w',50); S(el,'lg-b',-28); S(el,'lg-x',120);
+  chk(T(el,'lg-wo')==='0.050'&&T(el,'lg-bo')==='−2.8'&&T(el,'lg-xo')==='60.0 saat', "kaydırıcılar verinin biriminde: β₁ = 0.050 saat başına, β₀ = −2.8, x = 60 saat (adım 5)", `${T(el,'lg-wo')} · ${T(el,'lg-bo')} · ${T(el,'lg-xo')}`);
+  chk(/z = 0\.20, p̂ = 0\.550, odds = 1\.22, logit = 0\.20;/.test(AR())&&T(el,'lg-odds')==='1.22', "60 saat: z = 0.20, p̂ 0.55, odds 1.22, logit = z (adım 5, ex)", T(el,'lg-odds'));
+  /* ex 3. adım ve not: "sınır 56 saat" — Hafta 6: sınır birimle okunur */
+  chk(T(el,'lg-bnd')==='56.0 saat', "decision boundary verinin biriminde: 2.8 / 0.05 = 56.0 saat (ex, not)", T(el,'lg-bnd'));
+  /* adım 6: "her saat odds'u e^β₁ = 1.05 ile çarpar … 80 saatte 3.32, p̂ 0.77" */
+  chk(T(el,'lg-or')==='1.05', "odds ratio e^β₁ = e^0.05 ≈ 1.05 (adım 6)", T(el,'lg-or'));
+  const o60=Math.exp(+(/z = (−?[\d.]+), p̂/.exec(AR())[1].replace('−','-')));
+  S(el,'lg-x',160);
+  const pz=/z = (−?[\d.]+), p̂ = ([\d.]+), odds/.exec(AR());
+  chk(T(el,'lg-odds')==='3.32'&&Math.abs(+pz[2]-0.77)<0.005, "80 saat: odds 3.32, p̂ 0.77 (adım 6, ex)", `${T(el,'lg-odds')} · p̂ ${pz[2]}`);
+  chk(Math.abs(Math.exp(+pz[1])/o60-Math.E)<0.03, "20 saat daha: z 1 artıyor, odds e ≈ 2.718 katına çıkıyor (adım 6)", (Math.exp(+pz[1])/o60).toFixed(3));
+  /* ders notu · Seçili x: "odds = p̂ / (1 − p̂) = e^z ve logit = ln(odds), yani yine z" — rastgele ayarlarda */
+  let tut=0; const N=20;
+  /* p̂ üç ondalıkla, odds üç anlamlı basamakla yazılıyor: p̂ / (1 − p̂)'yi yuvarlanmış p̂'den
+     hesaplamak uçlarda (p̂ 0.002, 0.999) %20 sapıyordu. Ters yönden sınanır: odds / (1 + odds) = p̂;
+     pay iki yuvarlamanın toplamı (p̂ ±0.0005, odds ±%0.3 → ±0.0008). */
+  for(let t=0;t<N;t++){ pick(t%3); S(el,'lg-w',-60+6*t); S(el,'lg-b',25-2.5*t); S(el,'lg-x',10*t);
+    const m=/z = (−?[\d.]+), p̂ = ([\d.]+), odds = ([\d.e+-]+), logit = (−?[\d.]+);/.exec(AR());
+    if(!m) continue; const z=+m[1].replace('−','-'), p=+m[2], o=+m[3];
+    if(m[1]===m[4]&&Math.abs(Math.log(o)-z)<=0.011&&Math.abs(o/(1+o)-p)<=0.0015) tut++; }
+  chk(tut===N, "odds = p̂ / (1 − p̂) = e^z ve logit = z her ayarda (ders notu · Seçili x)", `${tut}/${N}`);
+  /* ders notu · S eğrisi: "Yatay eksen verinin biriminde (mm, saat, m/s)" */
+  pick(0); S(el,'lg-w',40); S(el,'lg-b',-20);
+  const u0=T(el,'lg-bnd'); pick(2); S(el,'lg-w',40); S(el,'lg-b',-20); const u2=T(el,'lg-bnd');
+  chk(u0==='20.0 mm'&&u2==='10.0 m/s', "aynı sigmoid, iki kümede iki birim: 20.0 mm / 10.0 m/s (ders notu · S eğrisi)", `${u0} · ${u2}`);
+  /* adım 7 ve not: 12 öğrencinin doğrusu 0 saatte −0.14, 20 saatte 1.82; sınır 6.5 → 7.5 saat;
+     logistic regression'ınki iki durumda da 6.4 saat */
+  pick(3); P(el,'lg-lin',true);
+  chk(/least squares, 12 öğrenci: x = 0 → −0\.14 · x = 20 saat → 1\.82;/.test(AR()), "12 öğrenci: doğru 0 saatte −0.14, 20 saatte 1.82 der — olasılık olamaz (adım 7, not)");
+  chk(/doğrunun sınırı 6\.5 saat → uzak öğrenciyle 7\.5 saat;/.test(AR()), "40 saatlik tek öğrenci doğrunun sınırını 6.5'ten 7.5 saate kaydırıyor (adım 7, not)");
+  chk(/logistic regression sınırı 6\.4 saat → 6\.4 saat\./.test(AR()), "logistic regression'ın sınırı yerinde: 6.4 → 6.4 saat (adım 7, not)");
+  S(el,'lg-w',238); S(el,'lg-b',-38); S(el,'lg-x',35);
+  chk(T(el,'lg-bnd')==='6.4 saat'&&/Seçili x = 7\.0 saat: z = 0\.37, p̂ = 0\.59/.test(AR()), "adım 7'nin sigmoid'i: sınır 6.4 saat, 7 saate p̂ 0.59", T(el,'lg-bnd'));
+  /* « Eğit » de aynı yere iniyor (en çok olabilirlik 6.45 saat; gradient descent 400 adımda) */
+  el('lg-fit').click(); tick(600); if(T(el,'lg-fit')!=='Eğit') tick(600);
+  chk(T(el,'lg-fit')==='Eğit'&&Math.abs(V(el,'lg-bnd')-6.45)<=0.15, "uzak öğrenci kümesinde « Eğit » de 6.4–6.5 saate iniyor", T(el,'lg-bnd'));
+  el('lg-new').click();
+  chk(T(el,'lg-it')==='0'&&/13 nokta/.test(AR())&&/7\.5 saat/.test(AR()), "« Yeni veri » aynı 13 öğrenciyi getiriyor (not)");
+  /* .head ve ders notu · Doğru uydur: "sınıflandırmada 0'ın altına, 1'in üstüne taşar" — rastgele kümelerde */
+  let tas=0, top=0;
+  for(const j of [0,1,2]) for(let t=0;t<8;t++){ pick(j); top++;
+    const m=/least squares doğrusu: x = 0 → (−?[\d.]+) · x = [\d.]+ \S+ → (−?[\d.]+);/.exec(AR());
+    if(m&&+m[1].replace('−','-')<0&&+m[2]>1) tas++; }
+  chk(tas===top, "doğru eksenin iki ucunda da 0–1'in dışına taşıyor (.head, ders notu · Doğru uydur)", `${tas}/${top}`);
+  P(el,'lg-lin',false); pick(0);
 }
 
 /* ── 06 · Karar ağacı: düğme kaydırıcının ulaşabildiği en iyi bölmeyi buluyor ── */
@@ -746,6 +843,41 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   console.log(`       dik kanyon: lr=0.060 → ${sOk.st} w=${sOk.x} · lr=0.200 → ${sBad.st}`);
   chk(!/raksad/.test(sOk.st), "dik kanyonda 0.06 hâlâ iş görüyor (note: '0.06 iş görür')", sOk.st);
   chk(/raksad/.test(sBad.st), "aynı yüzeyde 0.20 ıraksıyor — learning rate yüzeye bağlı (note: '0.20'yi deneyin — patlar')", sBad.st);
+}
+
+/* ── 08 · Gradyan inişi · « Beş öğrenci · β₁ » (Hafta 5 · sl. 35): sunumun dört α senaryosu ──
+   β₀ = 44 sabit, J(β₁) = 1.2 + 44·(β₁ − 4)², başlangıç β₁ = 0. Sayılar birebir sunumdaki. */
+{
+  head("Modül 08 · Beş öğrenci · β₁ (dört learning rate)");
+  const {el,M,tick}=boot(F);
+  PK(M,'m-gd',3);
+  /* not: "Bu yüzeyde learning rate kaydırıcısı 0.001 ile 0.030 arasında"; "β₁ = 0'dan, J = 705.2" */
+  chk(+el('gd-lr').min===1&&+el('gd-lr').max===30&&T(el,'gd-lro')==='0.010', "learning rate kaydırıcısı bu yüzeyde 0.001–0.030 (not)", `${el('gd-lr').min}–${el('gd-lr').max} · ${T(el,'gd-lro')}`);
+  chk(T(el,'gd-x')==='0.000'&&T(el,'gd-l')==='705.200'&&T(el,'gd-k1')==='β₁'&&T(el,'gd-k2')==='J(β₁)', "başlangıç β₁ = 0, J = 705.2; göstergeler β₁ der (not, ders notu)", `${T(el,'gd-x')} · ${T(el,'gd-l')} · ${T(el,'gd-k1')}`);
+  const walk=(lr,k)=>{S(el,'gd-lr',lr); S(el,'gd-x0',0); const xs=[],Ls=[];
+    for(let i=0;i<k;i++){ el('gd-step').click(); xs.push(V(el,'gd-x')); Ls.push(V(el,'gd-l')); } return {xs,Ls};};
+  const a=walk(2,10);
+  chk(Math.abs(a.xs[9]-3.42)<0.005&&T(el,'gd-i')==='10', "α = 0.002: on adımda β₁ ancak 3.42 (adım 6, not)", a.xs[9]);
+  const b=walk(10,3);
+  chk(Math.abs(b.xs[0]-3.52)<0.005&&Math.abs(b.xs[2]-3.99)<0.005, "α = 0.01: ilk adımda 3.52, üçüncüde 3.99 (adım 7, not)", b.xs.join(' → '));
+  /* adım 8: "dibin üstünden atlıyor, karşı yamaca konuyor … her seferinde biraz daha yaklaşıyor ve sonunda dibe varıyor" */
+  const c=walk(20,8), zz=c.xs.every((x,i)=>i===0||Math.sign(x-4)!==Math.sign(c.xs[i-1]-4)),
+        yak=c.xs.every((x,i)=>i===0||Math.abs(x-4)<Math.abs(c.xs[i-1]-4));
+  chk(zz&&yak, "α = 0.02: dibin iki yanında zikzak, her adımda biraz daha yakın (adım 8)", c.xs.map(x=>x.toFixed(2)).join(' '));
+  const koş=(lr)=>{S(el,'gd-lr',lr); S(el,'gd-x0',0); el('gd-run').click(); tick(600);
+    if(T(el,'gd-run')!=='Koştur') tick(600); return {st:T(el,'gd-s'), x:V(el,'gd-x'), bitti:T(el,'gd-run')==='Koştur'};};
+  const k20=koş(20);
+  chk(k20.bitti&&/Global/.test(k20.st)&&Math.abs(k20.x-4)<0.001, "α = 0.02 sonunda dibe varıyor: β₁ = 4 (adım 8, not)", `${k20.st} ${k20.x}`);
+  /* adım 9: "Dört adımda maliyet 705'ten 3028'e çıktı; Sonuç 'Yükseliyor' diyor" */
+  const d=walk(25,4);
+  chk(Math.abs(d.Ls[3]-3028)<1&&d.Ls.every((L,i)=>L>(i?d.Ls[i-1]:705.2)), "α = 0.025: J her adımda büyüyor, dört adımda 705 → 3028 (adım 9, not)", d.Ls.map(L=>L.toFixed(0)).join(' → '));
+  chk(T(el,'gd-s')==='Yükseliyor', "ıraksarken Sonuç 'İniyor' değil 'Yükseliyor' diyor (adım 9)", T(el,'gd-s'));
+  /* not ve adım 9: "Sınır α = 2 / 88 ≈ 0.0227" — kaydırıcının iki komşu adımı iki yanında */
+  const k22=koş(22), k23=koş(23);
+  chk(/Global/.test(k22.st)&&/raksad/.test(k23.st), "sınır 2/88 ≈ 0.0227: 0.022 varıyor, 0.023 ıraksıyor (not, adım 9)", `0.022 → ${k22.st} · 0.023 → ${k23.st}`);
+  /* öteki yüzeye dönünce kaydırıcı eski aralığına ve α 0.06'ya döner (0.06 beş öğrencide ıraksardı) */
+  PK(M,'m-gd',0);
+  chk(+el('gd-lr').max===650&&T(el,'gd-lro')==='0.060'&&T(el,'gd-k1')==='θ', "öteki yüzeyde kaydırıcı 0.001–0.650 ve θ'ya dönüyor", `${el('gd-lr').max} · ${T(el,'gd-lro')} · ${T(el,'gd-k1')}`);
 }
 
 /* ── 06 · Karar ağacı · "Sahte işlem": pozitif sınıf bir kutunun içinde ── */
