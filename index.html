@@ -152,6 +152,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3
 .seg button+button{border-left:1px solid var(--line)}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
 .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
 
 /* readouts */
@@ -693,20 +694,25 @@ input[type=range]{min-height:28px;margin:0}
           <button class="btn" id="fit-res" aria-pressed="true">Artıklar</button>
           <button class="btn" id="fit-new">Yeni veri</button>
           <button class="btn primary" id="fit-sweep" aria-pressed="false">Dereceyi tara</button>
+          <div class="seg" role="group" aria-label="Sağ panel: hata neye göre çizilsin">
+            <button id="fit-byd" aria-pressed="true">Dereceye göre</button>
+            <button id="fit-byn" aria-pressed="false">Örnek sayısına göre</button>
+          </div>
           <span class="hint">Derece kaydırıcısını sürükle → pembe eğri ve sağdaki iki hata eğrisi birlikte değişir.</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">Derece</span><span class="v" id="fit-vd">3</span></div>
           <div class="stat"><span class="k">Eğitim RMSE</span><span class="v ok" id="fit-vtr">—</span></div>
           <div class="stat"><span class="k">Test RMSE</span><span class="v" id="fit-vte">—</span></div>
+          <div class="stat"><span class="k">Test R²</span><span class="v" id="fit-vr2">—</span></div>
           <div class="stat"><span class="k">Durum</span><span class="v" id="fit-vs">—</span></div>
         </div>
       </div>
       <div class="ask">
         <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Derece 14'te eğri bütün eğitim noktalarından geçiyor, eğitim hatası sıfıra yakın. « Test RMSE » göstergesine bak. Bu modele yeni bir gün için tahmin yaptırır mıydın?</p>
-          <p>Sonra <b>eğitim verisi</b> kaydırıcısını 40'a çek: aynı yüksek derece artık o kadar savrulmuyor. Değişen ne oldu, model mi, veri mi? Buradan <b>overfitting</b>'in sebebi hakkında ne söyleyebilirsin?</p>
+          <p>Derece 14'te eğri bütün eğitim noktalarından geçiyor, eğitim hatası sıfıra yakın. « Test RMSE » ve « Test R² » göstergelerine bak. R² neden eksi? Bu modele yeni bir gün için tahmin yaptırır mıydın?</p>
+          <p>Sağ paneli « Örnek sayısına göre »ye çevir: 14. derecede eğitim ve test eğrisi arasındaki boşluk veri arttıkça ne oluyor? Sonra « Titreşim ölçümü »nde dereceyi 1 yap. Bu iki modelden hangisi için daha çok veri toplamak boşa para harcamak olur, neden?</p>
         </div>
       </div>
     </section>
@@ -1085,6 +1091,10 @@ input[type=range]{min-height:28px;margin:0}
           <button class="btn" id="poly-t" aria-pressed="false">Terimler</button>
           <button class="btn" id="poly-new">Yeni veri</button>
           <button class="btn" id="poly-clr">Temizle</button>
+          <div class="seg" role="group" aria-label="Sağ panel">
+            <button id="poly-vm" aria-pressed="true">Tasarım matrisi</button>
+            <button id="poly-vr" aria-pressed="false">Artık grafiği</button>
+          </div>
           <span class="hint">Tuvale tıkla → nokta ekle, gri kenara da · sonra « Least squares çözümü » · fareyi bir noktaya götür → tablodaki satırı gör.</span>
         </div>
         <div class="stats">
@@ -1265,6 +1275,10 @@ input[type=range]{min-height:28px;margin:0}
           <button class="btn" id="cv-res" aria-pressed="true">Artıklar</button>
           <button class="btn" id="cv-shuf">Yeniden karıştır</button>
           <button class="btn" id="cv-new">Yeni veri</button>
+          <div class="seg" role="group" aria-label="Bölme yöntemi">
+            <button id="cv-kf" aria-pressed="true">Karıştır</button>
+            <button id="cv-ts" aria-pressed="false">Zaman sırası</button>
+          </div>
           <span class="hint">Bir kat çubuğuna ya da bir noktaya tıkla → o kat doğrulama katı olsun.</span>
         </div>
         <div class="stats">
@@ -2003,10 +2017,10 @@ const CONTENT={
      biriminde; yalnız gri bölgede ve ex noktasında gösterilir. */
   sets:[
     {name:"Gün içi sıcaklık", x:"saat", lo:6, hi:18, xlo:3.5, xhi:20.5, xd:1, ex:20, exk:"20:00 tahmini",
-     ylo:5, yhi:35, yu:"°C", yd:1, rd:2, sd:1.0, y:"sıcaklık",
+     ylo:5, yhi:35, yu:"°C", yd:1, rd:2, sd:1.0, y:"sıcaklık", vx:"en sıcak saat", xu:"",
      ax:"saat · ölçüm 06–18", ay:"sıcaklık · 5–35 °C",
      f:(h)=>18+8*Math.cos(2*Math.PI*(h-15)/24),
-     note:"06:00 ile 18:00 arası ölçüm. Tek sütunlu doğru öğleden sonraki tepeyi göremiyor (R² 0.8 civarı), x² ekleyince 0.9'u geçiyor. Doğru akşam 20:00 için yaklaşık 30 °C söylüyor; gerçek 20 °C."},
+     note:"06:00 ile 18:00 arası ölçüm. Tek sütunlu doğru öğleden sonraki tepeyi göremiyor (R² 0.8 civarı), x² ekleyince 0.9'u geçiyor. Doğru akşam 20:00 için yaklaşık 30 °C söylüyor; gerçek 20 °C. Artık grafiğinde doğrunun artıkları kubbe çiziyor: sabah ve akşam eksi, öğleden sonra artı (200 örneklemin %88'inde). x² ile desen kayboluyor ve parabolün tepesi 15:00 civarına oturuyor."},
     {name:"Fren mesafesi", x:"hız", lo:30, hi:110, xlo:10, xhi:135, xd:0, ex:130, exk:"130 km/sa'te",
      ylo:0, yhi:160, yu:"m", yd:0, rd:1, sd:4, y:"mesafe",
      ax:"hız · ölçüm 30–110 km/sa", ay:"durma mesafesi · 0–160 m",
@@ -2016,7 +2030,17 @@ const CONTENT={
      ylo:-10, yhi:65, yu:"cm", yd:0, rd:1, sd:1.8, y:"boy",
      ax:"hafta · ölçüm 2–18", ay:"fidan boyu · cm",
      f:(t)=>3+48/(1+Math.exp(-(t-10)/2.2)),
-     note:"Yavaş başlar, hızlanır, durulur: S eğrisi. x² eklemek hatayı neredeyse hiç düşürmüyor, çünkü S tek bir tepe değil; x³ ekleyince RMSE yaklaşık yarıya iniyor. Ama aynı model 24. haftada fidanı 51 cm yerine sıfır boy civarına indiriyor; örneklemlerin yaklaşık yarısında tahmin eksiye düşüyor."}
+     note:"Yavaş başlar, hızlanır, durulur: S eğrisi. x² eklemek hatayı neredeyse hiç düşürmüyor, çünkü S tek bir tepe değil; x³ ekleyince RMSE yaklaşık yarıya iniyor. Ama aynı model 24. haftada fidanı 51 cm yerine sıfır boy civarına indiriyor; örneklemlerin yaklaşık yarısında tahmin eksiye düşüyor."},
+    /* Hafta 5 Python senaryosu: tüketim = 900 + 1.8 · (sıcaklık − 18)² + gürültü (45 MWh);
+       sıcaklık iki yılın günlerinden: 14 − 11 · cos(mevsim) + N(0, 3.5), ölçüm −5…34.5 °C
+       (veride en sıcak gün 34.5). gen:"mevsim" → x mevsim dağılımından gelir (kış ve yaz
+       çok, bahar ve güz az), öteki kümelerde ölçüm aralığında düzgün. Hafta sonu etkisi
+       (−120 MWh) ikinci bir sütun ister: burada yalnız hafta içi günler. */
+    {name:"Elektrik · sıcaklık", x:"sıcaklık", lo:-5, hi:34.5, xlo:-10, xhi:45, xd:1, ex:42, exk:"42 °C'de", gen:"mevsim",
+     ylo:600, yhi:2400, yu:"MWh", yd:0, rd:0, sd:45, y:"tüketim", vx:"en az tüketim", xu:" °C",
+     ax:"sıcaklık · ölçüm −5…34.5 °C", ay:"günlük tüketim · MWh",
+     f:(t)=>900+1.8*(t-18)**2,
+     note:"Hafta 5'in Python senaryosu: tüketim = 900 + 1.8 · (sıcaklık − 18)² + gürültü (45 MWh), yalnız hafta içi günler. Sıcaklıklar iki yılın günlerinden geliyor (kış ve yaz çok, bahar ve güz az); en sıcak gün 34.5 °C. 200 örneklemde ölçtük: düz doğrunun R²'si ortalama 0.48 (sunumda 0.51, orada hafta sonu sütunu da vardı) ve artıklar %92'sinde gülümsüyor. x² ile R² 0.93, desen kayboluyor, parabolün dibi 17–18 °C. 42 °C'de doğru 655 MWh der, x²'li model 1931 (formüldeki gerçek 1937); 4. derecede bu tahmin yine savruluyor."}
   ],
   lesson:{
     q:"Doğru çizmekten başka bir şey bilmeyen bir modelle eğri bir ilişkiyi nasıl yakalarız?",
@@ -2025,17 +2049,20 @@ const CONTENT={
           "Eğri çizse de bu hâlâ linear regression. Doğrusal olan x değil, katsayılar (β'lar). Model her sütunu bir katsayıyla çarpıp topluyor, o kadar. Modül 07'deki iki sütun alan ve yaştı; burada ikinci sütun birincinin karesi. Yani polinom regresyon, sütunlarını kendisi üreten bir çoklu doğrusal regresyon. Var olan sütunlardan yeni sütun türetmeye <b>feature engineering</b> (öznitelik türetme) deniyor. Gerçek projelerde emeğin büyük kısmı bu adıma gider. Modelin gördüğü tabloya da <b>design matrix</b> (tasarım matrisi) deniyor: her satır bir ölçüm, sütunlar 1, x, x², …",
           "Eğriyi parçalarına ayırınca ne olduğu görünüyor. β₀ yatay bir seviye. β₁·x o seviyeyi eğiyor. β₂·x² kavis veriyor: bir tepe ya da bir çukur. β₃·x³ bir S kıvrımı katıyor. Tuvalde « Terimler »i açarsan her parça ince bir çizgi olarak çizilir; kalın eğri onların toplamı. Katsayıları kimse elle seçmiyor; least squares hepsini birlikte, tek formülle buluyor.",
           "Polinomun zayıf yeri veri aralığının dışı. Ölçüm olmayan saatlerde eğriyi tutan tek bir nokta yok. x³ ve x⁴ ise orada hızla büyüyor. Fidan verisinde üç sütunlu model aralığın içinde neredeyse kusursuz. Ama 24. haftada 51 cm'lik fidanı sıfır boy civarına indiriyor. Modeli verinin dışında kullanmaya <b>extrapolation</b> (ekstrapolasyon) deniyor. Bir istisnası var: ilişkinin biçimini bir yasadan biliyorsan doğru biçimdeki model dışarıda da tutar. Fren mesafesi hızın karesiyle büyür. Bu yüzden x² sütunlu model, ölçülmemiş 130 km/sa'te bile yalnız birkaç metre şaşıyor.",
+          "Modelin iyi olup olmadığını R²'ye bakıp anlayabilir misin? Tam değil. Bir hasta düşün: ateşi yok, yüzü gülüyor, 'iyiyim' diyor. Doktor yine de röntgen ister, çünkü bazı çatlaklar dışarıdan görünmez. Modelin röntgeni <b>artık grafiği</b> (residual plot): her noktanın artığını, yani ölçülen eksi tahmini, x'e karşı çizersin. Desensiz bir bulut iyi haber: modelin kaçırdığı bir yapı kalmamış. Kubbe ya da gülümseme ise modelin bir eğriliği kaçırdığını söyler. Elektrik verisinde düz doğrunun R²'si 0.5 civarında, ama artıklar gülümsüyor: en soğuk ve en sıcak günlerde tüketim hep az tahmin ediliyor. Sıcaklığın karesini sütun olarak ekleyince desen kayboluyor. Parabolün dibi (−β₁ / 2β₂) 18 °C civarına düşüyor: şehrin konfor sıcaklığını model kendisi buluyor.",
           "Dereceyi 10'a çıkarınca ne olur? Eğitim noktalarındaki hata daha da düşer, çünkü on bir ağırlık on sekiz noktaya çok rahat yapışır. Ama sıcaklık verisinde 20:00 tahmini örneklemlerin çoğunda binlerce derece şaşar. Hatası düşen model her zaman daha iyi model değildir. Bu ezberin adı <b>overfitting</b> (aşırı öğrenme); bir sonraki büyük durak."],
-    read:[["Sol panel","Mavi noktalar ölçüm. Gri kenarlar ölçüm yapılmayan bölge; oradaki kesikli çizgi gerçekte ne olduğu. Tuvale tıklayıp nokta ekleyebilirsin, gri kenara da: eklediğin nokta orayı 'veri var' yapar ve şerit daralır. Kalın pembe eğri modelin. « Terimler » açıkken ince renkli çizgiler eğrinin parçaları: her biri β₀ seviyesine eklenen tek bir terim. Sağ kenardaki pembe halka modelin veri dışı tahmini, gri halka gerçek değer."],
+    read:[["Sol panel","Mavi noktalar ölçüm. Gri kenarlar ölçüm yapılmayan bölge; oradaki kesikli çizgi gerçekte ne olduğu. Tuvale tıklayıp nokta ekleyebilirsin, gri kenara da: eklediğin nokta orayı 'veri var' yapar ve şerit daralır. Kalın pembe eğri modelin. « Terimler » açıkken ince renkli çizgiler eğrinin parçaları: her biri β₀ seviyesine eklenen tek bir terim. Sağ kenardaki pembe halka modelin veri dışı tahmini, gri halka gerçek değer. Derece 2'de, anlamı olan veride (gün içi sıcaklık, elektrik) parabolün tepesi ya da dibi küçük bir halkayla işaretli: en sıcak saat, en az tüketimin olduğu sıcaklık."],
           ["Least squares çözümü","Eğri kendiliğinden oturmaz. Yeni veride model düz bir çizgi (her x'e ortalama); nokta ekleyince ya da sütun değiştirince eğri yerinde kalır. Düğme o anki sütunlarla en iyi ağırlıkları bulur ve eğriyi yerine indirir; köşede hatanın nasıl düştüğü yazar, önceki eğri kesikli gri çizgide kalır."],
-          ["Sağ panel","Tasarım matrisi, yani modelin gördüğü tablo. Her satır bir ölçüm, her sütun bir öznitelik: 1, x, x², x³. Buradaki x ham değer değil; ortalanıp −1 ile 1 arasına ölçeklenmiş hâli (Modül 02), formülü tablonun üstünde. Alttaki 'β' satırı katsayılar. Seçili satırda her sayı kendi katsayısıyla çarpılıyor, toplamı ŷ. Fareyi bir noktanın üstüne götür, seçili satır değişir."],
+          ["Sağ panel · tasarım matrisi","Tasarım matrisi, yani modelin gördüğü tablo. Her satır bir ölçüm, her sütun bir öznitelik: 1, x, x², x³. Buradaki x ham değer değil; ortalanıp −1 ile 1 arasına ölçeklenmiş hâli (Modül 02), formülü tablonun üstünde. Alttaki 'β' satırı katsayılar. Seçili satırda her sayı kendi katsayısıyla çarpılıyor, toplamı ŷ. Fareyi bir noktanın üstüne götür, seçili satır değişir."],
+          ["Sağ panel · artık grafiği","Modelin röntgeni. Yatay eksen x, dikey eksen artık (ölçülen − tahmin), siyah çizgi sıfır, yani tam isabet. Kırmızı çubuk her noktanın artığı, mor kesikli çizgi artıkların yerel ortalaması: deseni görmeye yardım eder. Üstteki satır desen var mı diye bakar. İki şeye bakıyor: artılarla eksilerin kaç kez yer değiştirdiği (rastgele olsa aşağı yukarı yarısında değişirdi) ve mor çizginin artıkları ne kadar önceden bildiği. İki uç artı, orta eksi gülümseme; tersi kubbe. Gün içi sıcaklıkta doğrunun artıkları kubbe, elektrikte gülümseme çizer; x² ile ikisi de desensiz. Çok öznitelikli modelde yatay eksene x yerine tahmin (ŷ) konur."],
           ["Derece","Kaydırıcı modele giren sütunları seçiyor: 1'den 10'a, yanında 'x … x⁷' gibi yazar. Her adım bir sütun ve bir ağırlık daha ekliyor. Yeni ağırlık 0'dan başlar, yani sütunu eklemek tek başına eğriyi değiştirmez; değiştiren, ardından basılan « Least squares çözümü ». 5. dereceden sonra tablo ortadaki sütunları '…' ile kısaltır."],
           ["Göstergeler","RMSE ekrandaki modelin tipik hata büyüklüğü, verinin kendi biriminde (karelerle hesaplandığı için büyük hatalara ağırlık verir; düz ortalama hata MAE'dir); 'En iyi RMSE' bu sütunlarla inilebilecek en düşük değer. İkisi eşitse RMSE yeşile döner. R² Modül 06'daki gibi. Son kutu veri dışındaki tek bir noktada modelin söylediği. Rengi gerçeğe ne kadar uzak olduğunu gösteriyor: yeşil yakın, kırmızı uzak."]],
     terms:[["polynomial regression","polinom regresyon","x'in üslerini yeni sütun olarak ekleyip doğrusal regresyon kurmak"],
            ["degree","derece","modeldeki en yüksek üs; 2 bir kavis, 3 bir S kıvrımı"],
            ["feature engineering","öznitelik türetme","var olan sütunlardan yeni sütunlar üretmek: kare, çarpım, oran"],
            ["design matrix","tasarım matrisi","modelin gördüğü tablo: satır başına bir ölçüm, sütun başına bir öznitelik"],
-           ["extrapolation","ekstrapolasyon","modeli ölçüm aralığının dışında kullanmak"]],
+           ["extrapolation","ekstrapolasyon","modeli ölçüm aralığının dışında kullanmak"],
+           ["residual plot","artık grafiği","her noktanın artığını (ölçülen − tahmin) x'e ya da tahmine göre çizen grafik; desen varsa model bir yapıyı kaçırıyor"]],
     life:["Mühendislikte kalibrasyon eğrileri: sensörün ham çıktısını gerçek birime çeviren ikinci ya da üçüncü dereceden polinomlar.",
           "Ekonomide önce artıp sonra azalan ilişkiler (yaş ile gelir gibi): modele yaşın yanına yaş² eklemek standart bir adım.",
           "Öznitelik türetme her yerde: iki sütunu çarpmak (alan × kat), oran almak (borç / gelir), tarihten haftanın gününü çıkarmak. Hepsi aynı fikir: model doğrusal kalır, sütunlar zenginleşir."],
@@ -2278,17 +2305,24 @@ const CONTENT={
     short:"Çünkü hatası sıfır olan model soruları değil, cevapları ezberlemiş olabilir. Gördüğü noktaları kusursuz bilir, yeni bir nokta gelince çuvallar. Buna overfitting (aşırı öğrenme) deniyor ve makine öğrenmesinin baş belası.",
     idea:["Sınava, kitaptaki çözümlü örnekleri ezberleyerek giren bir öğrenci düşün. Aynı sorular çıksa 100 alır. Biraz değişik bir soru gelince kalır. Model için de aynı şey geçerli. Buradaki model bir polinom (ayrıntısı Modül 09'da). Ona istediğin kadar sütun, yani esneklik verebiliyorsun: 'derece' kaydırıcısı. 1. derece düz bir çizgi. 14. derece, 14 noktanın hepsinden geçebilen kıvrımlı bir eğri.",
           "İki ayrı hata ölçüyoruz. <b>Eğitim hatası</b>: modelin gördüğü noktalarda ne kadar yanıldığı. <b>Test hatası</b>: hiç görmediği noktalarda ne kadar yanıldığı. Derece arttıkça eğitim hatası hep düşer, çünkü esnek eğri noktalara daha iyi oturur. Test hatası ise bir yere kadar düşer, sonra tırmanır. Tırmanmanın başladığı yerden sonrası <b>overfitting</b> (aşırı öğrenme): model asıl ilişkiyi değil, o örneklemin rastgele gürültüsünü öğrenmiş. Dönüş noktasının solu <b>underfitting</b> (yetersiz öğrenme): model veriyi görecek kadar esnek değil. İkisinin arasında aranan şey, yeni veride de iyi çalışmak; buna <b>generalization</b> (genelleme) deniyor.",
-          "Asıl ders şu: aşırı öğrenme modelin tek başına suçu değil. Belirleyen, model karmaşıklığı ile veri miktarının oranı. Aynı 14. derece, 40 noktayla çok daha uslu duruyor. Veri arttıkça esnek model de disipline giriyor: her aralıkta eğriyi yerinde tutan bir nokta oluyor."],
+          "Bir de kıyas çıtası lazım: herkese eğitim verisinin ortalamasını söyleyen <b>temel model</b> (baseline). Hiçbir şey öğrenmez, ama her modelin geçmesi gereken çıta odur. Test hatası ona yakınsa model veriden hemen hiçbir şey öğrenmemiştir. <b>Test R²</b> bunu tek sayıyla söyler: 1 kusursuz, 0 temel modelle aynı, eksi ise temel modelden kötü.",
+          "Asıl ders şu: aşırı öğrenme modelin tek başına suçu değil. Belirleyen, model karmaşıklığı ile veri miktarının oranı. Aynı 14. derece, 40 noktayla çok daha uslu duruyor. Veri arttıkça esnek model de disipline giriyor: her aralıkta eğriyi yerinde tutan bir nokta oluyor.",
+          "Bunu tek grafikte görmenin yolu <b>öğrenme eğrisi</b> (learning curve). Dereceyi sabit tut, eğitim örneği sayısını artır, her adımda eğitim ve test hatasını çiz. Üç soruyu ezberleyen öğrenciyi düşün: o üç soruda kusursuz, yeni sorularda zorlanıyor, ama yeni soru çözdükçe gelişiyor. Esnek modelde de iki eğri arasında geniş bir boşluk var ve veri arttıkça kapanıyor; Modül 04 buna yüksek varyans diyecek. Bu modele veri toplamak işe yarar. Bir de kıvrımlı bir yolu cetvelle çizmeye çalışanı düşün: kaç kez denerse denesin çizgi eğrilmez. Düz doğruda da iki eğri baştan yüksekte birleşmiş (yüksek bias); veri eklemek hiçbir şey değiştirmez, daha esnek model gerekir."],
     read:[["Sol panel","Kesikli gri eğri gerçek ilişki; model bunu bilmiyor, sen biliyorsun. Mavi noktalar eğitim verisi, soluk küçük noktalar test verisi, pembe eğri modelin tahmini. Yüksek derecede pembe eğrinin noktalar arasında nasıl çıldırdığına bak."],
-          ["Sağ panel","Dereceye göre iki hata eğrisi: mavi eğitim, kırmızı test. Eğitim hep iniyor, test U çiziyor. Yeşil bant test hatasının en düşük olduğu derece: aranan denge orası."],
-          ["Göstergeler","RMSE hataların karesinin ortalamasının karekökü, verinin biriminde: büyük hatalara ağırlık veren tipik hata büyüklüğü. Ortalama hata değildir; 'ortalama ne kadar yanılıyorum'un cevabı MAE'dir ve RMSE hep ondan büyük ya da ona eşittir. 'Durum' rozeti yetersiz / dengede / aşırı öğrenme diyor ve kararını test eğrisine göre veriyor, eğitim hatasına göre değil."]],
+          ["Sağ panel · dereceye göre","Dereceye göre iki hata eğrisi: mavi eğitim, kırmızı test. Eğitim hep iniyor, test U çiziyor. Yeşil bant test hatasının en düşük olduğu derece: aranan denge orası. Kesikli gri çizgi temel model: herkese eğitim ortalamasını söyleyen modelin test hatası. Test eğrisi onun üstüne çıkınca model temel modelden kötü."],
+          ["Sağ panel · örnek sayısına göre","Öğrenme eğrisi: derece sabit, yatay eksende eğitim örneği sayısı (0–200). Her nokta 21 ayrı örneklemin medyanı; tek örneklemde eğri zıplıyor. İki eğri arasındaki pembe alan boşluk. Boşluk geniş ve kapanıyorsa veri toplamak işe yarar; iki eğri yüksekte, temel model çizgisinin yanında birleşmişse yaramaz. Noktalı çizgi gürültü tabanı: hiçbir model test hatasını bunun altına indiremez. Pembe kesikli dikey çizgi, soldaki eğitim verisi kaydırıcısının şu anki değeri."],
+          ["Göstergeler","RMSE hataların karesinin ortalamasının karekökü, verinin biriminde: büyük hatalara ağırlık veren tipik hata büyüklüğü. Ortalama hata değildir; 'ortalama ne kadar yanılıyorum'un cevabı MAE'dir ve RMSE hep ondan büyük ya da ona eşittir. Test R² = 1 − (modelin test MSE'si) / (temel modelin test MSE'si). 'Durum' rozeti yetersiz / dengede / aşırı öğrenme diyor ve kararını test hatasına göre veriyor, eğitim hatasına göre değil. Test hatası temel modele çok yakınsa (test R² 0.2'nin altında) da « Yetersiz » der: model veriden hemen hiçbir şey öğrenmemiş."]],
     terms:[["overfitting","aşırı öğrenme","eğitim verisini ezberleyip yeni veride bozulmak"],
            ["underfitting","yetersiz öğrenme","modelin veriyi görecek kadar esnek olmaması"],
            ["generalization","genelleme","hiç görülmemiş veride başarılı olmak; asıl amaç bu"],
+           ["baseline","temel model","herkese eğitim verisinin ortalamasını söyleyen model; her modelin geçmesi gereken çıta"],
+           ["R²","R kare","1 − model hatası / temel modelin hatası (kareli); 0 temel modelle aynı, eksi temel modelden kötü"],
+           ["learning curve","öğrenme eğrisi","eğitim örneği sayısına göre eğitim ve test hatası; 'daha çok veri işe yarar mı?' sorusunun cevabı"],
            ["RMSE","kök ortalama kare hata","hataların karesinin ortalamasının karekökü; büyük hatayı kareyle büyüttüğü için hep MAE'den büyük ya da ona eşit"],
            ["MAE","ortalama mutlak hata","hataların mutlak değerlerinin ortalaması; 'ortalama ne kadar yanılıyorum'un cevabı"]],
     life:["Her makine öğrenmesi projesinin baş belası. 'Sunumda %99, sahada %60' hikâyesinin adı hep overfitting.",
-          "Bu yüzden veri her zaman eğitim / doğrulama / test diye üçe bölünür ve test kümesine karar verirken hiç bakılmaz. Test, sınav günü açılan zarftır."],
+          "Bu yüzden veri her zaman eğitim / doğrulama / test diye üçe bölünür ve test kümesine karar verirken hiç bakılmaz. Test, sınav günü açılan zarftır.",
+          "Proje toplantısında en sık duyulan cümle: 'Model iyi değil, daha çok veri toplayalım.' Veri toplamak pahalıdır. Önce öğrenme eğrisi çizilir: eğriler yüksekte birleşmişse o para boşa gider."],
     trap:"Eğitim hatası bir kalite ölçütü değildir. Daha sinsi bir hata da var: test kümesine bakarak dereceyi seçip sonra aynı test kümesindeki notu rapor etmek. O zaman test artık test değildir, sen ona göre ayar yapmışsın. Derece seçmek için ayrı bir doğrulama kümesi lazım; Modül 05 bunu anlatıyor.",
     fig:{at:1, cap:"Beş evin hataları (kırmızı çubuklar). D'nin 1.6 milyonluk hatası mutlak hataların %64'ü; kare alınca payı %90'a çıkıyor. Kare, büyük hatayı büyütüyor: bu yüzden RMSE (0.752) MAE'den (0.500) büyük. Kesikli çizgi ȳ = 3.8, herkese aynı fiyatı söyleyen temel model."},
     ex:{t:"Beş ev: MAE, RMSE ve temel model",
@@ -2300,8 +2334,8 @@ const CONTENT={
       end:"RMSE ortalama hata değildir: ortalama hata MAE'dir (0.500), RMSE (0.752) büyük hatayı kareyle büyüten tipik hata büyüklüğüdür ve hiçbir zaman MAE'den küçük olmaz."},
     check:[["Bir modelin beş evdeki hataları (milyon TL): +1, −1, +1, −1, +6. MAE ve RMSE kaç?",
             "MAE = (1 + 1 + 1 + 1 + 6) / 5 = 2.0. MSE = (1 + 1 + 1 + 1 + 36) / 5 = 8, RMSE = √8 ≈ 2.83. Hataları işaretleriyle toplayıp 6 / 5 = 1.2 bulmak tuzaktır. Tek büyük hata (6), RMSE'yi MAE'nin üstüne çekti."],
-           ["Hıza göre yakıt tüketimi tahmini. Eğitim / test RMSE: doğru 1.08 / 1.16, parabol 0.53 / 0.69, 12. derece eğri 0.18 / 0.95. Hangisini seçersin, öteki ikisinin derdi ne?",
-            "Parabolü: test hatası en düşük olan o (0.69). Doğru underfitting: iki hata da yüksek ve birbirine yakın. 12. derece overfitting: eğitimde 0.18'e inmiş, testte beş kattan fazla büyümüş. Eğitim hatasına bakıp seçseydin en kötülerden birini seçerdin."],
+           ["Bir modelin öğrenme eğrisinde eğitim hatası 0.05, test (doğrulama) hatası 0.30 ve iki eğri hâlâ birbirine yaklaşıyor. İlk adımın ne olur: daha esnek bir model mi, daha çok veri mi?",
+            "Daha çok veri. Eğitim hatası düşük, test hatası yüksek: aradaki boşluk büyük, bu yüksek varyansın (aşırı öğrenmenin) işareti. Eğriler hâlâ yaklaştığına göre yeni veri boşluğu kapatmaya devam edecek; modeli sadeleştirmek de yardım eder. Daha esnek model ise ezberi artırır, durumu kötüleştirir. Eğriler yüksekte birleşmiş olsaydı cevap tersine dönerdi."],
            ["Eğitim RMSE'si 1.05, test RMSE'si 1.08. Herkese ortalamayı söyleyen temel modelin test RMSE'si 1.10. Teşhis ne?",
             "Underfitting. İki hatanın yakın olması yalnız overfitting olmadığını söyler. Ama ikisi de temel modele neredeyse eşit: model herkese ortalamayı söylemekten ancak %2 iyi, yani veriden hemen hiçbir şey öğrenmemiş. Çare daha esnek bir model ya da yeni öznitelikler."]],
     next:"Modül 04 · Yanlılık mı, varyans mı — bu U eğrisinin iki ucundaki hatanın adı ve kaynağı orada."
@@ -2432,18 +2466,28 @@ const CONTENT={
   }},
 
 /* ══ 11 ══ */
-"m-cv":{ pick:"Veri seti", sets:CURVES,
+"m-cv":{ pick:"Veri seti",
+  /* CURVES'ün üçü + zaman sırası olan kafe satışı. time: « Zaman sırası » bölmesi yalnız
+     zamanı olan veride açık (reklam bütçesi zaman değil). Kafe: y ölçekli birimde
+     (satış − 293) / 150; ys ile bardağa döner, sd gürültü (23 bardak). */
+  sets:[{...CURVES[0],time:true}, CURVES[1], {...CURVES[2],time:true},
+    {name:"Kafe satışı", x:"gün · 3 yıl", y:"satış (bardak)", time:true, ys:150, yu:"bardak", sd:23/150,
+     truth:(x)=>{const t=(x+1)/2*1094; return (228+t/7-66*Math.cos(2*Math.PI*t/365)-293)/150;},
+     note:"Üç yıllık günlük satış; yıldan yıla artıyor, yazın yükseliyor. Gizli kural sunumdakiyle aynı (hafta sonu etkisi hariç): 150 bardak taban, her gün yedide bir bardak artış, sıcaklığın her derecesi 6 bardak. k = 5 ve 60 günle, 100 örneklemde ölçtük: düz doğruda karıştırılmış KFold ortalama 54 bardak hata söylüyor, zaman sırası 80 (1.5 kat); 2. derecede 54'e karşı 149 (2.8 kat); 10. derecede KFold 31'e iniyor, zaman sırası binlerce bardak. Sunumdaki KNN'de oran 2 kattı (18.0 ↔ 36.6): model ne olursa olsun karıştırılmış KFold iyimser."}],
   lesson:{
     q:"Tek bir sınav notuna bakıp 'bu model iyi' demek güvenilir mi?",
     short:"Değil. Veriyi bir kez bölüp not almak tek zar atmaya benzer; şanslı ya da şanssız bir bölme çıkabilir. Cross-validation veriyi k kez farklı böler, k not alır ve ortalamasını verir. Yanına bir de 'artı eksi ne kadar' ekler.",
     idea:["Elinde 20 nokta var ve modeli sınamak için 4'ünü ayırdın. Hangi 4'ünü? Kolay 4 nokta denk gelirse model olduğundan iyi görünür. Zor 4 nokta denk gelirse olduğundan kötü. Aynı model, iki farklı not. Tek bir bölmeye güvenmek, bir öğrenciyi tek soruluk bir sınavla değerlendirmek gibi.",
           "<b>k-fold cross-validation</b> (k-katlı çapraz doğrulama) çözümü basit. Veriyi k eşit parçaya böl; her parçaya <b>fold</b> (kat) deniyor. Sırayla her katı bir kez doğrulama katı yap, kalanlarla eğit. k tur sonunda k notun olur. Ortalaması modelin notu. Standart sapması ise bu notun ne kadar güvenilir olduğu. Artık 'modelim %86' değil, '%86 ± 3' diyebiliyorsun. İkinci sayı birincisi kadar önemli.",
-          "k'yı kaç seçmeli? Büyük k daha kararlı bir not verir, ama k kez eğitim demek; pahalı. k nokta sayısına eşit olursa her nokta tek başına doğrulama katı olur; buna LOOCV (leave-one-out) deniyor. Pratikte 5 ya da 10 alışılmış denge. Ayar seçmek için (derece, α) ayrılan veriye <b>validation set</b> (doğrulama kümesi) deniyor. Cross-validation bu kümeyi k kez, her seferinde başka bir parçadan kuruyor. Bu yüzden katlara 'test' değil 'doğrulama' diyoruz: 'test' adı en sonda yalnız bir kez açılan, kilitli kümeye saklanır. Deneme sınavını istediğin kadar tekrarlarsın, final bir kez yapılır."],
-    read:[["Sol panel","Kesikli gri eğri gerçek ilişki. Renkli noktalar katlar; içi dolu olanlar o turun doğrulama katı. Pembe eğri, o katı hiç görmeden eğitilmiş model. Bir kattan ötekine geçince eğrinin nasıl değiştiğine bak."],
-          ["Alt şerit","Veri karıştırılıp katlara bölünmüş hâli. Bir kata tıklayarak onu doğrulama katı yapabilirsin."],
-          ["Sağ panel","Kat başına hata çubukları, ortalama çizgisi ve ±1 standart sapma bandı (sapma n − 1'e bölünerek, yani k − 1). Soluk yeşil çizgiler önceki karıştırmaların ortalamaları: k küçükken dağınık, k büyükken üst üste biniyor. Yani k büyüdükçe not kararlılaşıyor."]],
+          "k'yı kaç seçmeli? Büyük k daha kararlı bir not verir, ama k kez eğitim demek; pahalı. k nokta sayısına eşit olursa her nokta tek başına doğrulama katı olur; buna LOOCV (leave-one-out) deniyor. Pratikte 5 ya da 10 alışılmış denge. Ayar seçmek için (derece, α) ayrılan veriye <b>validation set</b> (doğrulama kümesi) deniyor. Cross-validation bu kümeyi k kez, her seferinde başka bir parçadan kuruyor. Bu yüzden katlara 'test' değil 'doğrulama' diyoruz: 'test' adı en sonda yalnız bir kez açılan, kilitli kümeye saklanır. Deneme sınavını istediğin kadar tekrarlarsın, final bir kez yapılır.",
+          "Bir istisna var: veride zaman sırası varsa karıştırmak hile olur. Kafe satışını düşün. Günleri karıştırıp katlara bölersen doğrulamaya düşen bir salının pazartesisi ve çarşambası çoğu zaman eğitimde kalır. Model tahmin edeceği günün dününü ve yarınını görmüş olur, yani sınavda geleceği görmüştür. Gerçekte ise hep geçmişi görüp geleceği tahmin edecek. <b>TimeSeriesSplit</b> (zaman serisi bölmesi) bunu taklit eder: veri karıştırılmaz, eğitim hep doğrulamadan önceki dönemden seçilir. Her turda doğrulama bir dilim ileri kayar, eğitim penceresi büyür. Kafe verisinde karıştırılmış KFold 2. derece modele 55 bardak hata diyor, zaman sırası 150 civarı. Karıştırınca not iyimser çıkar, çünkü model aslında iki bilinen günün arasını dolduruyor. Gerçek iş ise ileriye uzatmak; orada model çok daha kötü. Daha da kötüsü, karıştırılmış nota bakıp model seçersen gelecekte çökecek modeli seçebilirsin. Kendine hep şunu sor: model gerçekte hangi durumla karşılaşacak? Doğrulama o durumu taklit etmeli."],
+    read:[["Sol panel","Kesikli gri eğri gerçek ilişki. Renkli noktalar katlar; içi dolu olanlar o turun doğrulama katı. Pembe eğri, o katı hiç görmeden eğitilmiş model. Bir kattan ötekine geçince eğrinin nasıl değiştiğine bak. « Zaman sırası »nda sağdaki gri bölge o turda henüz gelmemiş günler: model onları hiç görmüyor, eğrisi doğrulama diliminin sonunda bitiyor."],
+          ["Alt şerit","Bölmenin kendisi. « Karıştır »da veri karıştırılıp k eşit kata bölünmüş hâli; her nokta tam bir kez doğrulamada. « Zaman sırası »nda noktalar zaman sırasında: solda eğitim, çerçevede doğrulama dilimi, sağda soluk kalan gelecek. İlk dilim hiç doğrulanmaz, hep eğitimde kalır. Bir kata tıklayarak onu doğrulama katı yapabilirsin."],
+          ["Bölme","« Karıştır » sıradan k-fold (KFold). « Zaman sırası » TimeSeriesSplit: veri k + 1 dilime bölünür, k turda doğrulama dilimi soldan sağa kayar. Yalnız zamanı olan veride açılır; reklam bütçesi zaman değil, orada kapalı. Zaman sırası karıştırılmaz: « Yeniden karıştır » turları değiştirmez."],
+          ["Sağ panel","Kat başına hata çubukları, ortalama çizgisi ve ±1 standart sapma bandı (sapma n − 1'e bölünerek, yani k − 1). Soluk yeşil çizgiler önceki karıştırmaların ortalamaları: k küçükken dağınık, k büyükken üst üste biniyor. Yani k büyüdükçe not kararlılaşıyor. « Zaman sırası »nda kesikli gri çizgi aynı verinin karıştırılmış KFold ortalaması: iki not arasındaki fark, karıştırmanın ne kadar iyimser olduğu. Kafe verisinde hatalar bardak cinsinden."]],
     terms:[["cross-validation","çapraz doğrulama","veriyi k kez farklı bölüp her seferinde not alarak ortalama başarı ölçmek"],
            ["fold","kat","verinin k parçasından biri"],
+           ["TimeSeriesSplit","zaman serisi bölmesi","eğitimi hep doğrulamadan önceki dönemden seçen, her turda bir dilim ileri kayan bölme; zaman sırası olan veride kullanılır"],
            ["validation set","doğrulama kümesi","ayar (hiperparametre) seçmek için kullanılan, testten ayrı küme"],
            ["variance of the estimate","tahminin varyansı","aynı modelin farklı bölmelerde farklı not almasının ölçüsü; '± kaç'"]],
     life:["Bilimsel yayında ve yarışmalarda tek bir bölmenin notu artık kabul edilmez; sonuçlar 'ortalama ± sapma' olarak yazılır.",
@@ -3331,16 +3375,57 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   }
   const evalp=(w,x)=>{let s=0,p=1;for(let i=0;i<w.length;i++){s+=w[i]*p;p*=x;}return s;};
   const rmse=(w,d)=>Math.sqrt(d.reduce((a,p)=>a+(evalp(w,p.x)-p.y)**2,0)/d.length);
+  const median=(a)=>{const x=[...a].sort((p,q)=>p-q), n=x.length; return !n?NaN:n%2?x[(n-1)/2]:(x[n/2-1]+x[n/2])/2;};
 
   /* 14 polinom uydurması yalnız veriye bağlı, derece kaydırıcısına değil:
-     her draw()'da baştan hesaplamak gereksiz (artık dar yerleşimde de çağrılıyor) */
+     her draw()'da baştan hesaplamak gereksiz (artık dar yerleşimde de çağrılıyor).
+     base: TEMEL MODEL (Hafta 3) — herkese eğitim ortalamasını söyleyen modelin test
+     RMSE'si. Test R² buna göre: 1 − (test MSE) / (temel modelin test MSE'si); 0 temel
+     modelle aynı, eksi temel modelden kötü. */
   let ceVer=-1, ceVal=null;
   function curveErrors(){
     if(ceVer===fitVer && ceVal) return ceVal;
     const out=[];
     for(let d=1;d<=14;d++){const w=polyfit(tr,d);out.push({d,tr:rmse(w,tr),te:rmse(w,te)});}
+    const my=tr.reduce((a,p)=>a+p.y,0)/Math.max(1,tr.length);
+    out.base=Math.sqrt(te.reduce((a,p)=>a+(p.y-my)**2,0)/te.length);
     ceVer=fitVer; return ceVal=out;
   }
+
+  /* ── öğrenme eğrisi (learning curve, Hafta 4): seçili derecede eğitim örneği sayısı
+     LN[k] olan modellerin eğitim ve test hatası. Tek örneklemde eğri zıplıyor (14.
+     derecenin test hatası ağır kuyruklu, bir örneklemde 1e4'ü geçiyor): her nokta LR
+     örneklemin MEDYANI. Her örneklem 200 noktalık bir havuz; m örnekli model havuzun
+     İLK m noktasıyla eğitilir (iç içe kümeler, sklearn'ün learning_curve'ü gibi), böylece
+     bir örneklemin eğrisi m'ye göre kesintisiz. Tohum veri kümesine ve gürültüye bağlı,
+     dereceye değil: derece değişince AYNI örneklemler karşılaştırılır, eğri titremez.
+     Maliyet 14. derecede ~30 ms; yalnız bu görünüm açıkken ve derece / gürültü / veri
+     kümesi değişince hesaplanır. */
+  const LN=[8,10,12,14,16,18,20,23,26,30,35,40,50,60,70,80,100,120,140,160,180,200], LR=21, LMAX=200;
+  function seeded(a){return function(){a|=0;a=a+0x6D2B79F5|0;
+    let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t;
+    return((t^t>>>14)>>>0)/4294967296;};}
+  let lcKey="", lcVal=null;
+  function learnCurve(){
+    const key=dsi+"|"+noise+"|"+deg; if(key===lcKey&&lcVal) return lcVal; lcKey=key;
+    const R=seeded(0x2545F491^(dsi*977+Math.round(noise*100)*131));
+    const g=()=>{let u=0,v=0;while(!u)u=R();while(!v)v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+    const TR=LN.map(()=>[]), TE=LN.map(()=>[]), BS=[];
+    for(let r=0;r<LR;r++){
+      const pool=[]; for(let i=0;i<LMAX;i++){const x=-1+2*R(); pool.push({x,y:truth(x)+g()*noise});}
+      const tst=[];  for(let i=0;i<60;i++){const x=-1+2*i/59; tst.push({x,y:truth(x)+g()*noise});}
+      LN.forEach((m,k)=>{ if(m<deg+2) return;               // derece + 1 katsayıya en az bir fazla nokta
+        const a=pool.slice(0,m), w=polyfit(a,deg); TR[k].push(rmse(w,a)); TE[k].push(rmse(w,tst)); });
+      const my=pool.reduce((s,p)=>s+p.y,0)/LMAX;
+      BS.push(Math.sqrt(tst.reduce((s,p)=>s+(p.y-my)**2,0)/tst.length));
+    }
+    const out=LN.map((m,k)=>({m, tr:median(TR[k]), te:median(TE[k])})).filter(e=>Number.isFinite(e.tr));
+    out.base=median(BS);
+    return lcVal=out;
+  }
+  let view="d";                                   // sağ panel: "d" dereceye göre · "n" örnek sayısına göre
+  /* R² eksi sonsuza kadar gidebiliyor (14. derecede −1e20): kutuyu taşırmasın */
+  const r2s=(v)=>!Number.isFinite(v)?"—":v>=-99.995?(v<0?"−":"")+Math.abs(v).toFixed(2):"−"+Math.abs(v).toExponential(1).replace("e+","e");
   function draw(){
     if(!fit()) return;
     const W=cv.__w,H=cv.__h;
@@ -3377,21 +3462,44 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     label(ctx,S().x+" →",p+pw/2,p+ph+16,css("--ink-soft"),"center",11);
     ylabel(ctx,S().y+" →",p-15,p,p+ph,css("--ink-soft"),11);
 
-    /* ---- sağ: hata eğrisi ---- */
+    /* ---- sağ: hata eğrisi (dereceye göre) ya da öğrenme eğrisi (örnek sayısına göre) ---- */
     /* E/cur/best göstergeler için de gerekli: dar yerleşimde de hesaplanmalı,
        yoksa 930 px altında üç gösterge son geniş çizimin değerinde donuyor */
-    const E=curveErrors(), cur=E[deg-1];
+    const E=curveErrors(), cur=E[deg-1], base=E.base;
     const best=E.reduce((a,b)=>b.te<a.te?b:a);
+    /* öğrenme eğrisi çizimden bağımsız: aria-label'a da yazılıyor (dar yerleşimde de) */
+    const LC=view==="n"?learnCurve():null;
     if(split<W){
       const q0=split+18, qw=W-split-40, qh=H-2*p, qy0=p;
-      const mx=Math.min(1.2, Math.max(0.25,...E.map(e=>Math.min(e.te,1.2))))*1.05;
-      const EX=(d)=>q0+(d-1)/13*qw, EY=(v)=>qy0+qh-clamp(v,0,mx)/mx*qh;
+      const ref=LC?LC.base:base;
+      const vals=LC?LC.flatMap(e=>[e.tr,e.te]):E.map(e=>e.te);
+      /* temel model çizgisi yüksekliğin ~%60'ında kalsın: düz doğruda iki eğri onun hemen
+         altında birleşiyor ve tavana yapışınca üstteki lejantın altında kalıyordu */
+      const mx=Math.min(1.2, Math.max(0.25,ref*1.6,...vals.map(v=>Math.min(v,1.2))))*1.05;
+      const X0=LC?0:1, X1=LC?LMAX:14;
+      const EX=(d)=>q0+(d-X0)/(X1-X0)*qw, EY=(v)=>qy0+qh-clamp(v,0,mx)/mx*qh;
+      const S2=LC?LC.map(e=>({x:e.m,tr:e.tr,te:e.te})):E.map(e=>({x:e.d,tr:e.tr,te:e.te}));
       ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
       for(let i=0;i<=4;i++){const gy=qy0+i*qh/4;ctx.beginPath();ctx.moveTo(q0,gy);ctx.lineTo(q0+qw,gy);ctx.stroke();}
       ctx.strokeStyle=css("--line");ctx.strokeRect(q0,qy0,qw,qh);ctx.restore();
-      // en iyi derece bandı
-      ctx.fillStyle=hexA("--good",.10);
-      ctx.fillRect(EX(best.d)-9,qy0,18,qh);
+      if(LC){
+        /* iki eğri arasındaki boşluk (Hafta 4'teki pembe alan): ölçeğin içinde kalan kısmı */
+        ctx.save();ctx.beginPath();
+        S2.forEach((e,i)=>{const x=EX(e.x),y=EY(Math.min(e.te,mx)); i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+        for(let i=S2.length-1;i>=0;i--) ctx.lineTo(EX(S2[i].x),EY(S2[i].tr));
+        ctx.closePath();ctx.fillStyle=hexA("--bad",.10);ctx.fill();ctx.restore();
+        /* gürültü tabanı: hiçbir modelin test hatası bunun altına inmez */
+        if(noise>0){ ctx.save();ctx.strokeStyle=hexA("--ink-soft",.75);ctx.lineWidth=1.2;ctx.setLineDash([2,4]);
+          ctx.beginPath();ctx.moveTo(q0,EY(noise));ctx.lineTo(q0+qw,EY(noise));ctx.stroke();ctx.restore(); }
+      } else {
+        // en iyi derece bandı
+        ctx.fillStyle=hexA("--good",.10);
+        ctx.fillRect(EX(best.d)-9,qy0,18,qh);
+      }
+      /* temel model: herkese eğitim ortalamasını söyleyen modelin test hatası. Test eğrisi
+         bunun üstündeyse test R² eksi: model "ortalamayı söyle"den de kötü. */
+      ctx.save();ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.8;ctx.setLineDash([8,5]);
+      ctx.beginPath();ctx.moveTo(q0,EY(ref));ctx.lineTo(q0+qw,EY(ref));ctx.stroke();ctx.restore();
       /* ölçeği aşan değer tavanda ▲: eskiden kırpılıp tavanda DÜZ bir çizgi gibi
          görünüyordu — sanki test hatası orada sabitleniyormuş gibi. Gerçekte
          yükselmeye devam ediyor (14. derecede 1e4'ü geçebiliyor). */
@@ -3399,41 +3507,68 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       const line=(key,color,dash)=>{
         /* çizgi tavana çarptığı yerde kesilir: tavanda yürüyen düz bir parça yok */
         ctx.save();ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2.4;ctx.setLineDash(dash);
-        E.forEach((e,i)=>{
-          const x=EX(e.d), v=e[key], out=!(v<=mx);
+        S2.forEach((e,i)=>{
+          const x=EX(e.x), v=e[key], out=!(v<=mx);
           if(!i){ if(!out) ctx.moveTo(x,EY(v)); return; }
-          const pv=E[i-1][key], pout=!(pv<=mx), px=EX(E[i-1].d);
+          const pv=S2[i-1][key], pout=!(pv<=mx), px=EX(S2[i-1].x);
           if(!out&&!pout) ctx.lineTo(x,EY(v));
           else if(!out&&pout){ const t=Number.isFinite(pv)?(pv-mx)/(pv-v):0; ctx.moveTo(px+(x-px)*t,qy0); ctx.lineTo(x,EY(v)); }
           else if(out&&!pout){ const t=Number.isFinite(v)?(mx-pv)/(v-pv):1; ctx.lineTo(px+(x-px)*t,qy0); }
         });
         ctx.stroke();ctx.restore();
-        E.forEach(e=>{ if(e[key]>mx){ clipped=true; label(ctx,"▲",EX(e.d),qy0+5,color,"center",10); }
-          else disc(ctx,EX(e.d),EY(e[key]),2.6,color); });
+        S2.forEach(e=>{ if(e[key]>mx){ clipped=true; label(ctx,"▲",EX(e.x),qy0+5,color,"center",10); }
+          else disc(ctx,EX(e.x),EY(e[key]),LC?2.2:2.6,color); });
       };
       line("tr",css("--a"),[]); line("te",css("--bad"),[]);
+      /* şu anki derece (U eğrisinde) ya da şu anki eğitim verisi (öğrenme eğrisinde) */
+      const xm=LC?EX(mTrain):EX(deg);
       ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=1.5;ctx.setLineDash([3,4]);
-      ctx.beginPath();ctx.moveTo(EX(deg),qy0);ctx.lineTo(EX(deg),qy0+qh);ctx.stroke();ctx.restore();
-      if(cur.te<=mx) disc(ctx,EX(deg),EY(cur.te),5.5,css("--bad"),css("--surface"));
-      disc(ctx,EX(deg),EY(cur.tr),5.5,css("--a"),css("--surface"));
-      legend(ctx,q0+8,qy0+14,[["test hatası","--bad"],["eğitim hatası","--a"],[`en iyi: ${best.d}. derece`,"--good"],
-        clipped&&["▲ ölçeğin dışında, yükseliyor","--ink-soft"]],{size:12,lh:17});
-      label(ctx,"model karmaşıklığı (derece) →",q0+qw/2,qy0+qh+16,css("--ink-soft"),"center",11);
-      label(ctx,"1",q0,qy0+qh+16,css("--ink-soft"),"center",11);
-      label(ctx,"14",q0+qw,qy0+qh+16,css("--ink-soft"),"center",11);
+      ctx.beginPath();ctx.moveTo(xm,qy0);ctx.lineTo(xm,qy0+qh);ctx.stroke();ctx.restore();
+      if(LC){
+        /* başlık panelin üstünde: lejantı kısa tutuyor, eğriler (sağ üst boş) görünür kalıyor */
+        label(ctx,`öğrenme eğrisi · ${LR} örneklemin medyanı`,q0,qy0-12,css("--ink-soft"),"left",10.5);
+        legend(ctx,xm+5,qy0+qh*.56,[[`şu an ${mTrain}`,"--accent"]],{size:10.5});
+        legend(ctx,q0+qw-8,qy0+14,[["test hatası","--bad"],["eğitim hatası","--a"],
+          [`- - temel model ${fmt(ref,2)}`,"--ink-soft"],noise>0&&[`··· gürültü ${fmt(noise,2)}`,"--ink-soft"],
+          clipped&&["▲ ölçek dışı","--ink-soft"]],{size:11.5,lh:16,align:"right"});
+        label(ctx,"eğitim örneği sayısı →",q0+qw/2,qy0+qh+16,css("--ink-soft"),"center",11);
+        label(ctx,"0",q0,qy0+qh+16,css("--ink-soft"),"center",11);
+        label(ctx,String(LMAX),q0+qw,qy0+qh+16,css("--ink-soft"),"center",11);
+      } else {
+        if(cur.te<=mx) disc(ctx,EX(deg),EY(cur.te),5.5,css("--bad"),css("--surface"));
+        disc(ctx,EX(deg),EY(cur.tr),5.5,css("--a"),css("--surface"));
+        legend(ctx,q0+8,qy0+14,[["test hatası","--bad"],["eğitim hatası","--a"],[`en iyi: ${best.d}. derece`,"--good"],
+          [`- - temel model ${fmt(base,2)}`,"--ink-soft"],
+          clipped&&["▲ ölçeğin dışında, yükseliyor","--ink-soft"]],{size:12,lh:17});
+        label(ctx,"model karmaşıklığı (derece) →",q0+qw/2,qy0+qh+16,css("--ink-soft"),"center",11);
+        label(ctx,"1",q0,qy0+qh+16,css("--ink-soft"),"center",11);
+        label(ctx,"14",q0+qw,qy0+qh+16,css("--ink-soft"),"center",11);
+      }
     }
     {
       $("#fit-vtr").textContent=fmt(cur.tr);
       /* QR ile d=14'te test RMSE 1e7–1e11'e çıkabiliyor: toFixed(3) kutuyu taşırır */
       $("#fit-vte").textContent=!Number.isFinite(cur.te)?"—":
         (Math.abs(cur.te)>=1e4?cur.te.toExponential(1).replace("e+","e"):fmt(cur.te));
+      const r2=1-(cur.te/base)**2, r2e=$("#fit-vr2");
+      r2e.textContent=r2s(r2); r2e.className="v "+(r2<0?"bd":r2<0.2?"wr":"ok");
       const st=$("#fit-vs"), rat=cur.te/Math.max(cur.tr,1e-6);
       const tee=$("#fit-vte");
-      if(deg<best.d-1){st.textContent="Yetersiz";st.className="v wr";tee.className="v wr";}
-      else if(deg>best.d+1 && rat>2.2){st.textContent="Aşırı öğrenme";st.className="v bd";tee.className="v bd";}
+      /* « Yetersiz » iki yoldan gelir: derece en iyi dereceden belirgin düşük, ya da test
+         hatası temel modele yakın (test R² < 0.2; Hafta 3 Soru 4: eğitim 1.05, test 1.08,
+         temel 1.10 → yetersiz). Aşırı öğrenme önce bakılır: ezber de R²'yi eksiye indirir. */
+      if(deg>best.d+1 && rat>2.2){st.textContent="Aşırı öğrenme";st.className="v bd";tee.className="v bd";}
+      else if(deg<best.d-1 || r2<0.2){st.textContent="Yetersiz";st.className="v wr";tee.className="v wr";}
       else {st.textContent="Dengede";st.className="v ok";tee.className="v ok";}
     }
     $("#fit-vd").textContent=deg;
+    /* tuval metni sahte DOM'da okunmuyor: öğrenme eğrisinin sayıları aria-label'da */
+    const lcAt=(m)=>{const e=LC&&LC.find(q=>q.m===m);
+      return e?`${m} örnekte eğitim ${fmt(e.tr)}, test ${e.te>=1e4?e.te.toExponential(1):fmt(e.te)}`:null;};
+    cv.setAttribute("aria-label",`Polinom uydurma: ${deg}. derece, ${mTrain} eğitim noktası. `+
+      (LC?`Öğrenme eğrisi (${LR} örneklemin medyanı): `+[20,50,100,200].map(lcAt).filter(Boolean).join("; ")+
+        `. Temel model test RMSE ${fmt(LC.base)}, gürültü ${fmt(noise,2)}.`
+        :`Hata eğrisi: en iyi derece ${best.d}, temel model test RMSE ${fmt(base)}.`));
   }
   $("#fit-d").oninput=e=>{deg=+e.target.value;$("#fit-do").textContent=deg;draw();};
   $("#fit-n").oninput=e=>{noise=+e.target.value/100;$("#fit-no").textContent=noise.toFixed(2);sample();draw();};
@@ -3449,21 +3584,32 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     },520);
   }
   $("#fit-sweep").onclick=sweep;
+  /* sağ panel görünümü: segment düğmeleri (biri basılı) */
+  const setView=(v)=>{ view=v; $("#fit-byd").setAttribute("aria-pressed",String(v==="d"));
+    $("#fit-byn").setAttribute("aria-pressed",String(v==="n")); draw(); };
+  $("#fit-byd").onclick=()=>setView("d");
+  $("#fit-byn").onclick=()=>setView("n");
   function useSet(i){ dsi=clamp(i,0,DS.length-1); sample(); draw(); }
   reg({id:"m-fit",draw,space:sweep,init:()=>{sample();},
     scenarioLabel:CONTENT["m-fit"].pick,
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
     {t:"1. derece · yetersiz",d:"Gün içi sıcaklık verisi. Tek bir doğru: hem eğitim hem test hatası yüksek, model veriyi görmüyor bile. Buna <b>underfitting</b> diyoruz (yetersiz öğrenme).",
-     set:0, hl:["#fit-vtr","#fit-vte","#fit-vs"], run(){setR("#fit-m",14);setR("#fit-n",12);setR("#fit-d",1);}},
+     set:0, hl:["#fit-vtr","#fit-vte","#fit-vs"], run(){setPressed("#fit-byd",true);setR("#fit-m",14);setR("#fit-n",12);setR("#fit-d",1);}},
     {t:"4. derece · dengede",d:"Eğri gerçek ilişkiyi yakaladı. Sağdaki grafikte test hatası dibe yakın — yeşil bant tam burada.",
-     hl:["#fit-vte","#fit-vs"], run(){setR("#fit-d",4);}},
-    {t:"14. derece · ezber",d:"Eğri bütün eğitim noktalarından geçiyor, eğitim hatası neredeyse sıfır. Ama test hatası tavan yaptı (▲ işaretleri ölçeğin dışına çıktığını gösteriyor): model gürültüyü ezberledi.",
-     hl:["#fit-vtr","#fit-vte"], run(){setR("#fit-d",14);}},
+     hl:["#fit-vte","#fit-vs"], run(){setPressed("#fit-byd",true);setR("#fit-d",4);}},
+    {t:"14. derece · ezber",d:"Eğri bütün eğitim noktalarından geçiyor, eğitim hatası neredeyse sıfır. Ama test hatası tavan yaptı (▲ işaretleri ölçeğin dışına çıktığını gösteriyor): model gürültüyü ezberledi. « Test R² » eksiye düştü: model, herkese eğitim ortalamasını söyleyen temel modelden (kesikli gri çizgi) bile kötü.",
+     hl:["#fit-vtr","#fit-vte","#fit-vr2"], run(){setPressed("#fit-byd",true);setR("#fit-d",14);}},
     {t:"Aynı derece, daha çok veri",d:"Derece hâlâ 14 ama veri 40'a çıktı. Eğri sakinleşti. Demek ki sorun modelin karmaşıklığında değil, karmaşıklık ile veri miktarının oranındaydı.",
-     hl:["#fit-m","#fit-vte"], run(){setR("#fit-m",40);}},
+     hl:["#fit-m","#fit-vte"], run(){setPressed("#fit-byd",true);setR("#fit-m",40);}},
     {t:"Doğru derece veriye bağlı",d:"Aynı ekran, başka veri: titreşim ölçümünde 3. derece artık <b>yetersiz</b> — test eğrisinin dibi daha sağa kaydı, en iyi derece çoğunlukla 5. Rozette « Dengede » gördüyseniz « Yeni veri »ye basın: 14 nokta ve gürültüyle bu karar on örneklemin sekizinde yetersiz çıkıyor, ikisinde çıkmıyor — gürültü kararı da örneklem gibi savuruyor. « Derece 4 her zaman iyidir » diye bir kural yok.",
-     set:2, hl:["#fit-vs"], run(){setR("#fit-m",14);setR("#fit-d",3);}}
+     set:2, hl:["#fit-vs"], run(){setPressed("#fit-byd",true);setR("#fit-m",14);setR("#fit-d",3);}},
+    {t:"Temel modelle kıyasla",d:"Titreşimde düz bir doğru. Eğitim hatası da test hatası da yüksek: ezber yok, ama öğrenme de yok. Test hatası, kesikli gri çizgiyle gösterilen <b>temel model</b>in hatasına neredeyse eşit; o model herkese eğitim ortalamasını söylüyor. « Test R² » sıfıra yakın. Model veriden hemen hiçbir şey öğrenmemiş: rozet bu yüzden « Yetersiz » diyor. Ezber yok diye model iyi sayılmaz; çıta temel model.",
+     set:2, hl:["#fit-vte","#fit-vr2","#fit-vs"], run(){setPressed("#fit-byd",true);setR("#fit-m",14);setR("#fit-d",1);}},
+    {t:"Öğrenme eğrisi · yüksek varyans",d:"Gün içi sıcaklık, 14. derece. Sağ panel artık <b>öğrenme eğrisi</b> (learning curve): yatay eksen eğitim örneği sayısı, her nokta 21 örneklemin medyanı. 20 örnekte eğitim hatası sıfıra yakın, test hatası ölçeğin dışında: aradaki geniş boşluk yüksek varyansın işareti. Örnek arttıkça boşluk kapanıyor; 200 örnekte iki eğri de gürültü tabanına (noktalı çizgi) iniyor. Bu modele veri toplamak işe yarar.",
+     set:0, hl:["#fit-byn","#fit-m"], run(){setPressed("#fit-byn",true);setR("#fit-n",12);setR("#fit-m",14);setR("#fit-d",14);}},
+    {t:"Öğrenme eğrisi · yüksek bias",d:"Titreşim ölçümü, 1. derece. İki eğri baştan birbirine yakın ve 0.5 civarında, temel model çizgisinin hemen altında birleşiyor; 200 örnekte de aynı yerdeler. Veri eklemek hiçbir şey değiştirmiyor, çünkü sorun veri azlığı değil, doğrunun dalgayı çizememesi. Gereken daha çok veri değil, daha esnek bir model.",
+     set:2, hl:["#fit-vte","#fit-vs"], run(){setPressed("#fit-byn",true);setR("#fit-n",12);setR("#fit-d",1);}}
   ],
        stop:()=>{if(sweeping){clearInterval(sweeping);sweeping=0;runBtn("#fit-sweep",false,"Dereceyi tara");}}});
 })();
@@ -5947,7 +6093,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const S=()=>DS[dsi];
   /* pts: {u, v}. u = x'in ölçeklenmiş hâli: ölçüm aralığı [lo, hi] → [−1, 1]. Tuval ekseni
      bundan geniş, kenarlar gri: veri yok. v = y'nin eksen aralığındaki yeri (0..1). */
-  let pts=[], deg=1, showT=false, showR=true, hov=1, ver=0;
+  let pts=[], deg=1, showT=false, showR=true, hov=1, ver=0, view="m";   // view: sağ panel "m" tasarım matrisi · "r" artık grafiği
   /* Eğri KENDİLİĞİNDEN oturmaz (m-lin kuralı): wc ekrandaki modelin ağırlıkları. Yeni
      veride düz çizgi (her x'e ortalama, R² = 0); sütun eklenince yeni ağırlık 0'dan başlar
      ve eğri kıpırdamaz; nokta eklenince eğri yerinde kalır. « Least squares çözümü » o anki
@@ -5994,7 +6140,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const Wd=(w)=>w.map((c,j)=>j?c*Zs().ry:Yd(c));
   const tv=(u)=>{const z=Zs(); return (S().f(z.mid+u*z.half)-S().ylo)/z.ry;};
   /* ham x tabloda verinin diliyle: saat "07:24", hız "43", hafta "3.5" */
-  const fx=(x)=>{const s=S(); if(s.x!=="saat") return x.toFixed(s.xd);
+  const fx=(x)=>{const s=S(); if(s.x!=="saat") return nf(x,s.xd);
     const m=Math.round(x*60); return `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;};
   const nf=(v,d)=>{const t=Math.abs(v).toFixed(d); return (v<0&&+t!==0?"−":"")+t;};   // eksi işareti U+2212, uygulamanın geri kalanı gibi
   const pm=(v,d)=>{const s=Math.abs(v).toFixed(d); return (v<0&&+s!==0?"− ":"+ ")+s;};
@@ -6003,10 +6149,43 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     return `${s.y} = ${W[0].toFixed(1)}${t(W[1],1)}${t(W[2],2)} …${t(W[W.length-1],W.length-1)}`;};
   const xdef=()=>{const s=S(), z=Zs(); return `x = (${s.x} − ${+z.mid.toFixed(2)}) / ${+z.half.toFixed(2)}`;};
 
+  /* x üreteci: "mevsim" iki yılın rastgele bir gününün sıcaklığı (Hafta 5: 14 − 11·cos +
+     N(0, 3.5)), ölçüm aralığına kırpılarak; öteki kümelerde ölçüm aralığında düzgün */
+  const drawX=(s)=>{ if(s.gen!=="mevsim") return rnd(s.lo,s.hi);
+    for(let k=0;k<50;k++){ const t=14-11*Math.cos(2*Math.PI*Math.random())+gauss()*3.5; if(t>=s.lo&&t<=s.hi) return t; }
+    return rnd(s.lo,s.hi); };
   function sample(){
     const s=S(), z=Zs(); pts=[];
-    for(let i=0;i<18;i++){const x=rnd(s.lo,s.hi); pts.push({u:(x-z.mid)/z.half, v:(s.f(x)+gauss()*s.sd-s.ylo)/z.ry});}
+    for(let i=0;i<18;i++){const x=drawX(s); pts.push({u:(x-z.mid)/z.half, v:(s.f(x)+gauss()*s.sd-s.ylo)/z.ry});}
     ver++; flat();
+  }
+  /* Artık grafiği (Hafta 5, "röntgen"): artık = ölçülen − tahmin, verinin biriminde, x'e
+     göre sıralı. Desen iki ölçüyle aranıyor: (1) art arda iki artığın işaret değiştirme
+     sayısı — rastgele artıklarda ~(n − 1)/2, kubbe ya da gülümsemede 2–3; (2) artıkların
+     yerel ortalaması (çizilen mor çizgi, Gauss çekirdekli düzleştirici) her noktayı, o nokta
+     DIŞARIDA bırakılarak ne kadar tahmin ediyor: rastgele artıkta payı sıfır ya da eksi,
+     desende büyük. Biri tutarsa "desen var". 18 noktada 400 örneklemle ölçüldü: elektrik
+     1. derece %98, sıcaklık 1. derece %90 yakalanıyor; 2. derecede ikisinde de en çok %2
+     yanlış alarm. Biçimi kenar üçte birlerin ve ortadaki üçte birin ortalama artığı söyler:
+     iki uç artı / orta eksi gülümseme, tersi kubbe, başkası (S eğrisinde olduğu gibi) dalga.
+     Polinomun kendi sütunlarıyla (1, x, x²) ölçmek işe yaramaz: least squares artıkları
+     o sütunlara zaten DİK, derece 2'de x² deseni tanım gereği sıfır çıkar. */
+  const RBW=.13;                                   // düzleştirici bant genişliği: x aralığının payı
+  function resStats(w){
+    const ry=Zs().ry, o=pts.map(q=>({u:q.u, r:(q.v-evw(w,q.u))*ry})).sort((a,b)=>a.u-b.u), n=o.length;
+    let chg=0; for(let i=1;i<n;i++) if((o[i].r<0)!==(o[i-1].r<0)) chg++;
+    const t=Math.floor(n/3), avg=(a)=>a.reduce((s2,q)=>s2+q.r,0)/Math.max(1,a.length);
+    const ends=avg(o.slice(0,t).concat(o.slice(n-t))), mid=avg(o.slice(t,n-t)), exp=Math.round((n-1)/2);
+    const L=avg(o.slice(0,t)), Rt=avg(o.slice(n-t));
+    const bw=((o.length?o[n-1].u-o[0].u:0)*RBW)||.1;
+    let ss=0, se=0;
+    o.forEach((q,i)=>{ let sw=0, sr=0;
+      o.forEach((p2,j)=>{ if(j===i) return; const k=Math.exp(-(((p2.u-q.u)/bw)**2)/2); sw+=k; sr+=k*p2.r; });
+      const sm=sw>1e-12?sr/sw:0; ss+=q.r*q.r; se+=(q.r-sm)**2; });
+    const loo=ss>1e-12?1-se/ss:0;
+    const pat=n>=6&&(chg<=Math.floor((n-1)/4)||loo>.2);
+    const shape=!pat?"":L>0&&Rt>0&&mid<0?"gülümseme":L<0&&Rt<0&&mid>0?"kubbe":"dalga";
+    return {o,n,chg,ends,mid,exp,pat,shape,loo,bw};
   }
   /* yeni veri yeni bir soru: model düz çizgiye döner (w₀ = ortalama, ötekiler 0) */
   function flat(){ stopAnim(); ghost=null;
@@ -6023,6 +6202,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const e=ease(Math.min(1,anim.k/AK)); return wc.map((c,j)=>anim.from[j]+(c-anim.from[j])*e);
   }
   const sseOf=(w)=>pts.reduce((a,q)=>a+(evw(w,q.u)-q.v)**2,0);
+  /* derece 2'de parabolün uç noktası u* = −w₁ / 2w₂ (ölçekli x); ölçüm aralığının dışındaysa yok */
+  const vertex=(w)=>{ if(!w||w.length!==3||!(Math.abs(w[2])>1e-9)) return null;
+    const u=-w[1]/(2*w[2]); if(!(u>=-1&&u<=1)) return null;
+    const z=Zs(); return {u, x:z.mid+u*z.half, min:w[2]>0}; };
   const rmseD=(w)=>pts.length?Math.sqrt(sseOf(w)/pts.length)*Zs().ry:NaN;
   /* tablodaki satırlar: noktalar x'e göre sıralanıp eşit aralıklı K tanesi */
   function rowsIdx(K){
@@ -6108,6 +6291,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         ctx.lineWidth=i===hr?2.6:1.4; ctx.strokeStyle=i===hr?css("--accent"):hexA("--ink",.55); ctx.stroke(); ctx.restore(); }
       disc(ctx,xx,yy,6,css("--a"),css("--surface"));
     });
+    /* parabolün dibi / tepesi (Hafta 5: −β₁ / 2β₂): yalnız anlamı olan kümede (vx) ve ölçüm
+       aralığının içindeyse — elektrikte şehrin "konfor sıcaklığı", gün içinde en sıcak saat */
+    const vt=vertex(w);
+    if(vt&&s.vx){ const xv=X(vt.u), yv=Y(clamp(evw(w,vt.u),-2,3));
+      disc(ctx,xv,yv,5.5,css("--surface"),css("--accent"));
+      legend(ctx,xv,clamp(yv+(vt.min?20:-20),y0+10,y1-10),[[`${s.vx}: ${fx(vt.x)}${s.xu}`,"--accent"]],{size:11.5,align:"center"}); }
+    /* "veri yok" yazısı tahmin etiketlerinden ÖNCE: ikisi aynı köşeye düşünce (elektrikte
+       42 °C tahmini alt kenarda) zeminli etiket yazının üstünü örtsün, iç içe okunmasın */
+    if(X(ul)-x0>44) label(ctx,"veri yok",(x0+X(ul))/2,y1-10,css("--ink-soft"),"center",10.5);
+    if(x1-X(uh)>44) label(ctx,"veri yok",(X(uh)+x1)/2,y1-10,css("--ink-soft"),"center",10.5);
     /* veri dışı tahmin: model (pembe halka) ve gerçek (gri halka), aralarında kırmızı fark */
     let pe=null, te=tv(z.ze);
     if(w){
@@ -6126,8 +6319,6 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       legend(ctx,ex-14,clamp(yl,y0+10,y1-10),[[`model ${nf(Yd(pe),s.yd)} ${yu}`,"--accent"]],{size:11.5,align:"right"});
       legend(ctx,ex-14,clamp(up?yt+14:yt-14,y0+10,y1-10),[[`gerçek ${nf(Yd(te),s.yd)} ${yu}`,"--ink-soft"]],{size:11.5,align:"right"});
     }
-    if(X(ul)-x0>44) label(ctx,"veri yok",(x0+X(ul))/2,y1-10,css("--ink-soft"),"center",10.5);
-    if(x1-X(uh)>44) label(ctx,"veri yok",(X(uh)+x1)/2,y1-10,css("--ink-soft"),"center",10.5);
     /* nokta yetmezse sol panel ne yapılacağını söyler (tablo dar ekranda görünmüyor) */
     if(!wo) legend(ctx,(x0+x1)/2,(y0+y1)/2,[[pts.length?`${deg+1} ağırlık için farklı x'te en az ${deg+1} nokta gerekiyor`:"veri yok: tuvale tıklayıp nokta ekle","--ink"],
       [pts.length?`şimdi ${pts.length} nokta var · tuvale tıklayıp ekle`:"sonra « Least squares çözümü »ne bas","--ink-soft"]],{size:12.5,lh:18,align:"center"});
@@ -6158,7 +6349,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
     /* ---- sağ: tasarım matrisi. Her satır bir ölçüm, her sütun bir öznitelik; seçili
        satırda sütun × ağırlık, toplamı ŷ. Sütunlar 1, x, x², … : x² de x kadar "veri". ---- */
-    if(wide){
+    if(wide&&view==="m"){
       const {fz,rh,note}=TF, show=rows;
       let yy=p+8;
       label(ctx,"tasarım matrisi",q0,yy,css("--ink"),"left",12.5);
@@ -6198,6 +6389,49 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         }
       } else label(ctx,"veri yok",q0,yy,css("--bad"),"left",11.5);
     }
+    /* ---- sağ: artık grafiği (Hafta 5, "modelin röntgeni"). Yatay eksen x, dikey eksen
+       artık = ölçülen − tahmin; sıfır çizgisi "tam isabet". Desensiz bulut iyi; kubbe ya da
+       gülümseme modelin bir eğriliği kaçırdığını söyler. Kesikli mor çizgi artıkların
+       yerel ortalaması (çekirdek düzleştirme): deseni görmeye yardım etsin diye. ---- */
+    if(wide&&view==="r"){
+      label(ctx,"artık grafiği · ölçülen − tahmin",q0,p+8,css("--ink"),"left",12.5);
+      if(!w||pts.length<2) label(ctx,"veri yok",q0,p+34,css("--bad"),"left",11.5);
+      else {
+        const RS=resStats(w), RF=resStats(wf), two=H-2*p>=230, yr0=p+(two?58:42), yr1=H-p-22, xr0=q0+40, xr1=qx1-6;
+        legend(ctx,q0+2,p+28,[[RF.pat?`desen var: ${RF.shape}`:"belirgin desen yok",RF.pat?"--bad":"--ink-soft"],
+          two&&[`artı/eksi değişimi ${RF.chg} kez · rastgele olsa ~${RF.exp}`,"--ink-soft"]],{size:11.5,lh:16});
+        const us=RS.o.map(q=>q.u), ua=Math.min(...us), ub=Math.max(...us), pad=Math.max(.04,(ub-ua)*.05);
+        const A=Math.max(...RS.o.map(q=>Math.abs(q.r)),1e-9)*1.15;
+        const RX=(u)=>xr0+(u-ua+pad)/(ub-ua+2*pad)*(xr1-xr0), RY=(r)=>(yr0+yr1)/2-r/A*(yr1-yr0)/2;
+        ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+        for(const k of [-1,-.5,.5,1]){ ctx.beginPath(); ctx.moveTo(xr0,RY(k*A/1.15)); ctx.lineTo(xr1,RY(k*A/1.15)); ctx.stroke(); }
+        ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.strokeRect(xr0,yr0,xr1-xr0,yr1-yr0);
+        ctx.strokeStyle=css("--ink"); ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(xr0,RY(0)); ctx.lineTo(xr1,RY(0)); ctx.stroke();
+        ctx.restore();
+        const am=A/1.15;
+        label(ctx,"+"+nf(am,s.yd),xr0-4,RY(am),css("--ink-soft"),"right",10.5);
+        label(ctx,"0",xr0-4,RY(0),css("--ink-soft"),"right",10.5);
+        label(ctx,nf(-am,s.yd),xr0-4,RY(-am),css("--ink-soft"),"right",10.5);
+        ctx.save(); ctx.beginPath(); ctx.rect(xr0,yr0,xr1-xr0,yr1-yr0); ctx.clip();
+        /* artıkların yerel ortalaması: Gauss çekirdekli ağırlıklı ortalama */
+        const bw=RS.bw;
+        ctx.strokeStyle=css("--c"); ctx.lineWidth=2.2; ctx.setLineDash([7,5]); ctx.beginPath();
+        for(let i=0;i<=60;i++){ const u=ua+(ub-ua)*i/60; let sw=0, sr=0;
+          RS.o.forEach(q=>{const k=Math.exp(-(((q.u-u)/bw)**2)/2); sw+=k; sr+=k*q.r;});
+          const yy=RY(sr/sw); i?ctx.lineTo(RX(u),yy):ctx.moveTo(RX(u),yy); }
+        ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
+        RS.o.forEach(q=>{ ctx.beginPath(); ctx.moveTo(RX(q.u),RY(0)); ctx.lineTo(RX(q.u),RY(q.r)); ctx.stroke(); });
+        ctx.restore();
+        RS.o.forEach(q=>disc(ctx,RX(q.u),RY(q.r),5,css("--a"),css("--surface")));
+        if(hr>=0){ const q=pts[hr], rr=(q.v-evw(w,q.u))*z.ry; ctx.save(); ctx.beginPath(); ctx.arc(RX(q.u),RY(rr),9.5,0,7);
+          ctx.lineWidth=2.4; ctx.strokeStyle=css("--accent"); ctx.stroke(); ctx.restore(); }
+        label(ctx,s.x+" →",(xr0+xr1)/2,yr1+14,css("--ink-soft"),"center",11);
+        label(ctx,fx(z.mid+ua*z.half),RX(ua),yr1+14,css("--ink-soft"),"center",10.5);
+        label(ctx,fx(z.mid+ub*z.half),RX(ub),yr1+14,css("--ink-soft"),"center",10.5);
+        legend(ctx,xr1-6,yr1-12,[["- - artıkların gidişi","--c"]],{size:10.5,align:"right"});
+      }
+    }
 
     /* ---- göstergeler (dar yerleşimde de): ekrandaki modelin SON değeri, geçişin ara konumu değil ---- */
     let sst=0; const my=pts.length?pts.reduce((a2,q)=>a2+q.v,0)/pts.length:0;
@@ -6210,13 +6444,17 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     txt("#poly-best",wo?`${rmseD(wo).toFixed(s.rd)} ${s.yu}`:"—");
     txt("#poly-r2",wf&&sst>1e-12?fmt(1-sse/sst,3):"—");
     txt("#poly-exk",s.exk);
+    /* tepe ve artık deseni ekrandaki SON modelden (geçişin ara konumu değil), dar yerleşimde de */
+    const vf=vertex(wf), RF=wf&&view==="r"&&pts.length>=2?resStats(wf):null;
     const ev=$("#poly-ex");
     ev.textContent=pf===null?"—":`${nf(Yd(pf),s.yd)} ${s.yu}`;
     const er=pf===null?null:Math.abs(pf-te);
     ev.className="v"+(er===null?"":er<=.04?" ok":er<=.09?" wr":" bd");
     cv.setAttribute("aria-label",`Polynomial regression, ${pts.length} nokta, ${deg+1} sütun (1`+
       Array.from({length:deg},(_,j)=>", x"+SUP[j+1]).join("")+`). `+(wf?`${best?"Least squares":"Model"}: ${eqStr(wf)}, ${xdef()}. ${s.exk}: model ${nf(Yd(pf),s.yd)} ${s.yu}, gerçek ${nf(Yd(te),s.yd)} ${s.yu}.`:"Veri yok.")+
-      (wo?"":" Least squares için nokta yetmiyor.")+(ghost?` Önceki eğri kesikli çizgide, RMSE ${rmseD(ghost).toFixed(s.rd)} ${s.yu}.`:""));
+      (wo?"":" Least squares için nokta yetmiyor.")+(ghost?` Önceki eğri kesikli çizgide, RMSE ${rmseD(ghost).toFixed(s.rd)} ${s.yu}.`:"")+
+      (vf&&s.vx?` Parabolün ${vf.min?"dibi":"tepesi"} (${s.vx}): ${fx(vf.x)}${s.xu}.`:"")+
+      (RF?` Artık grafiği: kenarlarda ortalama ${nf(RF.ends,s.yd)} ${s.yu}, ortada ${nf(RF.mid,s.yd)} ${s.yu}; artı/eksi ${RF.chg} kez değişiyor (rastgele olsa ~${RF.exp}); ${RF.pat?"desen var: "+RF.shape:"belirgin desen yok"}.`:""));
   }
 
   /* fareyle satır seçimi: imlece en yakın tablo noktası. Fare tuvalden çıkınca seçim
@@ -6258,6 +6496,11 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   $("#poly-d").oninput=e=>setDeg(+e.target.value);
   $("#poly-t").onclick=e=>{showT=!showT; e.currentTarget.setAttribute("aria-pressed",String(showT)); draw();};
   $("#poly-res").onclick=e=>{showR=!showR; e.currentTarget.setAttribute("aria-pressed",String(showR)); draw();};
+  /* sağ panel: segment düğmeleri (biri basılı) */
+  const setView=(v)=>{ view=v; $("#poly-vm").setAttribute("aria-pressed",String(v==="m"));
+    $("#poly-vr").setAttribute("aria-pressed",String(v==="r")); draw(); };
+  $("#poly-vm").onclick=()=>setView("m");
+  $("#poly-vr").onclick=()=>setView("r");
   $("#poly-new").onclick=()=>{ed.reset();sample();draw();};
   $("#poly-clr").onclick=()=>{ed.reset();pts=[];ver++;flat();draw();};
   function useSet(i){ dsi=clamp(i,0,DS.length-1); ed.reset(); sample(); draw(); }
@@ -6266,13 +6509,13 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
     {t:"Düz çizgiden doğruya",d:"Gün içi sıcaklık. Model düz bir çizgiyle başladı: her saate ortalama sıcaklık, <b>R²</b> 0. « Least squares çözümü » tek sütunla (x) en iyi ağırlıkları buldu ve çizgi yerine indi. Ama doğru ya hep çıkar ya hep iner, tepeyi göremez: R² düşük, akşam 20:00 için yaklaşık 30 °C söylüyor, gerçek 20 °C.",
-     set:0, hl:["#poly-fit","#poly-r2","#poly-ex"], run(){setPressed("#poly-t",false);setR("#poly-d",1);press("#poly-fit");}},
+     set:0, hl:["#poly-fit","#poly-r2","#poly-ex"], run(){setPressed("#poly-vm",true);setPressed("#poly-t",false);setR("#poly-d",1);press("#poly-fit");}},
     {t:"Yeni bir sütun: x²",d:"Tabloya saatin karesini ekledik. Yeni ağırlık 0'dan başladı, eğri kıpırdamadı. « Least squares çözümü » bu ağırlığı da bulunca eğri büküldü ve tepe yakalandı; R² 0.9'un üstüne çıktı. Önceki doğru kesikli gri çizgide duruyor. Model hâlâ aynı işi yapıyor: her sütunu bir ağırlıkla çarpıp topluyor.",
      hl:["#poly-d","#poly-r2"], run(){setR("#poly-d",2);press("#poly-fit");}},
     {t:"Eğri, parçaların toplamı",d:"« Terimler » açıldı. Gri kesikli çizgi β₀, yani ortalama seviye. Mor çizgi β₁·x terimi, eğimi veriyor. Turuncu çizgi β₂·x², kavisi veriyor. Kalın pembe eğri bunların toplamı. Katsayıları least squares birlikte buluyor, Modül 06'daki gibi.",
      hl:["#poly-t"], run(){setPressed("#poly-t",true);press("#poly-fit");}},
     {t:"Tasarım matrisi",d:"Sağdaki tablo modelin gördüğü veri: her satır bir ölçüm, her sütun bir öznitelik. 1, x ve x² sütunlarını aynı ham ölçümden biz ürettik. Seçili satırda her sayı alttaki ağırlıkla çarpılıyor, toplamı ŷ: modelin o saat için tahmini. Fareyi bir noktanın üstüne götürün, seçili satır değişir.",
-     run(){setPressed("#poly-t",false);press("#poly-fit");}},
+     hl:["#poly-vm"], run(){setPressed("#poly-vm",true);setPressed("#poly-t",false);press("#poly-fit");}},
     {t:"Veri dışında savruluyor",d:"Dört sütun: x … x⁴, ağırlıkları yeniden bulundu. Ölçüm aralığının içinde eğri iyi görünüyor, ama gri bölgede onu tutan tek bir nokta yok. Sağ kenardaki pembe halka modelin 20:00 tahmini, gri halka gerçek değer. « Yeni veri » ve ardından « Least squares çözümü »ne birkaç kez basın: aralığın içi hep benzer kalıyor, kenar her seferinde başka yere savruluyor.",
      hl:["#poly-ex"], run(){setR("#poly-d",4);press("#poly-fit");}},
     {t:"Derece 10: daha iyi mi?",d:"On bir sütun, on bir ağırlık. RMSE ve R² 4. dereceden de iyi: eğri noktalara daha çok yapışıyor. Ama 20:00 tahmini örneklemlerin neredeyse hepsinde 100 °C'den, çoğunda 1000 °C'den fazla şaşıyor. Eğitim noktalarındaki hata derece arttıkça hep düşer; modelin iyi olduğunu söylemez. Bu ezberin adı <b>overfitting</b> (aşırı öğrenme); Modül 03'te test hatasıyla ölçtün.",
@@ -6282,7 +6525,13 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     {t:"Doğru biçim dışarıda da tutar",d:"Durma mesafesi hızın karesiyle büyür; bu bir fizik yasası. x² ekleyip ağırlıkları yeniden bulunca 130 km/sa tahmini gerçeğe iniyor, çünkü modelin biçimi yasanın biçimi. Burada ekstrapolasyon güvenli; sebebi veri değil, fizik. Dört sütuna çıkarsanız aynı kenar yine savruluyor.",
      hl:["#poly-ex"], run(){setR("#poly-d",2);press("#poly-fit");}},
     {t:"S eğrisi için x³",d:"Fidan boyu: yavaş başlar, hızlanır, durulur. x² eklemek hatayı neredeyse hiç düşürmüyor, çünkü S tek bir tepe değil. x³ ile RMSE yaklaşık yarıya iniyor. Ama sağ kenara bakın: aynı model 24. haftada 51 cm'lik fidanı sıfır boy civarına indiriyor, örneklemlerin yarısında eksiye. Aralığın içinde R² 0.99, dışında saçma.",
-     set:2, hl:["#poly-rmse","#poly-ex"], run(){setR("#poly-d",3);press("#poly-fit");}}
+     set:2, hl:["#poly-rmse","#poly-ex"], run(){setR("#poly-d",3);press("#poly-fit");}},
+    {t:"Röntgen: artık grafiği",d:"Elektrik tüketimi ve günün sıcaklığı, yalnız hafta içi günler. Tek sütunla least squares: R² 0.5 civarında, fena değil gibi. Sağda <b>artık grafiği</b>, yani modelin röntgeni: her nokta ölçülen eksi tahmin, sıfır çizgisi tam isabet. İki uçta artı, ortada eksi: bir gülümseme. Model en soğuk ve en sıcak günlerde tüketimi az tahmin ediyor; dağıtım şirketi için en tehlikeli günler tam bunlar.",
+     set:3, hl:["#poly-vr","#poly-r2"], run(){setPressed("#poly-vr",true);setPressed("#poly-t",false);setR("#poly-d",1);press("#poly-fit");}},
+    {t:"x² ile desen kayboluyor",d:"Sıcaklığın karesini ekleyip ağırlıkları yeniden bulunca R² 0.9'un üstüne çıkıyor ve artıklar sıfırın iki yanına rastgele dağılıyor: röntgen temiz. Parabolün dibi 18 °C civarında: şehrin konfor sıcaklığını model kendisi buldu (gizli formüldeki değer 18).",
+     hl:["#poly-r2","#poly-vr"], run(){setPressed("#poly-vr",true);setR("#poly-d",2);press("#poly-fit");}},
+    {t:"42 °C: veride yok",d:"Veride en sıcak gün 34.5 °C; 42 °C'lik bir ısı dalgası gri bölgede. x²'li modelin tahmini burada gerçeğe yakın, çünkü verinin biçimi gerçekten parabol, fren mesafesi gibi. Ama buradaki 'gerçek' bizim formülümüz. Gerçek şebekede klimaların kapasitesi dolabilir, şebeke sınırına gelinir. Model 42 °C'yi hiç görmedi: bu tahmin bir ekstrapolasyon, temkinle oku.",
+     hl:["#poly-ex"], run(){setPressed("#poly-vr",true);setR("#poly-d",2);press("#poly-fit");}}
   ]});
 })();
 
@@ -7226,15 +7475,19 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 /* ═════════════ 13 · Çapraz doğrulama ═════════════ */
 (function(){
   const cv=$("#c-cv"), {ctx,fit}=setupCanvas(cv);
-  let K=5, deg=3, N=60, D=[], cur=0, ver=0, timer=0, hist=[], showR=true;
+  let K=5, deg=3, N=60, D=[], cur=0, ver=0, timer=0, hist=[], showR=true, mode="kf";
   const NOISE=.12;
-  /* kat renkleri: k=2 → teal/turuncu, k=5 → beş belirgin renk */
+  /* kat renkleri: k=2 → teal/turuncu, k=5 → beş belirgin renk. f = −1: zaman sırasında
+     hiç doğrulanmayan ilk dilim (hep eğitimde) */
   const FC=["--a","--b","--c","--d","--bad","--ink-soft","--good","--warn","--accent","--ink"];
-  const col=(f)=>FC[f%FC.length];
-  /* m-fit ve m-reg ile aynı üç eğri */
+  const col=(f)=>f<0?"--ink-soft":FC[f%FC.length];
+  /* m-fit ve m-reg ile aynı üç eğri + zaman sırası olan kafe satışı */
   const DS=SETS("m-cv"); let dsi=0;
   const S=()=>DS[dsi];
   const truth=(x)=>S().truth(x);                    // x ∈ [-1,1]
+  const NO=()=>S().sd||NOISE;                       // gürültü, ölçekli birimde
+  const YS=()=>S().ys||1;                           // gösterim: kafe bardak, öteki eğriler birimsiz
+  const isTime=()=>!!S().time;                      // « Zaman sırası » yalnız zamanı olan veride
 
   /* m-fit'teki en küçük kareler polinom uydurmanın aynısı (kapsam ayrı) */
   function polyfit(data,d){
@@ -7264,39 +7517,63 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     D=[];
     for(let i=0;i<N;i++){
       const x=-1+2*(i+rnd(.15,.85))/N;
-      D.push({x, y:truth(x)+gauss()*NOISE, r:Math.random()});
+      D.push({x, y:truth(x)+gauss()*NO(), r:Math.random()});
     }
     cur=clamp(cur,0,K-1); hist=[]; ver++;
   }
   function reshuffle(){ D.forEach(d=>{d.r=Math.random();}); ver++; }
 
-  /* k katın hepsi her çizimde değil, yalnız veri / k / derece değişince hesaplanıyor */
-  let ckey="", cval=null;
-  function compute(){
-    const n=D.length, key=ver+"|"+K+"|"+deg+"|"+n;
-    if(key===ckey) return cval;
-    ckey=key;
-    if(n<K) return cval=null;
-    const ord=D.map((d,i)=>i).sort((a,b)=>D[a].r-D[b].r);
-    const fold=new Array(n).fill(0), errs=[], models=[], sizes=[];
-    for(let f=0;f<K;f++){
-      const s=Math.floor(f*n/K), e=Math.floor((f+1)*n/K), te=[], tr=[];
-      for(let i=0;i<n;i++){
-        const j=ord[i];
-        if(i>=s&&i<e){ fold[j]=f; te.push(D[j]); } else tr.push(D[j]);
+  /* k katın hepsi her çizimde değil, yalnız veri / k / derece değişince hesaplanıyor.
+     İki bölme ayrı önbellekte: zaman sırasında karıştırılmış KFold'un ortalaması da
+     karşılaştırma çizgisi olarak çiziliyor.
+     « Karıştır » (KFold): veri r anahtarıyla karışık sırada, k eşit ardışık blok.
+     « Zaman sırası » (sklearn TimeSeriesSplit): veri x'e (zamana) göre sıralı, k + 1
+     dilim. f. turda eğitim ilk n − (k − f)·ts nokta, doğrulama sonraki ts nokta, sonrası
+     o turda KULLANILMAZ: eğitim hep doğrulamadan önce, pencere her turda bir dilim ileri
+     kayıyor ve eğitim büyüyor. İlk dilim hiç doğrulanmıyor (fold −1).
+     wins[f] = [başlangıç, bitiş): doğrulama penceresinin sıralı dizideki yeri. */
+  const CC={kf:{k:"",v:null}, ts:{k:"",v:null}};
+  function compute(md=mode){
+    const n=D.length, key=ver+"|"+K+"|"+deg+"|"+n, C=CC[md];
+    if(key===C.k) return C.v;
+    C.k=key;
+    if(n<K+1) return C.v=null;
+    const fold=new Array(n).fill(0), errs=[], models=[], sizes=[], wins=[];
+    let ord;
+    if(md==="ts"){
+      ord=D.map((d,i)=>i).sort((a,b)=>D[a].x-D[b].x);
+      const ts=Math.floor(n/(K+1));
+      fold.fill(-1);
+      for(let f=0;f<K;f++){
+        const s=n-(K-f)*ts, tr=[], te=[];
+        for(let i=0;i<s;i++) tr.push(D[ord[i]]);
+        for(let i=s;i<s+ts;i++){ te.push(D[ord[i]]); fold[ord[i]]=f; }
+        const w=polyfit(tr,deg), v=rmse(w,te);
+        models.push(w); sizes.push(te.length); wins.push([s,s+ts]);
+        errs.push(Number.isFinite(v)?v:0);
       }
-      const w=polyfit(tr,deg), v=rmse(w,te);
-      models.push(w); sizes.push(te.length);
-      errs.push(Number.isFinite(v)?v:0);
+    } else {
+      ord=D.map((d,i)=>i).sort((a,b)=>D[a].r-D[b].r);
+      for(let f=0;f<K;f++){
+        const s=Math.floor(f*n/K), e=Math.floor((f+1)*n/K), te=[], tr=[];
+        for(let i=0;i<n;i++){
+          const j=ord[i];
+          if(i>=s&&i<e){ fold[j]=f; te.push(D[j]); } else tr.push(D[j]);
+        }
+        const w=polyfit(tr,deg), v=rmse(w,te);
+        models.push(w); sizes.push(te.length); wins.push([s,e]);
+        errs.push(Number.isFinite(v)?v:0);
+      }
     }
     const mean=errs.reduce((a,b)=>a+b,0)/K;
     /* katlar arası std, n − 1 ile (Hafta 4 sunumu, pandas): k = 2'de bile tanımlı */
     const sd=Math.sqrt(errs.reduce((a,b)=>a+(b-mean)**2,0)/Math.max(K-1,1));
     let iMin=0,iMax=0;
     errs.forEach((v,i)=>{ if(v<errs[iMin])iMin=i; if(v>errs[iMax])iMax=i; });
-    return cval={ord,fold,errs,models,sizes,mean,sd,iMin,iMax};
+    return C.v={ord,fold,errs,models,sizes,wins,mean,sd,iMin,iMax,md};
   }
   const en=(v)=>!Number.isFinite(v)?"—":(v>=100?v.toFixed(0):v>=10?v.toFixed(1):v.toFixed(3));
+  const ev=(v)=>en(v*YS());                        // verinin biriminde (kafe: bardak)
   /* 1280×720'de tuval 930 px; eşik 760 → projeksiyonda sağ panel her zaman açık */
   const geo=(W)=>({wide:W>760, split:W>760?Math.round(W*0.60):W, p:30});
   const plot=(W,H)=>{const {split,p}=geo(W), pw=split-2*p, pb=H-p-29, ph=pb-p;
@@ -7309,10 +7586,17 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const {wide,split,p}=geo(W);
     const R=compute();
     if(!R) return;
-    if(!hist.length) hist.push(R.mean);
+    const ts=R.md==="ts";
+    /* zaman sırasında karşılaştırma: aynı verinin karıştırılmış KFold ortalaması */
+    const RK=ts?compute("kf"):null;
+    if(!ts&&!hist.length) hist.push(R.mean);
     cur=clamp(cur,0,K-1);
     const n=D.length, {pw,pb,ph,X,Y}=plot(W,H);
     const cy=(y)=>clamp(y,-3000,3000);
+    const [ws,we]=R.wins[cur];
+    /* noktanın bu turdaki rolü: 0 eğitim, 1 doğrulama, 2 gelecek (zaman sırası: kullanılmıyor) */
+    const rank=new Array(n); R.ord.forEach((j,i)=>{rank[j]=i;});
+    const role=(i)=>ts?(rank[i]<ws?0:rank[i]<we?1:2):(R.fold[i]===cur?1:0);
 
     /* ───── sol panel: seri, katlar, o an eğitilen model ───── */
     ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
@@ -7321,52 +7605,62 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(p,p,pw,ph);ctx.restore();
 
     ctx.save();ctx.beginPath();ctx.rect(p,p,pw,ph);ctx.clip();
+    /* zaman sırası: bu turda henüz "gelmemiş" günler gri bölgede; model onları görmüyor */
+    const xF=ts&&we<n?(D[R.ord[we-1]].x+D[R.ord[we]].x)/2:null;
+    if(xF!==null){ ctx.fillStyle=hexA("--ink-soft",.09); ctx.fillRect(X(xF),p,p+pw-X(xF),ph); }
     ctx.beginPath();ctx.setLineDash([6,5]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.5;
     for(let i=0;i<=200;i++){const x=-1+2*i/200;i?ctx.lineTo(X(x),Y(truth(x))):ctx.moveTo(X(x),Y(truth(x)));}
     ctx.stroke();ctx.setLineDash([]);
-    const w=R.models[cur];
+    const w=R.models[cur], xEnd=xF===null?1:xF;
     ctx.beginPath();ctx.strokeStyle=css("--accent");ctx.lineWidth=3;ctx.lineJoin="round";
-    for(let i=0;i<=400;i++){const x=-1+2*i/400, yy=cy(Y(evalp(w,x)));i?ctx.lineTo(X(x),yy):ctx.moveTo(X(x),yy);}
+    for(let i=0;i<=400;i++){const x=-1+(xEnd+1)*i/400, yy=cy(Y(evalp(w,x)));i?ctx.lineTo(X(x),yy):ctx.moveTo(X(x),yy);}
     ctx.stroke();
-    for(let i=0;i<n;i++) if(R.fold[i]!==cur)
-      disc(ctx,X(D[i].x),Y(D[i].y),3.4,hexA(col(R.fold[i]),.34));
+    for(let i=0;i<n;i++){ const r=role(i);
+      if(r===0) disc(ctx,X(D[i].x),Y(D[i].y),3.4,hexA(col(R.fold[i]),.34));
+      else if(r===2){ ctx.save(); ctx.beginPath(); ctx.arc(X(D[i].x),Y(D[i].y),3.2,0,7);
+        ctx.strokeStyle=hexA("--ink-soft",.45); ctx.lineWidth=1.2; ctx.stroke(); ctx.restore(); } }
     /* artıklar: doğrulama katındaki her noktadan eğriye inen kırmızı çubuk — kat hatası bunların karesinden */
     if(showR){ ctx.save(); ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
       for(let i=0;i<n;i++){
-        if(R.fold[i]!==cur) continue;
+        if(role(i)!==1) continue;
         ctx.beginPath();ctx.moveTo(X(D[i].x),Y(D[i].y));ctx.lineTo(X(D[i].x),cy(Y(evalp(w,D[i].x))));ctx.stroke();
       }
       ctx.restore(); }
-    for(let i=0;i<n;i++) if(R.fold[i]===cur)
+    for(let i=0;i<n;i++) if(role(i)===1)
       disc(ctx,X(D[i].x),Y(D[i].y),6.5,css(col(cur)),css("--surface"));
     ctx.restore();
-    legend(ctx,p+8,p+14,[[`${deg}. derece model — ${cur+1}. katı hiç görmeden eğitildi`,"--accent"],
+    if(xF!==null&&p+pw-X(xF)>190) label(ctx,"gelecek · bu turda kullanılmıyor",X(xF)+8,pb-12,css("--ink-soft"),"left",10.5);
+    legend(ctx,p+8,p+14,ts?[[`${deg}. derece model — yalnız geçmişle eğitildi (${ws} nokta)`,"--accent"],
+      [`doğrulama: ${cur+1}. tur · sonraki ${we-ws} nokta (içi dolu)`,"--ink"],
+      ["gerçek ilişki (modelin bilmediği)","--ink-soft"],
+      ["yatay: "+S().x+"  ·  dikey: "+S().y,"--ink-soft"]]
+      :[[`${deg}. derece model — ${cur+1}. katı hiç görmeden eğitildi`,"--accent"],
       [`doğrulama katı: ${cur+1}. kat · ${R.sizes[cur]} nokta (içi dolu)`,"--ink"],
       ["gerçek ilişki (modelin bilmediği)","--ink-soft"],
       ["yatay: "+S().x+"  ·  dikey: "+S().y,"--ink-soft"]],{size:11,lh:16});
 
-    /* ───── karıştırılmış seri şeridi: bölmenin kendisi ───── */
+    /* ───── şerit: bölmenin kendisi (karıştırılmış sıra ya da zaman sırası) ───── */
     const sy=H-p-14, cw=pw/n;
     for(let i=0;i<n;i++){
       const f=R.fold[R.ord[i]];
-      ctx.fillStyle=hexA(col(f), f===cur?.95:.36);
+      ctx.fillStyle=hexA(col(f), ts?(i<ws?.36:i<we?.95:.08):(f===cur?.95:.36));
       ctx.fillRect(p+i*cw, sy, Math.max(1,cw-0.6), 14);
     }
-    const s0=Math.floor(cur*n/K), s1=Math.floor((cur+1)*n/K);
     ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1;ctx.strokeRect(p,sy,pw,14);
     ctx.strokeStyle=css("--ink");ctx.lineWidth=1.8;
-    ctx.strokeRect(p+s0*cw-1.5,sy-2.5,(s1-s0)*cw+3,19);ctx.restore();
-    label(ctx,`karıştırılmış seri · ${n} nokta → ${K} kat`,p,sy-8,css("--ink-soft"),"left",10.5);
-    label(ctx,"her nokta tam bir kez doğrulamada",p+pw,sy-8,css("--ink-soft"),"right",10.5);
+    ctx.strokeRect(p+ws*cw-1.5,sy-2.5,(we-ws)*cw+3,19);ctx.restore();
+    label(ctx,ts?`zaman sırası · ${n} nokta → ${K} tur`:`karıştırılmış seri · ${n} nokta → ${K} kat`,p,sy-8,css("--ink-soft"),"left",10.5);
+    label(ctx,ts?"eğitim hep doğrulamadan önce":"her nokta tam bir kez doğrulamada",p+pw,sy-8,css("--ink-soft"),"right",10.5);
 
     /* ───── sağ panel: kat hataları, ortalama, ±1 std ───── */
     if(wide){
       /* lejant grafiğin ÜSTÜNDE: içeride çubukların ve değer etiketlerinin üstüne
          biniyordu ("0.141" okunmuyordu) */
-      const q0=split+18, qw=W-split-40, qy=p+30, qh=H-2*p-52;
-      legendRow(ctx,q0,p+2,[["kat hataları (RMSE)","--ink-soft"],[`ortalama ${en(R.mean)} · ±1 std bandı`,"--accent"]],11,qw);
-      legendRow(ctx,q0,p+18,[["▬ en şanslı kat","--good"],["▬ en şanssız kat","--bad"]],10.5,qw);
-      const ax=clamp(Math.max(R.mean+R.sd,...R.errs,...hist)*1.25,.05,2.5);
+      const q0=split+18, qw=W-split-40, qy=p+30, qh=H-2*p-52, un=S().yu?", "+S().yu:"";
+      legendRow(ctx,q0,p+2,[[ts?`tur hataları (RMSE${un})`:`kat hataları (RMSE${un})`,"--ink-soft"],[`ortalama ${ev(R.mean)} · ±1 std bandı`,"--accent"]],11,qw);
+      legendRow(ctx,q0,p+18,ts?[["▬ en iyi tur","--good"],["▬ en kötü tur","--bad"],RK&&[`- - karıştırılmış KFold ${ev(RK.mean)}`,"--ink-soft"]]
+        :[["▬ en şanslı kat","--good"],["▬ en şanssız kat","--bad"]],10.5,qw);
+      const ax=clamp(Math.max(R.mean+R.sd,...R.errs,...hist,RK?RK.mean:0)*1.25,.05,2.5);
       const EY=(v)=>qy+qh-clamp(v,0,ax)/ax*qh;
       ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
       for(let i=0;i<=4;i++){const gy=qy+i*qh/4;ctx.beginPath();ctx.moveTo(q0,gy);ctx.lineTo(q0+qw,gy);ctx.stroke();}
@@ -7376,9 +7670,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ctx.fillStyle=hexA("--ink",.09);
       ctx.fillRect(q0+1,yb,qw-2,Math.max(1.5,yt-yb));
 
-      ctx.save();ctx.setLineDash([3,4]);ctx.strokeStyle=hexA("--good",.55);ctx.lineWidth=1.2;
-      hist.forEach(hm=>{const y=EY(hm);ctx.beginPath();ctx.moveTo(q0+1,y);ctx.lineTo(q0+qw-1,y);ctx.stroke();});
-      ctx.restore();
+      if(!ts){ ctx.save();ctx.setLineDash([3,4]);ctx.strokeStyle=hexA("--good",.55);ctx.lineWidth=1.2;
+        hist.forEach(hm=>{const y=EY(hm);ctx.beginPath();ctx.moveTo(q0+1,y);ctx.lineTo(q0+qw-1,y);ctx.stroke();});
+        ctx.restore(); }
+      /* zaman sırasında: aynı veride karıştırılmış KFold'un ortalaması (iyimser not) */
+      if(RK){ ctx.save();ctx.setLineDash([8,5]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.8;
+        ctx.beginPath();ctx.moveTo(q0+1,EY(RK.mean));ctx.lineTo(q0+qw-1,EY(RK.mean));ctx.stroke();ctx.restore(); }
 
       const bw=qw/K;
       for(let f=0;f<K;f++){
@@ -7392,26 +7689,34 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
           ctx.fillRect(x-2,Math.max(qy+1,y-5),bd+4,3.2);
         }
         if(bw>=34||f===cur)
-          label(ctx,(e>ax?"↑":"")+en(e),x+bd/2,Math.max(qy+12,y-13),f===cur?css("--ink"):css("--ink-soft"),"center",10);
+          label(ctx,(e>ax?"↑":"")+ev(e),x+bd/2,Math.max(qy+12,y-13),f===cur?css("--ink"):css("--ink-soft"),"center",10);
         label(ctx,String(f+1),x+bd/2,qy+qh+11,f===cur?css("--ink"):css("--ink-soft"),"center",10);
       }
       const ym=EY(R.mean);
       ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;
       ctx.beginPath();ctx.moveTo(q0,ym);ctx.lineTo(q0+qw,ym);ctx.stroke();ctx.restore();
 
-      legend(ctx,q0+qw-6,qy+qh-10,[[`soluk yeşil: ${hist.length} karıştırmanın ortalaması`,"--good"]],{size:10.5,align:"right"});
-      label(ctx,"kat numarası →",q0+qw/2,qy+qh+23,css("--ink-soft"),"center",11);
+      /* zaman sırasında karıştırma geçmişi yok (turlar hep aynı): lejant çubukları örtmesin */
+      if(!ts) legend(ctx,q0+qw-6,qy+qh-10,[[`soluk yeşil: ${hist.length} karıştırmanın ortalaması`,"--good"]],{size:10.5,align:"right"});
+      label(ctx,ts?"tur (doğrulama dilimi) →":"kat numarası →",q0+qw/2,qy+qh+23,css("--ink-soft"),"center",11);
     }
 
     /* ───── göstergeler ───── */
     $("#cv-vk").textContent=`${cur+1} / ${K}`;
-    const vc=$("#cv-vc"); vc.textContent=en(R.errs[cur]); vc.style.color=css(col(cur));
-    const vm=$("#cv-vm"); vm.textContent=en(R.mean);
-    vm.className="v "+(R.mean<.16?"ok":R.mean<.30?"wr":"bd");
+    const vc=$("#cv-vc"); vc.textContent=ev(R.errs[cur]); vc.style.color=css(col(cur));
+    const vm=$("#cv-vm"); vm.textContent=ev(R.mean);
+    /* renk eşiği gürültüye göre: ölçekli eğrilerde 0.16 / 0.30 (eskisiyle aynı) */
+    vm.className="v "+(R.mean<NO()*1.33?"ok":R.mean<NO()*2.5?"wr":"bd");
     /* yayılım bilerek renksiz: k büyüdükçe kat başına test noktası azaldığı için
        std DOĞAL olarak büyür — kırmızı görmek "k=10 kötü" yanılgısı yaratırdı */
-    $("#cv-vs").textContent=en(R.sd);
-    $("#cv-vr").textContent=`${en(R.errs[R.iMin])} – ${en(R.errs[R.iMax])}`;
+    $("#cv-vs").textContent=ev(R.sd);
+    $("#cv-vr").textContent=`${ev(R.errs[R.iMin])} – ${ev(R.errs[R.iMax])}`;
+    /* tuval metni sahte DOM'da okunmuyor: bölmenin kendisi ve iki not aria-label'da */
+    const u=S().yu?" "+S().yu:"";
+    cv.setAttribute("aria-label",`k-fold cross-validation, ${ts?"zaman sırası (TimeSeriesSplit)":"karıştırılmış (KFold)"}: k = ${K}, ${deg}. derece, ${n} nokta. `+
+      (ts?`${cur+1}. tur: eğitim 1–${ws}, doğrulama ${ws+1}–${we}, kullanılmayan ${we<n?(we+1)+"–"+n:"yok"} (zaman sırasına göre nokta numarası). `
+         :`${cur+1}. kat doğrulamada: ${we-ws} nokta, eğitim ${n-(we-ws)} nokta. `)+
+      `Ortalama hata ${ev(R.mean)}${u}, katlar arası std ${ev(R.sd)}${u}`+(RK?`; karıştırılmış KFold ortalaması ${ev(RK.mean)}${u}.`:"."));
   }
 
   /* ───── etkileşim: sağda çubuğa, solda noktaya tıkla → o kat doğrulama katı olsun ───── */
@@ -7429,7 +7734,8 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       const d=(X(D[i].x)-q.x)**2+(Y(D[i].y)-q.y)**2;
       if(d<bd){bd=d;bi=i;}
     }
-    if(bi>=0){ cur=R.fold[bi]; draw(); }
+    /* zaman sırasında ilk dilim hiç doğrulanmıyor: ona tıklayınca ilk tur */
+    if(bi>=0){ cur=Math.max(0,R.fold[bi]); draw(); }
   });
 
   $("#cv-k").oninput=e=>{K=+e.target.value;$("#cv-ko").textContent=K;cur=clamp(cur,0,K-1);hist=[];draw();};
@@ -7439,10 +7745,21 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   $("#cv-res").onclick=e=>{showR=!showR;e.currentTarget.setAttribute("aria-pressed",String(showR));draw();};
   $("#cv-shuf").onclick=()=>{
     reshuffle();
-    const R=compute();
+    /* zaman sırası karıştırmayı umursamaz: geçmiş çizgisi yalnız KFold'da birikir */
+    const R=mode==="kf"?compute():null;
     if(R){hist.push(R.mean); if(hist.length>16) hist.shift();}
     draw();
   };
+  /* bölme yöntemi: « Karıştır » (KFold) | « Zaman sırası » (TimeSeriesSplit) */
+  function setMode(m){
+    if(m==="ts"&&!isTime()) m="kf";
+    mode=m; hist=[]; cur=0;
+    $("#cv-kf").setAttribute("aria-pressed",String(m==="kf"));
+    $("#cv-ts").setAttribute("aria-pressed",String(m==="ts"));
+    draw();
+  }
+  $("#cv-kf").onclick=()=>setMode("kf");
+  $("#cv-ts").onclick=()=>{ if(isTime()) setMode("ts"); };
   function run(){
     if(timer){clearInterval(timer);timer=0;runBtn("#cv-run",false,"Çapraz doğrula");return;}
     cur=0; draw(); runBtn("#cv-run",true,"Durdur");
@@ -7452,19 +7769,28 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     },620);
   }
   $("#cv-run").onclick=run;
-  function useSet(i){ dsi=clamp(i,0,DS.length-1); sample(); draw(); }
+  /* reklam bütçesi zaman değil: orada « Zaman sırası » kapalı, açıksa « Karıştır »a döner */
+  function useSet(i){ dsi=clamp(i,0,DS.length-1);
+    const b=$("#cv-ts"); b.disabled=!isTime(); b.title=isTime()?"":"Bu veride zaman yok: x reklam bütçesi";
+    sample(); setMode(mode); }
   reg({id:"m-cv",draw,space:run,init:()=>{sample();},
     scenarioLabel:CONTENT["m-cv"].pick,
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
     {t:"Tek bölme",d:"k = 2: veri ikiye ayrıldı, sağda iki çubuk var. İkisi de AYNI modelin notu — sadece doğrulama tarafına düşen noktalar farklı. Hangisini rapor ederdiniz?",
-     hl:["#cv-vr"], run(){setPressed("#cv-run",false);setR("#cv-k",2);setR("#cv-d",3);}},
+     set:0, hl:["#cv-vr"], run(){setPressed("#cv-run",false);setPressed("#cv-kf",true);setR("#cv-k",2);setR("#cv-d",3);}},
     {t:"Katları gezin",d:"k = 5 ve çapraz doğrulama başladı: alttaki şeritte siyah çerçeve kayıyor, her blok sırayla doğrulama katı oluyor ve model o bloğu hiç görmeden eğitiliyor. Sağda çubuklar birer birer yanıyor.",
-     hl:["#cv-vk","#cv-vc"], run(){setR("#cv-k",5);setPressed("#cv-run",true);}},
+     hl:["#cv-vk","#cv-vc"], run(){setPressed("#cv-kf",true);setR("#cv-k",5);setPressed("#cv-run",true);}},
     {t:"Şanslı kat",d:"Derece 8: model karmaşıklaştı, katlar birbirinden ayrışıyor. Yeşil şerit en şanslı katı, kırmızı en şanssızı işaretliyor. Tek bölmede yeşili yakalasaydınız, olmayan bir başarıyı rapor etmiş olurdunuz.",
-     hl:["#cv-vr"], run(){setPressed("#cv-run",false);setR("#cv-d",8);}},
+     hl:["#cv-vr"], run(){setPressed("#cv-run",false);setPressed("#cv-kf",true);setR("#cv-d",8);}},
     {t:"k büyüyünce",d:"k = 10'da veri beş kez daha karıştırıldı: her soluk yeşil çizgi bir karıştırmanın ortalaması. Aynısını k = 2'de deneyin — orada dağınıklar, burada neredeyse tek çizgiye biniyorlar.",
-     hl:["#cv-vm","#cv-shuf"], run(){setR("#cv-d",3);setR("#cv-k",10);for(let i=0;i<5;i++) press("#cv-shuf");}}
+     hl:["#cv-vm","#cv-shuf"], run(){setPressed("#cv-kf",true);setR("#cv-d",3);setR("#cv-k",10);for(let i=0;i<5;i++) press("#cv-shuf");}},
+    {t:"Zaman sırası olan veri",d:"Kafe satışı: üç yıllık kayıt, satış yıldan yıla artıyor ve yazın yükseliyor. Günleri karıştırıp beş kata böldük; 2. derece model için ortalama hata 55 bardak civarında. Ama doğrulamaya düşen her günün dünü ve yarını eğitimde kalıyor: model, tahmin edeceği günün çevresini önceden görmüş oluyor.",
+     set:3, hl:["#cv-vm"], run(){setPressed("#cv-run",false);setPressed("#cv-kf",true);setR("#cv-n",60);setR("#cv-k",5);setR("#cv-d",2);}},
+    {t:"Geçmişle eğit, gelecekte sına",d:"« Zaman sırası » (<b>TimeSeriesSplit</b>): veri karıştırılmıyor, eğitim hep doğrulamadan önce. Birinci turda ilk dilimle eğitip sonraki dilimi tahmin ediyor; her turda doğrulama bir dilim ileri kayıyor, eğitim penceresi büyüyor. Gri bölge o turda henüz gelmemiş günler. Ortalama hata 150 bardak civarına çıktı: karıştırılmış KFold'un (sağda kesikli çizgi) söylediğinin iki buçuk ile üç katı arası. Model gerçekte hep geçmişi görüp geleceği tahmin edecek; dürüst not bu.",
+     hl:["#cv-vm","#cv-vk"], run(){setPressed("#cv-run",false);setPressed("#cv-ts",true);setPressed("#cv-run",true);}},
+    {t:"Karıştırınca yanlış model seçilir",d:"Derece 10. Zaman sırasında ortalama hata binlerce bardağa fırladı: polinom geleceğe uzatılınca savruluyor. « Karıştır »a basarsan aynı model 30 bardak civarında görünür, 2. dereceden de iyi. Zaman sırası olan veride karıştırılmış KFold'a güvenip model seçersen, tam da gelecekte çökecek modeli seçersin.",
+     hl:["#cv-vm","#cv-d"], run(){setPressed("#cv-run",false);setPressed("#cv-ts",true);setR("#cv-d",10);}}
   ],
        stop:()=>{if(timer){clearInterval(timer);timer=0;runBtn("#cv-run",false,"Çapraz doğrula");}}});
 })();
@@ -9569,13 +9895,13 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 const META=[
   ["01","m-stat",  "tanımsal istatistik ve outlier","Ortalama mı, medyan mı","Hafta 2","ortalama mean medyan median mod standart sapma standard deviation iqr çeyrek quartile kutu grafiği boxplot aykırı değer outlier çarpıklık skew dayanıklı robust maaş sınav notu ev fiyatı hafta 2 veri tanıma"],
   ["02","m-scale", "ölçekleme: min‑maks ve z‑skoru","Metre ile kilometre","Hafta 2","ölçekleme scaling normalizasyon z-skoru z-score min-maks min-max standardization uzaklık ön işleme preprocessing boy maaş yıldız puanı yorum otel araç yaşı kilometre normalizasyon standartlaştırma min-maks z-skoru hafta 2"],
-  ["03","m-fit",   "overfitting ve underfitting","Ezber mi, öğrenme mi","Hafta 3","aşırı öğrenme overfitting yetersiz öğrenme underfitting polinom polynomial derece degree yanlılık bias varyans variance gün içi sıcaklık reklam satış doygunluk titreşim hafta 3 eğitim hatası test hatası"],
+  ["03","m-fit",   "overfitting ve underfitting","Ezber mi, öğrenme mi","Hafta 3","aşırı öğrenme overfitting yetersiz öğrenme underfitting polinom polynomial derece degree yanlılık bias varyans variance gün içi sıcaklık reklam satış doygunluk titreşim hafta 3 eğitim hatası test hatası öğrenme eğrisi learning curve temel model baseline R² test r2"],
   ["04","m-bv",    "bias–variance: hatanın üç kaynağı","Yanlılık mı, varyans mı","Hafta 4","yanlılık bias varyans variance bias-variance tradeoff denge ayrıştırma decomposition indirgenemez hata irreducible error örneklem sample karmaşıklık complexity öğrenme eğrisi gün içi sıcaklık reklam satış titreşim hafta 4 okçu"],
-  ["05","m-cv",    "k-fold cross-validation","Şansı ortalamak","Hafta 4","çapraz doğrulama cross-validation k-katlı k-fold kat fold bölme split varyans variance şans ortalama sıcaklık reklam titreşim kat karıştırma hafta 4 doğrulama katı validation"],
+  ["05","m-cv",    "k-fold cross-validation","Şansı ortalamak","Hafta 4","çapraz doğrulama cross-validation k-katlı k-fold kat fold bölme split varyans variance şans ortalama sıcaklık reklam titreşim kat karıştırma hafta 4 doğrulama katı validation zaman serisi zaman sırası TimeSeriesSplit time series kafe satış"],
   ["06","m-lin",   "linear regression ve least squares","En iyi doğru","Hafta 5","doğrusal regresyon linear regression en küçük kareler least squares artık residual eğim r2 ols ev fiyatı alan metrekare çalışma saati sınav notu araç yaşı ikinci el hafta 5 kesme terimi intercept belirlilik katsayısı beta β0 β1 mse rmse"],
   ["07","m-mlr",   "multiple linear regression ve düzlem","İki öznitelik, bir düzlem","Hafta 5","çoklu doğrusal regresyon multiple linear regression düzlem plane iki öznitelik katsayı coefficient ceteris paribus karıştırıcı confounding çoklu doğrusallık multicollinearity en küçük kareler least squares ev fiyatı alan bina yaşı merkeze uzaklık ikinci el araç kilometre hafta 5 çoklu doğrusal bağlantı karıştırıcı değişken beta"],
   ["08","m-gd",    "gradient descent ve learning rate","Yamaçtan aşağı","Hafta 5","gradyan iniş gradient descent öğrenme oranı learning rate minimum local minimum eğim slope iraksama divergence hata yüzeyi iki vadi convex dışbükey dik kanyon hafta 5 türev derivative maliyet fonksiyonu cost function j theta θ alfa α"],
-  ["09","m-poly",  "polynomial regression ve yeni sütunlar","Eğri de doğrusal olabilir","Hafta 5","polinom regresyon polynomial regression derece degree kare küp öznitelik türetme feature engineering tasarım matrisi design matrix veri dışı tahmin extrapolation gün içi sıcaklık fren mesafesi hız fidan boyu büyüme eğri hafta 5 ekstrapolasyon"],
+  ["09","m-poly",  "polynomial regression ve yeni sütunlar","Eğri de doğrusal olabilir","Hafta 5","polinom regresyon polynomial regression derece degree kare küp öznitelik türetme feature engineering tasarım matrisi design matrix veri dışı tahmin extrapolation gün içi sıcaklık fren mesafesi hız fidan boyu büyüme eğri hafta 5 ekstrapolasyon artık grafiği residual plot röntgen desen elektrik tüketim"],
   ["10","m-log",   "logistic regression ve sigmoid","Yüzde kaç?","Hafta 6","lojistik regresyon logistic regression sigmoid olasılık probability log-kayıp log-loss cross-entropy tümör çapı kanser sınav çalışma rüzgar balon turu iptal hafta 6 log-loss kesme terimi beta p şapka"],
   ["11","m-cm",    "confusion matrix, precision–recall, ROC","Eşiği nereye koyalım","Hafta 8","eşik threshold konfüzyon confusion matrix kesinlik precision duyarlılık recall f1 roc auc dengesiz imbalanced iha tespiti kanser taraması spam filtresi hafta 8 hata matrisi fpr tpr"],
   ["12","m-reg",   "regularization: Ridge, Lasso ve α","Katsayıya ceza","Hafta 8","düzenlileştirme regularization ridge lasso l1 l2 lambda ceza penalty katsayı coefficient seyreklik sparsity shrinkage aşırı öğrenme overfitting sıcaklık reklam satış titreşim hafta 8 alfa α"],
