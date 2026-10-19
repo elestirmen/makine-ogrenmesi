@@ -11572,11 +11572,11 @@ const META=[
 const SEQ=META.map(r=>MODULES.find(m=>m.id===r[1])).filter(Boolean);
 if(SEQ.length!==META.length) console.warn("META'da karşılığı olmayan modül var",
   META.filter(r=>!MODULES.some(m=>m.id===r[1])).map(r=>r[1]));
-const GROUPS=["Hafta 2","Hafta 3","Hafta 4","Hafta 5","Hafta 6","Hafta 8","Hafta 9","Hafta 10","Hafta 11","Hafta 12","Hafta 13","Hafta 14","Ek · Sinir ağları"];
+const GROUPS=["Hafta 1","Hafta 2","Hafta 3","Hafta 4","Hafta 5","Hafta 6","Hafta 7","Hafta 8","Hafta 9","Hafta 10","Hafta 11","Hafta 12","Hafta 13","Hafta 14","Ek · Sinir ağları"];
 /* grup = dersin haftası (pptx/Hafta-NN sunumları); giriş sayfasında sunumun başlığıyla.
-   Hafta 1 (giriş) ve 7 (sınıflandırma uygulaması) yeni algoritma getirmiyor, modülü yok. */
-const GTITLE={"Hafta 2":"Veri tanıma ve tanımsal istatistikler","Hafta 3":"Denetimli algoritmalar ve hata",
-  "Hafta 4":"Bias-variance ve cross-validation","Hafta 5":"Linear regression","Hafta 6":"Logistic regression",
+   Modülü olmayan grup menüde ve giriş sayfasında görünmez. */
+const GTITLE={"Hafta 1":"Makine öğrenmesine giriş","Hafta 2":"Veri tanıma ve tanımsal istatistikler","Hafta 3":"Denetimli algoritmalar ve hata",
+  "Hafta 4":"Bias-variance ve cross-validation","Hafta 5":"Linear regression","Hafta 6":"Logistic regression","Hafta 7":"Sınıflandırma uygulaması",
   "Hafta 8":"Performans ölçütleri ve regularization","Hafta 9":"K-Nearest Neighbors","Hafta 10":"Decision tree",
   "Hafta 11":"Random forest","Hafta 12":"Support Vector Machine","Hafta 13":"PCA","Hafta 14":"Kümeleme"};
 
