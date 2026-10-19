@@ -102,6 +102,31 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
       for(let i=0;i<=100&&bi<0;i++){ set(i); if(el('reg-lamo').textContent===b) bi=i; }
       set(bi); rt.push(num(el('reg-te').textContent)/Math.min(...te)); }
     chk(med(rt)<=2, "CV ile seçilen α'nın test hatası çoğunlukla test dibine yakın (Sağ alt)", `medyan oran ${med(rt).toFixed(2)}`); }
+  /* Elastic Net (ρ = 0.5) · adım "Elastic Net · ikisinin karışımı": aynı α'da (kaydırıcı 42)
+     "L2 on ikisini de tutuyordu, L1 çoğunlukla üç dördünü, Elastic Net dört ile altı arasını".
+     Ölçüm (16 örneklemlik 7 blok, sıcaklık): L1 ort 2.6–3.9, Elastic Net 4.2–5.9, fark +0.75…+2.3;
+     tek örneklemde Elastic Net ≥ L1 16 turun 15–16'sında. Öteki iki eğride de sıra aynı
+     (doygunluk L1 3.3 / EN 4.7, titreşim 3.9 / 5.9). */
+  { const nz={l2:[],en:[],l1:[]}; let enGeL1=0;
+    for(let t=0;t<16;t++){ el('reg-new').click();
+      for(const m of ['l2','en','l1']){ P(el,'reg-'+m,true); set(42); nz[m].push(num(el('reg-nz').textContent)); }
+      if(nz.en[t]>=nz.l1[t]) enGeL1++; }
+    const m2=mean(nz.l2), me=mean(nz.en), m1=mean(nz.l1);
+    console.log(`       α kaydırıcı 42, 16 örneklem: sıfır olmayan L2 ${m2.toFixed(2)} · Elastic Net ${me.toFixed(2)} · L1 ${m1.toFixed(2)} (EN ≥ L1: ${enGeL1}/16)`);
+    chk(m2===12 && me<12 && nz.en.every(v=>v<12), "Elastic Net L2 gibi hepsini tutmuyor: bazı katsayılar tam sıfır", `L2 ${m2.toFixed(1)} · EN ${me.toFixed(2)}`);
+    chk(me>m1+0.3 && enGeL1>=13, "Elastic Net L1'den az katsayı sıfırlıyor (sıfır olmayan L1 ile L2 arasında)", `EN ${me.toFixed(2)} > L1 ${m1.toFixed(2)}, ${enGeL1}/16 turda ≥`);
+    chk(me>=3.5&&me<=7 && m1>=2&&m1<=4.5, "adımdaki sayılar: L1 üç dört, Elastic Net dört ile altı arası", `L1 ${m1.toFixed(2)} · EN ${me.toFixed(2)}`);
+    P(el,'reg-en',true); set(100);
+    chk(num(el('reg-nz').textContent)===0, "Elastic Net'te de α en büyükken 0 / 12 kalıyor", el('reg-nz').textContent);
+    /* "5 katlı CV ile α seçimi bu modda da çalışsın": seçimin test hatası test dibine oranı,
+       16 örneklemde medyan 1.05–1.22 (sıcaklık / doygunluk) ölçüldü — L2 ile aynı ölçüt */
+    const rt=[];
+    for(let t=0;t<16;t++){ el('reg-new').click();
+      const te=[]; for(let i=0;i<=100;i+=2){ set(i); te.push(num(el('reg-te').textContent)); }
+      const b=el('reg-best').textContent; let bi=-1;
+      for(let i=0;i<=100&&bi<0;i++){ set(i); if(el('reg-lamo').textContent===b) bi=i; }
+      set(bi); rt.push(num(el('reg-te').textContent)/Math.min(...te)); }
+    chk(med(rt)<=2, "Elastic Net'te de CV ile seçilen α'nın test hatası test dibine yakın", `medyan oran ${med(rt).toFixed(2)}`); }
 }
 
 /* ── 14 · Çapraz doğrulama: katlar ve ortalama tutarlı ── */
@@ -925,6 +950,99 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
       `precision %${spam.pre} vs recall %${spam.rec}`);
   chk(Math.abs(iha.pre-iha.rec)<15, "İHA senaryosu ikisini dengede tutuyor (note: 'iki maliyetin pazarlığı')",
       `%${iha.pre} / %${iha.rec}`);
+  /* spam note: "Eşik YUKARI, 0.90'a çekilir: precision %100 ... spam'in ancak %13'ü yakalanıyor".
+     Ölçüm (12 tur): precision 100.0, recall 12.6 ± 0.5 [11.9, 13.6] */
+  chk(spam.t==="0.90", "spam senaryosunun eşiği sunumdaki gibi 0.90", spam.t);
+  chk(spam.pre>=99.5 && spam.rec>=9 && spam.rec<=17, "spam note: precision %100, recall ancak %13 civarı",
+      `precision %${spam.pre} · recall %${spam.rec}`);
+}
+
+/* ── Modül 11 · temel model, specificity, PR eğrisi ve maliyetle eşik ──
+   Sayılar tuvalin aria-label'ından okunuyor (matris, temel model, ROC-AUC, PR-AUC,
+   maliyet eğrisinin dibi); tuval metni sahte DOM'da görünmüyor. 10 000 örnek olduğu için
+   turdan tura oynama küçük, yine de 12 turun ORTALAMASI alınıyor. */
+{
+  head("Modül 11 · temel model, PR eğrisi, maliyetle eşik");
+  const {el,M}=boot(F);
+  const AR=()=>el('c-cm').getAttribute('aria-label')||'';
+  const rd=()=>{ const a=AR(), g=(re)=>{const m=re.exec(a);return m?parseFloat(m[1]):NaN;};
+    return {acc:g(/Doğruluk ([\d.]+)%/), base:g(/temel model ([\d.]+)%/), spec:g(/Specificity ([\d.]+)%/),
+      roc:g(/ROC-AUC ([\d.]+)/), ap:g(/PR-AUC ([\d.]+)/), taban:g(/taban \(pozitif oranı\) ([\d.]+)/),
+      cost:g(/bu eşikte (\d+)/), best:g(/en ucuz eşik ([\d.]+)/), cmin:g(/→ (\d+) ₺/),
+      TP:g(/TP (\d+)/), FP:g(/FP (\d+)/), FN:g(/FN (\d+)/),
+      pre:V(el,'cm-pre'), rec:V(el,'cm-rec'), f1:V(el,'cm-f1'), accCls:el('cm-acc').className}; };
+  const avg=(setup,N=12)=>{ const R=[]; for(let i=0;i<N;i++){ el('cm-new').click(); setup(); R.push(rd()); }
+    const o={runs:R}; for(const k of Object.keys(R[0])) if(typeof R[0][k]==='number') o[k]=mean(R.map(r=>r[k])); return o; };
+  const f=(v,d=1)=>v.toFixed(d);
+
+  /* adım « Dengesiz sınıf tuzağı »: "herkese 'negatif' diyen tembel model de %97 alıyor,
+     gösterge bu yüzden kırmızı. Specificity %100'e yakın, recall yerlerde" */
+  P(el,'cm-vroc',true);
+  const tr=avg(()=>{PK(M,'m-cm',0); S(el,'cm-pr',3); S(el,'cm-t',95);});
+  console.log(`       tuzak: doğruluk %${f(tr.acc)} · temel model %${f(tr.base)} · specificity %${f(tr.spec)} · recall %${f(tr.rec)}`);
+  chk(Math.abs(tr.base-97)<=1, "tembel « hep negatif » modelin doğruluğu %97 (matrisin altı)", `%${f(tr.base)}`);
+  chk(tr.runs.every(r=>r.acc<=r.base+0.5 && /\bbd\b/.test(r.accCls)), "model temel modeli geçemiyor → Doğruluk göstergesi kırmızı",
+      `doğruluk − temel = ${f(tr.acc-tr.base,2)} puan`);
+  chk(tr.spec>=99.5 && tr.rec<5, "specificity %100'e yakın, recall yerlerde", `spec %${f(tr.spec)} · recall %${f(tr.rec)}`);
+
+  /* adımlar « PR eğrisi · dengeli veri » ve « Aynı model, %1 pozitif » (Hafta 8 slayt 28:
+     AUC 0.95, dengelide R .80 → P .92, %1'de P .11). Ölçüm (12 tur): dengeli ROC .949,
+     PR-AUC .950, R 80.1, P 91.9 · %1: ROC .949 ± .010, PR-AUC .399 ± .040, R 80.8 ± 3.7,
+     P 10.2 ± 0.7, TP 80, FP 707 ± 25 */
+  P(el,'cm-vpr',true);
+  const kStep=(pr)=>()=>{PK(M,'m-cm',1); S(el,'cm-sep',30); S(el,'cm-pr',pr); S(el,'cm-t',54);};
+  const d50=avg(kStep(50));
+  chk(T(el,'cm-auck')==="PR-AUC" && Math.abs(V(el,'cm-auc')-d50.runs[d50.runs.length-1].ap)<1e-9,
+      "PR görünümünde son gösterge PR-AUC'yi yazıyor", `${T(el,'cm-auck')} ${T(el,'cm-auc')}`);
+  const d01=avg(kStep(1));
+  console.log(`       %50 pozitif: ROC-AUC ${f(d50.roc,3)} · PR-AUC ${f(d50.ap,3)} · recall %${f(d50.rec)} · precision %${f(d50.pre)}`);
+  console.log(`       %1 pozitif : ROC-AUC ${f(d01.roc,3)} · PR-AUC ${f(d01.ap,3)} · recall %${f(d01.rec)} · precision %${f(d01.pre)} · TP ${f(d01.TP,0)} · FP ${f(d01.FP,0)}`);
+  chk(Math.abs(d50.roc-0.95)<=0.01 && Math.abs(d50.ap-0.95)<=0.02, "dengeli veride ROC-AUC 0.95, PR-AUC de 0.95", `${f(d50.roc,3)} / ${f(d50.ap,3)}`);
+  chk(Math.abs(d50.rec-80)<=2 && Math.abs(d50.pre-92)<=2, "eşik 0.54'te recall %80, precision %92", `%${f(d50.rec)} / %${f(d50.pre)}`);
+  chk(Math.abs(d01.roc-d50.roc)<=0.02, "pozitif oranı %1'e inince ROC-AUC yerinde kalıyor", `${f(d50.roc,3)} → ${f(d01.roc,3)}`);
+  chk(d01.ap>=0.3 && d01.ap<=0.5 && d50.ap-d01.ap>0.4, "PR-AUC ise 0.95'ten 0.40 civarına çöküyor", `${f(d50.ap,3)} → ${f(d01.ap,3)}`);
+  chk(Math.abs(d01.rec-80)<=4 && d01.pre>=8.5 && d01.pre<=12, "aynı eşikte recall yine %80, precision %10 civarı", `%${f(d01.rec)} / %${f(d01.pre)}`);
+  chk(d01.TP>=70 && d01.TP<=90 && d01.FP>=600 && d01.FP<=800, "80 hastaya karşı 700 kadar yanlış alarm", `TP ${f(d01.TP,0)} · FP ${f(d01.FP,0)}`);
+  chk(Math.abs(d01.taban-0.01)<0.003, "PR'nin taban çizgisi pozitif oranı (0.01)", f(d01.taban,3));
+
+  /* « Müşteri kaybı » note ve adımlar « Maliyetle eşik » / « En ucuz eşik » (Hafta 7:
+     P .393, R .857, F1 .539, doğruluk .795 ↔ temel .860; kampanya 300, FN 660 TL).
+     Ölçüm (12 tur): eşik .50'de ROC .886, P 39.9, R 80.8, F1 53.4, doğruluk 80.2, temel 86.0,
+     maliyet 690 ± 13 bin; en ucuz eşik .576 ± .010 [.56, .59]; .58'de 561 bin */
+  P(el,'cm-vcost',true);
+  chk(!el('cm-cfpc').hidden && !el('cm-cfnc').hidden && el('cm-aucs').hidden && !el('cm-costs').hidden,
+      "« Maliyet »te birim bedel kaydırıcıları ve toplam maliyet göstergesi görünüyor");
+  const ch=(t,fp=300)=>()=>{PK(M,'m-cm',3); S(el,'cm-cfp',fp); S(el,'cm-cfn',660); S(el,'cm-t',t);};
+  const c50=avg(ch(50)), c58=avg(ch(58));
+  console.log(`       churn .50: ROC ${f(c50.roc,3)} · P %${f(c50.pre)} · R %${f(c50.rec)} · F1 %${f(c50.f1)} · doğruluk %${f(c50.acc)} (temel %${f(c50.base)}) · maliyet ${f(c50.cost/1000,0)} bin`);
+  console.log(`       en ucuz eşik ${f(c50.best,3)} (${f(c50.cmin/1000,0)} bin) · .58'de ${f(c58.cost/1000,0)} bin · fark ${f((c50.cost-c58.cost)/1000,0)} bin`);
+  chk(Math.abs(c50.roc-0.88)<=0.015, "churn note: ROC-AUC 0.88", f(c50.roc,3));
+  chk(Math.abs(c50.pre-40)<=2 && Math.abs(c50.rec-81)<=2 && Math.abs(c50.f1-53)<=1.5, "churn note: eşik 0.50'de precision %40, recall %81, F1 0.53",
+      `%${f(c50.pre)} · %${f(c50.rec)} · %${f(c50.f1)}`);
+  chk(Math.abs(c50.acc-80)<=1.5 && Math.abs(c50.base-86)<=1 && c50.acc<c50.base, "churn note: doğruluk %80, herkese 'kalır' diyen temel model %86",
+      `%${f(c50.acc)} ↔ %${f(c50.base)}`);
+  chk(c50.cost>=650000 && c50.cost<=730000, "adım: eşik 0.50'de toplam maliyet ~690 bin ₺", `${f(c50.cost/1000,0)} bin`);
+  chk(c50.runs.every(r=>r.best>0.5) && c50.best>=0.55 && c50.best<=0.61, "en ucuz eşik 0.5'in sağında, 0.58 civarında", `ort ${f(c50.best,3)}`);
+  const sv=c50.cost-c58.cost;
+  chk(sv>=100000 && sv<=160000, "eşik 0.58'e gelince toplam maliyet ~130 bin ₺ düşüyor", `${f(sv/1000,0)} bin`);
+  chk(c58.FP<c50.FP && c58.FN>c50.FN, "yanlış alarm azaldı, kaçan üye arttı", `FP ${f(c50.FP,0)}→${f(c58.FP,0)} · FN ${f(c50.FN,0)}→${f(c58.FN,0)}`);
+  /* gösterge ile eğri aynı ızgarada: kaydırıcı en ucuz eşiğe gidince gösterge eğrinin dibini okur */
+  { const r=c58.runs[c58.runs.length-1]; S(el,'cm-t',Math.round(r.best*100)); const q=rd();
+    chk(q.cost===q.cmin && /\bok\b/.test(el('cm-cost').className), "kaydırıcı en ucuz eşikteyken gösterge eğrinin dibini okuyor (yeşil)", `${q.cost} = ${q.cmin}`); }
+
+  /* idea: "Kaçırmak pahalıysa ya da yanlış alarm ucuzsa en ucuz eşik sola kayar; tersi
+     olursa sağa." Ölçüm: İHA 50/800 → .389; churn FP 100 → .491 (FP 300'de .576);
+     İHA FP 500 / FN 40 → sağda. (.ask'ın sorusu: FP ₺ inince yeşil çizgi nereye?) */
+  const cheap=avg(ch(50,100));
+  const ihaL=avg(()=>{PK(M,'m-cm',0); S(el,'cm-cfp',50); S(el,'cm-cfn',800);});
+  const ihaR=avg(()=>{PK(M,'m-cm',0); S(el,'cm-cfp',500); S(el,'cm-cfn',40);});
+  console.log(`       en ucuz eşik: churn FP 300 → ${f(c50.best,3)}, FP 100 → ${f(cheap.best,3)} · İHA 50/800 → ${f(ihaL.best,3)}, 500/40 → ${f(ihaR.best,3)}`);
+  chk(cheap.best<c50.best-0.04, "yanlış alarm ucuzlayınca en ucuz eşik sola kayıyor (Hafta 7'nin sorusu)", `${f(c50.best,3)} → ${f(cheap.best,3)}`);
+  chk(ihaL.best<0.45, "kaçırmak pahalıysa (50 / 800) en ucuz eşik 0.5'in solunda", f(ihaL.best,3));
+  chk(ihaR.best>0.55, "yanlış alarm pahalıysa en ucuz eşik 0.5'in sağında", f(ihaR.best,3));
+  P(el,'cm-vroc',true);
+  chk(el('cm-cfpc').hidden && !el('cm-aucs').hidden && el('cm-costs').hidden && T(el,'cm-auck')==="ROC-AUC",
+      "ROC'a dönünce maliyet kaydırıcıları gizleniyor, gösterge yine ROC-AUC");
 }
 
 /* ── 02 · Ölçekleme · gösterge adı veri kümesiyle birlikte değişiyor ──
