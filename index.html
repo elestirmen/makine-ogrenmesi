@@ -135,6 +135,7 @@ canvas{display:block;width:100%;height:var(--cvh);min-height:320px;touch-action:
 #m-mlr .ctl output{min-width:6ch}
 #m-poly .ctl output{min-width:7ch}   /* "x … x¹⁰" */
 #cm-cfpo,#cm-cfno{min-width:4ch}     /* Modül 11 birim maliyet: "50" ile "2400" arası */
+#m-dt .ctl output{min-width:5.5ch}   /* kök eşiği veri biriminde: "3100", "507.6" */
 input[type=range]{accent-color:var(--accent);width:130px}
 input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
@@ -657,24 +658,33 @@ input[type=range]{min-height:28px;margin:0}
             <button id="knn-a" aria-pressed="true"><span class="dot" style="background:var(--a)"></span><span id="knn-an">Uçak</span></button>
             <button id="knn-b" aria-pressed="false"><span class="dot" style="background:var(--b)"></span><span id="knn-bn">Kuş</span></button>
           </div>
-          <label class="ctl"><span class="lab">k</span><input type="range" id="knn-k" min="1" max="21" step="2" value="3"><output id="knn-ko">3</output></label>
+          <label class="ctl"><span class="lab">k</span><input type="range" id="knn-k" min="1" max="41" step="2" value="3"><output id="knn-ko">3</output></label>
+          <div class="seg" role="group" aria-label="Uzaklık ölçüsü">
+            <button id="knn-euc" aria-pressed="true">Öklid</button>
+            <button id="knn-man" aria-pressed="false">Manhattan</button>
+            <button id="knn-che" aria-pressed="false">Chebyshev</button>
+          </div>
+          <div class="seg" role="group" aria-label="Oylama">
+            <button id="knn-uni" aria-pressed="true">Eşit oy</button>
+            <button id="knn-dw" aria-pressed="false">Ağırlıklı oy</button>
+          </div>
           <button class="btn" id="knn-bnd" aria-pressed="true">Karar bölgesi</button>
           <button class="btn" id="knn-demo">Örnek veri</button>
           <button class="btn" id="knn-clr">Temizle</button>
-          <span class="hint">Fareyi tuvalde gezdir → o noktanın oylaması görünür.</span>
+          <span class="hint">Fareyi tuvalde gezdir → o noktanın komşuları ve oyu görünür; fare çıkınca sorgu yerinde kalır.</span>
         </div>
         <div class="stats">
-          <div class="stat"><span class="k">Nokta</span><span class="v" id="knn-n">0</span></div>
           <div class="stat"><span class="k">İmleçteki tahmin</span><span class="v" id="knn-p">—</span></div>
-          <div class="stat"><span class="k">Oy dağılımı</span><span class="v" id="knn-v">—</span></div>
+          <div class="stat" style="flex-grow:1.6"><span class="k">Oy dağılımı</span><span class="v" id="knn-v">—</span></div>
           <div class="stat"><span class="k">Eğitim hatası</span><span class="v" id="knn-e">—</span></div>
+          <div class="stat"><span class="k">Test hatası</span><span class="v" id="knn-t">—</span></div>
         </div>
       </div>
       <div class="ask">
         <span class="tag">Dene ve düşün</span>
         <div>
-          <p><b>k = 1</b> yap. Eğitim hatası neden tam olarak sıfır çıkıyor? Sıfır hata, bu modelin iyi olduğu anlamına mı geliyor?</p>
-          <p>Sonra <b>k</b>'yı 21'e çek: adacıklar kayboluyor, sınır yumuşuyor, eğitim hatası %0'dan %4–5'e çıkıyor. Model artık neye bakıyor? k = 1 ile k = 21 arasında hangisini seçerdin, neden?</p>
+          <p><b>k = 1</b> yap. Eğitim hatası neden tam olarak sıfır çıkıyor? Test hatası da sıfır mı? Sonra <b>k</b>'yı 21'e çek: adacıklar kayboluyor, eğitim hatası %0'dan %4–5'e çıkıyor. Hangisini seçerdin? Cevabı « İki vadi »de sağdaki eğri veriyor: test hatası en düşük hangi k'da, √n işaretine yakın mı, neden iki uçta da yükseliyor?</p>
+          <p>« İki eczane »de k = 1 iken <b>Öklid</b>'den <b>Manhattan</b>'a geç: sorgu yerinden kıpırdamadı ama tahmin A'dan B'ye döndü. Ne değişti? Sonra « Altı daire »de <b>Ağırlıklı oy</b>'u aç: P 0.67'den 0.73'e çıkıyor. Hangi komşunun sözü azaldı? (İpucu: tablodaki w sütunu.)</p>
         </div>
       </div>
     </section>
@@ -876,36 +886,45 @@ input[type=range]{min-height:28px;margin:0}
       <div class="head">
         <div class="eyebrow"><span>Modül 14 · Hafta 10</span></div>
         <h2>Bölerek Karar Vermek</h2>
-        <p><b>Decision tree</b> (karar ağacı) tek bir soru sorar: "Hangi eksende, hangi eşikte kesersem <b>impurity</b> (safsızlık) en çok azalır?" Eşiği elinle kaydır, Gini eğrisinin dibini kendin bul; sonra derinliği artırıp ağacın nasıl ezberlemeye başladığını izle.</p>
+        <p><b>Decision tree</b> (karar ağacı) tek bir soru sorar: "Hangi eksende, hangi eşikte kesersem <b>impurity</b> (safsızlık) en çok azalır?" Eşiği elinle kaydır, safsızlık eğrisinin dibini kendin bul; sonra derinliği artırıp ağacın nasıl ezberlemeye başladığını izle.</p>
       </div>
       <div class="stage">
-        <canvas id="c-dt" aria-label="Decision tree bölmeleri ve Gini eğrisi"></canvas>
+        <canvas id="c-dt" aria-label="Decision tree bölmeleri ve safsızlık eğrisi"></canvas>
         <div class="bar">
           <div class="seg" role="group" aria-label="Bölme ekseni">
             <button id="dt-au" aria-pressed="true">Eksen: yatay</button>
             <button id="dt-av" aria-pressed="false">Eksen: dikey</button>
           </div>
-          <label class="ctl"><span class="lab">Kök eşiği</span><input type="range" id="dt-t" min="2" max="98" step="1" value="50"><output id="dt-to">0.50</output></label>
-          <label class="ctl"><span class="lab">Derinlik</span><input type="range" id="dt-d" min="1" max="5" step="1" value="1"><output id="dt-do">1</output></label>
+          <label class="ctl"><span class="lab">Kök eşiği</span><input type="range" id="dt-t" min="2" max="98" step="1" value="50"><output id="dt-to">70</output></label>
+          <label class="ctl"><span class="lab">Derinlik</span><input type="range" id="dt-d" min="1" max="8" step="1" value="1"><output id="dt-do">1</output></label>
           <button class="btn primary" id="dt-best">En iyi bölmeyi bul</button>
-          <button class="btn" id="dt-tree" aria-pressed="false">Ağacı çiz</button>
+          <div class="seg" role="group" aria-label="Safsızlık ölçütü">
+            <button id="dt-gini" aria-pressed="true">Gini</button>
+            <button id="dt-ent" aria-pressed="false">Entropi</button>
+          </div>
+          <div class="seg" role="group" aria-label="Sağ panel">
+            <button id="dt-vt" aria-pressed="true">Eşik eğrisi</button>
+            <button id="dt-tree" aria-pressed="false">Ağaç</button>
+            <button id="dt-vd" aria-pressed="false">Derinlik eğrisi</button>
+          </div>
           <button class="btn" id="dt-demo">Örnek veri</button>
           <button class="btn" id="dt-clr">Temizle</button>
           <span class="hint">Tuvale tıkla → nokta ekle (Shift ile ikinci sınıf).</span>
         </div>
         <div class="stats">
-          <div class="stat"><span class="k">Kök <span lang="en">Gini</span></span><span class="v" id="dt-g0">—</span></div>
+          <div class="stat"><span class="k" id="dt-k0">Kök <span lang="en">Gini</span></span><span class="v" id="dt-g0">—</span></div>
           <div class="stat"><span class="k">Bölme sonrası</span><span class="v" id="dt-g1">—</span></div>
-          <div class="stat"><span class="k"><span lang="en">Gini</span> kazancı</span><span class="v ok" id="dt-gain">—</span></div>
+          <div class="stat"><span class="k" id="dt-kg"><span lang="en">Gini</span> kazancı</span><span class="v ok" id="dt-gain">—</span></div>
           <div class="stat"><span class="k">Yaprak</span><span class="v" id="dt-leaf">—</span></div>
           <div class="stat"><span class="k">Eğitim doğruluğu</span><span class="v" id="dt-acc">—</span></div>
+          <div class="stat"><span class="k">Test doğruluğu</span><span class="v" id="dt-tacc">—</span></div>
         </div>
       </div>
       <div class="ask">
         <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Eşiği elle gezdirirken sağdaki Gini eğrisi düz bir çizgi değil, basamak basamak iniyor. Neden? (İpucu: eşik iki komşu nokta arasında gezerken hangi noktanın tarafı değişiyor?)</p>
-          <p>Derinliği 5 yap: ağaç eğitim doğruluğunu %99'a çıkarıyor, 30 noktayı birkaç kutuya hapsediyor. Bu ağaca yeni bir ölçüm sorsan güvenir miydin? Modül 03'teki 14. dereceden polinomla bu ağacın ortak noktası ne?</p>
+          <p>Eşiği elle gezdirirken sağdaki eğri düz bir çizgi değil, basamak basamak iniyor. Neden? (İpucu: eşik iki komşu nokta arasında gezerken hangi noktanın tarafı değişiyor?) Sonra <b>Entropi</b>'ye geç: sayılar büyüyor. En iyi eşik yerinden oynuyor mu?</p>
+          <p>« Kredi onayı »nda <b>Derinlik eğrisi</b>'ni aç ve derinliği 1'den 8'e çek: eğitim doğruluğu %98'e çıkıyor, ağaç 30 civarı kutu açıyor. Test doğruluğu ne yapıyor? Bu ağaca yeni bir başvuru sorsan güvenir miydin, hangi derinliği seçerdin? Modül 03'teki 14. dereceden polinomla ortak noktası ne?</p>
         </div>
       </div>
     </section>
@@ -2187,28 +2206,44 @@ const CONTENT={
 "m-knn":{ pick:"Veri seti",
   sets:[
     {name:"Uçak / Kuş", x:"kanat açıklığı (m)", y:"hız (km/sa)", cls:["Uçak","Kuş"], gen:"demo",
-     note:"İki ayrı bulut, ortada birkaç karışık örnek: radar izinden uçak mı kuş mu ayırmak."},
+     note:"İki ayrı bulut, ortada birkaç karışık örnek: radar izinden uçak mı kuş mu ayırmak. Test hatası k = 1'de %8 civarı, k ≥ 5'te %5 civarı; bulutlar iyi ayrık olduğu için büyük k bile bozmuyor."},
     {name:"Baz istasyonu", x:"doğu (km)", y:"kuzey (km)", cls:["Çeker","Çekmez"], gen:"rings",
-     note:"Kapsama alanı bir HALKA. Hiçbir doğru bu sınırı çizemez, KNN ise eğri sınırı hiç zorlanmadan öğrenir."},
+     note:"Kapsama alanı bir HALKA. Hiçbir doğru bu sınırı çizemez, KNN ise eğri sınırı hiç zorlanmadan öğrenir. Ama iç öbek küçük: k = 41'de komşuluk onu yutar, test hatası %50'ye yaklaşır."},
     {name:"Kredi riski", x:"gelir (bin ₺)", y:"borç / gelir oranı", cls:["Ödedi","Ödemedi"], gen:"noisy",
-     note:"Sınıflar iç içe: aynı gelir ve borçla biri ödüyor, biri ödemiyor. k = 1 bu gürültüyü ezberler."}
+     note:"Sınıflar iç içe: aynı gelir ve borçla biri ödüyor, biri ödemiyor. k = 1 bu gürültüyü ezberler: test hatası %35 civarı. k = 21'de %27'ye iner."},
+    {name:"İki vadi", x:"doğu (km)", y:"kuzey (km)", cls:["Güllüdere","Kızılçukur"], gen:"vadi", tm:2,
+     note:"Hafta 9'un « iki ay » verisi: yürüyüşçülerin GPS kayıtları iki kıvrımlı vadi boyunca, kayıtların %8'i yanlış vadiye yazılmış. Test hatası k = 1'de %19, k = 5–7'de %12, k = 41'de %21 civarı: U eğrisi. En düşük test hatası çoğunlukla k = 3–11'de; √n ≈ 9. 80 eğitim, 160 test noktası."},
+    /* Sabit veri (gen:"fixed"): adlı noktalar ve bir SORGU. raw = [ad, x, y, sınıf];
+       z:true iki ekseni z-skoruna çevirir (s, StandardScaler gibi n'ye bölünür).
+       span: tuvalin bir kenarı kaç birim — iki eksen aynı ölçekte, uzaklık o birimde. */
+    {name:"Altı daire", x:"alan (z)", y:"yaş (z)", cls:["Pahalı","Pahalı değil"], gen:"fixed",
+     raw:[["A",60,20,1],["B",80,15,1],["C",120,5,0],["D",100,10,0],["E",70,25,1],["F",140,2,0]], q:[95,12],
+     z:true, lo:-2.2, span:4.4, unit:"z birimi", dd:3,
+     note:"Hafta 9'un koşan örneği: m² ve yaş z-skoruna çevrildi. Sorgu daire 95 m², 12 yaşında. k = 3'te en yakınlar D 0.305, B 0.650, C 1.242; oy 2–1 « pahalı », P = 0.67. Ağırlıklı oyda P = 0.73. k = 5'te A ile E katılır ve oy 3–2 « pahalı değil »e döner."},
+    {name:"İki eczane", x:"doğu (sokak)", y:"kuzey (sokak)", cls:["A eczanesi","B eczanesi"], gen:"fixed",
+     raw:[["A",8,8,0],["B",5,10,1]], q:[5,5], lo:0, span:12, unit:"sokak", dd:2, xy:true,
+     note:"Evin (5, 5)'te; A eczanesi (8, 8), B eczanesi (5, 10). Kuş uçuşu (Öklid) A daha yakın: 4.24 < 5.00. Sokak sokak yürüyünce (Manhattan) B: 5 < 6. Chebyshev yalnız en büyük farka bakar: A 3, B 5. k = 1'de uzaklığı değiştir; sınır da yer değiştiriyor."}
   ],
   lesson:{
     q:"Hiç formül kurmadan, sadece komşulara bakarak karar verilebilir mi?",
     short:"Evet. KNN yeni bir noktayı gördüğünde en yakın k komşusuna bakar ve oy çokluğuyla karar verir. Öğrenme diye bir aşaması yok; bütün veriyi cebinde taşır, işi tahmin anında yapar.",
     idea:["Mahalleye yeni taşınan birinin hangi takımı tuttuğunu tahmin et desem, büyük ihtimalle komşularına bakarsın. <b>KNN</b> (k en yakın komşu) tam olarak bunu yapar. Yeni nokta gelince ona en yakın k noktayı bulur. Çoğunluk hangi sınıfsa cevap o olur. Eğitim diye bir adımı yok: bütün veriyi saklar, bütün işi tahmin anına bırakır. Bu yüzden ona <b>lazy learning</b> (tembel öğrenme) de deniyor.",
-          "k'yı sen seçiyorsun ve bu tek sayı dönemin en önemli konusunu içinde taşıyor. k = 1 dersen model en yakın tek komşuya körü körüne inanır. Tek bir tuhaf nokta bile kendi adacığını kurar. k = 21 dersen her şey yumuşar; adacıklar kaybolur ama ince ayrıntılar da gider. Birincisi <i>ezber</i>, ikincisi <i>üstünkörü bakmak</i>. İkisinin arasındaki denge, Modül 04'te gördüğün <b>bias–variance</b> (yanlılık–varyans) dengesinin ta kendisi. Aşağıdaki figürde aynı sorgu dairesi k = 3'te 2–1 'pahalı', k = 5'te 3–2 'pahalı değil' çıkıyor.",
-          "İki sınıfın bölgelerini ayıran çizgiye <b>decision boundary</b> (karar sınırı) deniyor. KNN'de bu çizgi bir formül değil, komşuluğun kendiliğinden çizdiği bir sınır. Bir de 'eğitim hatası' tuzağı var. k = 1 yapınca eğitim hatası tam %0 çıkıyor. Neden? Her noktanın en yakın komşusu kendisi. Bu bir başarı değil, ölçümün kendini kandırması: öğrencinin kendi yazdığı sınavı kendisinin okuması gibi. Bir modeli hiç görmediği veride sınamak gerekir; bunu Modül 03'te gördün."],
-    read:[["Tuval","Soluk renkli bölgeler karar bölgesi: o bölgeye düşen yeni bir nokta o renge atanır. Fareyi gezdir; kesikli çizgiler oy veren k komşuya gidiyor, halka modelin 'ne kadar uzağa baktığını' gösteriyor."],
-          ["Sınır","İki renk arasındaki sınır bir formül değil, komşuluğun sonucu. k küçükken kıvrımlı ve adacıklı, k büyürken düz ve yumuşak."],
-          ["Göstergeler","'Eğitim hatası' modelin kendi noktalarından kaçını yanlış bildiği. k = 1'de %0: her nokta kendine en yakın. 'Oy dağılımı' imlecin olduğu yerde komşuların kaça kaç oy verdiği."]],
+          "k'yı sen seçiyorsun ve bu tek sayı dönemin en önemli konusunu içinde taşıyor. k = 1 dersen model en yakın tek komşuya körü körüne inanır. Tek bir tuhaf nokta bile kendi adacığını kurar. k = 21 dersen her şey yumuşar; adacıklar kaybolur ama ince ayrıntılar da gider. Birincisi <i>ezber</i>, ikincisi <i>üstünkörü bakmak</i>. İkisinin arasındaki denge, Modül 04'te gördüğün <b>bias–variance</b> (yanlılık–varyans) dengesinin ta kendisi. Aşağıdaki figürde aynı sorgu dairesi k = 3'te 2–1 'pahalı', k = 5'te 3–2 'pahalı değil' çıkıyor. Hangi k? Eğitim hatasına bakarsan hep k = 1'i seçersin. Doğrusu modelin görmediği veride ölçmek: hata önce iner, sonra yeniden çıkar (U eğrisi). k ≈ √n iyi bir başlangıç; son kararı cross-validation verir.",
+          "İki sınıfın bölgelerini ayıran çizgiye <b>decision boundary</b> (karar sınırı) deniyor. KNN'de bu çizgi bir formül değil, komşuluğun kendiliğinden çizdiği bir sınır. Bir de 'eğitim hatası' tuzağı var. k = 1 yapınca eğitim hatası tam %0 çıkıyor. Neden? Her noktanın en yakın komşusu kendisi. Bu bir başarı değil, ölçümün kendini kandırması: öğrencinin kendi yazdığı sınavı kendisinin okuması gibi. Bir modeli hiç görmediği veride sınamak gerekir; bunu Modül 03'te gördün.",
+          "Komşuyu bulmak için uzaklığı da sen seçiyorsun. <b>Euclidean distance</b> (Öklid uzaklığı) kuş uçuşu ölçer: farkların karesi, toplamı, karekökü. <b>Manhattan distance</b> sokak sokak yürür: farkları olduğu gibi toplar, 3 blok sağa 4 blok yukarı 7 blok eder. <b>Chebyshev</b> yalnız en büyük farka bakar. Aynı sorgu için farklı komşu seçebilirler. Oyları da tartabilirsin: <b>weighted voting</b> (ağırlıklı oylama) her komşunun oyunu w = 1/d ile çarpar, yakın komşunun sözü daha güçlü olur. Oyların oranı bir olasılık gibi okunur: 2–1 kazanan sınıf için P = 0.67."],
+    read:[["Tuval","Soluk renkli bölgeler karar bölgesi: o bölgeye düşen yeni bir nokta o renge atanır. Dolu noktalar eğitim verisi. Soluk halkalar test noktaları: aynı kaynaktan geliyor ama model onları görmüyor; koyu halka, şu anki k'da yanlış bilinen test noktası. Fareyi gezdir: kesikli çizgiler oy veren k komşuya gidiyor. Komşuluk sınırı Öklid'de çember, Manhattan'da elmas, Chebyshev'de kare. Fare çıkınca sorgu yerinde kalır."],
+          ["Sınır","İki renk arasındaki sınır bir formül değil, komşuluğun sonucu. k küçükken kıvrımlı ve adacıklı, k büyürken düz ve yumuşak. Uzaklık ölçüsünü değiştirince de kayar."],
+          ["Sağ panel","k–hata eğrisi: k = 1, 3, …, 41 için eğitim (yeşil-mavi) ve test (kırmızı) hatası. Eğitim hatası k = 1'de hep 0, test hatası « İki vadi »de U çiziyor. Yeşil şerit en düşük test hatası, noktalı çizgi √n. Test noktaları burada göstermek için var; gerçekte k eğitim verisinde cross-validation ile seçilir, test en sona saklanır. « Altı daire » ve « İki eczane »de panel uzaklık tablosuna döner: her nokta için üç ölçü, seçili ölçünün sütunu vurgulu, k'ncı satırın altında çizgi, ağırlıklı oyda w = 1/d."],
+          ["Göstergeler","'Oy dağılımı' komşuların kaça kaç oy verdiği ve kazananın oranı: 2–1 ise P = 0.67. Ağırlıklı oyda sayılar ağırlık toplamları. 'Eğitim hatası' modelin kendi noktalarından kaçını yanlış bildiği: k = 1'de %0, ağırlıklı oyda HER k'da %0, çünkü her nokta kendine 0 uzaklıkta ve sözü sınırsız. 'Test hatası' görmediği halkalardan kaçını yanlış bildiği: modelin asıl notu."]],
     terms:[["KNN","k en yakın komşu","en yakın k komşunun oyuyla karar veren model"],
            ["decision boundary","karar sınırı","tahminin bir sınıftan ötekine geçtiği çizgi"],
            ["bias–variance","yanlılık–varyans","fazla basit (üstünkörü) ile fazla esnek (ezberci) model arasındaki denge"],
-           ["lazy learning","tembel öğrenme","eğitimde hiçbir şey hesaplamayıp bütün işi tahmin anına bırakma"]],
+           ["lazy learning","tembel öğrenme","eğitimde hiçbir şey hesaplamayıp bütün işi tahmin anına bırakma"],
+           ["Euclidean · Manhattan · Chebyshev distance","Öklid · Manhattan · Chebyshev uzaklığı","kuş uçuşu; farkların toplamı (sokak sokak); yalnız en büyük fark"],
+           ["weighted voting","ağırlıklı oylama","her komşunun oyu w = 1/d: yakın komşunun sözü daha güçlü (scikit-learn'de weights='distance')"]],
     life:["Öneri sistemlerinin en eski hâli: 'sana benzeyen kullanıcılar bunu da beğendi'.",
           "Uydu görüntüsünde arazi türü ayırma, el yazısı rakam tanıma, fabrikada 'bu ölçüm hangi partiye benziyor' sorusu. Karmaşık bir model kurmadan önce karşılaştırma ölçütü olarak hep denenir."],
-    trap:"KNN'in tek gördüğü şey uzaklık. Özellikler farklı ölçekteyse (biri binlerle, biri birlerle) sonuç ölçeğin ta kendisi olur; önce Modül 02'yi uygula. Bir de veri büyüdükçe her tahmin yavaşlar, çünkü her seferinde bütün noktalara uzaklık hesaplanıyor.",
+    trap:"KNN'in tek gördüğü şey uzaklık. Özellikler farklı ölçekteyse (biri binlerle, biri birlerle) sonuç ölçeğin ta kendisi olur; önce Modül 02'yi uygula. Bir de veri büyüdükçe her tahmin yavaşlar, çünkü her seferinde bütün noktalara uzaklık hesaplanıyor. Son tuzak: k'yı test hatasına bakarak seçme. O zaman test artık 'görülmemiş' veri değildir; k eğitim verisinde cross-validation ile seçilir.",
     fig:{at:1, cap:"Altı daire standartlaştırılmış düzlemde: iki eksende de 1 birim, 1 standart sapma. Sorguya en yakın üç daire D, B ve C; çember C'ye kadar uzanıyor ve oy 2–1 Evet, yani pahalı. Sağdaki çubuklar aynı uzaklıklar, aynı cetvelle. k = 5'e çıkınca A ve E de oya katılıyor ve sonuç 3–2 'pahalı değil'e dönüyor."},
     ex:{t:"Altı daire, bir sorgu",
       s:["Altı dairenin m²'si, yaşı, fiyatı (milyon TL) ve pahalı mı (3 milyonun üstü): A 60, 20, 1.8, Hayır · B 80, 15, 2.6, Hayır · C 120, 5, 5.4, Evet · D 100, 10, 3.9, Evet · E 70, 25, 1.9, Hayır · F 140, 2, 6.8, Evet. Sorgu dairesi 95 m², 12 yaşında. m² 60–140, yaş 2–25 arasında; ham farkla uzaklığı neredeyse yalnız m² belirlerdi.",
@@ -2292,29 +2327,45 @@ const CONTENT={
 "m-dt":{ pick:"Veri seti",
   sets:[
     {name:"Bağ hastalığı", x:"yaprak nemi (%)", y:"sıcaklık (°C)", xs:"nem", ys:"sıcaklık", cls:["Risk yok","Mildiyö riski"], gen:"demo",
-     note:"Nem ve sıcaklık birlikte yükselince mantar hastalığı riski doğuyor. Bağcının kafasındaki kural da tam olarak 'şu eşikten sonra' biçiminde."},
-    {name:"Sahte işlem", x:"işlem tutarı (₺)", y:"işlem saati (0–24)", xs:"tutar", ys:"saat", cls:["Normal","Sahte"], gen:"boxes",
-     note:"Sahtelik bir KUTUNUN içinde: yüksek tutar VE gece saatleri. Tek eşik yetmez, iki eşik gerekir; derinlik 1 ile 3'ü karşılaştır."},
+     xr:[40,100], xd:0, yr:[10,34], yd:1,
+     note:"Nem ve sıcaklık birlikte yükselince mantar hastalığı riski doğuyor. Bağcının kafasındaki kural da tam olarak 'şu eşikten sonra' biçiminde. En iyi kök sorusu sıcaklık (21 °C civarı), ikinci soru nem (%60 civarı). Veri neredeyse temiz ayrılıyor: test doğruluğu derinlik 2'den sonra %94–95'te kalıyor."},
+    {name:"Sahte işlem", x:"işlem tutarı (₺)", y:"işlem saati (12:00–24:00)", xs:"tutar", ys:"saat", cls:["Normal","Sahte"], gen:"boxes",
+     xr:[0,5000], xd:0, yr:[12,24], yd:1,
+     note:"Sahtelik bir KUTUNUN içinde: yüksek tutar (3 100 ₺ üstü) VE akşam 20'den sonra. Tek eşik yetmez, iki eşik gerekir; derinlik 1 ile 3'ü karşılaştır. Test doğruluğu derinlik 1'de %79, derinlik 2'de %92."},
     {name:"Kalite kontrol", x:"parça ağırlığı (g)", y:"titreşim (mm/s)", xs:"ağırlık", ys:"titreşim", cls:["Sağlam","Kusurlu"], gen:"band",
-     note:"Kusurlular bir ŞERİT hâlinde: ağırlık aralığın dışına çıkınca parça hatalı. Ağaç bunu iki dikey kesikle çözüyor."}
+     xr:[480,520], xd:1, yr:[0,10], yd:1,
+     note:"Kusurlular bir ŞERİT hâlinde: ağırlık 492 – 509 g aralığının dışına çıkınca parça hatalı. Ağaç bunu iki dikey kesikle çözüyor: derinlik 2'de test doğruluğu %98."},
+    {name:"Kredi onayı", x:"aylık gelir (bin ₺)", y:"borç / gelir oranı (%)", xs:"gelir", ys:"borç", cls:["Onay","Ret"], gen:"kredi",
+     xr:[10,90], xd:0, yr:[0,80], yd:0,
+     note:"Hafta 10'un 600 başvurusunun küçüğü: 150 eğitim, 150 test başvurusu. Kural iki basamaklı (gelir 38 binin üstü VE borç oranı %48'in altı; 66 binin üstünde borç sınırı %68), kararların %15'i kuralın dışında. Eğitim / test doğruluğu derinlik 1'de %74 / %71, derinlik 3'te %85 / %78, derinlik 8'de %98 / %73. En iyi test derinliği çoğunlukla 2–4."},
+    /* Sabit küme: ders notunun on kredi başvurusu. raw = [no, gelir, gecikme, sınıf]; Gelir
+       Yüksek = 38 binin üstü, Gecikme 0/1. Ev sahibi sütunu düzleme sığmadığı için yok. */
+    {name:"On başvuru", x:"aylık gelir (bin ₺)", y:"gecikme (0 yok, 1 var)", xs:"gelir", ys:"gecikme", cls:["Onay","Ret"], gen:"fixed",
+     xr:[10,80], xd:1, yr:[-0.5,1.5], yd:1,
+     raw:[["1",42,0,0],["2",62,0,0],["3",26,0,0],["4",18,1,1],["5",48,1,0],["6",34,0,1],["7",22,1,1],["8",55,1,1],["9",70,0,0],["10",30,1,1]],
+     note:"Ders notunun on başvurusu: gelir 38 binin üstü 'yüksek', gecikme 0 ya da 1 (ev sahibi sütunu düzleme sığmadığı için yok). Kökte Gini 0.500 → 0.320, Gini kazancı 0.180; entropiyle 1.000 → 0.722, information gain 0.278. Gecikme de aynı kazancı veriyor, beraberlikte ilk sütun (gelir) seçiliyor. Derinlik 3'te 6 yaprak, eğitim %100; yaprakların 4'ünde tek başvuru var."}
   ],
   lesson:{
     q:"Bir model, kararını bir insana 'şu yüzden' diye açıklayabilir mi?",
-    short:"Karar ağacı evet/hayır soruları sorarak ilerler: 'Nem %70'ten yüksek mi? Evetse sıcaklık 22'den yüksek mi?' Sonunda her yol bir karara varır. Kararı satır satır okuyup anlayabildiğin tek model ailesi bu.",
+    short:"Karar ağacı evet/hayır soruları sorarak ilerler: 'Sıcaklık 21 dereceyi geçti mi? Evetse yaprak nemi %60'ın üstünde mi?' Sonunda her yol bir karara varır. Kararı satır satır okuyup anlayabildiğin tek model ailesi bu.",
     idea:["Bir bağcıya 'hastalık riski var mı?' diye sorsan kafasındaki kural şuna benzer: 'yaprak nemi yüksekse ve hava sıcaksa risk var'. <b>decision tree</b> (karar ağacı) bu tür kuralları veriden kendisi çıkarır. Bir öznitelik seçer, bir eşik koyar ve veriyi ikiye ayırır; buna bölme diyoruz. Sonra her parçada aynı şeyi tekrar eder. 'Yirmi soru' oyunu gibi: her evet/hayır sorusu ihtimalleri ikiye ayırır.",
           "Hangi eşiği seçiyor? Kutuları en çok temizleyeni. Bir kutunun ne kadar karışık olduğuna <b>impurity</b> (safsızlık) deniyor; en yaygın ölçüsü <b>Gini</b>: Gini = 1 − (p₁² + p₂²), p'ler kutudaki sınıfların oranı. Şöyle de okuyabilirsin: kutudan geri koyarak iki örnek çeksen, ikisinin farklı sınıftan çıkma olasılığı. Bir kutuda iki sınıf yarı yarıyaysa Gini 0.5: tam karışık. Tek sınıf kaldıysa 0: tertemiz. Ağaç her aday eşik için 'bölünce safsızlık ne kadar düşer?' diye hesaplar; en çok düşüren kazanır. Gini ile hesaplanan bu düşüşe <b>Gini kazancı</b> deniyor. Aynı hesap Gini yerine entropiyle yapılınca adı <b>information gain</b> (bilgi kazancı) olur. İkisi farklı cetvel, ama en iyi bölmeyi çoğunlukla aynı yerde bulurlar.",
-          "Sonuç, düzlemi dikdörtgenlere bölen bir kurallar zinciri. Her dikdörtgen bir yaprak; kararı içindeki çoğunluk verir. Ağacın en büyük artısı açıklanabilir olması. 'Neden riskli dedin?' sorusuna 'nem %70'in üstünde ve sıcaklık 22'yi geçti' diye cevap verebilirsin. Tarımda, tıpta, bankacılıkta bu yüzden sevilir. Bedeli de var: ağacı ne kadar derin bırakırsan o kadar çok kutu açar. Sonunda her noktaya kendi kutusunu verip ezberler."],
-    read:[["Sol panel","Renkli dikdörtgenler yaprakların kararı; renk ne kadar koyuysa o yaprak o kadar 'temiz'. Kalın pembe çizgi ilk (kök) bölme, yani kaydırıcıyla seçtiğin eşik. Kesikli ince çizgiler daha derindeki bölmeler."],
-          ["Sağ panel","Eşiği soldan sağa gezdirince bölme sonrası safsızlık nasıl değişiyor. Eğri basamak basamak iniyor: eşik iki nokta arasında dolaşırken hiçbir nokta taraf değiştirmiyor, o yüzden Gini de değişmiyor. Yeşil çizgi en iyi eşik."],
-          ["Ağacı çiz","Sağ paneli kurallar ağacına çevirir: her kutu bir soru (« nem < 0.50 »), sol dal evet, sağ dal hayır; yaprak dairesinin rengi karar, altındaki sayı çoğunluk / toplam nokta. Sol paneldeki her dikdörtgen bu ağacın bir yaprağı."],
-          ["Göstergeler","Gini kazancı = bölmeden önceki Gini − sonrakilerin ağırlıklı ortalaması. Yaprak sayısı ağacın kaç kutuya böldüğü. Eğitim doğruluğu %99'a çıkınca sevinme; derinlik arttıkça ağaç her noktaya kendi kutusunu vermeye başlıyor, yani ezberliyor."]],
+          "Sonuç, düzlemi dikdörtgenlere bölen bir kurallar zinciri. Her dikdörtgen bir yaprak; kararı içindeki çoğunluk verir. Ağacın en büyük artısı açıklanabilir olması. 'Neden riskli dedin?' sorusuna 'sıcaklık 21 dereceyi geçti ve nem %60'ın üstünde' diye cevap verebilirsin. Tarımda, tıpta, bankacılıkta bu yüzden sevilir. Bedeli de var: ağacı ne kadar derin bırakırsan o kadar çok kutu açar. Sonunda her noktaya kendi kutusunu verip ezberler. Bunu görmenin yolu ağacın görmediği veride ölçmek: derinlik arttıkça eğitim doğruluğu hep yükselir, test doğruluğu bir yerde tepe yapıp iner. Derinliğe sınır koymak (<b>max_depth</b>) ağacı büyürken budamanın en basit yolu."],
+    read:[["Sol panel","Renkli dikdörtgenler yaprakların kararı; renk ne kadar koyuysa o yaprak o kadar 'temiz'. Kalın pembe çizgi ilk (kök) bölme, yani kaydırıcıyla seçtiğin eşik; yanındaki yazı eşiği verinin kendi biriminde verir (« sıcaklık < 21.0 »). Kesikli ince çizgiler daha derindeki bölmeler. Soluk halkalar test noktaları: ağaç onları görmedi; koyu halka yanlış bilinen test noktası."],
+          ["Gini / Entropi","Safsızlığı hangi cetvelle ölçtüğün. Gini iki sınıfta en çok 0.5, entropi en çok 1. Ağaç da, eşik eğrisi de, göstergeler de seçilen ölçütle kurulur. Göstergenin adı da değişir: Gini ile 'Gini kazancı', entropiyle 'information gain'."],
+          ["Eşik eğrisi","Kök eşiğini soldan sağa gezdirince bölme sonrası safsızlık nasıl değişiyor. Eğri basamak basamak iniyor: eşik iki nokta arasında dolaşırken hiçbir nokta taraf değiştirmiyor, o yüzden safsızlık da değişmiyor. Yeşil çizgi en iyi eşik."],
+          ["Ağaç","Sağ paneli kurallar ağacına çevirir: her kutu bir soru (« nem < 62 »), sol dal evet, sağ dal hayır; yaprak dairesinin rengi karar, altındaki sayı çoğunluk / toplam nokta. Sol paneldeki her dikdörtgen bu ağacın bir yaprağı. Yaprak çok olunca sorular sığmaz, yalnız iskelet çizilir."],
+          ["Derinlik eğrisi","Aynı kökle derinlik 1'den 8'e kadar kurulan ağaçların eğitim (yeşil-mavi) ve test (kırmızı) doğruluğu. Eğitim çizgisi hep yükselir; test çizgisi bir yerde tepe yapar. Yeşil şerit en iyi test derinliği. Gerçekte derinlik test verisiyle değil, eğitim verisinde cross-validation ile seçilir."],
+          ["Göstergeler","Kazanç = bölmeden önceki safsızlık − sonrakilerin ağırlıklı ortalaması. Yaprak sayısı ağacın kaç kutuya böldüğü. Eğitim doğruluğu %98'e çıkınca sevinme: test doğruluğuna bak. İkisinin arası açılıyorsa ağaç ezberliyor."]],
     terms:[["decision tree","karar ağacı","iç içe evet/hayır sorularıyla karar veren model"],
            ["impurity","safsızlık","bir kutudaki sınıfların ne kadar karışık olduğu; 0 tertemiz"],
            ["Gini impurity","Gini safsızlığı","1 − (p₁² + p₂² + …): iki sınıfta 0 tertemiz, 0.5 yarı yarıya"],
-           ["Gini gain · information gain","Gini kazancı · bilgi kazancı","bölmeden önceki safsızlık eksi sonrakilerin ağırlıklı ortalaması; entropiyle hesaplanınca information gain"]],
+           ["entropy","entropi","−(p₁·log₂p₁ + p₂·log₂p₂): iki sınıfta 0 tertemiz, 1 yarı yarıya"],
+           ["Gini gain · information gain","Gini kazancı · bilgi kazancı","bölmeden önceki safsızlık eksi sonrakilerin ağırlıklı ortalaması; entropiyle hesaplanınca information gain"],
+           ["max_depth · pre-pruning","en büyük derinlik · önden budama","ağacı büyürken durdurmak: üst üste en çok kaç soru sorulacağına sınır koymak"]],
     life:["Banka kredi kuralları, hastanede triyaj (aciliyet sıralama) protokolleri, üretimde kalite kontrol. 'Neden bu karar çıktı' sorusuna cevap verebilen tek model ailesi.",
           "Tablo verisinde bugün yarışma kazanan modeller (XGBoost, LightGBM) yüzlerce küçük ağacın toplamı. Hepsi bu ekrandaki tek ağaçtan türüyor."],
-    trap:"Derinliği artırmak eğitim doğruluğunu her zaman yükseltir, çünkü ağaç sonunda her noktaya ayrı kutu açar. Derinliği 5 yapıp %99 gördüğünde bu bir başarı değil, ezberin başladığının işareti. Tek ağaç kullanırken derinliği sınırlamak şart; bunun nedenini Modül 03'te eğitim ve test hatasıyla gördün.",
+    trap:"Derinliği artırmak eğitim doğruluğunu her zaman yükseltir, çünkü ağaç sonunda her noktaya ayrı kutu açar. Derinliği 8 yapıp %98 gördüğünde bu bir başarı değil, ezberin başladığının işareti; test doğruluğu o sırada iniyor. Tek ağaç kullanırken derinliği sınırlamak şart. Sınırı da test verisine bakarak değil, eğitim verisinde cross-validation ile seç.",
     fig:{at:1, cap:"Solda on kredi başvurusu, sağda kökteki Gelir bölmesi. Yüksek gelirde 4 onay 1 ret, düşükte 1 onay 4 ret kalıyor. Gini 0.500'den ağırlıklı 0.320'ye iniyor: Gini kazancı 0.180, entropiyle information gain 0.278. Gecikme ve Ev sahibi aynı kazancı veriyor; beraberlikte ilk sütun seçildi."},
     ex:{t:"Kredi başvurusunda ilk soru",
       s:["On kredi başvurusu, üç evet/hayır özniteliği (figürdeki tablo). Geliri yüksek olanlar: 1, 2, 5, 8, 9. Geçmişte gecikmesi olmayanlar: 1, 2, 3, 6, 9. Ev sahibi olanlar: 1, 3, 5, 7, 9. Onaylananlar: 1, 2, 3, 5, 9; ötekiler ret. Kökte 5 onay, 5 ret: Gini = 1 − (0.5² + 0.5²) = <b>0.500</b>, entropi = −(0.5 · log₂0.5 + 0.5 · log₂0.5) = <b>1.000</b>. İki sınıfta en karışık hâl.",
@@ -3270,188 +3321,403 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 /* ═════════════ 1 · KNN ═════════════ */
 (function(){
   const cv=$("#c-knn"), {ctx,fit}=setupCanvas(cv);
-  let pts=[], cls=0, k=3, showB=true, hover=null, ver=0;
-  const CL=["--a","--b"];
+  /* qry: sorgu noktası. İmleç onu taşır; fare tuvalden çıkınca YERİNDE KALIR (m-cn
+     kuralı) — hoca anlatmaya başlayınca komşular ve oy ekrandan silinmesin. Sabit
+     veri kümeleri (« Altı daire », « İki eczane ») kendi sorgusuyla açılır. */
+  let pts=[], tst=[], cls=0, k=3, showB=true, qry=null, ver=0, met=0, wtd=false;
+  const CL=["--a","--b"], MET=["Öklid","Manhattan","Chebyshev"], KMAX=41;
   /* somut veri kümeleri: eksen adı, sınıf adı ve üreteç CONTENT'ten gelir */
   const DS=SETS("m-knn"); let dsi=0;
   const S=()=>DS[dsi];
+  const fixed=()=>S().gen==="fixed";
+  /* Uzaklık: Minkowski ailesi. p = 2 Öklid (kuş uçuşu), p = 1 Manhattan (sokak
+     sokak), p → ∞ Chebyshev (yalnız en büyük fark). Birim: [0, 1]'e ölçekli eksen;
+     sabit kümelerde iki eksen aynı ölçekte, uzaklık × span = veri birimi. */
+  const distM=(m,du,dv)=>{du=Math.abs(du);dv=Math.abs(dv);
+    return m===0?Math.sqrt(du*du+dv*dv):m===1?du+dv:Math.max(du,dv);};
+  const dist=(du,dv)=>distM(met,du,dv);
 
-  /* Karar bölgesi 5096 hücrede oy sayıyor; eski hâli her hücrede n geçici nesne
-     üretip TAMAMINI sıralıyordu (48 noktada ~31 ms, 120'de ~92 ms — k kaydırıcısının
-     her kademesi ayrı bir takılma). k en yakını sınırlı eklemeli seçimle buluyoruz:
-     tahsisat yok, tam sıralama yok. Komşu listesi (imleç açıklaması için) yalnız
-     istendiğinde kuruluyor — böylece kural TEK yerde kalıyor ve hücre rengi ile
-     "Oy dağılımı" göstergesinin çelişmesi mümkün değil. */
-  let KBD=new Float64Array(32), KBC=new Int8Array(32), KBI=new Int32Array(32);
+  /* Oylama. Eşit oyda her komşu 1; ağırlıklı oyda w = 1/d. Uzaklığı tam 0 olan komşu
+     varsa (sorgu bir eğitim noktasının üstünde) scikit-learn gibi oyu yalnız onlar
+     verir — 1/0 tanımsız. Bu yüzden ağırlıklı oyda EĞİTİM hatası her k'da %0:
+     her nokta kendine 0 uzaklıkta. Beraberlikte en yakın komşunun sınıfı. */
+  function tally(kk,D,C){
+    let a=0,b=0,wa=0,wb=0; const zero=D[0]<1e-12;
+    for(let i=0;i<kk;i++){
+      const w=!wtd?1:zero?(D[i]<1e-12?1:0):1/D[i];
+      if(C[i]===0){a++;wa+=w;} else {b++;wb+=w;}
+    }
+    const sa=wtd?wa:a, sb=wtd?wb:b;
+    return {c:sa>sb?0:sb>sa?1:C[0], a, b, wa, wb, P:Math.max(sa,sb)/((sa+sb)||1)};
+  }
+  /* Karar bölgesi binlerce hücrede oy sayıyor: k en yakını sınırlı eklemeli seçimle
+     buluyoruz (tahsisat yok, tam sıralama yok). Komşu listesi yalnız istendiğinde
+     kuruluyor — kural TEK yerde, hücre rengi ile « Oy dağılımı » çelişemez. */
+  let KBD=new Float64Array(64), KBC=new Int8Array(64), KBI=new Int32Array(64);
   function vote(u,v,wantList){
     const n=pts.length, kk=Math.min(k,n);
     if(!kk) return null;
     if(KBD.length<kk){ KBD=new Float64Array(kk); KBC=new Int8Array(kk); KBI=new Int32Array(kk); }
     let cnt=0;
     for(let i=0;i<n;i++){
-      const p=pts[i], d=(p.u-u)**2+(p.v-v)**2;
+      const p=pts[i], d=dist(p.u-u,p.v-v);
       if(cnt===kk && !(d<KBD[kk-1])) continue;
       let j=(cnt<kk)?cnt++:kk-1;
       while(j>0 && KBD[j-1]>d){ KBD[j]=KBD[j-1]; KBC[j]=KBC[j-1]; KBI[j]=KBI[j-1]; j--; }
       KBD[j]=d; KBC[j]=p.c; KBI[j]=i;
     }
-    let a=0; for(let i=0;i<kk;i++) if(KBC[i]===0) a++;
-    const r={c:a*2>kk?0:1, a, b:kk-a};
+    const r=tally(kk,KBD,KBC);
     if(wantList){ r.nb=[]; for(let i=0;i<kk;i++) r.nb.push({i:KBI[i], d:KBD[i], c:KBC[i]}); }
     return r;
   }
-  /* eğitim hatası: nokta kendi komşuluğuna dahil — k=1'de tam olarak sıfır çıkar */
-  let teKey="", teVal=null;
-  function trainErr(){
-    const key=ver+"|"+k;
-    if(key===teKey) return teVal;
-    teKey=key;
-    if(pts.length<2) return teVal=null;
-    let e=0; pts.forEach(p=>{const r=vote(p.u,p.v); if(r&&r.c!==p.c)e++;});
-    return teVal=e/pts.length;
+  /* Eğitim ve test hatası, k = 1, 3, …, 41 için TEK hesapta: her noktanın bütün
+     komşuları bir kez sıralanır, her k o listenin başını sayar. Göstergeler, sağdaki
+     eğri ve aria-label aynı diziden okur. Eğitim noktası kendi komşuluğuna dahil —
+     k = 1'de eğitim hatası tam olarak sıfır. Test noktaları (soluk halkalar) aynı
+     üreteçten ayrı çekilir; model onları görmez. */
+  let cKey="", cVal=null;
+  function curves(){
+    const key=[ver,met,+wtd].join("|");
+    if(key===cKey) return cVal;
+    cKey=key;
+    const n=pts.length, out={ks:[],tr:[],te:[],LS:[]};
+    const lists=(set)=>set.map(q=>{
+      const o=pts.map((p,i)=>({d:dist(p.u-q.u,p.v-q.v),c:p.c,i}));
+      o.sort((x,y)=>x.d-y.d||x.i-y.i);
+      return {D:Float64Array.from(o,x=>x.d), C:Int8Array.from(o,x=>x.c), c:q.c};
+    });
+    if(n<1) return cVal=out;
+    const LT=n>1?lists(pts):[], LS=lists(tst);
+    out.LS=LS;
+    const err=(L,kk)=>{ if(!L.length) return null; let e=0;
+      for(const o of L) if(tally(kk,o.D,o.C).c!==o.c) e++; return e/L.length; };
+    for(let kq=1;kq<=KMAX;kq+=2){
+      const kk=Math.min(kq,n);
+      out.ks.push(kq); out.tr.push(err(LT,kk)); out.te.push(err(LS,kk));
+    }
+    return cVal=out;
   }
-  /* karar bölgesi pahalı (her hücrede tüm noktalar sıralanıyor); imleç hareketine
-     bağlı olmadığı için yalnız veri / k / boyut / tema değişince yeniden çiziliyor */
+  const at=(C,arr)=>{const i=(k-1)/2; return (arr&&i<arr.length)?arr[i]:null;};
+  function bestK(C){
+    let bi=-1; C.te.forEach((v,i)=>{ if(v!==null&&(bi<0||v<C.te[bi]-1e-12)) bi=i; });
+    return bi<0?null:{k:C.ks[bi], e:C.te[bi]};
+  }
+
+  /* Yerleşim: geniş tuvalde sol %60 harita, sağda k–hata eğrisi (sabit kümelerde
+     uzaklık tablosu). Eşik 760 (≤ 780 kuralı); dar dalda harita tam genişlik,
+     göstergeler yine draw()'da hesaplanıyor. Sabit kümelerde iki eksen AYNI ölçekte:
+     harita kare, böylece Öklid komşuluğu gerçekten çember, Manhattan elmas. */
+  function geo(){
+    const W=cv.__w, H=cv.__h, p=26, wide=W>760, split=wide?Math.round(W*0.6):W;
+    let x0=p, y0=p, w=split-2*p, h=H-2*p;
+    if(fixed()){ const s=Math.min(w,h); x0=p+(w-s)/2; y0=p+(h-s)/2; w=h=s; }
+    return {W,H,p,wide,split,x0,y0,w,h,
+      x:(u)=>x0+u*w, y:(v)=>y0+h-v*h, ix:(px)=>(px-x0)/w, iy:(py)=>(y0+h-py)/h};
+  }
+  /* karar bölgesi pahalı; imleçten bağımsız, yalnız veri / k / ölçü / oy / boyut /
+     tema değişince yeniden çiziliyor. Hücre başına BİR PİKSEL küçük tuvale yazılıp
+     yumuşatmayla büyütülür (testere dişi sınır öğrenciye "merdiven" diye okunuyordu). */
   const rc=document.createElement("canvas"), rcx=rc.getContext("2d");
   const lo=document.createElement("canvas"), lox=lo.getContext("2d");
   let rkey="";
-  /* Bölge önce HÜCRE BAŞINA BİR PİKSEL olarak küçük bir tuvale yazılır, sonra
-     yumuşatmayla büyütülür. Eski hâli 9 px'lik kareleri tek tek boyuyordu:
-     projeksiyonda sınır testere dişi gibi görünüyor, öğrenci "merdiven"i modelin
-     bir özelliği sanıyordu (KNN sınırı merdiven değil, komşuluğun sonucu).
-     Token'lar döngü DIŞINDA çözülür; tema değişince anahtar zaten değişiyor. */
-  function regionLayer(m){
-    const key=[ver,k,Math.round(m.w),Math.round(m.h),css("--a"),css("--b")].join("|");
+  function regionLayer(g){
+    const key=[ver,k,met,+wtd,Math.round(g.W),Math.round(g.H),Math.round(g.x0),Math.round(g.w),css("--a"),css("--b")].join("|");
     if(key===rkey) return rc;
-    const s=4, iw=m.w-2*m.p, ih=m.h-2*m.p;
-    const cols=Math.max(2,Math.ceil(iw/s)), rows=Math.max(2,Math.ceil(ih/s));
+    const s=4, cols=Math.max(2,Math.ceil(g.w/s)), rows=Math.max(2,Math.ceil(g.h/s));
     lo.width=cols; lo.height=rows;
     const img=lox.createImageData(cols,rows), d=img.data, C=CL.map(rgbOf);
     for(let j=0;j<rows;j++) for(let i=0;i<cols;i++){
       const r=vote((i+.5)/cols,1-(j+.5)/rows);
       if(!r) continue;
-      const al=0.10+0.22*(Math.max(r.a,r.b)/(r.a+r.b)-0.5)*2, c=C[r.c], o=(j*cols+i)*4;
+      const al=0.10+0.22*(r.P-0.5)*2, c=C[r.c], o=(j*cols+i)*4;
       d[o]=c[0]; d[o+1]=c[1]; d[o+2]=c[2]; d[o+3]=Math.round(al*255);
     }
     lox.putImageData(img,0,0);
     const dpr=window.devicePixelRatio||1;
-    rc.width=Math.round(m.w*dpr); rc.height=Math.round(m.h*dpr);
+    rc.width=Math.round(g.W*dpr); rc.height=Math.round(g.H*dpr);
     rcx.setTransform(dpr,0,0,dpr,0,0);
-    rcx.clearRect(0,0,m.w,m.h);
+    rcx.clearRect(0,0,g.W,g.H);
     rcx.imageSmoothingEnabled=true;
-    rcx.drawImage(lo,0,0,cols,rows,m.p,m.p,iw,ih);
+    rcx.drawImage(lo,0,0,cols,rows,g.x0,g.y0,g.w,g.h);
     rkey=key; return rc;
+  }
+  const unit=()=>fixed()?S().span:1;
+  const fd=(d)=>(d*unit()).toFixed(fixed()?(S().dd||2):3);
+  /* komşuluk sınırı: k'ncı komşunun uzaklığında çember / elmas / kare */
+  function hood(g,u,v,r){
+    const cx=g.x(u), cy=g.y(v), rx=r*g.w, ry=r*g.h;
+    ctx.beginPath();
+    if(met===0) ctx.ellipse(cx,cy,rx,ry,0,0,7);
+    else if(met===1){ ctx.moveTo(cx+rx,cy); ctx.lineTo(cx,cy-ry); ctx.lineTo(cx-rx,cy); ctx.lineTo(cx,cy+ry); ctx.closePath(); }
+    else ctx.rect(cx-rx,cy-ry,2*rx,2*ry);
+  }
+  /* sağ panel · k–hata eğrisi */
+  function drawCurve(C,q0,qy,qw,qh){
+    ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
+    ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(q0,qy,qw,qh);ctx.restore();
+    if(!C.ks.length){ label(ctx,"nokta ekle →",q0+qw/2,qy+qh/2,css("--ink-soft"),"center",12); return; }
+    const vals=[...C.tr,...C.te].filter(v=>v!==null);
+    const top=Math.max(0.12,...vals)*1.12, st=top<=.25?.05:top<=.5?.1:.2, mx=Math.ceil(top/st)*st;
+    const EX=(kq)=>q0+(kq-1)/(KMAX-1)*qw, EY=(v)=>qy+qh-v/mx*qh;
+    ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
+    for(let v=st;v<mx-1e-9;v+=st){ctx.beginPath();ctx.moveTo(q0,EY(v));ctx.lineTo(q0+qw,EY(v));ctx.stroke();}
+    ctx.restore();
+    for(let v=0;v<=mx+1e-9;v+=st) label(ctx,"%"+Math.round(v*100),q0-5,EY(v),css("--ink-soft"),"right",10);
+    const bk=bestK(C);
+    if(bk){ ctx.fillStyle=hexA("--good",.13); ctx.fillRect(EX(bk.k)-7,qy,14,qh); }
+    const n=pts.length, sq=Math.sqrt(n);
+    if(sq<=KMAX){
+      ctx.save();ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.2;ctx.setLineDash([2,4]);
+      ctx.beginPath();ctx.moveTo(EX(sq),qy);ctx.lineTo(EX(sq),qy+qh);ctx.stroke();ctx.restore();
+    }
+    const line=(arr,tok)=>{
+      ctx.save();ctx.beginPath();ctx.strokeStyle=css(tok);ctx.lineWidth=2.2;ctx.lineJoin="round";
+      let on=false; arr.forEach((v,i)=>{ if(v===null) return; const x=EX(C.ks[i]), y=EY(v); on?ctx.lineTo(x,y):ctx.moveTo(x,y); on=true; });
+      ctx.stroke();ctx.restore();
+    };
+    line(C.tr,"--a"); line(C.te,"--bad");
+    ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=1.5;ctx.setLineDash([3,4]);
+    ctx.beginPath();ctx.moveTo(EX(k),qy);ctx.lineTo(EX(k),qy+qh);ctx.stroke();ctx.restore();
+    const tr=at(C,C.tr), te=at(C,C.te);
+    if(te!==null) disc(ctx,EX(k),EY(te),5,css("--bad"),css("--surface"));
+    if(tr!==null) disc(ctx,EX(k),EY(tr),5,css("--a"),css("--surface"));
+    /* lejant çizim alanının ÜSTÜNDE: eğriler iki uçta da tavana yaklaşıyor */
+    legendRow(ctx,q0,qy-12,[["eğitim hatası","--a"],te!==null?["test hatası","--bad"]:["test noktası yok","--ink-soft"],
+      bk&&[`en düşük test: k = ${bk.k}`,"--good"]],10.5,qw);
+    label(ctx,"1",q0,qy+qh+14,css("--ink-soft"),"center",10.5);
+    label(ctx,String(KMAX),q0+qw,qy+qh+14,css("--ink-soft"),"center",10.5);
+    if(sq<=KMAX) label(ctx,`√n ≈ ${sq.toFixed(1)}`,EX(sq),qy+qh-10,css("--ink-soft"),"left",10.5);
+    label(ctx,"k (komşu sayısı) →",q0+qw*0.62,qy+qh+14,css("--ink-soft"),"center",11);
+  }
+  /* sağ panel · sabit kümelerde uzaklık tablosu: ders notundaki elle hesabın canlısı.
+     Satırlar seçili ölçüye göre sıralı; seçili sütun vurgulu; k'ncı satırın altında çizgi. */
+  function drawTable(q0,qy,qw,qh){
+    ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(q0,qy,qw,qh);ctx.restore();
+    if(!qry||!pts.length){ label(ctx,"fareyi haritada gezdir",q0+qw/2,qy+qh/2,css("--ink-soft"),"center",12); return; }
+    const U=unit(), dd=S().dd||2;
+    const rows=pts.map((p,i)=>({nm:p.nm||"·", c:p.c, i, D:[0,1,2].map(m=>distM(m,p.u-qry.u,p.v-qry.v))}));
+    rows.sort((a,b)=>a.D[met]-b.D[met]||a.i-b.i);
+    const kk=Math.min(k,rows.length), fs=qw<300?10.5:11.5;
+    const cx=[q0+10, q0+qw*0.40, q0+qw*0.62, q0+qw*0.84, q0+qw-8];
+    const cols=wtd?[cx[1]-qw*0.06,cx[2]-qw*0.06,cx[3]-qw*0.06,cx[4]]:[cx[1],cx[2],cx[3]];
+    label(ctx,`sorguya uzaklık · ${S().unit}`,q0+10,qy+14,css("--ink"),"left",12);
+    MET.forEach((m,j)=>label(ctx,m==="Manhattan"&&qw<300?"Manh.":m==="Chebyshev"&&qw<300?"Cheb.":m,cols[j],qy+36,css(j===met?"--accent":"--ink-soft"),"right",fs));
+    if(wtd) label(ctx,"w = 1/d",cols[3],qy+36,css("--accent"),"right",fs);
+    const rh=Math.min(22,(qh-104)/Math.max(rows.length,1)), y0=qy+58;
+    const show=Math.max(1,Math.floor((qh-104)/rh));
+    rows.slice(0,show).forEach((r,j)=>{
+      const y=y0+j*rh;
+      label(ctx,r.nm,cx[0],y,css(CL[r.c]),"left",fs+1);
+      r.D.forEach((d,m)=>label(ctx,(d*U).toFixed(dd),cols[m],y,css(m===met?"--ink":"--ink-soft"),"right",fs));
+      if(wtd&&j<kk){ const d=r.D[met]*U; label(ctx,d<1e-12?"∞":(1/d).toFixed(2),cols[3],y,css("--ink"),"right",fs); }
+      if(j===kk-1){ ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=1.3;ctx.setLineDash([5,4]);
+        ctx.beginPath();ctx.moveTo(q0+8,y+rh/2);ctx.lineTo(q0+qw-8,y+rh/2);ctx.stroke();ctx.restore();
+        label(ctx,`k = ${k}`,q0+qw-8,y+rh/2+9,css("--accent"),"right",10); }
+    });
+    const r=vote(qry.u,qry.v);
+    if(r){
+      const nm=S().cls, f2=(x)=>x.toFixed(2);
+      const l1=wtd?`Σw: ${nm[0]} ${f2(r.wa/U)} · ${nm[1]} ${f2(r.wb/U)}`:`oy: ${nm[0]} ${r.a} · ${nm[1]} ${r.b}`;
+      label(ctx,l1,q0+10,qy+qh-32,css("--ink"),"left",fs);
+      label(ctx,`tahmin ${nm[r.c]} · P = ${r.P.toFixed(2)}`,q0+10,qy+qh-14,css(CL[r.c]),"left",fs+0.5);
+    }
   }
   function draw(){
     if(!fit()) return;
-    const m=makeMap(cv,26);
-    ctx.clearRect(0,0,m.w,m.h);
-    ctx.fillStyle=css("--surface");ctx.fillRect(0,0,m.w,m.h);
+    const g=geo();
+    ctx.clearRect(0,0,g.W,g.H);
+    ctx.fillStyle=css("--surface");ctx.fillRect(0,0,g.W,g.H);
 
-    if(showB && pts.length) ctx.drawImage(regionLayer(m),0,0,m.w,m.h);
-    grid(ctx,m,10);
+    if(showB && pts.length) ctx.drawImage(regionLayer(g),0,0,g.W,g.H);
+    ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
+    /* sabit kümede ızgara veri biriminin tam sayılarında (eczane: bir kare = bir sokak) */
+    const gl=fixed()?(()=>{const a=[];for(let z=Math.ceil(S().lo);z<=S().lo+S().span+1e-9;z++) a.push((z-S().lo)/S().span);return a;})()
+      :Array.from({length:11},(_,i)=>i/10);
+    gl.forEach(t=>{
+      ctx.beginPath();ctx.moveTo(g.x(t),g.y(0));ctx.lineTo(g.x(t),g.y(1));ctx.stroke();
+      ctx.beginPath();ctx.moveTo(g.x(0),g.y(t));ctx.lineTo(g.x(1),g.y(t));ctx.stroke(); });
+    ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(g.x0,g.y0,g.w,g.h);ctx.restore();
 
-    if(hover){
-      const r=vote(hover.u,hover.v,true);
-      if(r){
-        ctx.save();ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
-        r.nb.forEach(o=>{
-          const p=pts[o.i];
-          ctx.strokeStyle=hexA(CL[p.c],0.75);
-          ctx.beginPath();ctx.moveTo(m.x(hover.u),m.y(hover.v));ctx.lineTo(m.x(p.u),m.y(p.v));ctx.stroke();
-        });
-        ctx.restore();
-        const far=Math.sqrt(r.nb[r.nb.length-1].d);
-        ctx.save();ctx.setLineDash([3,5]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1;
-        ctx.beginPath();ctx.ellipse(m.x(hover.u),m.y(hover.v),far*(m.w-2*m.p),far*(m.h-2*m.p),0,0,7);ctx.stroke();ctx.restore();
-      }
-    }
-    pts.forEach(p=>disc(ctx,m.x(p.u),m.y(p.v),7,css(CL[p.c]),css("--surface")));
-    if(hover){
-      const r=vote(hover.u,hover.v);
-      disc(ctx,m.x(hover.u),m.y(hover.v),9,r?hexA(CL[r.c],.35):"transparent",css("--ink"));
-    }
-    label(ctx,S().x+" →",m.x(0)+4,m.y(0)+13,css("--ink-soft"));
-    ylabel(ctx,S().y+" →",m.x(0)-14,m.y(1),m.y(0),css("--ink-soft"),12);
+    const C=curves();
+    /* test noktaları: soluk halka; şu anki k'da YANLIŞ bilinenler koyu halka */
+    const kk=Math.min(k,pts.length);
+    tst.forEach((q,i)=>{
+      const L=C.LS[i], wrong=!!(L&&kk&&tally(kk,L.D,L.C).c!==q.c);
+      ctx.save();ctx.beginPath();ctx.arc(g.x(q.u),g.y(q.v),wrong?5:4,0,7);
+      ctx.strokeStyle=hexA(CL[q.c],wrong?.95:.45);ctx.lineWidth=wrong?2:1.4;ctx.stroke();ctx.restore();
+    });
 
-    $("#knn-n").textContent=pts.length;
-    const e=trainErr();
-    const el=$("#knn-e"); el.textContent=e===null?"—":(e*100).toFixed(0)+"%";
-    el.className="v "+(e===null?"":e===0?"ok":e<.15?"wr":"bd");
-    if(hover){
-      const r=vote(hover.u,hover.v);
-      $("#knn-p").textContent=r?S().cls[r.c]:"—";
-      $("#knn-p").style.color=r?css(CL[r.c]):"";
-      $("#knn-v").textContent=r?`${r.a} – ${r.b}`:"—";
+    let qr=null;
+    if(qry && pts.length){
+      qr=vote(qry.u,qry.v,true);
+      const qx=g.x(qry.u), qy=g.y(qry.v);
+      /* birkaç noktalı sabit kümede (eczane) oy VERMEYEN noktanın yolu da soluk
+         çizilir: slayttaki gibi iki yol yan yana, hangisi kısa gözle görülsün */
+      const all=fixed()&&pts.length<=4;
+      const nbs=all?pts.map((p,i)=>qr.nb.find(o=>o.i===i)||{i,d:dist(p.u-qry.u,p.v-qry.v),c:p.c,off:true}):qr.nb;
+      ctx.save();ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+      nbs.forEach(o=>{
+        const p=pts[o.i], px=g.x(p.u), py=g.y(p.v);
+        ctx.strokeStyle=hexA(CL[p.c],o.off?0.3:0.75);
+        ctx.beginPath();ctx.moveTo(qx,qy);
+        if(met===1) ctx.lineTo(px,qy);              // sokak sokak: önce yatay, sonra dikey
+        ctx.lineTo(px,py);ctx.stroke();
+      });
+      ctx.restore();
+      qr.all=nbs;
+      const far=qr.nb[qr.nb.length-1].d;
+      ctx.save();ctx.beginPath();ctx.rect(g.x0,g.y0,g.w,g.h);ctx.clip();
+      ctx.setLineDash([3,5]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.2;
+      hood(g,qry.u,qry.v,far);ctx.stroke();ctx.restore();
     }
+    pts.forEach(p=>disc(ctx,g.x(p.u),g.y(p.v),7,css(CL[p.c]),css("--surface")));
+    if(fixed()) pts.forEach(p=>{ if(p.nm) label(ctx,p.nm+(S().xy&&p.raw?` (${p.raw[0]}, ${p.raw[1]})`:""),g.x(p.u)+10,g.y(p.v)-11,css("--ink"),"left",13); });
+    if(qr){
+      const qx=g.x(qry.u), qy=g.y(qry.v);
+      /* sabit kümede komşu uzaklığı çizginin üstünde, veri biriminde */
+      /* sabit kümede komşu uzaklığı yolun üstünde, veri biriminde; sorguya çok yakın
+         komşuda yazı sorgu dairesine biniyordu, kısa yollarda yazılmıyor (tablo var) */
+      if(fixed()) qr.all.forEach(o=>{ const p=pts[o.i], px=g.x(p.u), py=g.y(p.v);
+        const L=met===1?Math.abs(px-qx)+Math.abs(py-qy):Math.hypot(px-qx,py-qy);
+        if(L<52) return;
+        let mx,my;
+        if(met===1){ if(Math.abs(py-qy)>=Math.abs(px-qx)){mx=px+7;my=(qy+py)/2;} else {mx=(qx+px)/2-14;my=qy-10;} }
+        else { mx=qx+(px-qx)*.55+7; my=qy+(py-qy)*.55-8; }
+        label(ctx,fd(o.d),mx,my,css(o.off?"--ink-soft":"--ink"),"left",11.5); });
+      disc(ctx,qx,qy,9,hexA(CL[qr.c],.35),css("--ink"));
+      if(fixed()) label(ctx,"sorgu"+(S().xy?` (${S().q[0]}, ${S().q[1]})`:""),qx-13,qy+14,css("--ink"),"right",11.5);
+    }
+    label(ctx,S().x+" →",g.x(0)+4,g.y(0)+13,css("--ink-soft"));
+    ylabel(ctx,S().y+" →",g.x(0)-14,g.y(1),g.y(0),css("--ink-soft"),12);
+
+    if(g.wide){
+      const q0=g.split+22, qw=g.W-g.split-40, qy0=g.p, qh=g.H-2*g.p;
+      if(fixed()) drawTable(q0,qy0,qw,qh); else drawCurve(C,q0,qy0,qw,qh);
+    }
+
+    /* göstergeler: yerleşimden bağımsız (dar dalda donmasın) */
+    const tr=at(C,C.tr), te=at(C,C.te), bk=bestK(C);
+    const el=$("#knn-e"); el.textContent=tr===null?"—":(tr*100).toFixed(0)+"%";
+    el.className="v "+(tr===null?"":tr===0?"ok":tr<.15?"wr":"bd");
+    const et=$("#knn-t"); et.textContent=te===null?"—":(te*100).toFixed(0)+"%";
+    et.className="v "+(te===null?"":te<.10?"ok":te<.25?"wr":"bd");
+    const ep=$("#knn-p"), ev=$("#knn-v");
+    ep.textContent=qr?S().cls[qr.c]:"—"; ep.style.color=qr?css(CL[qr.c]):"";
+    const fw=(x)=>x>=10?x.toFixed(0):x.toFixed(1);
+    ev.textContent=!qr?"—":(wtd?`${fw(qr.wa/unit())} – ${fw(qr.wb/unit())}`:`${qr.a} – ${qr.b}`)+` · P = ${qr.P.toFixed(2)}`;
+    /* tuval metni sahte DOM'da okunmuyor: özet aria-label'da (behaviour.js oradan okur) */
+    let ar=`KNN tuvali · k = ${k} · ${MET[met]} · ${wtd?"ağırlıklı":"eşit"} oy · eğitim hatası ${tr===null?"—":"%"+Math.round(tr*100)}`+
+      ` · test hatası ${te===null?"—":"%"+Math.round(te*100)}`+(bk?` · en düşük test hatası k = ${bk.k} (%${Math.round(bk.e*100)})`:"")+
+      ` · √n ≈ ${Math.sqrt(pts.length).toFixed(1)}`;
+    if(qr) ar+=` · sorgu: ${S().cls[qr.c]}, P = ${qr.P.toFixed(2)}, komşular `+qr.nb.map(o=>`${pts[o.i].nm||"·"} ${fd(o.d)}`).join(", ");
+    cv.setAttribute("aria-label",ar);
   }
   const ed=editable(cv,{
     pts:()=>pts, setPts:(a)=>{pts=a},
-    toPx:(t)=>{const m=makeMap(cv,26);return{x:m.x(t.u),y:m.y(t.v)};},
-    toData:(x,y)=>{const m=makeMap(cv,26);return{u:clamp(m.ix(x),0,1),v:clamp(m.iy(y),0,1)};},
+    toPx:(t)=>{const g=geo();return{x:g.x(t.u),y:g.y(t.v)};},
+    toData:(x,y)=>{const g=geo(); if(x>g.split-g.p/2) return null;
+      return{u:clamp(g.ix(x),0,1),v:clamp(g.iy(y),0,1)};},
     add:(u,v)=>pts.push({u,v,c:cls}),
     draw:()=>draw(), commit:()=>{ver++;draw();}
   });
   cv.addEventListener("pointermove",e=>{
     if(cv.__dragging) return;
-    const m=makeMap(cv,26), q=pointerPos(cv,e);
-    hover={u:clamp(m.ix(q.x),0,1),v:clamp(m.iy(q.y),0,1)}; draw();
+    const g=geo(), q=pointerPos(cv,e);
+    if(q.x>g.split-g.p/2) return;                     // sağ panelde sorgu yerinde kalır
+    qry={u:clamp(g.ix(q.x),0,1),v:clamp(g.iy(q.y),0,1)}; draw();
   });
-  cv.addEventListener("pointerleave",()=>{hover=null;$("#knn-p").textContent="—";$("#knn-v").textContent="—";draw();});
   const setCls=(c)=>{cls=c;$("#knn-a").setAttribute("aria-pressed",c===0);$("#knn-b").setAttribute("aria-pressed",c===1);};
   $("#knn-a").onclick=()=>setCls(0); $("#knn-b").onclick=()=>setCls(1);
   $("#knn-k").oninput=e=>{k=+e.target.value;$("#knn-ko").textContent=k;draw();};
+  const MB=["#knn-euc","#knn-man","#knn-che"];
+  const setMet=(m)=>{met=m;MB.forEach((s,i)=>$(s).setAttribute("aria-pressed",i===m));draw();};
+  MB.forEach((s,i)=>{$(s).onclick=()=>setMet(i);});
+  const setW=(on)=>{wtd=on;$("#knn-uni").setAttribute("aria-pressed",!on);$("#knn-dw").setAttribute("aria-pressed",on);draw();};
+  $("#knn-uni").onclick=()=>setW(false); $("#knn-dw").onclick=()=>setW(true);
   $("#knn-bnd").onclick=e=>{showB=!showB;e.currentTarget.setAttribute("aria-pressed",showB);draw();};
-  $("#knn-clr").onclick=()=>{ed.reset();pts=[];ver++;draw();};
+  $("#knn-clr").onclick=()=>{ed.reset();pts=[];tst=[];qry=null;ver++;draw();};
+  /* üreteçler bir DİZİ döndürür: aynı üreteç bir kez eğitim, bir kez test kümesi çeker */
   function demo(){
-    ed.reset(); pts=[];
-    for(let i=0;i<22;i++) pts.push({u:clamp(.30+gauss()*.11,.03,.97),v:clamp(.68+gauss()*.11,.03,.97),c:0});
-    for(let i=0;i<22;i++) pts.push({u:clamp(.68+gauss()*.11,.03,.97),v:clamp(.34+gauss()*.11,.03,.97),c:1});
-    for(let i=0;i<4;i++) pts.push({u:rnd(.35,.7),v:rnd(.35,.7),c:i%2});
-    ver++; draw();
+    const a=[];
+    for(let i=0;i<22;i++) a.push({u:clamp(.30+gauss()*.11,.03,.97),v:clamp(.68+gauss()*.11,.03,.97),c:0});
+    for(let i=0;i<22;i++) a.push({u:clamp(.68+gauss()*.11,.03,.97),v:clamp(.34+gauss()*.11,.03,.97),c:1});
+    for(let i=0;i<4;i++) a.push({u:rnd(.35,.7),v:rnd(.35,.7),c:i%2});
+    return a;
   }
   /* Dış halka dikeyde 1.9 kat uzatılınca (.5 ± .63) tuvalden taşıyordu: clamp
      noktaları üst ve alt kenara DİZİYOR, "kapsama dışı" sınıfı perdede iki düz
      sıra gibi görünüyordu. Dış halkanın dikey uzaması 1.25'e indi; halka hâlâ
      iç öbeği çevreliyor, aradaki boşluk da yerinde. */
   function rings(){
-    ed.reset(); pts=[];
+    const a=[];
     for(let i=0;i<26;i++){const t=rnd(0,Math.PI*2),r=.13+Math.abs(gauss())*.035;
-      pts.push({u:clamp(.5+Math.cos(t)*r,.03,.97),v:clamp(.5+Math.sin(t)*r*1.9,.03,.97),c:0});}
+      a.push({u:clamp(.5+Math.cos(t)*r,.03,.97),v:clamp(.5+Math.sin(t)*r*1.9,.03,.97),c:0});}
     for(let i=0;i<34;i++){const t=rnd(0,Math.PI*2),r=.33+gauss()*.035;
-      pts.push({u:clamp(.5+Math.cos(t)*r,.03,.97),v:clamp(.5+Math.sin(t)*r*1.25,.04,.96),c:1});}
-    ver++; draw();
+      a.push({u:clamp(.5+Math.cos(t)*r,.03,.97),v:clamp(.5+Math.sin(t)*r*1.25,.04,.96),c:1});}
+    return a;
   }
   function noisy(){
-    ed.reset(); pts=[];
-    for(let i=0;i<28;i++) pts.push({u:clamp(.42+gauss()*.17,.03,.97),v:clamp(.58+gauss()*.17,.03,.97),c:0});
-    for(let i=0;i<28;i++) pts.push({u:clamp(.58+gauss()*.17,.03,.97),v:clamp(.42+gauss()*.17,.03,.97),c:1});
-    ver++; draw();
+    const a=[];
+    for(let i=0;i<28;i++) a.push({u:clamp(.42+gauss()*.17,.03,.97),v:clamp(.58+gauss()*.17,.03,.97),c:0});
+    for(let i=0;i<28;i++) a.push({u:clamp(.58+gauss()*.17,.03,.97),v:clamp(.42+gauss()*.17,.03,.97),c:1});
+    return a;
   }
-  const GEN={demo,rings,noisy};
+  /* İki vadi: sklearn'ün make_moons'u (Hafta 9'un « iki ay »ı). İki hilal iç içe,
+     kayıtların %8'i yanlış etiketli (GPS sapması): k = 1 bu gürültüyü ezberler,
+     büyük k hilalin ucunu öteki sınıfa verir — test hatası iki uçta da yüksek (U).
+     Konum gürültüsü 0.3'te hilaller seçilmiyordu; 0.2 + etiket gürültüsü hem şekli
+     gösteriyor hem U'yu koruyor (40 tur: k = 1 %18, k = 5–7 %12, k = 41 %20). */
+  function vadi(){
+    const a=[];
+    for(let i=0;i<80;i++){ const c=i%2, t=rnd(0,Math.PI);
+      const x=(c?1-Math.cos(t):Math.cos(t))+gauss()*.2, y=(c?.5-Math.sin(t):Math.sin(t))+gauss()*.2;
+      a.push({u:clamp((x+1.4)/3.8,.03,.97), v:clamp((y+.95)/2.4,.03,.97), c:Math.random()<.08?1-c:c}); }
+    return a;
+  }
+  /* sabit küme: ham değerler → (z-skoru ya da lo/span ile) [0, 1] */
+  function fixedSet(){
+    const s=S(), R=s.raw;
+    let mx=[0,0], sd=[1,1];
+    if(s.z) [1,2].forEach((j,a)=>{ const m=R.reduce((t,r)=>t+r[j],0)/R.length;
+      mx[a]=m; sd[a]=Math.sqrt(R.reduce((t,r)=>t+(r[j]-m)**2,0)/R.length); });
+    const tf=(x,a)=>((s.z?(x-mx[a])/sd[a]:x)-s.lo)/s.span;
+    return {pts:R.map(r=>({nm:r[0],raw:[r[1],r[2]],u:tf(r[1],0),v:tf(r[2],1),c:r[3]})), q:{u:tf(s.q[0],0),v:tf(s.q[1],1)}};
+  }
+  const GEN={demo,rings,noisy,vadi};
   /* veri kümesini değiştir: eksen adları draw()'da okunuyor, sınıf adları düğmelerde */
   function useSet(i){
     dsi=clamp(i,0,DS.length-1);
     txt("#knn-an",S().cls[0]); txt("#knn-bn",S().cls[1]);
     $("#knn-a").setAttribute("aria-label","Eklenecek sınıf: "+S().cls[0]);
     $("#knn-b").setAttribute("aria-label","Eklenecek sınıf: "+S().cls[1]);
-    (GEN[S().gen]||demo)();
+    ed.reset();
+    if(fixed()){ const f=fixedSet(); pts=f.pts; tst=[]; qry=f.q; }
+    else { const gen=GEN[S().gen]||demo; pts=gen(); tst=[]; for(let i=0;i<(S().tm||1);i++) tst.push(...gen()); qry=null; }
+    ver++; draw();
   }
   $("#knn-demo").onclick=()=>useSet(dsi);
   reg({id:"m-knn",draw,space:()=>useSet(dsi),init:()=>useSet(0),undo:()=>ed.undo(),
     scenarioLabel:CONTENT["m-knn"].pick,
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
-    {t:"Önce veri",d:"İki sınıf: uçak ve kuş. Kanat açıklığı ve hız ekseninde iki bulut, ortada birkaç karışık örnek. Üstteki veri kümesi düğmeleri aynı dersi başka bir hikâyeyle tekrar eder.",
-     set:0, run(){setR("#knn-k",3);setPressed("#knn-bnd",true);}},
-    {t:"k = 1 · ezber",d:"Her nokta kendi en yakın komşusudur, bu yüzden eğitim hatası tam olarak %0. Ama sınıra bakın: ortadaki tek bir aykırı nokta etrafına kendi adacığını kurmuş.",
-     hl:["#knn-e","#knn-k"], run(){setR("#knn-k",1);}},
-    {t:"k = 7 · yumuşama",d:"Yedi komşu oyluyor. Adacıklar kayboldu, sınır sadeleşti. Eğitim hatası artık sıfır değil — ve bu iyi bir şey.",
-     hl:["#knn-e"], run(){setR("#knn-k",7);}},
-    {t:"k = 21 · körlük",d:"Komşuluk o kadar genişledi ki model yerel yapıyı göremiyor: ortadaki karışık noktalar tamamen yutuldu, sınır iki bulutun arasında düz bir şeride indi. İki uç arasındaki denge, dönemin ana konusu.",
-     hl:["#knn-e","#knn-k"], run(){setR("#knn-k",21);}},
-    {t:"Başka veri, aynı ders",d:"Baz istasyonu verisi: kapsama alanı bir halka. Hiçbir doğru bu sınırı çizemez ama KNN öğreniyor — k = 5'te sınır halkayı sarıyor, k = 21'de halka eriyip kayboluyor.",
-     set:1, hl:["#knn-e"], run(){setR("#knn-k",5);}}
+    {t:"Önce veri",d:"İki sınıf: uçak ve kuş. Kanat açıklığı ve hız ekseninde iki bulut, ortada birkaç karışık örnek. Dolu noktalar eğitim verisi. Soluk halkalar test noktaları: aynı kaynaktan geliyor ama model onları hiç görmüyor; sağdaki eğri iki hatayı her k için çiziyor.",
+     set:0, run(){setR("#knn-k",3);setPressed("#knn-bnd",true);press("#knn-euc");press("#knn-uni");}},
+    {t:"k = 1 · ezber",d:"Her nokta kendi en yakın komşusudur, bu yüzden eğitim hatası tam olarak %0. Test hatası ise sıfır değil, %8 civarında: ortadaki aykırı noktalar kendi adacığını kurmuş, oraya düşen test noktası yanlış biliniyor (koyu halka).",
+     hl:["#knn-e","#knn-t"], run(){press("#knn-euc");press("#knn-uni");setR("#knn-k",1);}},
+    {t:"k = 7 · yumuşama",d:"Yedi komşu oyluyor. Adacıklar kayboldu, sınır sadeleşti. Eğitim hatası artık sıfır değil — ve bu iyi bir şey: model tek tek noktaları değil, bulutların yapısını öğreniyor.",
+     hl:["#knn-e"], run(){press("#knn-euc");press("#knn-uni");setR("#knn-k",7);}},
+    {t:"İki vadi · k = 1",d:"Hafta 9'un « iki ay »ı: GPS kayıtları iki kıvrımlı vadi boyunca, kayıtların %8'i yanlış vadiye yazılmış. k = 1 her yanlış etikete bir adacık veriyor: eğitim hatası %0, test hatası %19 civarı.",
+     set:3, hl:["#knn-e","#knn-t"], run(){press("#knn-euc");press("#knn-uni");setR("#knn-k",1);}},
+    {t:"k = 41 · körlük",d:"Aynı veri, k = 41: komşuluk verinin yarısını aştı. Hilallerin uçları öteki vadiye veriliyor; test hatası %21 civarına, eğitim hatası da %20'nin üstüne çıktı. k = 1 ezberliyordu, k = 41 üstünkörü bakıyor: iki uç da kötü, sebepleri farklı.",
+     hl:["#knn-e","#knn-t"], run(){press("#knn-euc");press("#knn-uni");setR("#knn-k",41);}},
+    {t:"k–hata eğrisi",d:"Sağdaki eğri iki ucu birleştiriyor. Eğitim hatası k = 1'de 0'dan başlayıp artıyor; ona bakan hep k = 1'i seçer. Test hatası önce iniyor, sonra çıkıyor: U. Yeşil şerit en düşüğü, çoğunlukla k = 3–11; noktalı çizgi √n ≈ 9. Gerçekte k test noktalarıyla değil, eğitim verisinde cross-validation ile seçilir.",
+     hl:["#knn-t","#knn-k"], run(){press("#knn-euc");press("#knn-uni");setR("#knn-k",7);}},
+    {t:"Başka veri, aynı ders",d:"Baz istasyonu verisi: kapsama alanı bir halka. Hiçbir doğru bu sınırı çizemez ama KNN öğreniyor — k = 5'te sınır halkayı sarıyor; k'yı 21'e çekersen halka eriyip kayboluyor.",
+     set:1, hl:["#knn-e"], run(){press("#knn-euc");press("#knn-uni");setR("#knn-k",5);}},
+    {t:"Farklı uzaklık, farklı komşu",d:"Evin (5, 5)'te, k = 1. Kuş uçuşu (Öklid) A eczanesi 4.24, B 5.00 sokak uzakta: tahmin A. Manhattan'a geçtik: sokak sokak A 3 + 3 = 6, B 0 + 5 = 5; tahmin B'ye döndü. Komşuluk çemberi elmas oldu, iki eczanenin arasındaki sınır da kırıldı.",
+     set:5, hl:["#knn-p"], run(){press("#knn-uni");setR("#knn-k",1);press("#knn-man");}},
+    {t:"Ağırlıklı oy · P",d:"Altı daire, sorgu 95 m² ve 12 yaşında, k = 3. Eşit oyda D, B, C: 2–1 pahalı, P = 0.67. Ağırlıklı oyda her komşunun sözü w = 1/d: D 3.28, B 1.54, C 0.81. B'nin payı üçte birden %27'ye indi, P = 0.73. Sağdaki tablo ders notundaki elle hesabın aynısı.",
+     set:4, hl:["#knn-v"], run(){press("#knn-euc");setR("#knn-k",3);press("#knn-dw");}}
   ],});
 })();
 
@@ -4733,44 +4999,62 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 /* ═════════════ 6 · Karar ağacı ═════════════ */
 (function(){
   const cv=$("#c-dt"), {ctx,fit}=setupCanvas(cv);
-  let pts=[], axis="u", thr=.5, depth=1, treeView=false;
-  /* üç somut veri: bağ hastalığı (iki bulut), sahte işlem (kutu), kalite kontrol (şerit) */
+  /* view: sağ panel — "thr" eşik eğrisi · "tree" kurallar ağacı · "depth" derinlik eğrisi
+     crit: 0 Gini, 1 entropi. tst: gizli test noktaları (aynı üreteçten ayrı çekim). */
+  let pts=[], tst=[], axis="u", thr=.5, depth=1, view="thr", crit=0, ver=0;
+  const DMAX=8, CRIT=["Gini","entropi"];
+  /* dört somut veri: bağ hastalığı (iki bulut), sahte işlem (kutu), kalite kontrol
+     (şerit), on kredi başvurusu (ders notunun elle hesabı, sabit) */
   const DS=SETS("m-dt"); let dsi=0;
   const S=()=>DS[dsi];
+  /* Eşik VERİ BİRİMİNDE yazılır: kaydırıcı ve hesap 0–1 ızgarasında, yazı eksenin
+     kendi aralığında (xr / yr). Eskiden ağaç « nem < 0.50 » diyordu, figür ve ders
+     notu « nem 70 »: öğrenci iki ölçeği birbirine çeviremiyordu. */
+  const rng=(ax)=>ax==="u"?(S().xr||[0,1]):(S().yr||[0,1]);
+  const fv=(ax,t)=>{const r=rng(ax), d=ax==="u"?S().xd:S().yd;
+    return (r[0]+t*(r[1]-r[0])).toFixed(d===undefined?2:d);};
+  const nm=(ax)=>ax==="u"?(S().xs||"x"):(S().ys||"y");
 
-  const gini=(s)=>{ if(!s.length) return 0;
-    const a=s.filter(p=>p.c===0).length/s.length; return 1-a*a-(1-a)*(1-a); };
-  const wGini=(s,ax,t)=>{
-    const L=s.filter(p=>p[ax]<t), R=s.filter(p=>p[ax]>=t);
-    if(!L.length||!R.length) return gini(s);
-    return (L.length*gini(L)+R.length*gini(R))/s.length;
-  };
+  /* Safsızlık (impurity): Gini = 1 − (p₁² + p₂²), entropi = −(p₁·log₂p₁ + p₂·log₂p₂).
+     Kazanç = ebeveyn − çocukların ağırlıklı ortalaması; Gini ile « Gini kazancı »,
+     entropiyle « information gain » (Hafta 10'un adlandırması). */
+  const H2=(a)=>a<=0||a>=1?0:-(a*Math.log2(a)+(1-a)*Math.log2(1-a));
+  const fI=(n0,n)=>{ if(!n) return 0; const a=n0/n; return crit===0?1-a*a-(1-a)*(1-a):H2(a); };
+  const imp=(s)=>{ let n0=0; for(const p of s) if(p.c===0) n0++; return fI(n0,s.length); };
+  const wImp=(s,ax,t)=>{ let nl=0,l0=0,nr=0,r0=0;
+    for(const p of s){ if(p[ax]<t){nl++; if(p.c===0) l0++;} else {nr++; if(p.c===0) r0++;} }
+    if(!nl||!nr) return fI(l0+r0,nl+nr);
+    return (nl*fI(l0,nl)+nr*fI(r0,nr))/s.length; };
   function bestSplit(s){
     let best=null;
     ["u","v"].forEach(ax=>{
       const vals=[...new Set(s.map(p=>p[ax]))].sort((a,b)=>a-b);
       for(let i=1;i<vals.length;i++){
-        const t=(vals[i-1]+vals[i])/2, g=wGini(s,ax,t);
+        const t=(vals[i-1]+vals[i])/2, g=wImp(s,ax,t);   // CART: eşik iki değerin ortası
         if(!best||g<best.g-1e-12) best={ax,t,g};
       }
     });
     return best;
   }
+  const leaf=(s)=>{ let n0=0; for(const p of s) if(p.c===0) n0++;
+    return {leaf:true,n:s.length,c:n0*2>=s.length?0:1,pur:Math.max(n0,s.length-n0)/Math.max(s.length,1)}; };
+  /* Durma: kutu saf, derinlik bitti ya da tek nokta kaldı (scikit-learn'ün
+     min_samples_split = 2 varsayılanı). Eskiden 4'ten az noktalı kutu bölünmüyordu;
+     derin ağaç eğitimde %100'e ulaşamıyor, Hafta 10'un « derinlik 12: eğitim 1.00 »
+     makası ekranda kurulamıyordu. */
   function build(s,d){
-    if(d<=0||s.length<4||gini(s)<1e-9) return {leaf:true,n:s.length,c:s.filter(p=>p.c===0).length*2>=s.length?0:1,pur:Math.max(...[0,1].map(k=>s.filter(p=>p.c===k).length))/Math.max(s.length,1)};
+    if(d<=0||s.length<2||imp(s)<1e-9) return leaf(s);
     const b=bestSplit(s);
-    if(!b||b.g>=gini(s)-1e-9) return {leaf:true,n:s.length,c:s.filter(p=>p.c===0).length*2>=s.length?0:1,pur:Math.max(...[0,1].map(k=>s.filter(p=>p.c===k).length))/Math.max(s.length,1)};
+    if(!b||b.g>=imp(s)-1e-9) return leaf(s);
     return {leaf:false,ax:b.ax,t:b.t,n:s.length,
       L:build(s.filter(p=>p[b.ax]<b.t),d-1), R:build(s.filter(p=>p[b.ax]>=b.t),d-1)};
   }
-  function tree(){
+  /* kök eşiği kullanıcının (kaydırıcı); altı açgözlü */
+  function tree(dd){
     if(pts.length<2) return null;
     const L=pts.filter(p=>p[axis]<thr), R=pts.filter(p=>p[axis]>=thr);
-    if(!L.length||!R.length){
-      const n0=pts.filter(p=>p.c===0).length;
-      return {leaf:true,n:pts.length,c:n0*2>=pts.length?0:1,pur:Math.max(n0,pts.length-n0)/pts.length};
-    }
-    return {leaf:false,ax:axis,t:thr,n:pts.length,root:true,L:build(L,depth-1),R:build(R,depth-1)};
+    if(!L.length||!R.length) return leaf(pts);
+    return {leaf:false,ax:axis,t:thr,n:pts.length,root:true,L:build(L,dd-1),R:build(R,dd-1)};
   }
   function leaves(node,rect,out,lines,lvl){
     if(!node) return;
@@ -4781,12 +5065,41 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     if(a==="u"){r1.u1=node.t;r2.u0=node.t;} else {r1.v1=node.t;r2.v0=node.t;}
     leaves(node.L,r1,out,lines,lvl+1); leaves(node.R,r2,out,lines,lvl+1);
   }
+  const nLeaves=(n)=>!n?0:n.leaf?1:nLeaves(n.L)+nLeaves(n.R);
   function predict(node,p){ while(node&&!node.leaf) node=p[node.ax]<node.t?node.L:node.R; return node?node.c:0; }
+  const acc=(T,set)=>!T||!set.length?null:set.filter(q=>predict(T,q)===q.c).length/set.length;
+  /* Derinlik 1…8 için ağaç, eğitim ve test doğruluğu: TEK hesapta, önbellekli.
+     Göstergeler, derinlik eğrisi ve aria-label aynı diziden okur. */
+  let dKey="", dVal=null;
+  function depths(){
+    const key=[ver,axis,thr,crit].join("|");
+    if(key===dKey) return dVal;
+    dKey=key;
+    const out={T:[],tr:[],te:[],lf:[]};
+    for(let d=1;d<=DMAX;d++){ const T=tree(d);
+      out.T.push(T); out.tr.push(acc(T,pts)); out.te.push(acc(T,tst)); out.lf.push(nLeaves(T)); }
+    return dVal=out;
+  }
+  const bestDepth=(D)=>{ let bi=-1; D.te.forEach((v,i)=>{ if(v!==null&&(bi<0||v>D.te[bi]+1e-12)) bi=i; });
+    return bi<0?null:{d:bi+1,a:D.te[bi]}; };
+  /* Bir eksende kaydırıcı ızgarasının (1/100) en iyi eşiği. Aynı safsızlığı veren
+     düz bir basamak varsa ORTASI seçilir (CART'ın orta nokta kuralına en yakın
+     ızgara noktası); eskiden basamağın ilk noktası seçiliyordu, eşik hep bir
+     noktanın dibine yapışıyordu. */
+  function axisBest(ax){
+    let bg=Infinity, bt=.5, i=2;
+    while(i<=98){
+      const g=wImp(pts,ax,i/100);
+      if(g<bg-1e-12){ let j=i; while(j<98 && Math.abs(wImp(pts,ax,(j+1)/100)-g)<1e-12) j++;
+        bg=g; bt=Math.round((i+j)/2)/100; i=j+1; }
+      else i++;
+    }
+    return {t:bt,g:bg};
+  }
 
   /* Kurallar ağacı: sol paneldeki dikdörtgenlerin ASIL hâli. Her kutu bir soru
-     ("nem < 0.50?"), sol dal evet, sağ dal hayır; yaprak dairesi kararın rengi,
-     altındaki "17/18" o yapraktaki çoğunluk / toplam nokta. Ders notu "kararı satır
-     satır okuyabildiğin model" diyordu ama ekranda ağacın kendisi hiç yoktu. */
+     (« nem < 70? »), sol dal evet, sağ dal hayır; yaprak dairesi kararın rengi,
+     altındaki "17/18" o yapraktaki çoğunluk / toplam nokta. */
   function drawTree(T,x0,y0,w,h){
     ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(x0,y0,w,h);ctx.restore();
     const lay=[]; let nl=0, dmax=0;
@@ -4796,7 +5109,6 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const top=y0+40, rowH=Math.min(52,(h-78)/Math.max(1,dmax)), colW=(w-12)/Math.max(1,nl);
     const PX=(nd)=>x0+6+(nd.__x+.5)*colW, PY=(nd)=>top+nd.__lv*rowH;
     const fs=colW<40?8.5:colW<56?9.5:10.5;
-    const nm=(ax)=>ax==="u"?(S().xs||"x"):(S().ys||"y");
     /* dallar önce, düğümler üstte */
     ctx.save();ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.3;
     lay.forEach(nd=>{ if(nd.leaf) return;
@@ -4806,15 +5118,28 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       label(ctx,"evet",(PX(T)+PX(T.L))/2-4,PY(T)+rowH*.45,css("--good"),"right",9.5);
       label(ctx,"hayır",(PX(T)+PX(T.R))/2+4,PY(T)+rowH*.45,css("--bad"),"left",9.5);
     }
+    /* derin ağaçta (≥ 5 seviye) kutu yazısı sığmıyor: yaprak altı sayısı gizlenir,
+       soru kısalır (eksen adının ilk harfi). Yaprak sütunu 22 px'in altına inince
+       (derinlik 8'de 30+ yaprak) sorular hiç yazılmaz, ağacın İSKELETİ çizilir:
+       okunmayan bir ağaç, ezberin kendisi. */
+    const deep=dmax>=5||rowH<30, tiny=colW<22;
+    if(tiny){
+      lay.forEach(nd=>{ const x=PX(nd), y=PY(nd);
+        if(nd.leaf) disc(ctx,x,y,3.2,css(nd.c===0?"--a":"--b"));
+        else disc(ctx,x,y,nd.root?5:3.5,css(nd.root?"--accent":"--ink-soft")); });
+      label(ctx,"kurallar ağacı · "+nl+" yaprak",x0+8,y0+14,css("--accent"),"left",11);
+      label(ctx,"sorular sığmıyor: ağaç nokta ezberliyor",x0+8,y0+h-10,css("--ink-soft"),"left",10);
+      return;
+    }
     lay.forEach(nd=>{
       const x=PX(nd), y=PY(nd);
       if(nd.leaf){
         const col=nd.c===0?"--a":"--b", maj=Math.round((nd.pur||1)*nd.n);
-        disc(ctx,x,y,7.5,hexA(col,.35+.6*(((nd.pur||.5)-.5)*2)),css(col));
-        label(ctx,maj+"/"+nd.n,x,y+17,css("--ink-soft"),"center",fs);
+        disc(ctx,x,y,deep?5.5:7.5,hexA(col,.35+.6*(((nd.pur||.5)-.5)*2)),css(col));
+        if(!deep) label(ctx,maj+"/"+nd.n,x,y+17,css("--ink-soft"),"center",fs);
         return;
       }
-      const t=`${nm(nd.ax)} < ${nd.t.toFixed(2)}`;
+      const t=`${deep&&colW<56?nm(nd.ax).slice(0,1):nm(nd.ax)} < ${fv(nd.ax,nd.t)}`;
       ctx.save(); ctx.font=`600 ${fs}px "IBM Plex Mono", monospace`;
       const tw=ctx.measureText(t).width+10; ctx.restore();
       ctx.save();ctx.fillStyle=css("--surface");ctx.strokeStyle=nd.root?css("--accent"):css("--ink-soft");
@@ -4826,6 +5151,59 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     label(ctx,"kurallar ağacı · "+nl+" yaprak",x0+8,y0+14,css("--accent"),"left",11);
     label(ctx,"sol dal: evet · sağ dal: hayır",x0+8,y0+h-10,css("--ink-soft"),"left",10);
   }
+  /* sağ panel · eşik eğrisi: kök eşiği gezerken bölme sonrası safsızlık */
+  function drawThr(q0,qy,qw,qh){
+    const N=140, curve=[];
+    for(let i=0;i<=N;i++){const t=i/N;curve.push({t,g:wImp(pts,axis,t)});}
+    const g0=imp(pts), gmax=Math.max(g0,...curve.map(c=>c.g))*1.08||1;
+    const CX=(t)=>q0+t*qw, CY=(g)=>qy+qh-g/gmax*qh;
+    ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){const gy=qy+i*qh/4;ctx.beginPath();ctx.moveTo(q0,gy);ctx.lineTo(q0+qw,gy);ctx.stroke();}
+    ctx.strokeStyle=css("--line");ctx.strokeRect(q0,qy,qw,qh);ctx.restore();
+    ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(q0,CY(g0));ctx.lineTo(q0+qw,CY(g0));ctx.stroke();ctx.restore();
+    ctx.save();ctx.beginPath();ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;ctx.lineJoin="round";
+    curve.forEach((c,i)=>{i?ctx.lineTo(CX(c.t),CY(c.g)):ctx.moveTo(CX(c.t),CY(c.g));});
+    ctx.stroke();ctx.restore();
+    /* yeşil işaret kaydırıcının kendi 1/100 ızgarasında: « En iyi bölmeyi bul » ile aynı */
+    const bm=axisBest(axis);
+    ctx.save();ctx.strokeStyle=css("--good");ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(CX(bm.t),qy);ctx.lineTo(CX(bm.t),qy+qh);ctx.stroke();ctx.restore();
+    disc(ctx,CX(bm.t),CY(bm.g),5,css("--good"),css("--surface"));
+    disc(ctx,CX(thr),CY(wImp(pts,axis,thr)),6,css("--accent"),css("--surface"));
+    legend(ctx,q0+8,qy+qh-46,[["ağırlıklı "+CRIT[crit],"--accent"],["bölmeden önce (kesikli)","--ink-soft"],["en iyi eşik","--good"]],{size:12,lh:17});
+    label(ctx,`eşik (${nm(axis)}) →`,q0+qw/2,qy+qh+16,css("--ink-soft"),"center",11);
+  }
+  /* sağ panel · derinlik eğrisi: eğitim ve test doğruluğu, derinlik 1…8 */
+  function drawDepth(D,q0,qy,qw,qh){
+    ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(q0,qy,qw,qh);ctx.restore();
+    const vals=[...D.tr,...D.te].filter(v=>v!==null);
+    if(!vals.length){ label(ctx,"nokta ekle →",q0+qw/2,qy+qh/2,css("--ink-soft"),"center",12); return; }
+    const lo=Math.max(0,Math.floor(Math.min(...vals)*10-0.5)/10), hi=1.02;
+    const EX=(d)=>q0+14+(d-1)/(DMAX-1)*(qw-28), EY=(v)=>qy+qh-(v-lo)/(hi-lo)*qh;
+    ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
+    for(let v=lo+.1;v<1.001;v+=.1){ctx.beginPath();ctx.moveTo(q0,EY(v));ctx.lineTo(q0+qw,EY(v));ctx.stroke();}
+    ctx.restore();
+    for(let v=lo;v<1.001;v+=.1) label(ctx,"%"+Math.round(v*100),q0-5,EY(v),css("--ink-soft"),"right",10);
+    const bd=bestDepth(D);
+    if(bd){ ctx.fillStyle=hexA("--good",.13); ctx.fillRect(EX(bd.d)-8,qy,16,qh); }
+    const line=(arr,tok)=>{
+      ctx.save();ctx.beginPath();ctx.strokeStyle=css(tok);ctx.lineWidth=2.2;ctx.lineJoin="round";
+      let on=false; arr.forEach((v,i)=>{ if(v===null) return; const x=EX(i+1), y=EY(v); on?ctx.lineTo(x,y):ctx.moveTo(x,y); on=true; });
+      ctx.stroke();ctx.restore();
+      arr.forEach((v,i)=>{ if(v!==null) disc(ctx,EX(i+1),EY(v),2.6,css(tok)); });
+    };
+    line(D.tr,"--a"); line(D.te,"--bad");
+    ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=1.5;ctx.setLineDash([3,4]);
+    ctx.beginPath();ctx.moveTo(EX(depth),qy);ctx.lineTo(EX(depth),qy+qh);ctx.stroke();ctx.restore();
+    const tr=D.tr[depth-1], te=D.te[depth-1];
+    if(te!==null) disc(ctx,EX(depth),EY(te),5.5,css("--bad"),css("--surface"));
+    if(tr!==null) disc(ctx,EX(depth),EY(tr),5.5,css("--a"),css("--surface"));
+    legendRow(ctx,q0,qy-12,[["eğitim doğruluğu","--a"],te!==null?["test doğruluğu","--bad"]:["test noktası yok","--ink-soft"],
+      bd&&[`en iyi test: ${bd.d}`,"--good"]],10.5,qw);
+    for(let d=1;d<=DMAX;d++) label(ctx,String(d),EX(d),qy+qh+14,css(d===depth?"--accent":"--ink-soft"),"center",10.5);
+    label(ctx,"derinlik →",q0+qw-6,qy+qh-10,css("--ink-soft"),"right",10.5);
+  }
   function draw(){
     if(!fit()) return;
     const W=cv.__w,H=cv.__h;
@@ -4834,7 +5212,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const p=26, mw=split-2*p, mh=H-2*p;
     const X=(u)=>p+u*mw, Y=(v)=>p+mh-v*mh;
 
-    const T=tree(), outs=[], lines=[];
+    const D=depths(), T=D.T[depth-1], outs=[], lines=[];
     if(T) leaves(T,{u0:0,u1:1,v0:0,v1:1},outs,lines,0);
     outs.forEach(o=>{
       const col=o.node.c===0?"--a":"--b";
@@ -4858,50 +5236,52 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       else{ctx.moveTo(X(l.rect.u0),Y(l.t));ctx.lineTo(X(l.rect.u1),Y(l.t));}
       ctx.stroke();ctx.restore();
     });
+    /* test noktaları: soluk halka; şu anki ağacın YANLIŞ bildiği koyu halka */
+    tst.forEach(q=>{ const wrong=T&&predict(T,q)!==q.c, col=q.c===0?"--a":"--b";
+      ctx.save();ctx.beginPath();ctx.arc(X(q.u),Y(q.v),wrong?5:4,0,7);
+      ctx.strokeStyle=hexA(col,wrong?.95:.45);ctx.lineWidth=wrong?2:1.4;ctx.stroke();ctx.restore(); });
     pts.forEach(q=>disc(ctx,X(q.u),Y(q.v),6.5,css(q.c===0?"--a":"--b"),css("--surface")));
-    legend(ctx,X(0)+8,Y(1)+14,[[S().cls[0],"--a"],[S().cls[1],"--b"]]);
+    if(S().gen==="fixed") pts.forEach(q=>{ if(q.nm) label(ctx,q.nm,X(q.u)+9,Y(q.v)-10,css("--ink"),"left",11.5); });
+    /* kök eşiği haritada, veri biriminde */
+    if(pts.length>1){
+      const tl=`${nm(axis)} < ${fv(axis,thr)}`;
+      if(axis==="u") label(ctx,tl,X(thr)+(thr>.75?-6:6),Y(0)-11,css("--accent"),thr>.75?"right":"left",11.5);
+      else label(ctx,tl,X(1)-6,Y(thr)+(thr>.8?11:-10),css("--accent"),"right",11.5);
+    }
+    legend(ctx,X(0)+8,Y(1)+14,[[S().cls[0],"--a"],[S().cls[1],"--b"],tst.length&&["○ test (gizli)","--ink-soft"]]);
     label(ctx,S().x+" →",X(0)+4,Y(0)+13,css("--ink-soft"));
     ylabel(ctx,S().y+" →",X(0)-13,Y(1),Y(0),css("--ink-soft"),12);
 
-    if(wide && pts.length>1 && treeView && T) drawTree(T,split+14,p,W-split-38,H-2*p);
-    else if(wide && pts.length>1){
-      const q0=split+14, qw=W-split-38, qy=p, qh=H-2*p;
-      const N=140, curve=[];
-      for(let i=0;i<=N;i++){const t=i/N;curve.push({t,g:wGini(pts,axis,t)});}
-      const g0=gini(pts), gmax=Math.max(g0,...curve.map(c=>c.g))*1.08||1;
-      const CX=(t)=>q0+t*qw, CY=(g)=>qy+qh-g/gmax*qh;
-      ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
-      for(let i=0;i<=4;i++){const gy=qy+i*qh/4;ctx.beginPath();ctx.moveTo(q0,gy);ctx.lineTo(q0+qw,gy);ctx.stroke();}
-      ctx.strokeStyle=css("--line");ctx.strokeRect(q0,qy,qw,qh);ctx.restore();
-      ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.5;
-      ctx.beginPath();ctx.moveTo(q0,CY(g0));ctx.lineTo(q0+qw,CY(g0));ctx.stroke();ctx.restore();
-      ctx.save();ctx.beginPath();ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;ctx.lineJoin="round";
-      curve.forEach((c,i)=>{i?ctx.lineTo(CX(c.t),CY(c.g)):ctx.moveTo(CX(c.t),CY(c.g));});
-      ctx.stroke();ctx.restore();
-      /* yeşil işaret kaydırıcının kendi 1/100 ızgarasında olmalı, yoksa
-         'en iyi'yi gösterip öğrencinin ulaşamadığı bir t'yi işaretliyor */
-      let bmin={t:.5,g:Infinity};
-      for(let i=2;i<=98;i++){const t=i/100,g=wGini(pts,axis,t); if(g<bmin.g-1e-12) bmin={t,g};}
-      ctx.save();ctx.strokeStyle=css("--good");ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
-      ctx.beginPath();ctx.moveTo(CX(bmin.t),qy);ctx.lineTo(CX(bmin.t),qy+qh);ctx.stroke();ctx.restore();
-      disc(ctx,CX(bmin.t),CY(bmin.g),5,css("--good"),css("--surface"));
-      disc(ctx,CX(thr),CY(wGini(pts,axis,thr)),6,css("--accent"),css("--surface"));
-      legend(ctx,q0+8,qy+qh-46,[["ağırlıklı Gini","--accent"],["bölmeden önce (kesikli)","--ink-soft"],["en iyi eşik","--good"]],{size:12,lh:17});
-      label(ctx,"eşik →",q0+qw/2,qy+qh+16,css("--ink-soft"),"center",11);
+    if(wide && pts.length>1){
+      const q0=split+22, qw=W-split-46, qy=p, qh=H-2*p;
+      if(view==="tree" && T) drawTree(T,split+14,p,W-split-38,H-2*p);
+      else if(view==="depth") drawDepth(D,q0,qy,qw,qh);
+      else drawThr(split+14,qy,W-split-38,qh);
     }
 
-    const g0=pts.length?gini(pts):null, g1=pts.length>1?wGini(pts,axis,thr):null;
+    /* göstergeler: yerleşimden bağımsız (dar dalda donmasın) */
+    const g0=pts.length?imp(pts):null, g1=pts.length>1?wImp(pts,axis,thr):null;
     $("#dt-g0").textContent=g0===null?"—":fmt(g0);
     $("#dt-g1").textContent=g1===null?"—":fmt(g1);
     const gainEl=$("#dt-gain");
     gainEl.textContent=(g0===null||g1===null)?"—":fmt(g0-g1);
     gainEl.className="v "+((g0!==null&&g1!==null&&g0-g1>0.02)?"ok":"wr");
     $("#dt-leaf").textContent=outs.length||"—";
-    if(pts.length){
-      const acc=pts.filter(q=>predict(T,q)===q.c).length/pts.length;
-      const el=$("#dt-acc"); el.textContent=(acc*100).toFixed(0)+"%";
-      el.className="v "+(acc>0.98?"bd":acc>0.85?"ok":"wr");
-    } else $("#dt-acc").textContent="—";
+    const tr=D.tr[depth-1], te=D.te[depth-1], bd=bestDepth(D);
+    const el=$("#dt-acc"); el.textContent=tr===null?"—":(tr*100).toFixed(0)+"%";
+    el.className="v "+(tr===null?"":tr>0.98?"bd":tr>0.85?"ok":"wr");
+    const et=$("#dt-tacc"); et.textContent=te===null?"—":(te*100).toFixed(0)+"%";
+    et.className="v "+(te===null?"":te>=0.85?"ok":te>=0.7?"wr":"bd");
+    $("#dt-to").textContent=fv(axis,thr);
+    /* tuval metni sahte DOM'da okunmuyor: ağaç ve eğri özeti aria-label'da */
+    const rules=[]; (function w(nd,pre){ if(!nd) return; if(nd.leaf){ rules.push((pre.join(" VE ")||"her zaman")+" → "+S().cls[nd.c]+` (${nd.n})`); return; }
+      const q=`${nm(nd.ax)} < ${fv(nd.ax,nd.t)}`, q2=`${nm(nd.ax)} ≥ ${fv(nd.ax,nd.t)}`;
+      w(nd.L,[...pre,q]); w(nd.R,[...pre,q2]); })(depth<=3?T:null,[]);
+    cv.setAttribute("aria-label",`Decision tree · ölçüt ${CRIT[crit]} · kök ${nm(axis)} < ${fv(axis,thr)} · derinlik ${depth} · ${outs.length} yaprak`+
+      ` · eğitim ${tr===null?"—":"%"+Math.round(tr*100)} · test ${te===null?"—":"%"+Math.round(te*100)}`+
+      (bd?` · en iyi test derinliği ${bd.d} (%${Math.round(bd.a*100)})`:"")+
+      ` · derinliğe göre eğitim/test: `+D.tr.map((v,i)=>`${i+1}: ${v===null?"—":Math.round(v*100)}/${D.te[i]===null?"—":Math.round(D.te[i]*100)}`).join(", ")+
+      (rules.length?` · kurallar: `+rules.join("; "):""));
   }
   const geo=()=>{const W=cv.__w,H=cv.__h,p=26,wide=W>760,split=wide?Math.round(W*0.60):W;
     return {p,split,W,H,mw:split-2*p,mh:H-2*p};};
@@ -4911,77 +5291,109 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     toData:(x,y)=>{const g=geo(); if(x>g.split-g.p/2) return null;
       return{u:clamp((x-g.p)/g.mw,0,1), v:clamp((g.H-g.p-y)/g.mh,0,1)};},
     add:(u,v,e)=>pts.push({u,v,c:e&&e.shiftKey?1:0}),
-    draw:()=>draw(), commit:()=>draw()
+    draw:()=>{ver++;draw();}, commit:()=>{ver++;draw();}
   });
   const setAxis=(a)=>{axis=a;$("#dt-au").setAttribute("aria-pressed",a==="u");$("#dt-av").setAttribute("aria-pressed",a==="v");draw();};
   $("#dt-au").onclick=()=>setAxis("u"); $("#dt-av").onclick=()=>setAxis("v");
-  $("#dt-t").oninput=e=>{thr=+e.target.value/100;$("#dt-to").textContent=thr.toFixed(2);draw();};
+  $("#dt-t").oninput=e=>{thr=+e.target.value/100;draw();};
   $("#dt-d").oninput=e=>{depth=+e.target.value;$("#dt-do").textContent=depth;draw();};
+  /* ölçüt: gösterge adları da değişir — Gini kazancı ↔ information gain */
+  const setCrit=(c)=>{crit=c;
+    $("#dt-gini").setAttribute("aria-pressed",c===0);$("#dt-ent").setAttribute("aria-pressed",c===1);
+    $("#dt-k0").innerHTML=c===0?'Kök <span lang="en">Gini</span>':"Kök entropi";
+    $("#dt-kg").innerHTML=c===0?'<span lang="en">Gini</span> kazancı':'<span lang="en">Information gain</span>';
+    draw();};
+  $("#dt-gini").onclick=()=>setCrit(0); $("#dt-ent").onclick=()=>setCrit(1);
+  const VB={thr:"#dt-vt",tree:"#dt-tree",depth:"#dt-vd"};
+  const setView=(v)=>{view=v;Object.keys(VB).forEach(k=>$(VB[k]).setAttribute("aria-pressed",k===v));draw();};
+  $("#dt-vt").onclick=()=>setView("thr"); $("#dt-tree").onclick=()=>setView("tree"); $("#dt-vd").onclick=()=>setView("depth");
   function best(){
     if(pts.length<2) return;
-    /* yuvarlama en iyiyi kaçırabiliyordu; doğrudan kaydırıcı ızgarasında ara */
-    let bg=Infinity, bax="u", bt=.5;
-    for(const ax of ["u","v"]) for(let i=2;i<=98;i++){
-      const t=i/100, g=wGini(pts,ax,t);
-      if(g<bg-1e-12){bg=g;bax=ax;bt=t;}
-    }
-    axis=bax; thr=bt;
-    $("#dt-t").value=Math.round(thr*100);$("#dt-to").textContent=thr.toFixed(2);
+    /* kaydırıcı ızgarasında ara (yuvarlama en iyiyi kaçırabiliyordu); eşitlikte yatay eksen */
+    const a=axisBest("u"), b=axisBest("v"), w=b.g<a.g-1e-12?{ax:"v",...b}:{ax:"u",...a};
+    axis=w.ax; thr=w.t;
+    $("#dt-t").value=Math.round(thr*100);
     $("#dt-au").setAttribute("aria-pressed",axis==="u");$("#dt-av").setAttribute("aria-pressed",axis==="v");
     draw();
   }
   $("#dt-best").onclick=best;
-  $("#dt-tree").onclick=e=>{treeView=!treeView;e.currentTarget.setAttribute("aria-pressed",String(treeView));draw();};
-  $("#dt-clr").onclick=()=>{ed.reset();pts=[];draw();};
+  $("#dt-clr").onclick=()=>{ed.reset();pts=[];tst=[];ver++;draw();};
+  /* üreteçler bir DİZİ döndürür: aynı üreteç bir kez eğitim, bir kez test kümesi çeker */
   function demo(){
-    ed.reset(); pts=[];
-    for(let i=0;i<20;i++)pts.push({u:clamp(.26+gauss()*.10,.03,.97),v:clamp(.30+gauss()*.13,.03,.97),c:0});
-    for(let i=0;i<20;i++)pts.push({u:clamp(.70+gauss()*.10,.03,.97),v:clamp(.68+gauss()*.13,.03,.97),c:1});
-    for(let i=0;i<8;i++)pts.push({u:clamp(.70+gauss()*.09,.03,.97),v:clamp(.24+gauss()*.09,.03,.97),c:0});
-    for(let i=0;i<5;i++)pts.push({u:rnd(.35,.6),v:rnd(.4,.7),c:1});
-    draw();
+    const a=[];
+    for(let i=0;i<20;i++)a.push({u:clamp(.26+gauss()*.10,.03,.97),v:clamp(.30+gauss()*.13,.03,.97),c:0});
+    for(let i=0;i<20;i++)a.push({u:clamp(.70+gauss()*.10,.03,.97),v:clamp(.68+gauss()*.13,.03,.97),c:1});
+    for(let i=0;i<8;i++)a.push({u:clamp(.70+gauss()*.09,.03,.97),v:clamp(.24+gauss()*.09,.03,.97),c:0});
+    for(let i=0;i<5;i++)a.push({u:rnd(.35,.6),v:rnd(.4,.7),c:1});
+    return a;
   }
   /* sahte işlem: pozitif sınıf bir KUTUNUN içinde — tek eşik yetmez, iki eşik gerekir */
   function boxes(){
-    ed.reset(); pts=[];
+    const a=[];
     for(let i=0;i<44;i++){
       const u=rnd(.04,.96), v=rnd(.04,.96);
       const inBox=(u>.62&&v>.64);
-      pts.push({u,v,c:(inBox!==(Math.random()<.05))?1:0});
+      a.push({u,v,c:(inBox!==(Math.random()<.05))?1:0});
     }
-    for(let i=0;i<9;i++)pts.push({u:rnd(.66,.94),v:rnd(.68,.94),c:1});
-    draw();
+    for(let i=0;i<9;i++)a.push({u:rnd(.66,.94),v:rnd(.68,.94),c:1});
+    return a;
   }
   /* kalite kontrol: kusurlular iki ŞERİT — ağırlık aralığın dışına çıkınca parça bozuk */
   function band(){
-    ed.reset(); pts=[];
+    const a=[];
     for(let i=0;i<46;i++){
       const u=rnd(.04,.96), v=rnd(.06,.94);
-      pts.push({u,v,c:(u<.30||u>.72)?1:0});
+      a.push({u,v,c:(u<.30||u>.72)?1:0});
     }
-    draw();
+    return a;
   }
-  const GEN={demo,boxes,band};
-  const gen=()=>(GEN[S().gen]||demo)();
-  function useSet(i){ dsi=clamp(i,0,DS.length-1); gen(); }
-  $("#dt-demo").onclick=gen;
-  reg({id:"m-dt",draw,space:best,init:demo,undo:()=>ed.undo(),
+  /* sabit küme (On başvuru): raw = [ad, x, y, sınıf], veri biriminde → xr / yr ile 0–1 */
+  function fixedSet(){
+    const s=S(), tf=(x,r)=>(x-r[0])/(r[1]-r[0]);
+    return s.raw.map(r=>({nm:r[0],u:tf(r[1],s.xr),v:tf(r[2],s.yr),c:r[3]}));
+  }
+  /* Kredi onayı: Hafta 10'un « 600 başvuru »sunun küçüğü (150 eğitim + 150 test).
+     Kural iki basamaklı (gelir yüksek VE borç oranı düşük; çok yüksek gelirde borç
+     sınırı gevşer), kararların %15'i kuralın dışında: derin ağaç bu gürültüyü ezberler,
+     test doğruluğu derinlik 2–3'ten sonra düşer (eğitim ↔ test makası). */
+  function kredi(){
+    const a=[];
+    for(let i=0;i<150;i++){ const u=rnd(.03,.97), v=rnd(.03,.97);
+      const ok=(u>.35&&v<.6)||(u>.7&&v<.85);
+      a.push({u,v,c:(ok!==(Math.random()<.15))?0:1}); }
+    return a;
+  }
+  const GEN={demo,boxes,band,kredi};
+  function useSet(i){
+    dsi=clamp(i,0,DS.length-1); ed.reset();
+    if(S().gen==="fixed"){ pts=fixedSet(); tst=[]; }
+    else { const g=GEN[S().gen]||demo; pts=g(); tst=[]; for(let j=0;j<(S().tm||1);j++) tst.push(...g()); }
+    ver++; draw();
+  }
+  $("#dt-demo").onclick=()=>useSet(dsi);
+  reg({id:"m-dt",draw,space:best,init:()=>{setCrit(0);useSet(0);},undo:()=>ed.undo(),
     scenarioLabel:CONTENT["m-dt"].pick,
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
-    {t:"Veri ve kök eşiği",d:"Bağ verisi: nem ve sıcaklık. Tek bir soru soracağız — yatay eksende nereden kesersek safsızlık en çok azalır?",
-     set:0, hl:["#dt-t"], run(){setPressed("#dt-tree",false);press("#dt-demo");setR("#dt-d",1);setR("#dt-t",50);}},
-    {t:"Eşiği gezdirin",d:"Sağdaki Gini eğrisi basamaklı iniyor. Neden düz değil? Çünkü eşik iki komşu nokta arasında gezerken hiçbir noktanın tarafı değişmiyor.",
-     hl:["#dt-g1"], run(){setPressed("#dt-tree",false);setR("#dt-t",22);}},
-    {t:"En iyi bölme",d:"Gini eğrisinin dibi en iyi eşik. Gini kazancı burada en yüksek.",
-     hl:["#dt-gain"], run(){setPressed("#dt-tree",false);press("#dt-best");}},
-    {t:"Kurallar ağacı",d:"Sağ panel ağaca döndü, derinlik 2. Pembe kutu kök sorusu, altındakiler ikinci sorular; sol dal evet, sağ dal hayır. Kökten bir yaprağa inen her yol okunabilir bir kural: « nem < 0.50 VE sıcaklık < 0.55 ise → Risk yok ». Yaprağın altındaki sayı: çoğunluk / o kutudaki nokta.",
-     hl:["#dt-tree","#dt-leaf"], run(){setPressed("#dt-tree",true);setR("#dt-d",2);}},
-    {t:"Derinlik 5 · ezber",d:"Ağaç dallanıp budaklandı: yaprak sayısı dört-beşe çıktı, eğitim doğruluğu %99 — veri kutulara ayrılıp ezberlendi; bazı yapraklarda yalnız birkaç nokta var. Modül 03'te gördüğün 14. dereceden polinomla aynı hastalık, ağaçtaki yüzü.",
-     hl:["#dt-leaf","#dt-acc"], run(){setPressed("#dt-tree",true);setR("#dt-d",5);}},
-    {t:"Bir eşik yetmediğinde",d:"Sahte işlem verisi: sahtelik bir KUTUNUN içinde — yüksek tutar VE gece saatleri. Derinliği 1 yapın, sonra 3: tek eşikle kutuyu ayıramıyoruz, iki eşikle ayırıyoruz. Ağaçta görün: « tutar » sorusunun altında bir « saat » sorusu. Ağacın gücü eşikleri iç içe koymasında.",
-     set:1, hl:["#dt-acc","#dt-d"], run(){setPressed("#dt-tree",true);press("#dt-best");setR("#dt-d",3);}}
-  ],});
+    {t:"Veri ve kök eşiği",d:"Bağ verisi: nem ve sıcaklık. Tek bir soru soracağız — yatay eksende nereden kesersek safsızlık en çok azalır? Eşik verinin kendi biriminde yazıyor: nem %70.",
+     set:0, hl:["#dt-t"], run(){press("#dt-gini");press("#dt-vt");press("#dt-au");setR("#dt-d",1);setR("#dt-t",50);}},
+    {t:"Eşiği gezdirin",d:"Sağdaki eşik eğrisi basamaklı iniyor. Neden düz değil? Çünkü eşik iki komşu nokta arasında gezerken hiçbir noktanın tarafı değişmiyor.",
+     hl:["#dt-g1"], run(){press("#dt-gini");press("#dt-vt");setR("#dt-t",22);}},
+    {t:"En iyi bölme",d:"Düğme iki ekseni de tarıyor ve eğrinin dibini buluyor. Bu veride kazanan hep sıcaklık: 21 °C civarında bir eşik, Gini kazancı burada en yüksek.",
+     hl:["#dt-gain"], run(){press("#dt-gini");press("#dt-vt");press("#dt-best");}},
+    {t:"Kurallar ağacı",d:"Sağ panel ağaca döndü, derinlik 2. Pembe kutu kök sorusu, altındakiler ikinci sorular; sol dal evet, sağ dal hayır. Kökten yaprağa inen her yol okunabilir bir kural: « sıcaklık ≥ 21 VE nem ≥ 62 ise → Mildiyö riski » gibi. Eşikler verinin kendi biriminde: derece ve yüzde.",
+     hl:["#dt-tree","#dt-leaf"], run(){press("#dt-gini");press("#dt-tree");setR("#dt-d",2);}},
+    {t:"Derinlik eğrisi",d:"Kredi onayı: 150 başvuru eğitim, 150 test (soluk halkalar). Sağda derinliğe göre iki doğruluk. Derinlik 3'te eğitim %85, test %78 civarı. Eğitim çizgisi derinlikle hep yükseliyor; test çizgisi 2–4'te tepe yapıyor. Yeşil şerit en iyi test derinliği.",
+     set:3, hl:["#dt-acc","#dt-tacc"], run(){press("#dt-gini");press("#dt-best");press("#dt-vd");setR("#dt-d",3);}},
+    {t:"Derinlik 8 · ezber",d:"Ağaç 30 civarı yaprağa bölündü, eğitim doğruluğu %98. Test doğruluğu ise %73 civarına indi: iki çizginin arası açıldı. Ağaç kuralın dışındaki %15'lik gürültüyü kutu kutu ezberledi. Hafta 10'un 600 başvurusunda da öyleydi: derinlik 12'de eğitim 1.00, CV 0.74.",
+     hl:["#dt-acc","#dt-tacc","#dt-leaf"], run(){press("#dt-gini");press("#dt-vd");setR("#dt-d",8);}},
+    {t:"Aynı bölme, iki cetvel",d:"Ders notunun on başvurusu, kök sorusu « gelir < 38 ». Gini ile 0.500'den 0.320'ye, kazanç 0.180. Entropi'ye geçtik: 1.000'den 0.722'ye, information gain 0.278. Sayılar farklı çünkü cetvel farklı; seçilen eşik aynı yerde.",
+     set:4, hl:["#dt-g0","#dt-gain"], run(){press("#dt-vt");setR("#dt-d",1);press("#dt-best");press("#dt-ent");}},
+    {t:"On başvurunun ağacı",d:"Derinlik 3: kök gelir, sonra gecikme, en altta yine gelir. 6 yaprak, eğitim %100. Ama yaprakların 4'ünde tek başvuru var: ağaç bir kural öğrenmedi, kişileri ezberledi.",
+     hl:["#dt-leaf","#dt-acc"], run(){press("#dt-gini");press("#dt-tree");setR("#dt-d",3);}},
+    {t:"Bir eşik yetmediğinde",d:"Sahte işlem verisi: sahtelik bir KUTUNUN içinde — yüksek tutar VE akşam saatleri. Derinlik 3'te ağaçta görün: « tutar » sorusunun altında bir « saat » sorusu. Tek eşikle kutuyu ayıramıyoruz, iki eşikle ayırıyoruz. Ağacın gücü eşikleri iç içe koymasında.",
+     set:1, hl:["#dt-acc","#dt-d"], run(){press("#dt-gini");press("#dt-tree");press("#dt-best");setR("#dt-d",3);}}
+  ]});
 })();
 
 /* ═════════════ 7 · Eşik, hata matrisi (confusion matrix), ROC / PR / maliyet ═════════════ */
@@ -11141,8 +11553,8 @@ const META=[
   ["10","m-log",   "logistic regression ve sigmoid","Yüzde kaç?","Hafta 6","lojistik regresyon logistic regression sigmoid olasılık probability log-kayıp log-loss cross-entropy tümör çapı kanser sınav çalışma rüzgar balon turu iptal hafta 6 log-loss kesme terimi beta p şapka"],
   ["11","m-cm",    "confusion matrix, precision–recall, ROC","Eşiği nereye koyalım","Hafta 8","eşik threshold konfüzyon confusion matrix kesinlik precision duyarlılık recall f1 roc auc dengesiz imbalanced iha tespiti kanser taraması spam filtresi hafta 8 hata matrisi fpr tpr specificity özgüllük pr eğrisi pr-auc average precision temel model baseline maliyet cost churn müşteri kaybı hafta 7"],
   ["12","m-reg",   "regularization: Ridge, Lasso ve α","Katsayıya ceza","Hafta 8","düzenlileştirme regularization ridge lasso l1 l2 lambda ceza penalty katsayı coefficient seyreklik sparsity shrinkage aşırı öğrenme overfitting sıcaklık reklam satış titreşim hafta 8 alfa α elastic net l1_ratio ρ karışım"],
-  ["13","m-knn",   "KNN ile sınıflandırma","Komşuna bak","Hafta 9","knn komşu neighbor sınıflandırma classification karar sınırı decision boundary uçak kuş kanat açıklığı baz istasyonu kapsama kredi riski hafta 9 k en yakın komşu öklid euclidean lazy learning tembel öğrenme"],
-  ["14","m-dt",    "decision tree ve Gini kazancı","Bölerek karar ver","Hafta 10","karar ağacı decision tree gini bölme split eşik threshold yaprak leaf bağ hastalığı mildiyö sahte işlem dolandırıcılık fraud kalite kontrol hafta 10 safsızlık impurity gini kazancı"],
+  ["13","m-knn",   "KNN ile sınıflandırma","Komşuna bak","Hafta 9","knn komşu neighbor sınıflandırma classification karar sınırı decision boundary uçak kuş kanat açıklığı baz istasyonu kapsama kredi riski hafta 9 k en yakın komşu öklid euclidean lazy learning tembel öğrenme manhattan chebyshev uzaklık distance ağırlıklı oylama weighted voting test hatası iki ay iki vadi altı daire eczane kök n"],
+  ["14","m-dt",    "decision tree ve Gini kazancı","Bölerek karar ver","Hafta 10","karar ağacı decision tree gini bölme split eşik threshold yaprak leaf bağ hastalığı mildiyö sahte işlem dolandırıcılık fraud kalite kontrol hafta 10 safsızlık impurity gini kazancı entropi entropy information gain bilgi kazancı derinlik max_depth budama pruning test doğruluğu kredi onayı on başvuru"],
   ["15","m-ens",   "bagging, random forest ve OOB","Kırk ağaç","Hafta 11","topluluk ensemble torbalama bagging rastgele orman random forest oob out-of-bag bootstrap oylama voting varyans ağaç kredi onayı pivot sulama halka hafta 11 ensemble yerine koyarak örnekleme max_features hard voting soft voting sert oylama yumuşak oylama gini önemi gini importance permütasyon önemi permutation importance kimlik sütunu abonelik korelasyon"],
   ["16","m-svm",   "SVM: margin, support vector ve kernel","En geniş yol","Hafta 12","svm destek vektör makinesi support vector machine marj margin destek vektörü support vector kernel çekirdek rbf gamma hinge menteşe c parametresi kalite kontrol kredi riski baz istasyonu halka hafta 12 margin support vector yol dört ev kızılırmak test doğruluğu kernel hilesi kernel trick çekirdek hilesi kesme terimi intercept"],
   ["17","m-pca",   "PCA ile boyut indirgeme","İki sayı yerine bir","Hafta 13","pca ana bileşen principal component boyut indirgeme dimensionality reduction varyans variance özvektör eigenvector izdüşüm projection boy kilo matematik fizik uydu bandı ndvi kızılötesi hafta 13 pc1 pc2 açıklanan varyans oranı explained variance ratio beş öğrenci özdeğer eigenvalue kovaryans matrisi covariance matrix standartlaştırma standardization z-skoru birim saat dakika jüri açıya göre varyans"],

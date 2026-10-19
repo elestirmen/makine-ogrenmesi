@@ -509,7 +509,8 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
 /* ── 05 · kNN: ".ask: k=1'de eğitim hatası tam olarak sıfır" ── */
 {
   head("Modül 13 · Komşuna bak (KNN)");
-  const {el}=boot(F); const e1=[], e21=[];
+  /* karar bölgesi kapalı: her k değişiminde binlerce hücre yeniden oylanıyor (yavaş) */
+  const {el}=boot(F); const e1=[], e21=[]; P(el,'knn-bnd',false);
   for(let t=0;t<20;t++){ el('knn-demo').click();
     S(el,'knn-k',1);  e1.push(V(el,'knn-e'));
     S(el,'knn-k',21); e21.push(V(el,'knn-e')); }
@@ -603,27 +604,40 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   P(el,'lg-lin',false); pick(0);
 }
 
-/* ── 06 · Karar ağacı: düğme kaydırıcının ulaşabildiği en iyi bölmeyi buluyor ── */
+/* ── 06 · Karar ağacı: düğme kaydırıcının ulaşabildiği en iyi bölmeyi buluyor ──
+   İki ölçütle de (Gini ve entropi): ağaç, eşik eğrisi ve göstergeler seçilen
+   ölçütle kuruluyor, « En iyi bölmeyi bul » da onunla aramalı. */
 {
   head("Modül 14 · Bölerek karar ver (decision tree)");
   const {el}=boot(F);
-  let lost=0; const leaves=[], accs=[], d1=[];
-  for(let t=0;t<8;t++){
-    el('dt-demo').click(); el('dt-best').click();
+  let lost=0; const d1=[], d5=[], ax=[], tq=[], gain=[];
+  for(const c of ['dt-gini','dt-ent']) for(let t=0;t<6;t++){
+    el(c).click(); el('dt-demo').click(); el('dt-best').click();
     const g=V(el,'dt-g1');
     let gmin=Infinity;
     for(let i=2;i<=98;i++){ S(el,'dt-t',i); const x=V(el,'dt-g1'); if(x<gmin) gmin=x; }
     if(gmin<g-1e-9) lost++;
     el('dt-best').click();                              // tarama eşiği bozdu, geri koy
     S(el,'dt-d',1); d1.push(V(el,'dt-acc'));
-    S(el,'dt-d',5); leaves.push(V(el,'dt-leaf')); accs.push(V(el,'dt-acc'));
+    S(el,'dt-d',5); d5.push(V(el,'dt-acc'));
+    S(el,'dt-d',1);
   }
-  console.log(`       derinlik 1: doğruluk ort %${mean(d1).toFixed(1)}`);
-  console.log(`       derinlik 5: yaprak ort ${mean(leaves).toFixed(1)} [${Math.min(...leaves)}–${Math.max(...leaves)}] · doğruluk ort %${mean(accs).toFixed(1)}`);
-  chk(lost===0, "'En iyi bölmeyi bul' kaydırıcı ızgarasında yenilmiyor", `${lost}/8 yenildi`);
-  chk(mean(accs)>96, "derinlik 5 ezberliyor (.ask: '%99'a çıkarıyor')", `%${mean(accs).toFixed(1)}`);
-  chk(mean(leaves)>=3 && mean(leaves)<=6, "yaprak sayısı metindeki dört-beş civarında", `ort ${mean(leaves).toFixed(1)}`);
-  chk(mean(accs)>mean(d1), "derinlik artınca eğitim doğruluğu yükseliyor", `%${mean(d1).toFixed(1)} → %${mean(accs).toFixed(1)}`);
+  el('dt-gini').click();
+  for(let t=0;t<20;t++){ el('dt-demo').click(); el('dt-best').click();
+    ax.push(el('dt-av').getAttribute('aria-pressed')==='true'); tq.push(V(el,'dt-to')); gain.push(V(el,'dt-gain')); }
+  console.log(`       eğitim doğruluğu: derinlik 1 ort %${mean(d1).toFixed(1)} → derinlik 5 ort %${mean(d5).toFixed(1)}`);
+  console.log(`       en iyi kök: dikey eksen ${ax.filter(Boolean).length}/20 · sıcaklık eşiği medyan ${med(tq)} [${Math.min(...tq)}–${Math.max(...tq)}]`);
+  chk(lost===0, "'En iyi bölmeyi bul' kaydırıcı ızgarasında yenilmiyor (Gini ve entropi)", `${lost}/12 yenildi`);
+  chk(mean(d5)>mean(d1), "derinlik artınca eğitim doğruluğu yükseliyor", `%${mean(d1).toFixed(1)} → %${mean(d5).toFixed(1)}`);
+  /* adım 3: "Bu veride kazanan hep sıcaklık: 21 °C civarında bir eşik" (40 çekimde 40/40,
+     eşik 18.4–23.7, medyan 20.6) */
+  chk(ax.every(Boolean), "Bağ verisinde en iyi kök sorusu hep sıcaklık (adım 3)", `${ax.filter(Boolean).length}/20`);
+  chk(med(tq)>=19.5&&med(tq)<=22.5, "kök eşiği 21 °C civarı, veri biriminde yazılıyor (adım 3)", `medyan ${med(tq)}`);
+  chk(mean(gain)>0.02, "Gini kazancı en iyi bölmede belirgin (adım 3)", `ort ${mean(gain).toFixed(3)}`);
+  /* adım 1: "Eşik verinin kendi biriminde yazıyor: nem %70" — kaydırıcı 50, yatay eksen */
+  el('dt-au').click(); S(el,'dt-t',50);
+  const ar=el('c-dt').getAttribute('aria-label')||'';
+  chk(T(el,'dt-to')==='70' && /kök nem < 70 /.test(ar), "kaydırıcının ortası « nem < 70 » (adım 1, brief: 0.50 değil)", `${T(el,'dt-to')} · ${ar.slice(0,60)}`);
 }
 
 /* ── 09 · Aşırı öğrenme: Durum göstergesi en iyi derecede uyarı VERMEMELİ ── */
@@ -898,7 +912,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
 /* ── 05 · k-NN · "Baz istasyonu": kapsama alanı bir HALKA ── */
 {
   head("Modül 13 · veri kümesi « Baz istasyonu » (halka)");
-  const {el,M}=boot(F); const e1=[],e5=[],e21=[];
+  const {el,M}=boot(F); P(el,'knn-bnd',false); const e1=[],e5=[],e21=[];
   for(let t=0;t<12;t++){ PK(M,'m-knn',1);
     S(el,'knn-k',1);  e1.push(V(el,'knn-e'));
     S(el,'knn-k',5);  e5.push(V(el,'knn-e'));
@@ -912,7 +926,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
 /* ── 05 · k-NN · "Kredi riski": sınıflar iç içe ── */
 {
   head("Modül 13 · veri kümesi « Kredi riski » (gürültülü sınır)");
-  const {el,M}=boot(F); const e1=[],e21=[];
+  const {el,M}=boot(F); P(el,'knn-bnd',false); const e1=[],e21=[];
   for(let t=0;t<12;t++){ PK(M,'m-knn',2);
     S(el,'knn-k',1);  e1.push(V(el,'knn-e'));
     S(el,'knn-k',21); e21.push(V(el,'knn-e')); }
@@ -1019,6 +1033,12 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(mean(d3)-mean(d1)>8, "iki eşik bir eşikten belirgin biçimde iyi (adım 5: 'tek eşikle kutuyu ayıramıyoruz')",
       `+${(mean(d3)-mean(d1)).toFixed(1)} puan`);
   chk(mean(d1)<92, "derinlik 1 kutuyu ayıramıyor", `%${mean(d1).toFixed(1)}`);
+  /* not: "Test doğruluğu derinlik 1'de %79, derinlik 2'de %92" (40 çekim: 79 / 92) */
+  const t1=[],t2=[];
+  for(let t=0;t<16;t++){ PK(M,'m-dt',1); el('dt-best').click();
+    S(el,'dt-d',1); t1.push(V(el,'dt-tacc')); S(el,'dt-d',2); t2.push(V(el,'dt-tacc')); }
+  console.log(`       test doğruluğu: derinlik 1 → %${mean(t1).toFixed(1)} · derinlik 2 → %${mean(t2).toFixed(1)}`);
+  chk(Math.abs(mean(t1)-79)<=5 && Math.abs(mean(t2)-92)<=4, "test doğruluğu derinlik 1'de ~%79, 2'de ~%92 (not)", `%${mean(t1).toFixed(1)} → %${mean(t2).toFixed(1)}`);
 }
 
 /* ── 07 · Orman · "Pivot sulama": sınır kapalı bir eğri ── */
@@ -1516,8 +1536,12 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   const {el,M}=boot(F); const dt=M.find(m=>m.id==='m-dt');
   let bad=0;
   for(let t=0;t<6;t++){ el('dt-demo').click(); P(el,'dt-tree',true);
-    for(const d of [1,2,3,5]){ S(el,'dt-d',d); try{ dt.draw(); }catch(e){ bad++; } } }
-  chk(bad===0, "ağaç görünümü her derinlikte çiziliyor", `${bad} hata`);
+    for(const d of [1,2,3,5,8]){ S(el,'dt-d',d); try{ dt.draw(); }catch(e){ bad++; } } }
+  /* « Kredi onayı »nda derinlik 8: 30 civarı yaprak, sorular sığmıyor (iskelet çizimi) */
+  PK(M,'m-dt',3); el('dt-best').click(); S(el,'dt-d',8);
+  try{ dt.draw(); }catch(e){ bad++; }
+  for(const v of ['dt-vd','dt-vt']){ el(v).click(); try{ dt.draw(); }catch(e){ bad++; } }
+  chk(bad===0, "ağaç, eşik ve derinlik görünümü her derinlikte çiziliyor", `${bad} hata`);
 }
 
 /* ── 21 · Yapay nöron: adım metinleri, elle hesap ve veri kümesi notları ──
@@ -1767,6 +1791,143 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(el('db-link').hidden===true&&el('db-epsl').hidden===false, "DBSCAN'de linkage gizli, eps / min_samples görünür (ders notu)");
   P(el,'db-hier',true);
   chk(el('db-link').hidden===false&&el('db-epsl').hidden===true&&el('db-mpl').hidden===true, "hierarchical'da eps / min_samples yerine linkage seçicisi");
+}
+
+/* ══ 3. aşama · Modül 13 (KNN): uzaklık, ağırlıklı oy, test hatası ══
+   Tuval metni sahte DOM'da okunmuyor; KNN tuvalinin aria-label'ı k, ölçü, oy,
+   eğitim/test hatası, en düşük test hatasının k'sı, √n ve sorgunun komşularını
+   (veri biriminde uzaklıkla) yazıyor. Karar bölgesi (knn-bnd) ölçümde kapalı:
+   her k değişiminde binlerce hücre yeniden oylanıyor ve sınama yavaşlıyordu. */
+{
+  head("Modül 13 · test hatası ve k–hata eğrisi");
+  const {el,M}=boot(F); P(el,'knn-bnd',false); P(el,'knn-euc',true); P(el,'knn-uni',true);
+  const AR=()=>el('c-knn').getAttribute('aria-label')||'';
+  const sweep=(j,N,ks)=>{ const tr={},te={},best=[]; ks.forEach(k=>{tr[k]=[];te[k]=[];});
+    for(let t=0;t<N;t++){ PK(M,'m-knn',j);
+      ks.forEach(k=>{ S(el,'knn-k',k); tr[k].push(V(el,'knn-e')); te[k].push(V(el,'knn-t')); });
+      best.push(+(/en düşük test hatası k = (\d+)/.exec(AR())||[0,0])[1]); }
+    return {tr,te,best}; };
+  /* « Uçak / Kuş »: adım 2 "test hatası sıfır değil, %8 civarında"; not "k ≥ 5'te %5
+     civarı, büyük k bile bozmuyor" (60 çekim: k=1 %7.7, k=7 %5.3, k=41 %4.8) */
+  const a=sweep(0,20,[1,5,21,41]);
+  console.log(`       Uçak/Kuş test hatası: k=1 %${mean(a.te[1]).toFixed(1)} · k=5 %${mean(a.te[5]).toFixed(1)} · k=41 %${mean(a.te[41]).toFixed(1)}`);
+  chk(a.te[1].every(x=>x>0), "k=1'de test hatası sıfır DEĞİL (adım 2, .ask)", `min %${Math.min(...a.te[1])}`);
+  chk(mean(a.te[1])>=5&&mean(a.te[1])<=11, "k=1'de test hatası %8 civarı (adım 2, not)", `%${mean(a.te[1]).toFixed(1)}`);
+  chk(mean(a.te[5])<mean(a.te[1])&&mean(a.te[5])<=7.5, "k=5'te %5 civarına iniyor (not)", `%${mean(a.te[5]).toFixed(1)}`);
+  chk(mean(a.te[41])<=7.5, "bulutlar ayrık: k=41 bile bozmuyor (not)", `%${mean(a.te[41]).toFixed(1)}`);
+  /* « İki vadi »: adım 4–6 ve not — U eğrisi. 100 çekim: k=1 %18.8, k=7 %12.5, k=41 %20.7;
+     tek çekimde U (k=1 ve k=41 ikisi de k=7'den kötü) 93/100; en düşük test k'sı 3–11'de 91/100 */
+  const v=sweep(3,30,[1,7,41]);
+  const u=v.te[1].filter((x,i)=>x>v.te[7][i]&&v.te[41][i]>v.te[7][i]).length;
+  const mid=v.best.filter(b=>b>=3&&b<=11).length;
+  console.log(`       İki vadi test hatası: k=1 %${mean(v.te[1]).toFixed(1)} · k=7 %${mean(v.te[7]).toFixed(1)} · k=41 %${mean(v.te[41]).toFixed(1)} · U ${u}/30 · en iyi k 3–11'de ${mid}/30`);
+  console.log(`       İki vadi eğitim hatası: k=1 %${mean(v.tr[1]).toFixed(1)} · k=41 %${mean(v.tr[41]).toFixed(1)}`);
+  chk(v.tr[1].every(x=>x===0), "İki vadi: k=1'de eğitim hatası %0 (adım 4)");
+  chk(Math.abs(mean(v.te[1])-19)<=3.5, "İki vadi: k=1'de test hatası %19 civarı (adım 4, not)", `%${mean(v.te[1]).toFixed(1)}`);
+  chk(Math.abs(mean(v.te[7])-12)<=3, "İki vadi: k=5–7'de %12 civarı (not)", `%${mean(v.te[7]).toFixed(1)}`);
+  chk(Math.abs(mean(v.te[41])-21)<=3.5 && mean(v.tr[41])>18, "İki vadi: k=41'de test %21 civarı, eğitim %20'nin üstünde (adım 5)", `test %${mean(v.te[41]).toFixed(1)} · eğitim %${mean(v.tr[41]).toFixed(1)}`);
+  chk(u>=24, "tek çekimde de U: iki uç ortadan kötü (adım 6: 'önce iniyor, sonra çıkıyor')", `${u}/30`);
+  chk(mid>=23, "en düşük test hatası çoğunlukla k = 3–11'de (adım 6, not)", `${mid}/30`);
+  chk(/√n ≈ 8\.9/.test(AR()), "√n ≈ 9 (80 eğitim noktası; adım 6, not)", (/√n ≈ [\d.]+/.exec(AR())||[''])[0]);
+  /* Göstergeler (ders notu): "ağırlıklı oyda HER k'da %0" */
+  P(el,'knn-dw',true); let w0=0;
+  for(let t=0;t<6;t++){ PK(M,'m-knn',3); for(const k of [1,7,21,41]){ S(el,'knn-k',k); if(V(el,'knn-e')!==0) w0++; } }
+  chk(w0===0, "ağırlıklı oyda eğitim hatası her k'da %0 (ders notu · Göstergeler)", `${w0} sıfır olmayan`);
+  P(el,'knn-uni',true);
+  /* « Baz istasyonu » notu: "k = 41'de ... test hatası %50'ye yaklaşır" (30 çekim: %48) */
+  const b=sweep(1,12,[41]);
+  chk(mean(b.te[41])>40, "Baz istasyonu: k=41'de iç öbek yutuluyor, test hatası %50'ye yakın (not)", `%${mean(b.te[41]).toFixed(1)}`);
+  /* « Kredi riski » notu: "test hatası %35 civarı. k = 21'de %27'ye iner" (100 çekim: 34.3 / 27.5) */
+  const c=sweep(2,24,[1,21]);
+  chk(Math.abs(mean(c.te[1])-35)<=5 && Math.abs(mean(c.te[21])-27)<=4, "Kredi riski: k=1 %35 civarı, k=21 %27 civarı (not)", `%${mean(c.te[1]).toFixed(1)} → %${mean(c.te[21]).toFixed(1)}`);
+}
+
+/* ── Modül 13 · sabit örnekler: Hafta 9'un Q = (5, 5)'i ve altı daire ── */
+{
+  head("Modül 13 · uzaklık ölçüsü ve ağırlıklı oy (sabit örnekler)");
+  const {el,M}=boot(F); P(el,'knn-bnd',false);
+  const AR=()=>el('c-knn').getAttribute('aria-label')||'';
+  /* « İki eczane » (adım 8, not, .ask): k = 1; Öklid A 4.24, Manhattan B 5 < 6, Chebyshev A 3 */
+  PK(M,'m-knn',5); P(el,'knn-uni',true); S(el,'knn-k',1);
+  const run=(id)=>{ el(id).click(); return {p:T(el,'knn-p'), ar:AR()}; };
+  const e=run('knn-euc'), m=run('knn-man'), ch=run('knn-che');
+  console.log(`       Öklid → ${e.p} · Manhattan → ${m.p} · Chebyshev → ${ch.p}`);
+  chk(e.p==='A eczanesi' && /komşular A 4\.24/.test(e.ar), "Öklid: en yakın A, 4.24 sokak (adım 8, not)", e.ar.slice(-40));
+  chk(m.p==='B eczanesi' && /komşular B 5\.00/.test(m.ar), "Manhattan: tahmin B'ye dönüyor, 5 sokak (adım 8, .ask)", m.ar.slice(-40));
+  chk(ch.p==='A eczanesi' && /komşular A 3\.00/.test(ch.ar), "Chebyshev: en büyük fark, A 3 (not)", ch.ar.slice(-40));
+  S(el,'knn-k',3); el('knn-man').click();
+  chk(/B 5\.00, A 6\.00/.test(AR()), "Manhattan'da A 3 + 3 = 6 sokak (adım 8)", AR().slice(-30));
+  el('knn-euc').click();
+  chk(/A 4\.24, B 5\.00/.test(AR()), "Öklid'de A 4.24, B 5.00 (adım 8)", AR().slice(-30));
+  /* « Altı daire » (adım 9, not, ders notu ex): k = 3 → D 0.305, B 0.650, C 1.242; 2–1 pahalı,
+     P = 0.67; ağırlıklı P = 0.73 (D 3.28 + C 0.81 = 4.1 · B 1.54); k = 5 → 3–2 pahalı değil */
+  PK(M,'m-knn',4); P(el,'knn-euc',true); P(el,'knn-uni',true); S(el,'knn-k',3);
+  console.log(`       altı daire k=3: ${T(el,'knn-p')} · ${T(el,'knn-v')} · ${AR().split('komşular ')[1]}`);
+  chk(/komşular D 0\.305, B 0\.650, C 1\.242/.test(AR()), "en yakın üç daire D 0.305, B 0.650, C 1.242 (ders notu ex, adım 9)", AR().split('komşular ')[1]);
+  chk(T(el,'knn-p')==='Pahalı' && T(el,'knn-v')==='2 – 1 · P = 0.67', "eşit oy 2–1 pahalı, P = 0.67 (adım 9, .ask)", T(el,'knn-v'));
+  el('knn-dw').click();
+  chk(T(el,'knn-v')==='4.1 – 1.5 · P = 0.73', "ağırlıklı oy: Σw 4.1 – 1.5, P = 0.73 (adım 9, .ask)", T(el,'knn-v'));
+  el('knn-uni').click(); S(el,'knn-k',5);
+  chk(T(el,'knn-p')==='Pahalı değil' && /^2 – 3 /.test(T(el,'knn-v')), "k = 5'te 3–2 « pahalı değil »e dönüyor (not, figür)", `${T(el,'knn-p')} · ${T(el,'knn-v')}`);
+}
+
+/* ══ 3. aşama · Modül 14 (karar ağacı): ölçüt, test doğruluğu, derinlik eğrisi ══ */
+{
+  head("Modül 14 · Gini ↔ entropi (On başvuru) ve derinlik eğrisi");
+  const {el,M}=boot(F);
+  const AR=()=>el('c-dt').getAttribute('aria-label')||'';
+  const KT=(id)=>String(el(id).innerHTML||'').replace(/<[^>]+>/g,'');
+  /* « On başvuru » (adım 7–8, not, ders notu ex): kök « gelir < 38 »; Gini 0.500 → 0.320,
+     kazanç 0.180; entropi 1.000 → 0.722, information gain 0.278 */
+  el('dt-gini').click(); PK(M,'m-dt',4); S(el,'dt-d',1); el('dt-best').click();
+  const g=[T(el,'dt-g0'),T(el,'dt-g1'),T(el,'dt-gain')].join(' / ');
+  chk(g==='0.500 / 0.320 / 0.180' && KT('dt-kg')==='Gini kazancı', "Gini: 0.500 → 0.320, Gini kazancı 0.180 (adım 7, not)", `${g} · ${KT('dt-kg')}`);
+  chk(T(el,'dt-to')==='38.0' && /kök gelir < 38\.0/.test(AR()), "kök sorusu « gelir < 38 », veri biriminde (adım 7)", T(el,'dt-to'));
+  el('dt-ent').click();
+  const h=[T(el,'dt-g0'),T(el,'dt-g1'),T(el,'dt-gain')].join(' / ');
+  chk(h==='1.000 / 0.722 / 0.278' && KT('dt-kg')==='Information gain' && KT('dt-k0')==='Kök entropi',
+      "entropi: 1.000 → 0.722, information gain 0.278; gösterge adları değişiyor (adım 7, brief)", `${h} · ${KT('dt-k0')} · ${KT('dt-kg')}`);
+  el('dt-best').click();
+  chk(T(el,'dt-to')==='38.0', "entropiyle de seçilen eşik aynı yerde (adım 7)", T(el,'dt-to'));
+  /* not: "Gecikme de aynı kazancı veriyor" — dikey eksende en iyi eşik de 0.180 */
+  el('dt-gini').click(); el('dt-av').click(); let gv=0;
+  for(let i=2;i<=98;i++){ S(el,'dt-t',i); gv=Math.max(gv,V(el,'dt-gain')); }
+  chk(Math.abs(gv-0.18)<1e-9, "gecikme sorusu da 0.180 kazanç veriyor, beraberlikte gelir seçiliyor (not)", `dikey en iyi ${gv}`);
+  el('dt-best').click();
+  chk(el('dt-au').getAttribute('aria-pressed')==='true', "« En iyi bölmeyi bul » beraberlikte ilk sütunu (gelir) seçiyor (not, ders notu ex)");
+  /* adım 8 ve not: "Derinlik 3: 6 yaprak, eğitim %100; yaprakların 4'ünde tek başvuru" */
+  S(el,'dt-d',3);
+  const tek=(AR().match(/\(1\)/g)||[]).length;
+  chk(T(el,'dt-leaf')==='6' && T(el,'dt-acc')==='100%' && tek===4, "derinlik 3: 6 yaprak, %100, 4 yaprakta tek başvuru (adım 8, not)", `${T(el,'dt-leaf')} yaprak · ${T(el,'dt-acc')} · tek ${tek}`);
+  /* Gini ve entropi en iyi eşiği çoğunlukla aynı yerde bulur (ders notu idea; Bağ verisinde 39/40) */
+  let same=0;
+  for(let t=0;t<16;t++){ el('dt-gini').click(); PK(M,'m-dt',0); el('dt-best').click(); const a=el('dt-t').value, ax=el('dt-av').getAttribute('aria-pressed');
+    el('dt-ent').click(); el('dt-best').click(); if(el('dt-t').value===a && el('dt-av').getAttribute('aria-pressed')===ax) same++; }
+  chk(same>=13, "Gini ve entropi en iyi bölmeyi çoğunlukla aynı yerde buluyor (ders notu, .ask)", `${same}/16`);
+  el('dt-gini').click();
+  /* « Bağ hastalığı » notu: "test doğruluğu derinlik 2'den sonra %94–95'te kalıyor" */
+  const bt=[];
+  for(let t=0;t<16;t++){ PK(M,'m-dt',0); el('dt-best').click(); const r=[]; for(const d of [2,4,8]){ S(el,'dt-d',d); r.push(V(el,'dt-tacc')); } bt.push(r); }
+  const bm=[0,1,2].map(i=>mean(bt.map(r=>r[i])));
+  chk(bm.every(x=>x>=91&&x<=98), "Bağ: test doğruluğu derinlik 2–8'de %94–95 civarı (not)", bm.map(x=>'%'+x.toFixed(1)).join(' '));
+  /* « Kalite kontrol » notu: "derinlik 2'de test doğruluğu %98" */
+  const kq=[]; for(let t=0;t<12;t++){ PK(M,'m-dt',2); el('dt-best').click(); S(el,'dt-d',2); kq.push(V(el,'dt-tacc')); }
+  chk(mean(kq)>=95, "Kalite kontrol: derinlik 2'de test %98 civarı (not)", `%${mean(kq).toFixed(1)}`);
+  /* « Kredi onayı » (adım 5–6, not, .ask, trap). 100 çekim: derinlik 1 %74/%71, 3 %85/%78,
+     8 %98/%73, yaprak 31.3; en iyi test derinliği 2–4'te 89/100 (20 çekimde 15/20 da
+     görüldü: eşik 30 çekimde 22, binom alt kuyruğu ~%0.5) */
+  const K={tr:[[],[],[]],te:[[],[],[]],lf:[],bd:[]};
+  for(let t=0;t<30;t++){ PK(M,'m-dt',3); el('dt-best').click();
+    [1,3,8].forEach((d,i)=>{ S(el,'dt-d',d); K.tr[i].push(V(el,'dt-acc')); K.te[i].push(V(el,'dt-tacc')); if(d===8) K.lf.push(V(el,'dt-leaf')); });
+    K.bd.push(+(/en iyi test derinliği (\d+)/.exec(AR())||[0,0])[1]); }
+  const kt=K.tr.map(mean), ke=K.te.map(mean), bd24=K.bd.filter(d=>d>=2&&d<=4).length;
+  console.log(`       Kredi onayı eğitim/test: d1 %${kt[0].toFixed(1)}/%${ke[0].toFixed(1)} · d3 %${kt[1].toFixed(1)}/%${ke[1].toFixed(1)} · d8 %${kt[2].toFixed(1)}/%${ke[2].toFixed(1)} · yaprak d8 ${mean(K.lf).toFixed(1)} · en iyi 2–4: ${bd24}/30`);
+  chk(Math.abs(kt[0]-74)<=4 && Math.abs(ke[0]-71)<=4, "derinlik 1: eğitim %74, test %71 civarı (not)", `%${kt[0].toFixed(1)} / %${ke[0].toFixed(1)}`);
+  chk(Math.abs(kt[1]-85)<=4 && Math.abs(ke[1]-78)<=4, "derinlik 3: eğitim %85, test %78 civarı (adım 5, not)", `%${kt[1].toFixed(1)} / %${ke[1].toFixed(1)}`);
+  chk(kt[2]>=96 && Math.abs(ke[2]-73)<=4, "derinlik 8: eğitim %98, test %73 civarı (adım 6, .ask, trap)", `%${kt[2].toFixed(1)} / %${ke[2].toFixed(1)}`);
+  chk(ke[1]>ke[2]+2.5 && kt[2]>kt[1]+8, "makas: eğitim yükselirken test düşüyor (adım 6)", `test %${ke[1].toFixed(1)} → %${ke[2].toFixed(1)}`);
+  chk(mean(K.lf)>=24 && mean(K.lf)<=37, "derinlik 8'de 30 civarı yaprak (adım 6, .ask)", `ort ${mean(K.lf).toFixed(1)}`);
+  chk(bd24>=22, "en iyi test derinliği çoğunlukla 2–4 (adım 5, not)", `${bd24}/30`);
 }
 
 console.log(`\n${fail?fail+" DENETİM DÜŞTÜ":"tüm davranış denetimleri geçti"}`);
