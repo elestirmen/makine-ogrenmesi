@@ -1067,7 +1067,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
 /* ── 24 · Oyun alanı: rehber adımları ve veri kümesi notları ──
    Eğitim rastgele başlangıçla, tık başına 2 epoch. Eşikler 8 koşuluk ölçümden
    (sarmalda 3): gizli katmansız daire 31–71 (ort ~54), 2×4 ReLU 100 epoch'ta 97–100,
-   doğrusal 33–63, kare öznitelikle 98–100, XOR 1×4 200 epoch'ta 83–100, tek nöronla
+   doğrusal 27–68 (16 koşu, ort ~48), kare öznitelikle 98–100, XOR 1×4 200 epoch'ta 83–100, tek nöronla
    41–68, lr 3'te 47–61. Tek koşuya değil ORTALAMAYA bakılır. */
 {
   head("Modül 24 · Katman ekle, nöron ekle (oyun alanı)");
@@ -1082,8 +1082,10 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(mA(d0)<=65, "daire, gizli katman yok: %50 civarında (adım 1, not)", d0.map(x=>x.acc).join(' '));
   const d24=runs(3,0,2,4,'lay-relu',4,false,50);
   chk(d24.every(x=>x.acc>=95)&&d24[0].ep===100, "daire, 2×4 ReLU: 100 epoch'ta %95'in üstü (adım 3, not)", d24.map(x=>x.acc).join(' '));
-  const dl=runs(3,0,2,4,'lay-lin',4,false,150);
-  chk(dl.every(x=>x.acc<65), "doğrusal aktivasyon: daire çözülmüyor, %65'in altı (adım 4)", dl.map(x=>x.acc).join(' '));
+  /* 16 koşuda 27–65, ortalama 48; koşuların ~%15'i 65'e değiyor. Eskiden üç koşunun HER
+     BİRİ < 65 isteniyordu ve arada bir 68 gelip düşüyordu: 6 koşunun ortalamasına bakılır. */
+  const dl=runs(6,0,2,4,'lay-lin',4,false,150);
+  chk(mA(dl)<62, "doğrusal aktivasyon: daire çözülmüyor, çoğunlukla %30–65, yazı turaya yakın (adım 4)", dl.map(x=>x.acc).join(' '));
   const dq=runs(3,0,0,4,'lay-relu',4,true,150);
   chk(dq.every(x=>x.acc>=95)&&dq[0].par===6, "kare özniteliklerle gizli katmansız daire çözülüyor (adım 5)", dq.map(x=>x.acc).join(' '));
   const x0=runs(4,1,0,4,'lay-relu',4,false,100), x14=runs(4,1,1,4,'lay-relu',4,false,100);

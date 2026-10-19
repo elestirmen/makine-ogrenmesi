@@ -247,8 +247,15 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
     Eskiden ders notu yalnız anlatıyordu: öğrenci Gini'yi, silhouette'i, precision'ı
     hiç kendi eliyle hesaplamadan geçiyordu. Her sayı doğrulanmış olmalı (tek bir
     yanlış ara sonuç öğrenciye formülü yanlış öğretir); figürdeki sayılar örnekle aynı.
+    **Örnek, o haftanın sunumundaki elle çözümlü örnektir** (sekiz not, beş ev, beş
+    öğrenci 44 + 4x, altı daire, 10 kredi başvurusu, üç ağaçlık mini orman, dört noktalı
+    SVM, PCA'da λ₁ = 248.79, altı noktalı k-ortalamalar ve dendrogram…); öğrenci slaytta
+    gördüğü sayıyı ders notunda da görür. Tuvalin veri kümesi başka olabilir. Hangi
+    slayttan geldiği ve Python doğrulaması: `/var/tmp/ml-sunum/faz2/m-*.json` (`notes`).
+    Sunumda bulunan tek sayı hatası düzeltilerek yazıldı (Hafta-09 sl.35: n − 1 ile
+    uzaklıklar büyümez, küçülür).
   - **`check` (kendini sına)** 2–3 kavram sorusu; cevap `<details>` içinde, öğrenci
-    önce kendisi düşünür.
+    önce kendisi düşünür. Sorular çoğunlukla sunumun "Soru N" ve alıştırmalarından.
   - **`.ask` (« Dene ve düşün »)** uygulama öğrencinin eline de verildiği için
     öğrenciye yazılır (eskiden etiketi « Derste sor »du ve hocaya yazılmıştı: "siz"
     hitabı, "tahtaya yazın", kutunun içinde cevap). Kural: "sen" hitabı; her paragraf
