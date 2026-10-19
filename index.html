@@ -134,6 +134,7 @@ canvas{display:block;width:100%;height:var(--cvh);min-height:320px;touch-action:
 #m-lin .ctl output{min-width:6ch}
 #m-mlr .ctl output{min-width:6ch}
 #m-poly .ctl output{min-width:7ch}   /* "x … x¹⁰" */
+#cm-cfpo,#cm-cfno{min-width:4ch}     /* Modül 11 birim maliyet: "50" ile "2400" arası */
 input[type=range]{accent-color:var(--accent);width:130px}
 input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
@@ -899,24 +900,33 @@ input[type=range]{min-height:28px;margin:0}
       <div class="head">
         <div class="eyebrow"><span>Modül 11 · Hafta 8</span></div>
         <h2>Eşiği Nereye Koyacağız?</h2>
-        <p>Model bir olasılık üretir; kararı veren şey senin koyduğun eşiktir. Eşiği kaydır: <b>precision</b> (kesinlik) ile <b>recall</b> (duyarlılık) ters yönde hareket eder. Sınıf dengesini bozunca "%95 doğruluk"un neden bir şey ifade etmediğini de göreceksin.</p>
+        <p>Model bir olasılık üretir, kararı senin eşiğin verir. Eşiği kaydır: <b>precision</b> (kesinlik) ile <b>recall</b> (duyarlılık) ters yönde gider. Dengesiz sınıfta "%97 doğruluk" bir şey söylemez, <b>PR eğrisi</b> söyler; en iyi eşiği hataların TL'si seçer.</p>
       </div>
       <div class="stage">
-        <canvas id="c-cm" aria-label="Skor dağılımı, confusion matrix ve ROC eğrisi"></canvas>
+        <canvas id="c-cm" aria-label="Skor dağılımı, hata matrisi ve ROC / PR / maliyet paneli"></canvas>
         <div class="bar">
           <label class="ctl"><span class="lab">Karar eşiği</span><input type="range" id="cm-t" min="1" max="99" step="1" value="50"><output id="cm-to">0.50</output></label>
           <label class="ctl"><span class="lab">Model gücü</span><input type="range" id="cm-sep" min="0" max="70" step="1" value="34"><output id="cm-sepo">0.34</output></label>
-          <label class="ctl"><span class="lab">Pozitif oranı</span><input type="range" id="cm-pr" min="3" max="50" step="1" value="35"><output id="cm-pro">%35</output></label>
+          <label class="ctl"><span class="lab">Pozitif oranı</span><input type="range" id="cm-pr" min="1" max="50" step="1" value="35"><output id="cm-pro">%35</output></label>
+          <div class="seg" role="group" aria-label="Sağ panel: ROC, PR eğrisi ya da maliyet">
+            <button id="cm-vroc" aria-pressed="true">ROC</button>
+            <button id="cm-vpr" aria-pressed="false">PR</button>
+            <button id="cm-vcost" aria-pressed="false">Maliyet</button>
+          </div>
+          <label class="ctl" id="cm-cfpc" hidden><span class="lab">FP ₺</span><input type="range" id="cm-cfp" min="10" max="500" step="10" value="50" aria-label="Bir yanlış alarmın (FP) bedeli, TL"><output id="cm-cfpo">50</output></label>
+          <label class="ctl" id="cm-cfnc" hidden><span class="lab">FN ₺</span><input type="range" id="cm-cfn" min="20" max="2400" step="20" value="800" aria-label="Bir kaçırılanın (FN) bedeli, TL"><output id="cm-cfno">800</output></label>
           <button class="btn" id="cm-new">Yeni veri</button>
           <button class="btn primary" id="cm-sweep" aria-pressed="false">Eşiği tara</button>
-          <span class="hint">Soldaki skor dağılımına tıkla → eşik oraya gitsin.</span>
+          <span class="hint">Skor dağılımına ya da maliyet eğrisine tıkla → eşik oraya gitsin.</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">Doğruluk</span><span class="v" id="cm-acc">—</span></div>
           <div class="stat"><span class="k" lang="en">Precision</span><span class="v" id="cm-pre">—</span></div>
           <div class="stat"><span class="k">Recall</span><span class="v" id="cm-rec">—</span></div>
+          <div class="stat"><span class="k" lang="en">Specificity</span><span class="v" id="cm-spec">—</span></div>
           <div class="stat"><span class="k">F1</span><span class="v" id="cm-f1">—</span></div>
-          <div class="stat"><span class="k">AUC</span><span class="v" id="cm-auc">—</span></div>
+          <div class="stat" id="cm-aucs"><span class="k" id="cm-auck">ROC-AUC</span><span class="v" id="cm-auc">—</span></div>
+          <div class="stat" id="cm-costs" hidden><span class="k">Toplam maliyet</span><span class="v" id="cm-cost">—</span></div>
         </div>
       </div>
       <div class="ask">
@@ -924,6 +934,7 @@ input[type=range]{min-height:28px;margin:0}
         <div>
           <p>Pozitif oranını %3'e indir ve eşiği 0.95 yap: model neredeyse hiçbir şeye pozitif demiyor, ama doğruluk %97. Bu modeli kullanır mıydın? Hangi gösterge sana gerçeği söylüyor?</p>
           <p>Senaryoyu değiştir: bu bir <b>kanser taraması</b> olsaydı hangi hatayı göze alırdın, bir <b>spam filtresi</b> olsaydı hangisini? Eşiği kim seçmeli, modeli kuran mı, o işin sahibi mi?</p>
+          <p>« Maliyet »i aç. Yanlış alarm ucuzlarsa, yani FP ₺'yi indirirsen, yeşil « en ucuz eşik » çizgisi hangi yöne kayar? Önce tahmin et, sonra dene. Neden o yöne?</p>
         </div>
       </div>
     </section>
@@ -1215,14 +1226,15 @@ input[type=range]{min-height:28px;margin:0}
       <div class="head">
         <div class="eyebrow"><span>Modül 12 · Hafta 8</span><span class="chip">DÜZENLİLEŞTİRME</span></div>
         <h2>Katsayılara Ceza Kesmek</h2>
-        <p>Ezber modülüyle aynı veri, aynı yüksek derece — bu kez çaresi var: modeli küçültmüyoruz, büyük katsayıyı pahalı hâle getiriyoruz. <b>Regularization</b> (düzenlileştirme): <b>Ridge</b> (L2) bütün katsayıları kısar, <b>Lasso</b> (L1) bir kısmını tam sıfıra indirir.</p>
+        <p>Ezber modülünün verisi ve derecesi; bu kez büyük katsayıyı pahalı hâle getiriyoruz. <b>Regularization</b> (düzenlileştirme): <b>Ridge</b> (L2) bütün katsayıları kısar, <b>Lasso</b> (L1) bir kısmını tam sıfıra indirir, <b>Elastic Net</b> (L1 + L2 karışımı) ikisinin arasında kalır.</p>
       </div>
       <div class="stage">
         <canvas id="c-reg" aria-label="Regularization: cezalı polinom uyumu, katsayı büyüklükleri ve α yolu"></canvas>
         <div class="bar">
           <label class="ctl"><span class="lab">Ceza <span class="sym">α</span></span><input type="range" id="reg-lam" min="0" max="100" step="1" value="12"><output id="reg-lamo">4.0e-4</output></label>
-          <div class="seg" role="group" aria-label="Ceza türü (L1 / L2)">
+          <div class="seg" role="group" aria-label="Ceza türü (L2 / Elastic Net / L1)">
             <button id="reg-l2" aria-pressed="true">L2 · Ridge</button>
+            <button id="reg-en" aria-pressed="false" lang="en">Elastic Net</button>
             <button id="reg-l1" aria-pressed="false">L1 · Lasso</button>
           </div>
           <label class="ctl"><span class="lab">Derece</span><input type="range" id="reg-d" min="1" max="14" step="1" value="12"><output id="reg-do">12</output></label>
@@ -1244,7 +1256,7 @@ input[type=range]{min-height:28px;margin:0}
         <span class="tag">Dene ve düşün</span>
         <div>
           <p>Derece 12'de α'yı en sola al: eğitim RMSE'si en küçük değerinde, ama test RMSE'si onun katı. Şimdi α'yı sağa kaydırıp alt şeritteki yeşil bandı bul. Test RMSE düşerken eğitim RMSE ne yapıyor? Eğitim hatasını bilerek artırmak neden mantıklı olabilir?</p>
-          <p>Aynı α'da L2'den L1'e geç ve sağdaki 12 çubuğu say: L1 kaç tanesini tam olarak sıfıra indirdi, L2 kaç tanesini? Sonra α'yı sonuna kadar büyüt: ekranda ne kaldı, modelin bu hâline ne ad veriyoruz?</p>
+          <p>Aynı α'da L2'den L1'e geç ve sağdaki 12 çubuğu say: L1 kaç tanesini tam olarak sıfıra indirdi, L2 kaç tanesini? Elastic Net'e geç: sayı ikisinin neresine düştü, neden? Sonra α'yı sonuna kadar büyüt: ekranda ne kaldı, modelin bu hâline ne ad veriyoruz?</p>
         </div>
       </div>
     </section>
@@ -2314,14 +2326,16 @@ const CONTENT={
     short:"Mümkün. Modele 'büyük katsayı kullanmak sana pahalıya patlar' diyorsun. Model esnekliğini koruyor ama onu ancak gerçekten gerektiğinde kullanıyor. Buna regularization (düzenlileştirme) deniyor.",
     idea:["Modül 03'teki kurulum aynen duruyor: aynı veri, aynı 12. derece polinom. Ama bu kez dereceyi düşürmüyoruz. Ezberleyen eğri neden çıldırıyor? Çünkü katsayıları devasa oluyor: iki nokta arasında aşağı yukarı zıplamak için büyük sayılar gerekiyor. O hâlde büyük katsayıyı cezalandıralım. Hata ölçüsüne bir ceza eklenir: <b>hata + α × katsayıların büyüklüğü</b>. α (alfa) cezanın ne kadar ağır olduğu; scikit-learn'deki adı da alpha (bazı kitaplar λ yazar). α sıfırsa ceza yok, eski model. α büyüdükçe model 'büyük sayı kullanmadan da idare edeyim' der. Bu fikrin adı <b>regularization</b> (düzenlileştirme). Harcamalara bütçe koymak gibi: her lirayı hâlâ harcayabilirsin, ama her birinin bir bedeli var.",
           "İki ceza türü var ve farklı davranıyorlar. <b>Ridge</b> (L2) katsayıların karelerini cezalandırır: α · Σβⱼ². Hepsini birden küçültür ama hiçbirini tam sıfıra indirmez. <b>Lasso</b> (L1) mutlak değerleri cezalandırır: α · Σ|βⱼ|. Bir kısmını <i>tam olarak</i> sıfır yapar, yani o özniteliği modelden atar. Buna <b>sparsity</b> (seyreklik) deniyor. Pratikte 'hangi öznitelikler gerçekten işe yarıyor?' sorusunu modelin kendisinin cevaplaması demek. Neden? Ridge'in çekişi katsayı küçüldükçe zayıflar, Lasso ise her adımda aynı güçle çeker. Aşağıdaki figür bunu tek bir katsayıda gösteriyor: α büyüdükçe Ridge'in β'sı sıfıra yaklaşır ama varmaz, Lasso'nunki düz bir çizgiyle iner ve tam sıfıra oturur.",
+          "İkisinin karışımı da var: <b>Elastic Net</b>. Bavul ücretini düşün. Ücret kiloyla birlikte kareyle artarsa her şeyi götürürsün ama küçültürsün (Ridge). Kilo başına sabitse az işe yarayanı evde bırakırsın (Lasso). Elastic Net iki tarifeyi birlikte uygular: ceza α · [ρ · Σ|βⱼ| + (1 − ρ)/2 · Σβⱼ²]. ρ (scikit-learn'de l1_ratio) karışım oranı: ρ = 1 saf Lasso, ρ = 0 saf Ridge; burada 0.5. L1 payı bazı katsayıları yine tam sıfırlar, L2 payı kalanları birlikte kısar. Bu yüzden sıfır olmayan katsayı sayısı ikisinin arasında kalır. Asıl faydası birbirine bağlı sütunlarda: Lasso ikizlerden birini keyfî seçip ötekini atar, Elastic Net ikisini birlikte tutar ya da birlikte atar.",
           "α'yı büyüttükçe eğitim hatası mutlaka kötüleşir; modelin elini bağlıyorsun. Ama test hatası düşüyorsa doğru yoldasın: eğitimde biraz kaybedip yeni veride kazanıyorsun. Fazla kaçırırsan öteki uca düşersin: model düz çizgiye döner, underfitting başlar. Doğru α tahminle ya da hisle seçilmez. Modül 05'teki cross-validation ile, yalnız eğitim verisi kullanılarak seçilir; test verisi seçimde hiç kullanılmaz. Ekrandaki yeşil bant tam böyle bulunuyor."],
     read:[["Sol panel","Pembe eğri şu anki cezalı model. Kırmızı kesikli eğri cezanın neredeyse sıfır olduğu, yani ezberleyen hâli. Aradaki fark cezanın işi."],
-          ["Sağ üst","Her katsayının büyüklüğü |β|. Kesikli kırmızı çizgiler cezasız hâldeki boyları; ne kadar kısaldıklarını gösteriyor. L1'e geçince bazı çubuklar tamamen yok oluyor: o katsayılar sıfırlandı, 'Sıfır olmayan' göstergesi düştü."],
+          ["Sağ üst","Her katsayının büyüklüğü |β|. Kesikli kırmızı çizgiler cezasız hâldeki boyları; ne kadar kısaldıklarını gösteriyor. L1'e geçince bazı çubuklar tamamen yok oluyor: o katsayılar sıfırlandı, 'Sıfır olmayan' göstergesi düştü. Elastic Net'te de boş kutular çıkar, ama aynı α'da L1'dekinden azdır."],
           ["Sağ alt","α yolu: soldan sağa ceza büyürken üç hata. Mavi eğitim hatası. Yeşil kesikli çizgi 5 katlı cross-validation hatası: yalnız eğitim noktalarıyla hesaplanıyor. Yeşil bant bu CV hatasının en düşük olduğu α; 'En iyi α' göstergesi de o. Kırmızı test hatası seçimden sonra 'gerçekten iyi mi' diye bakmak için; seçimde kullanılmıyor. 14 noktalık CV gürültülüdür: yeşil bant çoğunlukla test dibinin yakınına düşer, arada bir uzağına. Küçük veride ayar seçmek de şansa bağlıdır. Şeride tıklayarak α'yı oraya götürebilirsin."],
-          ["Ölçek notu","Burada ceza ortalama kare hataya ekleniyor. Sunumdaki formül ve scikit-learn'ün Ridge'i toplam kare hatayı kullanır; aynı etkinin α'sı orada nokta sayısı kadar büyük görünür. Eğrilerin biçimi aynı."]],
+          ["Ölçek notu","Burada ceza ortalama kare hataya ekleniyor: (1/2n) · Σ(yᵢ − ŷᵢ)² + ceza. scikit-learn'ün Lasso ve ElasticNet sınıfları da böyle yazar, oradaki alpha buradaki α'yla aynı. Sunumdaki formül ve scikit-learn'ün Ridge'i toplam kare hatayı kullanır; aynı etkinin α'sı orada nokta sayısı kadar büyük görünür. Eğrilerin biçimi aynı."]],
     terms:[["regularization","düzenlileştirme","büyük katsayıyı cezalandırarak modeli sadeleştirmek"],
            ["Ridge (L2)","L2 cezası","katsayıların karelerini cezalar; hepsini kısar, hiçbirini sıfırlamaz"],
            ["Lasso (L1)","L1 cezası","mutlak değerleri cezalar; bazılarını tam sıfır yapar, o özelliği atar"],
+           ["Elastic Net","L1 ve L2 karışımı","α · [ρ · Σ|β| + (1 − ρ)/2 · Σβ²]; ρ = l1_ratio: 1 ise Lasso, 0 ise Ridge. Bağlı sütunları birlikte tutar ya da birlikte atar"],
            ["sparsity","seyreklik","katsayıların çoğunun sıfır olması; modelin kendi yaptığı özellik seçimi"]],
     life:["Yüzlerce sütunlu bir tabloda Lasso 'şu on sütun yeter, kalanı gürültü' der. Genetikte binlerce gen arasından birkaç tanesini seçmek için kullanılır.",
           "Derin öğrenmede aynı fikir <i>weight decay</i> adıyla her eğitim aracının içinde hazır durur. Sinir ağlarının varsayılan ayarıdır."],
@@ -2338,6 +2352,8 @@ const CONTENT={
             "C = 1 / α. C = 100 → α = 0.01: neredeyse cezasız. C = 0.01 → α = 100: çok güçlü ceza. C'yi büyütmek cezayı azaltır; en sık karıştırılan nokta bu. SVM'deki C de aynı yönde çalışır."],
            ["Bir veride özniteliklerin çoğunun gereksiz olduğunu düşünüyorsun. Başka bir veride metrekare ile oda sayısı gibi birbirine çok bağlı iki sütun var. Hangisinde Lasso, hangisinde Ridge?",
             "Gereksiz sütunlar çoksa Lasso: katsayılarını tam sıfırlar, kısa bir liste bırakır. Sunumdaki 28 sütunlu örnekte Lasso 19'unu sıfırladı, test R² Ridge'le aynı kaldı (0.761 ↔ 0.758). İkiz sütunlarda Ridge: katsayıyı ikisi arasında paylaştırır, model kararlı kalır. Lasso ikizlerden birini keyfî seçip ötekini atar."],
+           ["İki özniteliğin korelasyonu 0.98, yani neredeyse ikiz. Lasso bunlardan birini sıfırlıyor. Bu neden sorun olabilir, Elastic Net bunu nasıl yumuşatır?",
+            "Lasso ikizlerden hangisini atacağını keyfî seçer; veride küçük bir değişiklik seçimi öbürüne çevirebilir. Daha kötüsü, 'atılan sütun önemsiz' gibi yanlış bir yoruma kapı açar. Elastic Net'in L2 payı yükü ikisine paylaştırır: ikisini benzer katsayılarla birlikte tutar ya da ceza büyükse birlikte atar."],
            ["Öznitelikleri ölçeklemeden ceza uygularsan ne olur?",
             "Ceza önemi değil birimi cezalandırır. Bir uzunluğu metre yerine kilometreyle yazarsan değerler bin kat küçülür, katsayı bin kat büyür ve ceza onu haksız yere ezer. Önce standartlaştır (Modül 02). Kesme terimi β₀ ise hiç cezalanmaz."]],
     next:"Modül 13 · Komşuna bak — formülü olmayan, veriyi saklayıp komşulara soran bir model."
@@ -2394,26 +2410,37 @@ const CONTENT={
      note:"Dengeli sayılabilir bir problem. Yanlış alarm operatörü yorar, kaçırmak ise güvenlik açığı — eşik bu iki maliyetin pazarlığı."},
     {name:"Kanser taraması", pos:"kanser", neg:"temiz", set:[42,6,18],
      note:"Pozitifler nadir (%6). Kaçırmanın bedeli çok yüksek olduğu için eşik AŞAĞI çekilir: yanlış alarmı göze alıp recall'ı yükseltirsin."},
-    {name:"Spam filtresi", pos:"spam", neg:"normal posta", set:[50,42,85],
-     note:"Burada tam tersi: gerçek postayı spam'e atmak affedilmez. Eşik YUKARI çekilir, precision öne geçer."}
+    {name:"Spam filtresi", pos:"spam", neg:"normal posta", set:[50,42,90],
+     note:"Burada tam tersi: gerçek postayı spam'e atmak affedilmez. Eşik YUKARI, 0.90'a çekilir: precision %100, tek bir gerçek posta bile spam'e düşmüyor. Bedeli recall: spam'in ancak %13'ü yakalanıyor, kalanı gelen kutusuna sızıyor."},
+    {name:"Müşteri kaybı", pos:"ayrılır", neg:"kalır", set:[22,14,50],
+     note:"Hafta 7'nin spor salonu: üyelerin %14'ü ayrılıyor, ROC-AUC 0.88 (sunumdaki logistic regression 0.884). Eşik 0.50'de precision %40, recall %81, F1 0.53; doğruluk %80, ama herkese 'kalır' diyen temel model %86 alıyor. Sunumdaki sayılar da böyleydi (0.393 · 0.857 · 0.539; 0.795 ↔ 0.860). « Maliyet »te FP ₺ 300 (kampanya), FN ₺ 660 yap: en ucuz eşik 0.58 civarı, 0.5'in sağında."}
   ],
   lesson:{
     q:"Aynı model, aynı veri; nasıl oluyor da birine göre iyi, ötekine göre kötü?",
     short:"Çünkü 'iyi' ne demek, hangi hatanın affedilmediğine bağlı. Kanser taramasında kaçırılan hasta affedilmez; spam filtresinde çöpe giden gerçek mail affedilmez. Eşiği nereye koyduğun, hangi hatayı göze aldığını belirler.",
     idea:["Model her örnek için 0 ile 1 arası bir puan üretiyor. Karar vermek için bir <b>threshold</b> (eşik) gerekiyor: 'puan 0.5'ten büyükse pozitif de'. Eşiği oynatmak modeli değiştirmez; hataların <i>türünü</i> değiştirir. Dört durum var. Gerçek hastaya hasta dedin: doğru pozitif (TP). Sağlam kişiye hasta dedin: yanlış alarm (FP). Hastayı kaçırdın (FN). Sağlama sağlam dedin: doğru negatif (TN). Bu dört sayıyı 2×2 bir tabloya yazınca <b>confusion matrix</b> (hata matrisi) çıkar. scikit-learn tabloyu satırda gerçek, sütunda tahmin olacak biçimde yazar: sol üstte TN, sağ altta TP. Bu ekran da öyle.",
           "Tablodan oranlar çıkıyor ve her biri dünyaya farklı yerden bakıyor. <b>precision</b> (kesinlik): 'hasta dediklerimin yüzde kaçı gerçekten hasta?' Yanlış alarm azaldıkça precision yükselir. <b>recall</b> (duyarlılık): 'gerçek hastaların yüzde kaçını yakaladım?' Kaçırılan azaldıkça recall yükselir. Sağlamlar için aynı soruyu soran orana <b>specificity</b> (özgüllük) deniyor: 'sağlamların yüzde kaçına sağlam dedim?', TN / (TN + FP). Denize çok geniş bir ağ attığını düşün: bütün balıkları yakalarsın (recall yüksek), ama ağa yosun ve çöp de dolar (precision düşük). Dar bir ağ atarsan yakaladığının hepsi balıktır, ama çok balık kaçar. Eşiği sağa çekersen daha seçici olursun: precision artar, recall düşer. Sola çekersen tersi olur. İkisini birden yükseltemezsin; bu bir pazarlık. F1 skoru ikisinin ortak notu.",
-          "Peki eşikten bağımsız olarak modelin kendisi ne kadar iyi? Bunun için <b>ROC eğrisi</b> ve altındaki alan <b>AUC</b> var. ROC bütün eşikleri tek tek dener; AUC hepsini tek bir sayıya indirir. AUC 0.5 yazı tura, 1.0 kusursuz. Eşiği oynatmak AUC'yi değiştirmez; onu değiştiren modelin gücü. Eşik ise teknik değil, işin sahibine ait bir karar. Hangi hatanın daha pahalı olduğuna hekim, operatör ya da hukukçu karar verir."],
-    read:[["Sol panel","Model puanlarının iki dağılımı: mavi gerçek pozitifler, turuncu gerçek negatifler. Pembe dikey çizgi eşik; tuvale tıklayıp taşıyabilirsin. Eşiğin YANLIŞ tarafına düşen parçalar taralı: pozitiflerin solda kalan kısmı FN (kaçırılan), negatiflerin sağa geçen kısmı FP (yanlış alarm). Dört sayı alanların üstünde yazıyor; matristeki hücrelerle aynı sayılar. Eşiği kaydırınca taralı alanların biri büyürken öteki küçülüyor: pazarlık tam olarak bu."],
-          ["Orta panel","Confusion matrix, scikit-learn düzeninde: satırlar gerçek, sütunlar modelin dediği; sol üst TN, sağ alt TP. Hücre koyulaştıkça oradaki örnek sayısı artıyor. Eşiği oynatınca sayıların çaprazlama yer değiştirmesine bak: yanlış alarm azalırken kaçırılan artıyor."],
-          ["Sağ panel","ROC eğrisi: her eşik için (FPR, TPR) noktası. FPR yanlış alarm oranı, FP / (FP + TN), yani 1 − specificity; TPR recall'un öteki adı. Eğri sol üst köşeye ne kadar yaklaşırsa model o kadar iyi. Köşegen kesikli çizgi yazı tura atan model."]],
+          "Peki eşikten bağımsız olarak modelin kendisi ne kadar iyi? Bunun için <b>ROC eğrisi</b> ve altındaki alan <b>AUC</b> var. ROC bütün eşikleri tek tek dener; AUC hepsini tek bir sayıya indirir. AUC 0.5 yazı tura, 1.0 kusursuz. Eşiği oynatmak AUC'yi değiştirmez; onu değiştiren modelin gücü. Eşik ise teknik değil, işin sahibine ait bir karar. Hangi hatanın daha pahalı olduğuna hekim, operatör ya da hukukçu karar verir.",
+          "AUC'nin gizlediği bir şey var. ROC'un iki ekseni de kendi sınıfı içinde bir oran: FPR sağlamlar arasında, recall hastalar arasında. Bu yüzden pozitif oranı değişse de ROC eğrisi kıpırdamaz. Nadir pozitifte ise birkaç yüz yanlış alarm FPR'de küçük, precision'da dev görünür. <b>PR eğrisi</b> (precision–recall eğrisi) bunu açığa çıkarır: yatayda recall, dikeyde precision. Rastgele sıralayan model ancak taban çizgisinde kalır; taban, pozitiflerin oranıdır. Eğrinin altındaki alanın özetine PR-AUC deniyor. 10 000 kişilik bir taramada 100 hasta olsun. ROC-AUC'si 0.95 olan model 80 hastayı yakalarken 700 kadar sağlıklıya da alarm verir: precision yalnız %10, on alarmın dokuzu boşa.",
+          "Son sözü para söyler. Her yanlış alarmın ve her kaçırılanın bir bedeli var: <b>toplam maliyet = FP × yanlış alarmın bedeli + FN × kaçırmanın bedeli</b>. Bu toplamı en küçük yapan eşik çoğu zaman 0.5 değildir. Kaçırmak pahalıysa ya da yanlış alarm ucuzsa en ucuz eşik sola kayar; tersi olursa sağa. Pozitifler nadirse de sağa kayar, çünkü 0.5'te yanlış alarmlar kalabalıklaşır (Hafta 7'de en iyi eşik 0.70 çıkmıştı). 'F1 = 0.539' bir yöneticiye bir şey söylemez; '200 müşteride 4740 TL net fayda' söyler."],
+    read:[["Sol panel","Model puanlarının iki dağılımı (10 000 örnek): mavi gerçek pozitifler, turuncu gerçek negatifler. Pembe dikey çizgi eşik; tuvale tıklayıp taşıyabilirsin. Eşiğin YANLIŞ tarafına düşen parçalar taralı: pozitiflerin solda kalan kısmı FN (kaçırılan), negatiflerin sağa geçen kısmı FP (yanlış alarm). Dört sayı alanların üstünde yazıyor; matristeki hücrelerle aynı sayılar. Eşiği kaydırınca taralı alanların biri büyürken öteki küçülüyor: pazarlık tam olarak bu."],
+          ["Orta panel","Confusion matrix, scikit-learn düzeninde: satırlar gerçek, sütunlar modelin dediği; sol üst TN, sağ alt TP. Hücre koyulaştıkça oradaki örnek sayısı artıyor. Eşiği oynatınca sayıların çaprazlama yer değiştirmesine bak: yanlış alarm azalırken kaçırılan artıyor. Matrisin altındaki satır, herkese çoğunluk sınıfını ('negatif') söyleyen tembel modelin doğruluğu: max(p, 1 − p), p pozitiflerin oranı. Model onu geçemezse satır ve Doğruluk göstergesi kırmızı yanar."],
+          ["Sağ panel · ROC","Her eşik için (FPR, TPR) noktası. FPR yanlış alarm oranı, FP / (FP + TN), yani 1 − specificity; TPR recall'un öteki adı. Eğri sol üst köşeye ne kadar yaklaşırsa model o kadar iyi. Köşegen kesikli çizgi yazı tura atan model."],
+          ["Sağ panel · PR","Yatayda recall, dikeyde precision. Kesikli yatay çizgi taban: pozitiflerin oranı; rastgele sıralayan model ancak bu hizada kalır. Üstte PR-AUC (scikit-learn'de average_precision_score) ile ROC-AUC yan yana; pozitif oranını düşürüp ikisini izle."],
+          ["Sağ panel · Maliyet","Yatayda eşik, dikeyde toplam maliyet: FP × FP ₺ + FN × FN ₺. İki birim bedel kaydırıcıda; başlangıç Hafta 7 alıştırmasının 50 ve 800 TL'si. Yeşil kesikli çizgi en ucuz eşik, pembe nokta seninki. Eğriye tıklayınca eşik oraya gider. Eğrinin sol ucu herkese 'pozitif', sağ ucu herkese 'negatif' demenin bedeli."],
+          ["Göstergeler","Specificity sağlamların yüzde kaçına sağlam dendiği: TN / (TN + FP) = 1 − FPR. Son gösterge sağ panele göre değişir: ROC-AUC, PR-AUC ya da o eşikteki toplam maliyet."]],
     terms:[["confusion matrix","hata matrisi","dört sonucu (yakaladı, yanlış alarm, kaçırdı, doğru reddetti) tutan 2×2 tablo; scikit-learn'de [[TN, FP], [FN, TP]]"],
            ["precision","kesinlik","'pozitif' dediklerimin yüzde kaçı gerçekten pozitif"],
            ["recall","duyarlılık","gerçek pozitiflerin yüzde kaçını yakaladım; TPR"],
            ["specificity","özgüllük","gerçek negatiflerin yüzde kaçına negatif dedim; 1 − FPR"],
-           ["ROC / AUC","ROC eğrisi / eğrinin altındaki alan","bütün eşiklerdeki başarıyı özetleyen eğri ve tek sayı; 0.5 yazı tura, 1 kusursuz"]],
+           ["ROC / AUC","ROC eğrisi / eğrinin altındaki alan","bütün eşiklerdeki başarıyı özetleyen eğri ve tek sayı; 0.5 yazı tura, 1 kusursuz"],
+           ["PR curve / PR-AUC","PR eğrisi (precision–recall eğrisi) / altındaki alan","yatayda recall, dikeyde precision; taban çizgisi pozitiflerin oranı. Nadir pozitifte ROC'tan dürüsttür"],
+           ["baseline","temel model","herkese çoğunluk sınıfını söyleyen model; doğruluğu max(p, 1 − p). Her model önce onu geçmeli"],
+           ["threshold","eşik","olasılığı karara çeviren sınır; en iyisi hataların bedeline bakılarak seçilir"]],
     life:["Tıbbi tarama, kart dolandırıcılığı, güvenlik kamerası, savunma sanayii. Eşiği yanlış yere koymanın bedeli hep insana çıkar; o yüzden bu karar mühendise değil alan uzmanına bırakılır.",
-          "Nadir olay tespitinde raporlara doğruluk değil precision–recall eğrisi yazılır, çünkü doğruluk orada hiçbir şey söylemez."],
-    trap:"Dengesiz sınıfta doğruluk yalan söyler. Pozitif oranını %3 yapıp eşiği 0.95'e çek: model neredeyse hiçbir şeye pozitif demiyor ama doğruluk %97 görünüyor. 'Herkese negatif de' diyen bir model bile %97 alır. Nadir olay ararken doğruluğa bakma; precision ve recall'a bak.",
+          "Nadir olay tespitinde raporlara doğruluk değil precision–recall eğrisi yazılır, çünkü doğruluk orada hiçbir şey söylemez.",
+          "Müşteri kaybı (churn) tahmininde eşiği kampanya bütçesi seçer: kampanyanın kişi başı bedeli ile kaybedilen müşterinin bedeli tartılır, sonuç yöneticiye TL olarak sunulur."],
+    trap:"Dengesiz sınıfta doğruluk yalan söyler. Pozitif oranını %3 yapıp eşiği 0.95'e çek: model neredeyse hiçbir şeye pozitif demiyor ama doğruluk %97 görünüyor. 'Herkese negatif de' diyen bir model bile %97 alır; matrisin altındaki satır bunu her an gösteriyor. Nadir olay ararken doğruluğa bakma; precision, recall ve PR eğrisine bak.",
     fig:{at:1, cap:"Tablo scikit-learn düzeninde: satırlar gerçek, sütunlar tahmin; sol üstte TN, sağ altta TP. Recall gerçek hastaların satırından okunuyor (3 / 4), precision 'hasta' tahminlerinin sütunundan (3 / 5); iki çerçeve TP hücresinde kesişiyor. Doğruluk 0.85, ama herkese 'sağlıklı' diyen model de 0.80 alıyor."},
     ex:{t:"20 kişilik tarama",
       s:["20 kişi tarandı, 4'ü gerçekten hasta. Model 5 kişiye 'pozitif' dedi, bunların 3'ü gerçekten hasta. Hücreleri doldur: TP = 3, FP = 5 − 3 = 2, FN = 4 − 3 = 1, TN = 20 − 3 − 2 − 1 = 14. scikit-learn düzeninde [[TN, FP], [FN, TP]] = <b>[[14, 2], [1, 3]]</b>.",
@@ -2426,6 +2453,10 @@ const CONTENT={
             "TP 12, FP 3, FN 8, TN 977. Doğruluk 989 / 1000 = 0.989, precision 12 / 15 = 0.80, recall 12 / 20 = 0.60. Herkese 'normal' diyen model 980 / 1000 = 0.980 alır, recall'u 0. İki doğruluk neredeyse aynı; dolandırıcılığın %40'ının kaçtığını yalnız recall söylüyor."],
            ["Tarama testinde P = 0.60, R = 0.75. Fβ = (1 + β²) · P · R / (β² · P + R). Kaçırmanın pahalı olduğu kanser taraması için F2'yi, yanlış alarmın pahalı olduğu spam filtresi için F0.5'i hesapla.",
             "F2 = 5 · 0.60 · 0.75 / (4 · 0.60 + 0.75) = 2.25 / 3.15 ≈ 0.714. F0.5 = 1.25 · 0.45 / (0.25 · 0.60 + 0.75) = 0.5625 / 0.90 = 0.625. F1 (0.667) ikisinin arasında. Recall precision'dan yüksek olduğu için recall'u öne çıkaran F2 en büyük."],
+           ["Bir yanlış alarmın bedeli 50 TL, bir kaçırılanınki 800 TL. Eşik 0.5'te FP = 40, FN = 25. Eşiği düşürünce FP = 80, FN = 10 oluyor. İki eşiğin toplam maliyeti kaç, hangisini seçersin?",
+            "0.5'te 40 × 50 + 25 × 800 = 2000 + 20 000 = 22 000 TL. Düşük eşikte 80 × 50 + 10 × 800 = 4000 + 8000 = 12 000 TL. Yanlış alarm iki katına çıktı, ama kaçırmak 16 kat pahalı olduğu için düşük eşik 10 000 TL daha ucuz. Yanlış alarm ucuzladıkça en ucuz eşik sola kayar."],
+           ["Spor salonu (Hafta 7): kampanya kişi başı 300 TL, kaybedilen üye 2400 TL, kampanya ayrılacakların %40'ını tutuyor. Model 61 kişiye 'ayrılır' dedi; 24'ü gerçekten ayrılacaktı. Net fayda kaç? Ekrandaki FN ₺ neden 2400 değil 660?",
+            "Kampanya 61 × 300 = 18 300 TL. Kurtulan 24 × 0.40 = 9.6 üye, önlenen kayıp 9.6 × 2400 = 23 040 TL. Net 4740 TL. Kısa yol: yakalanan her üye 0.40 × 2400 − 300 = 660 TL kazandırır, boşa giden her kampanya 300 TL kaybettirir: 24 × 660 − 37 × 300 = 4740. Kaçırılan üyeyi kampanya da ancak %40 ihtimalle tutacaktı; kaçırmanın gerçek bedeli bu 660 TL'lik fırsat."],
            ["Üç pozitifin puanı 0.9, 0.7, 0.4; üç negatifinki 0.8, 0.5, 0.2. AUC kaç?",
             "AUC, rastgele bir pozitifin rastgele bir negatiften yüksek puan alma olasılığı. 3 × 3 = 9 çift var: 0.9 üç negatifi de geçer (3), 0.7 ikisini (2), 0.4 yalnız 0.2'yi (1). 6 / 9 ≈ 0.667: yazı turadan (0.5) iyi, ama zayıf bir sıralama. Eşit puanlı bir çift olsaydı yarım sayılırdı."]],
     next:"Modül 12 · Katsayıya ceza — 8. haftanın ikinci yarısı: overfitting'i katsayıları küçülterek dizginlemek."
@@ -4520,12 +4551,21 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   ],});
 })();
 
-/* ═════════════ 7 · Eşik, hata matrisi (confusion matrix), ROC ═════════════ */
+/* ═════════════ 7 · Eşik, hata matrisi (confusion matrix), ROC / PR / maliyet ═════════════ */
 (function(){
   const cv=$("#c-cm"), {ctx,fit}=setupCanvas(cv);
-  let thr=.5, sep=.34, prate=.35, data=[], timer=0, pool=[];
-  const NS=600, SD=.13;
-  /* üç senaryo: pozitif/negatif sınıfın ADI ve kaydırıcı kurulumu CONTENT'ten */
+  let thr=.5, sep=.34, prate=.35, data=[], timer=0, pool=[], ver=0;
+  /* sağ panel: ROC · PR · Maliyet (Hafta 7–8). Birim maliyetler Hafta 7'nin alıştırmasından:
+     yanlış alarm 50 TL, kaçırma 800 TL. Senaryo bunları DEĞİŞTİRMEZ: kanser ve spam
+     eşikleri bir maliyet hesabının değil bir politika kararının sonucu; aynı maliyeti
+     onlara uygulamak notlarıyla çelişen bir "en ucuz eşik" çiziyordu. */
+  let view="roc", cFP=50, cFN=800, LAY=null;
+  /* 10 000 örnek: Hafta 8'in "10 bin kişilik tarama, 100 hasta" hesabı (%1 pozitif) ancak
+     bu boyda kararlı. 600 örnekte %1 = 6 pozitifti; PR eğrisi ve recall 0.80'deki precision
+     tek bir örnekle zıplıyordu. Pahalı iş (sıralama, eğriler) veri değişince bir kez yapılır
+     (curves); eşiği kaydırmak yalnız ikili arama. */
+  const NS=10000, SD=.13;
+  /* dört senaryo: pozitif/negatif sınıfın ADI ve kaydırıcı kurulumu CONTENT'ten */
   const DS=SETS("m-cm"); let dsi=0;
   const S=()=>DS[dsi];
 
@@ -4546,26 +4586,68 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       const mu=.5+(y?1:-1)*sep/2;
       return {y,s:clamp(mu+o.g*SD,0,1)};
     });
+    ver++;
   }
-  function counts(t){
-    let TP=0,FP=0,FN=0,TN=0;
-    data.forEach(d=>{ if(d.s>=t){d.y?TP++:FP++;} else {d.y?FN++:TN++;} });
-    return {TP,FP,FN,TN};
-  }
-  function roc(){
+
+  /* ── eğriler: veri değişince bir kez ──
+     ROC ve PR aynı sıralamadan çıkar. Eşit skorlar (0 ve 1'e kırpılanlar) aynı eşikte
+     birlikte geçer; tek tek sayılınca havuzdaki sıraya bağlı küçük bir sapma oluyordu.
+     PR-AUC = average precision: Σ (Rₙ − Rₙ₋₁) · Pₙ (scikit-learn average_precision_score). */
+  let ckey=-1, C=null;
+  function curves(){
+    if(ckey===ver&&C) return C;
     const s=[...data].sort((a,b)=>b.s-a.s);
-    const P=data.filter(d=>d.y).length||1, N=data.length-P||1;
-    let tp=0,fp=0; const pts=[{x:0,y:0}]; let auc=0,px=0,py=0;
-    s.forEach(d=>{ d.y?tp++:fp++;
-      const x=fp/N,y=tp/P; auc+=(x-px)*(y+py)/2; pts.push({x,y}); px=x;py=y; });
-    return {pts,auc};
+    const pos=[],neg=[]; data.forEach(d=>(d.y?pos:neg).push(d.s));
+    pos.sort((a,b)=>a-b); neg.sort((a,b)=>a-b);
+    const P=pos.length, N=neg.length, Pd=P||1, Nd=N||1;
+    const roc=[{x:0,y:0}], pr=[];
+    let tp=0,fp=0,auc=0,ap=0,px=0,py=0;
+    for(let i=0;i<s.length;){
+      const v=s[i].s;
+      while(i<s.length&&s[i].s===v){ if(s[i].y) tp++; else fp++; i++; }
+      const x=fp/Nd, y=tp/Pd, prec=tp/(tp+fp);
+      auc+=(x-px)*(y+py)/2; ap+=(y-py)*prec;
+      roc.push({x,y}); pr.push({x:y,y:prec}); px=x; py=y;
+    }
+    ckey=ver;
+    return C={roc,pr,auc,ap,P,N,pos,neg,base:P/Math.max(1,P+N)};
   }
+  /* s ≥ t olanların sayısı: artan sıralı dizide ikili arama */
+  const atLeast=(a,t)=>{ let lo=0,hi=a.length; while(lo<hi){ const m=(lo+hi)>>1; if(a[m]<t) lo=m+1; else hi=m; } return a.length-lo; };
+  function counts(t){
+    const c=curves(), TP=atLeast(c.pos,t), FP=atLeast(c.neg,t);
+    return {TP,FP,FN:c.P-TP,TN:c.N-FP};
+  }
+  /* toplam maliyet = FP × cFP + FN × cFN, kaydırıcının ızgarasında (0.01 … 0.99):
+     en ucuz eşik kaydırıcıyla gidilebilen bir konum, gösterge ile eğri aynı sayıyı okur */
+  function costCurve(){
+    const v=new Array(100).fill(0); let best=1;
+    for(let k=1;k<=99;k++){ const c=counts(k/100); v[k]=c.FP*cFP+c.FN*cFN; if(v[k]<v[best]) best=k; }
+    return {v,best};
+  }
+  const sp3=(x)=>String(Math.round(x)).replace(/\B(?=(\d{3})+(?!\d))/g," ");
+  const tl=(x)=>x>=1e6?(x/1e6).toFixed(2)+" mn ₺":x>=1e4?Math.round(x/1000)+" bin ₺":sp3(x)+" ₺";
+  /* uzun eğriyi çizimde seyrelt: 10 000 nokta yerine ~400 */
+  const thin=(a)=>{ const k=Math.max(1,Math.floor(a.length/400)), o=[];
+    for(let i=0;i<a.length;i+=k) o.push(a[i]);
+    if(o[o.length-1]!==a[a.length-1]) o.push(a[a.length-1]);
+    return o; };
+
   function draw(){
     if(!fit()) return;
     const W=cv.__w,H=cv.__h;
     ctx.clearRect(0,0,W,H);ctx.fillStyle=css("--surface");ctx.fillRect(0,0,W,H);
     const {three,two,hw}=layout(W);
     const p=30;
+    const Cv=curves(), c=counts(thr), CC=costCurve();
+    const acc=(c.TP+c.TN)/Math.max(1,data.length);
+    const pre=c.TP+c.FP?c.TP/(c.TP+c.FP):NaN;
+    const rec=c.TP+c.FN?c.TP/(c.TP+c.FN):NaN;
+    const spec=c.TN+c.FP?c.TN/(c.TN+c.FP):NaN;
+    const f1=(pre&&rec)?2*pre*rec/(pre+rec):NaN;
+    /* "herkese çoğunluk sınıfını söyle" diyen temel model: doğruluğu max(p, 1 − p) */
+    const base=Math.max(Cv.base,1-Cv.base), lazy=Cv.base<=.5?"negatif":"pozitif";
+    const cost=c.FP*cFP+c.FN*cFN, cmin=CC.v[CC.best];
 
     /* --- histogram: iki dağılım, dört bölge ---
        Eskiden iki sınıf yarım genişlikte iç içe ince çubuklardı ve hangi alanın
@@ -4573,7 +4655,6 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
        alan; eşiğin YANLIŞ tarafına düşen parçalar taralı: pozitiflerin solu FN
        (kaçırılan), negatiflerin sağı FP (yanlış alarm). Dört sayı da alanın üstünde
        yazıyor — hata matrisinin her hücresi bu eğrilerin altındaki bir alan. */
-    const c=counts(thr);
     const hx=p, hy=p, hW=hw-2*p, hH=H-2*p;
     const B=44, bins=[new Array(B).fill(0),new Array(B).fill(0)];
     data.forEach(d=>{bins[d.y][Math.min(B-1,Math.floor(d.s*B))]++;});
@@ -4611,11 +4692,14 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const peak=(k)=>{ let bi=0; for(let i=1;i<B;i++) if(bins[k][i]>bins[k][bi]) bi=i;
       return {x:hx+(bi+.5)*bw, y:hy+hH-BH(bins[k][bi])}; };
     const pk0=peak(0), pk1=peak(1);
-    /* tepe etiketleri üstteki sınıf lejantının (hy+30…hy+56) altında kalsın */
-    legend(ctx,clamp(pk0.x,hx+34,hx+hW-34),Math.max(hy+72,pk0.y-12),[["TN "+c.TN,"--b"]],{size:10.5,align:"center"});
-    legend(ctx,clamp(pk1.x,hx+34,hx+hW-34),Math.max(hy+72,pk1.y-12),[["TP "+c.TP,"--a"]],{size:10.5,align:"center"});
-    if(c.FN) legend(ctx,clamp(tx-8,hx+52,hx+hW-8),hy+hH-12,[["FN "+c.FN,"--bad"]],{size:10.5,align:"right"});
-    if(c.FP) legend(ctx,clamp(tx+8,hx+8,hx+hW-52),hy+hH-30,[["FP "+c.FP,"--warn"]],{size:10.5,align:"left"});
+    /* tepe etiketleri üstteki sınıf lejantının (hy+30…hy+56) altında, tabandaki FN / FP
+       etiketlerinin (hy+hH−12, −30) üstünde kalsın: %14'lük churn'de pozitif tepesi alçak,
+       "TP" etiketi "FP"nin üstüne biniyordu */
+    const pkY=(y)=>Math.max(hy+72,Math.min(y-12,hy+hH-52));
+    legend(ctx,clamp(pk0.x,hx+34,hx+hW-34),pkY(pk0.y),[["TN "+c.TN,"--b"]],{size:10.5,align:"center"});
+    legend(ctx,clamp(pk1.x,hx+34,hx+hW-34),pkY(pk1.y),[["TP "+c.TP,"--a"]],{size:10.5,align:"center"});
+    if(c.FN) legend(ctx,clamp(tx-8,hx+60,hx+hW-8),hy+hH-12,[["FN "+c.FN,"--bad"]],{size:10.5,align:"right"});
+    if(c.FP) legend(ctx,clamp(tx+8,hx+8,hx+hW-60),hy+hH-30,[["FP "+c.FP,"--warn"]],{size:10.5,align:"left"});
     /* lejant eşik çizgisinden kaçsın; eşik etiketi sağ kenara taşmasın */
     const tRight=thr>0.82;
     legend(ctx,tRight?tx-6:tx+6,hy+12,[["eşik "+thr.toFixed(2),"--accent"]],{align:tRight?"right":"left"});
@@ -4655,52 +4739,116 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ylabel(ctx,"gerçek",ox-25,oy,oy+cs*2,css("--ink"),10.5);
       ylabel(ctx,"negatif",ox-11,oy,oy+cs,css("--ink-soft"),10.5);
       ylabel(ctx,"pozitif",ox-11,oy+cs,oy+cs*2,css("--ink-soft"),10.5);
+      /* doğruluk tuzağı (Hafta 3 / 7 / 8): matrisin hemen altında tembel modelin notu.
+         Model ondan iyi değilse kırmızı yanar. */
+      const lt=`hep '${lazy}' diyen model: ${(base*100).toFixed(1)}%`, ly=oy+cw+12;
+      if(acc<=base+.005) label(ctx,lt,ox+cw/2,ly,css("--bad"),"center",10);
+      else label(ctx,lt,ox+cw/2,ly,css("--ink-soft"),"center",10);
     }
-    /* --- ROC --- */
-    const R=roc();
+
+    /* --- sağ panel: ROC · PR · Maliyet --- */
+    LAY=null;
     if(three){
       const rx=W*0.72+10, rw=W-rx-30, rh=Math.min(rw,H-2*p-24), ry=p+10;
+      LAY={rx,ry,rw,rh};
       ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
       for(let i=1;i<4;i++){
         ctx.beginPath();ctx.moveTo(rx,ry+i*rh/4);ctx.lineTo(rx+rw,ry+i*rh/4);ctx.stroke();
         ctx.beginPath();ctx.moveTo(rx+i*rw/4,ry);ctx.lineTo(rx+i*rw/4,ry+rh);ctx.stroke();
       }
-      ctx.strokeStyle=css("--line");ctx.strokeRect(rx,ry,rw,rh);
-      ctx.setLineDash([4,4]);ctx.strokeStyle=css("--ink-soft");
-      ctx.beginPath();ctx.moveTo(rx,ry+rh);ctx.lineTo(rx+rw,ry);ctx.stroke();ctx.restore();
-      ctx.save();ctx.beginPath();ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;
-      R.pts.forEach((q,i)=>{const X=rx+q.x*rw,Y=ry+rh-q.y*rh;i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);});
-      ctx.stroke();
-      ctx.lineTo(rx+rw,ry+rh);ctx.closePath();ctx.fillStyle=hexA("--accent",.12);ctx.fill();ctx.restore();
-      const P=data.filter(d=>d.y).length||1,N=data.length-P||1;
-      disc(ctx,rx+(c.FP/N)*rw,ry+rh-(c.TP/P)*rh,6.5,css("--accent"),css("--surface"));
-      label(ctx,"ROC · AUC "+R.auc.toFixed(3),rx+rw-8,ry+rh-14,css("--accent"),"right");
-      label(ctx,"FPR · yanlış alarm oranı →",rx+rw/2,ry+rh+16,css("--ink-soft"),"center",10.5);
-      ctx.save();ctx.translate(rx-12,ry+rh/2);ctx.rotate(-Math.PI/2);
-      label(ctx,"TPR · recall →",0,0,css("--ink-soft"),"center",10.5);ctx.restore();
+      ctx.strokeStyle=css("--line");ctx.strokeRect(rx,ry,rw,rh);ctx.restore();
+      const line=(pts,X,Y)=>{ ctx.beginPath(); pts.forEach((q,i)=>{ i?ctx.lineTo(X(q),Y(q)):ctx.moveTo(X(q),Y(q)); }); };
+      if(view==="roc"){
+        ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle=css("--ink-soft");
+        ctx.beginPath();ctx.moveTo(rx,ry+rh);ctx.lineTo(rx+rw,ry);ctx.stroke();ctx.restore();
+        ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;ctx.lineJoin="round";
+        line(thin(Cv.roc),q=>rx+q.x*rw,q=>ry+rh-q.y*rh); ctx.stroke();
+        ctx.lineTo(rx+rw,ry+rh);ctx.closePath();ctx.fillStyle=hexA("--accent",.12);ctx.fill();ctx.restore();
+        disc(ctx,rx+(1-spec||0)*rw,ry+rh-(rec||0)*rh,6.5,css("--accent"),css("--surface"));
+        label(ctx,"ROC · AUC "+Cv.auc.toFixed(3),rx+rw-8,ry+rh-14,css("--accent"),"right");
+        label(ctx,"ROC eğrisi",rx,ry-16,css("--ink-soft"),"left",10.5);
+        label(ctx,"FPR = 1 − specificity →",rx+rw/2,ry+rh+16,css("--ink-soft"),"center",10.5);
+        ylabel(ctx,"TPR · recall →",rx-12,ry,ry+rh,css("--ink-soft"),10.5);
+      }else if(view==="pr"){
+        /* taban çizgisi = pozitif oranı: rastgele sıralayan model bu hizada kalır */
+        const by=ry+rh-Cv.base*rh;
+        ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.4;
+        ctx.beginPath();ctx.moveTo(rx,by);ctx.lineTo(rx+rw,by);ctx.stroke();ctx.restore();
+        const pts=thin(Cv.pr);
+        ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;ctx.lineJoin="round";
+        line(pts,q=>rx+q.x*rw,q=>ry+rh-q.y*rh); ctx.stroke();
+        ctx.lineTo(rx+pts[pts.length-1].x*rw,ry+rh);ctx.lineTo(rx+pts[0].x*rw,ry+rh);ctx.closePath();
+        ctx.fillStyle=hexA("--accent",.12);ctx.fill();ctx.restore();
+        if(Number.isFinite(pre)) disc(ctx,rx+rec*rw,ry+rh-pre*rh,6.5,css("--accent"),css("--surface"));
+        legend(ctx,rx+6,clamp(by-12,ry+12,ry+rh-12),[["taban = "+Cv.base.toFixed(2),"--ink-soft"]],{size:10});
+        legendRow(ctx,rx,ry-16,[["PR-AUC "+Cv.ap.toFixed(3),"--accent"],["ROC-AUC "+Cv.auc.toFixed(3),"--ink-soft"]],10.5,rw);
+        label(ctx,"recall →",rx+rw/2,ry+rh+16,css("--ink-soft"),"center",10.5);
+        ylabel(ctx,"precision →",rx-12,ry,ry+rh,css("--ink-soft"),10.5);
+      }else{
+        /* yatayda eşik (soldaki skor ekseniyle aynı), dikeyde toplam maliyet */
+        const vmax=Math.max(1,...CC.v.slice(1))*1.06;
+        const X=(t)=>rx+t*rw, Y=(v)=>ry+rh-v/vmax*rh, tb=CC.best/100;
+        ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle=css("--good");ctx.lineWidth=1.6;
+        ctx.beginPath();ctx.moveTo(X(tb),ry);ctx.lineTo(X(tb),ry+rh);ctx.stroke();ctx.restore();
+        ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;ctx.lineJoin="round";ctx.beginPath();
+        for(let k=1;k<=99;k++){ const x=X(k/100), y=Y(CC.v[k]); k>1?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+        ctx.stroke();ctx.restore();
+        ctx.save();ctx.setLineDash([2,3]);ctx.strokeStyle=css("--accent");ctx.lineWidth=1.4;
+        ctx.beginPath();ctx.moveTo(X(thr),ry);ctx.lineTo(X(thr),ry+rh);ctx.stroke();ctx.restore();
+        disc(ctx,X(tb),Y(cmin),6,css("--good"),css("--surface"));
+        disc(ctx,X(thr),Y(cost),6.5,css("--accent"),css("--surface"));
+        legend(ctx,rx+rw-6,ry+12,[["en ucuz eşik "+tb.toFixed(2)+" · "+tl(cmin),"--good"]],{size:10,align:"right"});
+        label(ctx,`FP × ${cFP} ₺ + FN × ${cFN} ₺`,rx,ry-16,css("--ink-soft"),"left",10.5);
+        label(ctx,"eşik →",rx+rw/2,ry+rh+16,css("--ink-soft"),"center",10.5);
+        ylabel(ctx,"toplam maliyet →",rx-12,ry,ry+rh,css("--ink-soft"),10.5);
+      }
     }
-    const acc=(c.TP+c.TN)/Math.max(1,data.length);
-    const pre=c.TP+c.FP?c.TP/(c.TP+c.FP):NaN;
-    const rec=c.TP+c.FN?c.TP/(c.TP+c.FN):NaN;
-    const f1=(pre&&rec)?2*pre*rec/(pre+rec):NaN;
+
+    /* göstergeler yerleşimden bağımsız: dar ekranda sağ panel çizilmese de yazılır */
     const pct=(v)=>Number.isFinite(v)?(v*100).toFixed(1)+"%":"—";
     const cls=(v)=>"v "+(!Number.isFinite(v)?"":v>.8?"ok":v>.55?"wr":"bd");
-    $("#cm-acc").textContent=pct(acc); $("#cm-acc").className=cls(acc);
+    $("#cm-acc").textContent=pct(acc); $("#cm-acc").className="v "+(acc<=base+.005?"bd":acc<base+.05?"wr":"ok");
     $("#cm-pre").textContent=pct(pre); $("#cm-pre").className=cls(pre);
     $("#cm-rec").textContent=pct(rec); $("#cm-rec").className=cls(rec);
+    $("#cm-spec").textContent=pct(spec); $("#cm-spec").className=cls(spec);
     $("#cm-f1").textContent=pct(f1);   $("#cm-f1").className=cls(f1);
-    $("#cm-auc").textContent=R.auc.toFixed(3); $("#cm-auc").className=cls(R.auc);
+    const aucV=view==="pr"?Cv.ap:Cv.auc;
+    $("#cm-auck").textContent=view==="pr"?"PR-AUC":"ROC-AUC";
+    $("#cm-auc").textContent=aucV.toFixed(3); $("#cm-auc").className=cls(aucV);
+    $("#cm-cost").textContent=tl(cost);
+    $("#cm-cost").className="v "+(cost<=cmin*1.02?"ok":cost<=cmin*1.25?"wr":"bd");
+    /* tuval metni sahte DOM'da okunmuyor: behaviour.js sayıları buradan okur */
+    cv.setAttribute("aria-label",`Eşik ${thr.toFixed(2)}, ${data.length} örnek, ${Cv.P} pozitif. TN ${c.TN}, FP ${c.FP}, FN ${c.FN}, TP ${c.TP}. `+
+      `Doğruluk ${pct(acc)}; herkese ${lazy} diyen temel model ${pct(base)}. Specificity ${pct(spec)}, FPR ${pct(1-spec)}. `+
+      `ROC-AUC ${Cv.auc.toFixed(3)}, PR-AUC ${Cv.ap.toFixed(3)}, taban (pozitif oranı) ${Cv.base.toFixed(3)}. `+
+      `Maliyet FP × ${cFP} + FN × ${cFN}: bu eşikte ${Math.round(cost)} ₺, en ucuz eşik ${(CC.best/100).toFixed(2)} → ${Math.round(cmin)} ₺.`);
   }
+  function setThr(k){ k=clamp(Math.round(k),1,99); thr=k/100; $("#cm-t").value=k; $("#cm-to").textContent=thr.toFixed(2); draw(); }
   $("#cm-t").oninput=e=>{thr=+e.target.value/100;$("#cm-to").textContent=thr.toFixed(2);draw();};
   $("#cm-sep").oninput=e=>{sep=+e.target.value/100;$("#cm-sepo").textContent=sep.toFixed(2);sample();draw();};
   $("#cm-pr").oninput=e=>{prate=+e.target.value/100;$("#cm-pro").textContent="%"+e.target.value;sample();draw();};
+  $("#cm-cfp").oninput=e=>{cFP=+e.target.value;$("#cm-cfpo").textContent=String(cFP);draw();};
+  $("#cm-cfn").oninput=e=>{cFN=+e.target.value;$("#cm-cfno").textContent=String(cFN);draw();};
   $("#cm-new").onclick=()=>{newPool();sample();draw();};
+  /* sağ panel seçici: birim maliyet kaydırıcıları ve maliyet göstergesi yalnız « Maliyet »te */
+  const VB={roc:"#cm-vroc", pr:"#cm-vpr", cost:"#cm-vcost"};    // lint: seçiciler açık yazılır
+  function setView(k){
+    view=k;
+    Object.keys(VB).forEach(j=>$(VB[j]).setAttribute("aria-pressed",String(j===k)));
+    $("#cm-cfpc").hidden=k!=="cost"; $("#cm-cfnc").hidden=k!=="cost";
+    $("#cm-aucs").hidden=k==="cost"; $("#cm-costs").hidden=k!=="cost";
+    draw();
+  }
+  Object.keys(VB).forEach(k=>{ $(VB[k]).onclick=()=>setView(k); });
+  /* skor dağılımına ya da maliyet eğrisine tıkla → eşik oraya (kaydırıcının 0.01'lik ızgarasına) */
   cv.addEventListener("pointerdown",e=>{
     const q=pointerPos(cv,e),W=cv.__w,p=30;
     const {hw}=layout(W);
-    if(q.x>hw-p) return;
-    thr=clamp((q.x-p)/(hw-2*p),0,1);
-    $("#cm-t").value=Math.round(thr*100);$("#cm-to").textContent=thr.toFixed(2);draw();
+    let u=null;
+    if(q.x<=hw-p) u=(q.x-p)/(hw-2*p);
+    else if(view==="cost"&&LAY&&q.x>=LAY.rx-6&&q.x<=LAY.rx+LAY.rw+6&&q.y>=LAY.ry-6&&q.y<=LAY.ry+LAY.rh+6) u=(q.x-LAY.rx)/LAY.rw;
+    if(u===null) return;
+    setThr(u*100);
   });
   function sweep(){
     if(timer){clearInterval(timer);timer=0;runBtn("#cm-sweep",false,"Eşiği tara");return;}
@@ -4722,15 +4870,23 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
     {t:"İki dağılım",d:"İHA tespiti: model her örneğe bir skor veriyor. Turuncu gerçek negatifler (kuş, boş gök), mavi gerçek pozitifler. Dağılımlar üst üste biniyor — kusursuz ayrım yok. Eşiğin yanlış tarafına düşen taralı parçalar hatalar: FN kaçırılan, FP yanlış alarm; sayıları matrisle aynı.",
-     set:0, run(){setR("#cm-t",50);}},
+     set:0, run(){setPressed("#cm-vroc",true);setR("#cm-t",50);}},
     {t:"Eşiği sola çekin",d:"Eşik 0.20. Model cömertleşti: kırmızı taralı FN alanı neredeyse kayboldu (recall yüksek) ama turuncu taralı FP alanı büyüdü (precision düştü).",
      hl:["#cm-rec","#cm-pre"], run(){setR("#cm-t",20);}},
     {t:"Eşiği sağa çekin",d:"Eşik 0.80. Şimdi tam tersi: FP alanı küçüldü, FN alanı büyüdü — dediği pozitifler doğru ama çoğunu kaçırıyor. Precision ile recall aynı anda yükselmiyor.",
      hl:["#cm-pre","#cm-rec"], run(){setR("#cm-t",80);}},
-    {t:"Dengesiz sınıf tuzağı",d:"Pozitif oranı %3, eşik 0.95. Model neredeyse hiçbir şeye pozitif demiyor ama doğruluk %97 görünüyor. Doğruluk tek başına yalan söyler.",
-     hl:["#cm-acc","#cm-rec"], run(){setR("#cm-pr",3);setR("#cm-t",95);}},
+    {t:"Dengesiz sınıf tuzağı",d:"Pozitif oranı %3, eşik 0.95. Model neredeyse hiçbir şeye pozitif demiyor ama doğruluk %97 görünüyor. Matrisin altına bak: herkese 'negatif' diyen tembel model de %97 alıyor, gösterge bu yüzden kırmızı. Specificity %100'e yakın, recall yerlerde. Doğruluk tek başına yalan söyler.",
+     hl:["#cm-acc","#cm-spec","#cm-rec"], run(){setR("#cm-pr",3);setR("#cm-t",95);}},
     {t:"Aynı model, başka maliyet",d:"Senaryoyu değiştirin: kanser taramasında kaçırmak affedilmez, eşik SOLA gider — recall %100'e çıkar, precision düşer, doğruluk çöker ama kimse kaçmaz. Spam filtresinde tam tersi: eşik SAĞA gider, precision %100 olur, yakalama düşer. Eşiği oynatmak AUC'yi hiç değiştirmiyor; onu değiştiren şey modelin gücü.",
-     set:1, hl:["#cm-auc"], run(){}}
+     set:1, hl:["#cm-auc"], run(){setPressed("#cm-vroc",true);}},
+    {t:"PR eğrisi · dengeli veri",d:"Tarama dengeli olsun (%50 hasta), model gücü 0.30: ROC-AUC 0.95. Sağ panel artık PR eğrisi: yatayda recall, dikeyde precision. Kesikli taban çizgisi pozitif oranı; rastgele sıralayan model ancak orada kalır. PR-AUC de 0.95. Eşik 0.54'te recall %80, precision %92.",
+     set:1, hl:["#cm-auc","#cm-rec","#cm-pre"], run(){setPressed("#cm-vpr",true);setR("#cm-sep",30);setR("#cm-pr",50);setR("#cm-t",54);}},
+    {t:"Aynı model, %1 pozitif",d:"Yalnız pozitif oranını %1'e indirdik: 10 000 kişide 100 hasta. ROC-AUC neredeyse yerinde (0.95 civarı), çünkü ROC'un iki ekseni de kendi sınıfı içinde bir oran. PR-AUC ise 0.95'ten 0.40 civarına çöktü. Aynı eşikte recall yine %80, precision %10 civarı: 80 hastayı yakalamak için 700 kadar sağlıklıya da alarm verildi, matrise bak. Sunumda aynı hesap %11 çıkıyordu.",
+     set:1, hl:["#cm-auc","#cm-pre"], run(){setPressed("#cm-vpr",true);setR("#cm-sep",30);setR("#cm-pr",1);setR("#cm-t",54);}},
+    {t:"Maliyetle eşik",d:"Hafta 7'nin spor salonu: üyelerin %14'ü ayrılıyor. Kampanya kişi başı 300 TL (FP'nin bedeli). Kaçan üye 2400 TL, ama kampanya ancak %40'ını tutardı: yakalanan her üye 0.40 × 2400 − 300 = 660 TL kazandırır, kaçırmak bu 660 TL'yi yakmak (FN'nin bedeli). Sağ panel her eşikte toplam maliyeti çiziyor; eşik 0.50'de gösterge ~690 bin ₺.",
+     set:3, hl:["#cm-cost","#cm-cfp","#cm-cfn"], run(){setPressed("#cm-vcost",true);setR("#cm-cfp",300);setR("#cm-cfn",660);setR("#cm-t",50);}},
+    {t:"En ucuz eşik",d:"Yeşil işaret eğrinin dibi: 0.5'in sağında, 0.58 civarında. Eşiği oraya çektik: yanlış alarm azaldı, kaçan üye arttı, toplam maliyet ~130 bin ₺ düştü. Hafta 7'de de en iyi eşik 0.5'in sağındaydı. 'F1 = 0.53' bir yöneticiye bir şey söylemez; '10 000 üyede 130 bin TL' söyler.",
+     set:3, hl:["#cm-cost","#cm-f1"], run(){setPressed("#cm-vcost",true);setR("#cm-cfp",300);setR("#cm-cfn",660);setR("#cm-t",58);}}
   ],
        stop:()=>{if(timer){clearInterval(timer);timer=0;runBtn("#cm-sweep",false,"Eşiği tara");}}});
 })();
@@ -6873,6 +7029,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const NTR=14, NTE=60, LN=101;
   const lamAt=(i)=>Math.pow(10,-4+5*i/100);          // α ∈ [1e-4 , 10], logaritmik
   const ZTOL=1e-9;                                   // bunun altı "tam olarak sıfır" sayılır
+  const MODE_TXT={l2:"L2", en:"Elastic Net ρ=0.5", l1:"L1"};
   let deg=12, noise=.12, li=12, mode="l2", tr=[], te=[], ver=0, sweepT=0, hoverJ=-1, LAY=null, showR=false;
 
   function lamTxt(v){
@@ -6941,12 +7098,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     return {w0:s[0], w:Array.from(s.subarray(1))};
   }
 
-  /* ── L1 (lasso): koordinat inişi + yumuşak eşikleme ──
-     Amaç: (1/2n)‖y − Xw‖² + α·Σ|wⱼ|. Her katsayı sırayla, diğerleri sabitken çözülür;
-     yumuşak eşikleme |ρ| ≤ α olduğunda katsayıyı TAM OLARAK sıfır yapar. Sıcak başlangıç
-     (bir büyük α'nın çözümü) yakınsamayı hızlandırır. */
+  /* ── L1 (lasso) ve Elastic Net: koordinat inişi + yumuşak eşikleme ──
+     Amaç: (1/2n)‖y − Xw‖² + α·[r·Σ|wⱼ| + (1 − r)/2·Σwⱼ²], r = l1_ratio (Hafta 8'in ρ'su;
+     burada r, çünkü ρ aşağıda kısmi korelasyonun adı). r = 1 saf Lasso, r = 0 saf Ridge
+     (yukarıdaki normal denklemlerle aynı amaç). Her katsayı sırayla, diğerleri sabitken
+     çözülür: wⱼ = S(ρⱼ, α·r) / (Σz²/n + α·(1 − r)). Yumuşak eşikleme |ρ| ≤ α·r olduğunda
+     katsayıyı TAM OLARAK sıfır yapar; L2 payı paydayı büyütüp kalanları kısar.
+     Sıcak başlangıç (bir büyük α'nın çözümü) yakınsamayı hızlandırır. */
   const soft=(a,k)=>a>k?a-k:(a<-k?a+k:0);
-  function lasso(D,y,lam,warm){
+  const L1R={l1:1, en:0.5};                          // Elastic Net: scikit-learn'ün varsayılanı l1_ratio = 0.5
+  function lasso(D,y,lam,warm,r=1){
     const d=D.d,n=D.n;
     const w=warm?warm.slice():new Array(d).fill(0);
     let w0=0;for(let i=0;i<n;i++)w0+=y[i];w0/=n;
@@ -6962,7 +7123,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
           if(w[j]!==0){for(let i=0;i<n;i++)res[i]+=D.Z[i][j]*w[j];w[j]=0;}
           continue;
         }
-        const nw=soft(rho,lam)/den, dl=nw-w[j];
+        const nw=soft(rho,lam*r)/(den+lam*(1-r)), dl=nw-w[j];
         if(dl!==0){for(let i=0;i<n;i++)res[i]-=D.Z[i][j]*dl;w[j]=nw;if(Math.abs(dl)>mx)mx=Math.abs(dl);}
       }
       let mr=0;for(let i=0;i<n;i++)mr+=res[i];mr/=n;      // sabit terim: cezasız, ortalamaya oturur
@@ -6983,10 +7144,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     if(key===pkey&&P) return P;
     const D=design(deg), y=tr.map(q=>q.y);
     const out={D,W:new Array(LN),tr:new Array(LN),te:new Array(LN),cv:new Array(LN),best:0,tbest:0,axisMax:1};
+    /* L1 ve Elastic Net koordinat inişiyle, L2 normal denklemlerle çözülür */
+    const fitAt=(Dm,ym,i,wm)=> mode==="l2" ? ridge(Dm,ym,lamAt(i)) : lasso(Dm,ym,lamAt(i),wm,L1R[mode]);
     let warm=null;
     for(let i=LN-1;i>=0;i--){                              // büyük α'dan küçüğe: sıcak başlangıç
-      const f = mode==="l1" ? lasso(D,y,lamAt(i),warm) : ridge(D,y,lamAt(i));
-      if(mode==="l1") warm=f.w;
+      const f=fitAt(D,y,i,warm);
+      if(mode!=="l2") warm=f.w;
       out.W[i]=f; out.tr[i]=rmse(D,f,tr); out.te[i]=rmse(D,f,te);
     }
     /* En iyi α test noktalarına BAKMADAN seçilir: eğitim noktalarında 5 katlı CV (Hafta 8:
@@ -6997,8 +7160,8 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       const ftr=tr.filter((_,i)=>i%K!==k), val=tr.filter((_,i)=>i%K===k);
       const Dk=design(deg,ftr), yk=ftr.map(q=>q.y); let wk=null;
       for(let i=LN-1;i>=0;i--){
-        const f = mode==="l1" ? lasso(Dk,yk,lamAt(i),wk) : ridge(Dk,yk,lamAt(i));
-        if(mode==="l1") wk=f.w;
+        const f=fitAt(Dk,yk,i,wk);
+        if(mode!=="l2") wk=f.w;
         val.forEach(q=>{ const e=predict(Dk,f,q.x)-q.y; se[i]+=Number.isFinite(e)?e*e:1e6; });
       }
     }
@@ -7046,7 +7209,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     tr.forEach(q=>disc(ctx,X(q.x),Y(q.y),6,css("--a"),css("--surface")));
     ctx.restore();
     legend(ctx,p+8,p+14,[["eğitim noktası","--a"],["gerçek ilişki","--ink-soft"],
-      [`${deg}. derece · ${mode==="l1"?"L1":"L2"} · α=${lamTxt(lam)}`,"--accent"],showRef&&["kesikli kırmızı: α en küçükken","--bad"],showR&&["artık (eğitim)","--bad"]],{size:12,lh:17});
+      [`${deg}. derece · ${MODE_TXT[mode]} · α=${lamTxt(lam)}`,"--accent"],showRef&&["kesikli kırmızı: α en küçükken","--bad"],showR&&["artık (eğitim)","--bad"]],{size:12,lh:17});
     label(ctx,S().x+" →",p+pw,p+ph+16,css("--ink-soft"),"right",11);
     ylabel(ctx,S().y+" →",p-15,p,p+ph,css("--ink-soft"),11);
 
@@ -7166,6 +7329,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   function setMode(m){
     mode=m;
     $("#reg-l2").setAttribute("aria-pressed",String(m==="l2"));
+    $("#reg-en").setAttribute("aria-pressed",String(m==="en"));
     $("#reg-l1").setAttribute("aria-pressed",String(m==="l1"));
     draw();
   }
@@ -7188,6 +7352,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
   $("#reg-lam").oninput=e=>{li=+e.target.value;$("#reg-lamo").textContent=lamTxt(lamAt(li));draw();};
   $("#reg-l2").onclick=()=>setMode("l2");
+  $("#reg-en").onclick=()=>setMode("en");
   $("#reg-l1").onclick=()=>setMode("l1");
   $("#reg-d").oninput=e=>{deg=+e.target.value;$("#reg-do").textContent=deg;hoverJ=-1;draw();};
   $("#reg-n").oninput=e=>{noise=+e.target.value/100;$("#reg-no").textContent=noise.toFixed(2);sample();draw();};
@@ -7217,8 +7382,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
      hl:["#reg-te","#reg-nz"], run(){setR("#reg-lam",42);}},
     {t:"L1 · bazıları tam sıfır",d:"Aynı α, farklı ceza. Kesikli boş kutular sıfırlanan katsayılar: L1 kullanmadığı kuvvetleri modelden atıyor — yani öznitelik seçiyor.",
      hl:["#reg-nz","#reg-l1"], run(){setPressed("#reg-l1",true);}},
-    {t:"Ceza da aşırıya kaçarsa",d:"α sonuna kadar sağda: geriye düz bir çizgi ve 0 / 12 kaldı. Az ceza ezber, çok ceza körlük; tatlı nokta yeşil bandın içinde.",
-     hl:["#reg-nz","#reg-st"], run(){setR("#reg-lam",100);}}
+    {t:"Elastic Net · ikisinin karışımı",d:"Aynı α, ρ = 0.5: cezanın yarısı L1, yarısı L2. L1 payı yine bazı katsayıları tam sıfırlıyor, L2 payı kalanları birlikte kısıyor. « Sıfır olmayan » ikisinin arasında kalıyor: L2 on ikisini de tutuyordu, L1 çoğunlukla üç dördünü tutuyor, Elastic Net dört ile altı arasını.",
+     hl:["#reg-nz","#reg-en"], run(){setPressed("#reg-en",true);setR("#reg-lam",42);}},
+    {t:"Ceza da aşırıya kaçarsa",d:"L1, α sonuna kadar sağda: geriye düz bir çizgi ve 0 / 12 kaldı. Az ceza ezber, çok ceza körlük; tatlı nokta yeşil bandın içinde.",
+     hl:["#reg-nz","#reg-st"], run(){setPressed("#reg-l1",true);setR("#reg-lam",100);}}
   ],
        stop:()=>{if(sweepT){clearInterval(sweepT);sweepT=0;runBtn("#reg-sweep",false,"α'yı tara");}}});
 })();
@@ -9577,8 +9744,8 @@ const META=[
   ["08","m-gd",    "gradient descent ve learning rate","Yamaçtan aşağı","Hafta 5","gradyan iniş gradient descent öğrenme oranı learning rate minimum local minimum eğim slope iraksama divergence hata yüzeyi iki vadi convex dışbükey dik kanyon hafta 5 türev derivative maliyet fonksiyonu cost function j theta θ alfa α"],
   ["09","m-poly",  "polynomial regression ve yeni sütunlar","Eğri de doğrusal olabilir","Hafta 5","polinom regresyon polynomial regression derece degree kare küp öznitelik türetme feature engineering tasarım matrisi design matrix veri dışı tahmin extrapolation gün içi sıcaklık fren mesafesi hız fidan boyu büyüme eğri hafta 5 ekstrapolasyon"],
   ["10","m-log",   "logistic regression ve sigmoid","Yüzde kaç?","Hafta 6","lojistik regresyon logistic regression sigmoid olasılık probability log-kayıp log-loss cross-entropy tümör çapı kanser sınav çalışma rüzgar balon turu iptal hafta 6 log-loss kesme terimi beta p şapka"],
-  ["11","m-cm",    "confusion matrix, precision–recall, ROC","Eşiği nereye koyalım","Hafta 8","eşik threshold konfüzyon confusion matrix kesinlik precision duyarlılık recall f1 roc auc dengesiz imbalanced iha tespiti kanser taraması spam filtresi hafta 8 hata matrisi fpr tpr"],
-  ["12","m-reg",   "regularization: Ridge, Lasso ve α","Katsayıya ceza","Hafta 8","düzenlileştirme regularization ridge lasso l1 l2 lambda ceza penalty katsayı coefficient seyreklik sparsity shrinkage aşırı öğrenme overfitting sıcaklık reklam satış titreşim hafta 8 alfa α"],
+  ["11","m-cm",    "confusion matrix, precision–recall, ROC","Eşiği nereye koyalım","Hafta 8","eşik threshold konfüzyon confusion matrix kesinlik precision duyarlılık recall f1 roc auc dengesiz imbalanced iha tespiti kanser taraması spam filtresi hafta 8 hata matrisi fpr tpr specificity özgüllük pr eğrisi pr-auc average precision temel model baseline maliyet cost churn müşteri kaybı hafta 7"],
+  ["12","m-reg",   "regularization: Ridge, Lasso ve α","Katsayıya ceza","Hafta 8","düzenlileştirme regularization ridge lasso l1 l2 lambda ceza penalty katsayı coefficient seyreklik sparsity shrinkage aşırı öğrenme overfitting sıcaklık reklam satış titreşim hafta 8 alfa α elastic net l1_ratio ρ karışım"],
   ["13","m-knn",   "KNN ile sınıflandırma","Komşuna bak","Hafta 9","knn komşu neighbor sınıflandırma classification karar sınırı decision boundary uçak kuş kanat açıklığı baz istasyonu kapsama kredi riski hafta 9 k en yakın komşu öklid euclidean lazy learning tembel öğrenme"],
   ["14","m-dt",    "decision tree ve Gini kazancı","Bölerek karar ver","Hafta 10","karar ağacı decision tree gini bölme split eşik threshold yaprak leaf bağ hastalığı mildiyö sahte işlem dolandırıcılık fraud kalite kontrol hafta 10 safsızlık impurity gini kazancı"],
   ["15","m-ens",   "bagging, random forest ve OOB","Kırk ağaç","Hafta 11","topluluk ensemble torbalama bagging rastgele orman random forest oob out-of-bag bootstrap oylama voting varyans ağaç kredi onayı pivot sulama halka hafta 11 ensemble yerine koyarak örnekleme max_features"],
