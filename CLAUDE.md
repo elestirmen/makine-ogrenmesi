@@ -49,6 +49,12 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   | SVM · margin · support vector · kernel · hinge loss | destek vektör makinesi · marj · destek vektörü · çekirdek · menteşe kaybı |
   | DBSCAN · eps · min_samples · core point · hierarchical clustering · dendrogram | yoğunluk temelli kümeleme · komşuluk yarıçapı · en az komşu · çekirdek nokta · hiyerarşik kümeleme · ağaç diyagramı |
   | IQR · outlier | çeyrekler açıklığı · aykırı değer |
+  | Euclidean · Manhattan · Chebyshev distance · weighted voting | Öklid · Manhattan · Chebyshev uzaklığı · ağırlıklı oylama |
+  | entropy · hard / soft voting · Gini / permutation importance | entropi · sert / yumuşak oylama · Gini / permütasyon önemi |
+  | kernel trick · RBF · intercept | kernel hilesi · radyal tabanlı fonksiyon · kesme terimi |
+  | learning curve · TimeSeriesSplit · residual plot · baseline | öğrenme eğrisi · zaman sıralı bölme · artık grafiği · temel model |
+  | PR curve · PR-AUC · Elastic Net · odds · logit · odds ratio | PR eğrisi · PR eğrisinin altındaki alan · — · olasılık oranı · log-odds · odds oranı |
+  | k-means++ · n_init · linkage (single / complete / average / Ward) | — · deneme sayısı · bağlantı ölçütü |
   | bias–variance decomposition · irreducible error | yanlılık–varyans ayrışması · indirgenemez hata |
   | multiple linear regression · confounding variable · multicollinearity | çoklu doğrusal regresyon · karıştırıcı değişken · çoklu doğrusal bağlantı |
   | polynomial regression · degree · design matrix · feature engineering · extrapolation | polinom regresyon · derece · tasarım matrisi · öznitelik türetme · ekstrapolasyon |
@@ -185,6 +191,49 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   14 noktada CV gürültülü: 20 örneklemde seçilen α'nın test hatası test dibinin medyan
   1.2–1.5 katı, arada bir 10 katı; ders notu bunu söylüyor. LOOCV denendi, daha iyi değil.
   Ceza ortalama kare hataya ekleniyor; sunumun formülü toplamı kullanır (α'lar n kat farklı).
+- **3. aşama eklemeleri (2026-10-19, sunumdaki eksikler).** Ortak kalıplar: tuvale yazılan yeni
+  sayılar `aria-label`'a da yazılır, `behaviour.js` oradan okur; sabit (sunumdan gelen) veri kümesinde
+  işe yaramayan kontrol `hidden` ile gizlenir, çubuk uzamaz; `.seg button:disabled` soluk görünür.
+  - **03 m-fit** sağ panel « Dereceye göre | Örnek sayısına göre »: öğrenme eğrisi tohumlu, iç içe 200
+    noktalık havuzdan 21 örneklemin medyanı (titremez), yalnız o görünümde hesaplanır. Temel model
+    (eğitim ortalaması) kesikli çizgi; « Test R² » = 1 − test MSE / temel modelin test MSE'si; rozet
+    R² < 0.2 iken de « Yetersiz ».
+  - **05 m-cv** « Karıştır | Zaman sırası » (TimeSeriesSplit: k + 1 dilim, eğitim hep önce); yalnız
+    `sets[].time` olan veride açık. « Kafe satışı »nda polinom geleceğe uzatılınca 3. dereceden sonra
+    savruluyor; not bunu sunumun KNN'deki 2 katıyla birlikte söylüyor.
+  - **06 m-lin** « Beş öğrenci » sabit (`gen:"five"`, xr 12): cevap ŷ = 44 + 4x, SSE 6, R² 0.9907.
+    « Temel model » ȳ doğrusu ve SST kareleri; SSE / RMSE verinin biriminde, R² dört ondalık.
+  - **08 m-gd** « Beş öğrenci · β₁ » yüzeyi: yüzey başına `lr:[min,max,başlangıç]` (0.001–0.030),
+    `grow` iz pencereyi genişletir, `sym` gösterge adını θ ↔ β₁ yapar; J artarken Sonuç « Yükseliyor ».
+  - **09 m-poly** sağ panel « Tasarım matrisi | Artık grafiği » (x'e göre; desen ölçüsü işaret
+    değişimi + birini dışarıda bırakan düzleştirici, polinomun kendi sütunlarıyla ölçülmez: artıklar
+    onlara dik). « Elektrik · sıcaklık » `gen:"mevsim"`: düz R² ~0.48, x² ile ~0.93, dip ~18 °C.
+  - **10 m-log** eksen, β₁, sınır ve odds ratio verinin biriminde (`sets[].eq`, β₁ = w / xr); « Seçili x »
+    kaydırıcısı p̂ / odds / logit yazar; « Doğru uydur » ekseni −0.5…1.5'e açar; « Uzak öğrenci » sabit
+    (sınır 6.5 → 7.5 saat, logistic 6.4'te kalır; kıyas Newton ile, kaydırıcıdan bağımsız).
+  - **11 m-cm** sağ panel ROC | PR | Maliyet; 10 000 örnek (Hafta 8: %1 = 100 hasta), eğriler veri
+    değişince bir kez (`curves()`), eşik sayımı ikili arama; maliyet ızgarası kaydırıcınınkiyle aynı.
+    Senaryolar birim bedelleri değiştirmez. « Müşteri kaybı » Hafta 7'yi verir (FN 660 = 0.40 · 2400 − 300).
+    Specificity göstergesi; « hep negatif diyen model » satırı.
+  - **12 m-reg** Elastic Net, ρ = 0.5 sabit: (1/2n)‖·‖² + α[ρ‖w‖₁ + (1−ρ)/2‖w‖²]; L1 ve L2 uçları.
+  - **13 m-knn** Öklid | Manhattan | Chebyshev ve Eşit | Ağırlıklı oy (d = 0'da yalnız sıfır uzaklıklılar
+    oy verir, eğitim hatası %0); soluk test halkaları, sağda k–hata eğrisi (eşik 760), √n çizgisi;
+    sorgu fare çıkınca kalır. Sabit kümeler `gen:"fixed"` (Altı daire, İki eczane). Ölçerken
+    `knn-bnd` kapalı (yoksa koşu çok yavaş).
+  - **14 m-dt** Gini | Entropi; sağ panel Eşik eğrisi | Ağaç | Derinlik eğrisi; derinlik 1–8, eşikler veri
+    biriminde. Durma kuralı tek nokta (scikit-learn varsayılanı); en iyi bölme eşit basamağın ortası.
+  - **15 m-ens** hard | soft voting (ağaç yaprağı `.c` ve `.p` taşır), « Kökte x₁ soran » sayacı
+    (bagging 40/40, RF ~20/40 = m/p), Gini ve OOB permütasyon önemi, « + kimlik sütunu ».
+  - **16 m-svm** çözücü SMO, b cezasız; veri iki eksene TEK ölçekle standartlaştırılır, C = 10^(v/10−2),
+    γ = 10^(v/10−1); margin veri biriminde; test halkaları ve eğitim / test doğruluğu; « Dört ev »
+    (margin 2.83), « Kızılırmak »; « + z = x₁² + x₂² » yandan bakış (eşik 760).
+  - **17 m-pca** « Beş öğrenci » ve « Not ve süre » sabit (`sets[].fix`, n − 1), saat | dakika | standart;
+    kutular eşit ölçekli kare (perdedeki açı gerçek açı); sağda açıya göre varyans eğrisi; özdeğer
+    yalnız sabit tabloda yazılır.
+  - **18 m-km** Rastgele | k-means++ (seçili düğmeye yeniden basmak yeni başlangıç), « 10 kez dene »
+    (n_init), iterasyon = atama turu (n_iter_); « Altı nokta » iyi / kötü başlangıç, J veri biriminde.
+  - **20 m-dbs** hierarchical'da dendrogram + Single | Complete | Average | Ward (Lance–Williams,
+    önbellekte; k yalnız keser); eps / min_samples bu modda gizli. Hilalde single ayırır, Ward ~%80.
 - **Modül 21 (`m-neu`) nöronun içini açar:** ham değer → ölçekli girdi ([lo, hi] → [0, 1],
   Modül 02) → ağırlıklı bağlantılar → Σ ve z → aktivasyon kutusu (eğri ve z'nin düştüğü
   nokta) → ŷ; en altta hesabın kendisi. Aktivasyon (basamak / sigmoid / ReLU / yok) kararı
@@ -478,7 +527,7 @@ for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; 
 # 26 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
 # lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). oyun alanı canlı eğitim koştuğu için ~3 dk sürer.
-node tools/behaviour.js index.html   # 203 denetim: 26 modül + alternatif veri kümeleri, ~3 dk
+node tools/behaviour.js index.html   # ~420 denetim: 26 modül + alternatif veri kümeleri, ~6 dk
 
 # tuvale yazılan her etiket rengini ve ders notu figürlerinin (FIGS) yazı rengini
 # açık VE koyu temada zemine karşı ölç (label(...) / legend(...) çağrılarını ve
