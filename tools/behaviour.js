@@ -768,8 +768,69 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   for(let t=0;t<8;t++){ PK(M,'m-ens',1); S(el,'ens-d',4); S(el,'ens-k',40); tick(50);
     oob.push(V(el,'ens-oob')); one.push(V(el,'ens-one')); }
   console.log(`       40 ağaç OOB %${mean(oob).toFixed(1)} · tek ağaç OOB %${mean(one).toFixed(1)}`);
-  chk(mean(oob)-mean(one)>2, "topluluk halka sınırında da tek ağacı geçiyor (adım 5)",
+  chk(mean(oob)-mean(one)>2, "topluluk halka sınırında da tek ağacı geçiyor (adım 7)",
       `+${(mean(oob)-mean(one)).toFixed(1)} puan`);
+}
+
+/* ── 15 · Orman · "Abonelik": güçlü sütun, kökte aynı soru, ρ ──
+   .ask 2. paragraf, adım 5–6 ve veri kümesi notu: bagging'de 40 ağacın 40'ı kökte
+   x₁'i soruyor, random forest'ta 20 civarı (P = m/p = 1/2); tek ağaç 2–3 puan
+   geriliyor, ormanın OOB'si düşmüyor. Ölçüm (20 veri): kök 40.0 → 19.9 (14–27),
+   tek ağaç −2.5 (20/20), orman +0.5. */
+{
+  head("Modül 15 · « Abonelik » (kökte aynı soru · m/p)");
+  const {el,M}=boot(F); const rb=[],rr=[],tb=[],tr=[],ob=[],or=[],ri=[];
+  for(let t=0;t<16;t++){ PK(M,'m-ens',2); P(el,'ens-id',false); el('ens-hard').click(); S(el,'ens-d',4); S(el,'ens-k',40);
+    el('ens-m2').click(); rb.push(V(el,'ens-root')); tb.push(V(el,'ens-one')); ob.push(V(el,'ens-oob'));
+    el('ens-m1').click(); rr.push(V(el,'ens-root')); tr.push(V(el,'ens-one')); or.push(V(el,'ens-oob'));
+    P(el,'ens-id',true); ri.push(V(el,'ens-root')); P(el,'ens-id',false); }
+  console.log(`       kökte x₁: bagging ${mean(rb).toFixed(1)}/40 · random forest ${mean(rr).toFixed(1)}/40 (${Math.min(...rr)}–${Math.max(...rr)}) · kimlikle RF ${mean(ri).toFixed(1)}/40`);
+  console.log(`       tek ağaç OOB: bagging %${mean(tb).toFixed(1)} → RF %${mean(tr).toFixed(1)} · orman: %${mean(ob).toFixed(1)} → %${mean(or).toFixed(1)}`);
+  chk(mean(rb)>=39, "bagging'de 40 ağacın (neredeyse) hepsi kökte x₁'i soruyor (adım 5)", `${mean(rb).toFixed(1)}/40`);
+  chk(mean(rr)>=16&&mean(rr)<=24, "random forest'ta kökte x₁ soran 20 civarı: P = m/p = 1/2 (adım 6, .ask)", `${mean(rr).toFixed(1)}/40`);
+  chk(Math.min(...rr)>=10&&Math.max(...rr)<=30, "tek tek veri kümelerinde de yarıya yakın (not: en az 14, en çok 27)", `${Math.min(...rr)}–${Math.max(...rr)}`);
+  chk(mean(ri)>=10&&mean(ri)<=17, "kimlik sütunu açıkken kökte x₁ soran üçte bir civarı (p = 3, ders notu · Göstergeler)", `${mean(ri).toFixed(1)}/40`);
+  chk(mean(tb)-mean(tr)>=1&&mean(tb)-mean(tr)<=4.5, "random forest'ta tek ağaç OOB'si 2–3 puan geriliyor (adım 6, .ask)", `−${(mean(tb)-mean(tr)).toFixed(1)} puan`);
+  chk(mean(or)>=mean(ob)-0.5, "ama ormanın OOB'si düşmüyor (adım 6, .ask)", `${(mean(or)-mean(ob)>=0?"+":"")+(mean(or)-mean(ob)).toFixed(1)} puan`);
+}
+
+/* ── 15 · Orman · hard ve soft voting ──
+   Adım 8: derinlik 2'de iki sınır haritanın yaklaşık beşte birinde ayrışıyor, OOB
+   ortalama 6–7 puan artıyor; derinlik 6'da fark alanın %2'sine iniyor.
+   Ölçüm (20 veri, pivot, RF, 40 ağaç): d2 +6.7 puan, alan %19.5; d6 +0.3, %2.0. */
+{
+  head("Modül 15 · hard / soft voting (pivot, derinlik 2 ve 6)");
+  const {el,M}=boot(F);
+  const area=()=>{const m=/haritanın %([\d.]+)/.exec(el('c-ens').getAttribute('aria-label')); return m?+m[1]:NaN;};
+  const r={2:{h:[],s:[],a:[]},6:{h:[],s:[],a:[]}};
+  for(let t=0;t<16;t++) for(const d of [2,6]){ PK(M,'m-ens',1); P(el,'ens-id',false); el('ens-m1').click();
+    S(el,'ens-d',d); S(el,'ens-k',40);
+    el('ens-hard').click(); r[d].h.push(V(el,'ens-oob'));
+    el('ens-soft').click(); r[d].s.push(V(el,'ens-oob')); r[d].a.push(area()); el('ens-hard').click(); }
+  for(const d of [2,6]) console.log(`       derinlik ${d}: OOB hard %${mean(r[d].h).toFixed(1)} · soft %${mean(r[d].s).toFixed(1)} · farklı alan %${mean(r[d].a).toFixed(1)}`);
+  const g2=mean(r[2].s)-mean(r[2].h);
+  chk(g2>=4&&g2<=10, "derinlik 2'de soft voting OOB'yi ortalama 6–7 puan artırıyor (adım 8)", `+${g2.toFixed(1)} puan`);
+  chk(mean(r[2].a)>=12&&mean(r[2].a)<=28, "iki sınır haritanın yaklaşık beşte birinde ayrışıyor (adım 8)", `%${mean(r[2].a).toFixed(1)}`);
+  chk(mean(r[6].a)<=4, "derinlik 6'da fark alanın %2'si civarına iniyor (adım 8)", `%${mean(r[6].a).toFixed(1)}`);
+  chk(Math.abs(mean(r[6].s)-mean(r[6].h))<1.5, "derin ağaçta iki oylama neredeyse aynı karar veriyor", `${(mean(r[6].s)-mean(r[6].h)).toFixed(1)} puan`);
+}
+
+/* ── 15 · Orman · kimlik sütunu: Gini önemi kayırır, permütasyon önemi 0 der ──
+   Adım 9 ve ders notu (Sağ panel, altta). Ölçüm (12 veri, kredi, RF, derinlik 6):
+   Gini kimlik 0.171 (en az 0.149), permütasyon 0.001 (en çok 0.025). */
+{
+  head("Modül 15 · kimlik sütunu (Gini ↔ permütasyon önemi)");
+  const {el,M}=boot(F);
+  const imp=(re)=>{const m=re.exec(el('c-ens').getAttribute('aria-label')); return m?m[1].split(', ').map(x=>parseFloat(x.split(' ').pop().replace('−','-'))):[NaN,NaN,NaN];};
+  const g=[],p=[];
+  for(let t=0;t<14;t++){ PK(M,'m-ens',0); el('ens-hard').click(); el('ens-m1').click(); S(el,'ens-d',6); S(el,'ens-k',40);
+    P(el,'ens-id',true);
+    g.push(imp(/Gini önemi: (.*?)\. Permütasyon/)); p.push(imp(/Permütasyon önemi: (.*?)\.$/)); P(el,'ens-id',false); }
+  const gk=mean(g.map(x=>x[2])), pk=mean(p.map(x=>x[2])), px=mean(p.map(x=>x[0]));
+  console.log(`       kimlik: Gini ${gk.toFixed(3)} · permütasyon ${pk.toFixed(3)} (x₁'in permütasyonu ${px.toFixed(3)})`);
+  chk(gk>=0.12&&gk<=0.23, "Gini önemi kimliğe 0.15–0.20 arası pay veriyor (adım 9)", gk.toFixed(3));
+  chk(Math.abs(pk)<0.02, "permütasyon önemi kimliğe 0 diyor (adım 9)", pk.toFixed(3));
+  chk(px>5*Math.max(Math.abs(pk),0.005), "permütasyon gerçek sütunu (x₁) yine görüyor", `${px.toFixed(3)} ≫ ${pk.toFixed(3)}`);
 }
 
 /* ── 13 · Eşik · üç senaryo, üç ayrı maliyet ── */
@@ -839,34 +900,98 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
       `+${mean(gap).toFixed(1)} bin ₺`);
 }
 
-/* ── 08 · SVM: C koridoru daraltır, RBF halkayı çözer ── */
+/* ── 16 · SVM: C yolu daraltır, test doğruluğu ezberi gösterir, kernel halkayı çözer ──
+   Çözücü b'yi cezalandırmıyor (SMO) ve deterministik; rastgelelik yalnız veride.
+   C kaydırıcısı 0–40: C = 10^(v/10 − 2) → 0 = 0.01, 20 = 1, 40 = 100.
+   gamma kaydırıcısı 0–30: γ = 10^(v/10 − 1) → 0 = 0.1, 13 = 2.0, 30 = 100. */
 {
-  head("Modül 16 · En geniş yol (C ve kernel)");
+  head("Modül 16 · « Dört ev » (Hafta 12'nin elle çözümü)");
   const {el,M}=boot(F);
-  const wide=[], mid=[], narrow=[], svN=[];
-  for(let t=0;t<10;t++){
-    PK(M,'m-svm',0); P(el,'svm-lin',true);
-    S(el,'svm-c',0);   wide.push(V(el,'svm-m'));
-    S(el,'svm-c',50);  mid.push(V(el,'svm-m'));
-    S(el,'svm-c',100); narrow.push(V(el,'svm-m'));
-    svN.push(V(el,'svm-sv'));
-  }
-  console.log(`       marj: C=0.01 → ${mean(wide).toFixed(3)} · C=1 → ${mean(mid).toFixed(3)} · C=100 → ${mean(narrow).toFixed(3)}`);
-  chk(mean(wide)>mean(narrow), "C büyüdükçe marj koridoru daralıyor (adım 2–3)",
-      `${mean(wide).toFixed(3)} → ${mean(narrow).toFixed(3)}`);
-  chk(mean(svN)<36, "modeli 36 noktanın yalnız bir kısmı belirliyor (.ask: 'kaçını gerçekten kullanıyor')",
-      `ortalama ${mean(svN).toFixed(1)} destek vektörü / 36 nokta`);
-  const linErr=[], rbfErr=[];
-  for(let t=0;t<10;t++){
-    PK(M,'m-svm',2);                                   // halka
-    P(el,'svm-lin',true); S(el,'svm-c',60); linErr.push(V(el,'svm-err'));
-    P(el,'svm-rbf',true); S(el,'svm-g',45); rbfErr.push(V(el,'svm-err'));
-  }
-  console.log(`       halka verisi · yanlış sınıflanan: doğrusal ${mean(linErr).toFixed(1)} · RBF ${mean(rbfErr).toFixed(1)}`);
-  chk(mean(linErr)>3*Math.max(mean(rbfErr),0.2), "doğrusal çekirdek halkada çaresiz, RBF çözüyor (adım 5)",
-      `doğrusal ${mean(linErr).toFixed(1)} → RBF ${mean(rbfErr).toFixed(1)}`);
+  const aria=()=>el('c-svm').getAttribute('aria-label');
+  PK(M,'m-svm',3); P(el,'svm-z',false); P(el,'svm-lin',true); S(el,'svm-c',20);
+  const m1=T(el,'svm-m'), sv1=T(el,'svm-sv'), a1=aria();
+  S(el,'svm-c',10); const m01=T(el,'svm-m'), sv01=T(el,'svm-sv');
+  S(el,'svm-c',40); const m100=T(el,'svm-m'); S(el,'svm-c',20);
+  console.log(`       C=1: margin ${m1} · SV ${sv1} · ${(/Doğrusal: ([^,]+)/.exec(a1)||[])[1]}`);
+  console.log(`       C=0.1: margin ${m01} · SV ${sv01} · C=100: margin ${m100}`);
+  chk(/w = \(0\.50, 0\.50\), b = −2\.00/.test(a1), "ekranda w = (0.50, 0.50), b = −2.00 (adım 2, not)", (/w = [^m]+/.exec(a1)||[''])[0]);
+  chk(m1==="2.83", "margin veri biriminde 2.83 (adım 2, figür, elle hesap)", m1);
+  chk(sv1==="3 / 4", "üç ev support vector, (4, 4) değil (adım 2)", sv1);
+  chk(m100==="2.83", "C = 100'de de aynı yol (not: 'C = 1 ve üstünde sonuç aynı')", m100);
+  chk(m01==="6.19"&&sv01==="4 / 4", "C = 0.1'de yol 6.19'a açılıyor, dört ev de support vector (not)", `${m01} · ${sv01}`);
 }
-
+{
+  head("Modül 16 · « Kalite kontrol » (C yolu daraltır)");
+  const {el,M}=boot(F);
+  const r={0:{m:[],sv:[],tr:[],te:[]},20:{m:[],sv:[],tr:[],te:[]},40:{m:[],sv:[],tr:[],te:[]}};
+  for(let t=0;t<16;t++){ PK(M,'m-svm',0); P(el,'svm-z',false); P(el,'svm-lin',true);
+    for(const c of [0,20,40]){ S(el,'svm-c',c); r[c].m.push(V(el,'svm-m')); r[c].sv.push(V(el,'svm-sv')); r[c].tr.push(V(el,'svm-tr')); r[c].te.push(V(el,'svm-te')); } }
+  for(const c of [0,20,40]) console.log(`       C=${[0.01,1,100][c/20]}: margin ${mean(r[c].m).toFixed(2)} · SV ${mean(r[c].sv).toFixed(1)}/36 · eğitim %${mean(r[c].tr).toFixed(1)} · test %${mean(r[c].te).toFixed(1)}`);
+  chk(mean(r[0].m)>mean(r[20].m)&&mean(r[20].m)>mean(r[40].m), "C büyüdükçe yol daralıyor (adım 3–4)", [0,20,40].map(c=>mean(r[c].m).toFixed(2)).join(" → "));
+  chk(mean(r[40].m)>=2.2&&mean(r[40].m)<=3.0, "C = 100'de yol ortalama 2.6 birim (adım 3, not)", mean(r[40].m).toFixed(2));
+  chk(mean(r[40].sv)<=3.5, "C = 100'de support vector 2–3'e iniyor (adım 3)", mean(r[40].sv).toFixed(1));
+  chk(mean(r[0].m)>=8&&mean(r[0].m)<=10.5, "C = 0.01'de yol 9 birime açılıyor (adım 4, not)", mean(r[0].m).toFixed(2));
+  chk(mean(r[0].sv)>=35, "C = 0.01'de bütün noktalar support vector (adım 4, not)", `${mean(r[0].sv).toFixed(1)}/36`);
+  chk(mean(r[0].tr)>=99&&mean(r[0].te)>=99, "yine de eğitim ve test %100: çok support vector ≠ ezber (adım 4)", `%${mean(r[0].tr).toFixed(1)} / %${mean(r[0].te).toFixed(1)}`);
+  chk(mean(r[20].sv)<36, "modeli 36 noktanın yalnız birkaçı belirliyor (.ask: 'kaçını gerçekten kullanıyor')", `${mean(r[20].sv).toFixed(1)} / 36`);
+  chk([0,20,40].every(c=>mean(r[c].te)>=98), "test doğruluğu her C'de %100'e yakın (not)", [0,20,40].map(c=>mean(r[c].te).toFixed(1)).join(" · "));
+}
+{
+  head("Modül 16 · « Kredi riski » (iç içe sınıflar · C büyürse test düşebilir)");
+  const {el,M}=boot(F);
+  const best=[], tr1=[], te1=[], tr100=[], te100=[]; let fell=0; const N=12;
+  for(let t=0;t<N;t++){ PK(M,'m-svm',1); P(el,'svm-z',false); P(el,'svm-lin',true);
+    let b=0; for(let c=0;c<=40;c+=10){ S(el,'svm-c',c); b=Math.max(b,V(el,'svm-tr')); } best.push(b);
+    P(el,'svm-rbf',true); S(el,'svm-g',13);
+    S(el,'svm-c',20); tr1.push(V(el,'svm-tr')); te1.push(V(el,'svm-te'));
+    S(el,'svm-c',40); tr100.push(V(el,'svm-tr')); te100.push(V(el,'svm-te'));
+    if(te100[t]<te1[t]) fell++; }
+  console.log(`       doğrusal: en iyi C'de eğitim ort %${mean(best).toFixed(1)} (en çok %${Math.max(...best)})`);
+  console.log(`       RBF γ=2: C=1 eğitim %${mean(tr1).toFixed(1)} test %${mean(te1).toFixed(1)} → C=100 eğitim %${mean(tr100).toFixed(1)} test %${mean(te100).toFixed(1)} · test düştü ${fell}/${N}`);
+  chk(Math.max(...best)<100, "doğrusal kernel'de hiçbir C eğitimi %100'e çıkarmıyor (adım 5)", `en çok %${Math.max(...best)}`);
+  chk(mean(best)>=80&&mean(best)<=88, "en iyisi %84 civarı (adım 5, not)", `%${mean(best).toFixed(1)}`);
+  chk(mean(tr100)>=mean(tr1)+6&&mean(tr100)>=96, "RBF'te C 1 → 100: eğitim %87'den %99'a çıkıyor (adım 6, not)", `%${mean(tr1).toFixed(1)} → %${mean(tr100).toFixed(1)}`);
+  /* Eşli fark tek tek veride oynak (12 veride 7/12 ile 15/16 arası ölçüldü): metin
+     "ortalama" diyor ve "tek bir veride fark oynak" uyarısını veriyor, sınama da ortalamaya bakıyor. */
+  chk(mean(te1)-mean(te100)>=4, "aynı hamlede test doğruluğu ortalama %76 → %68 civarı düşüyor (adım 6, not)", `%${mean(te1).toFixed(1)} → %${mean(te100).toFixed(1)} · düştü ${fell}/${N}`);
+  chk(mean(te1)>=71&&mean(te1)<=81&&mean(te100)>=62&&mean(te100)<=73, "C = 1'de test %76, C = 100'de %68 civarı (adım 6, not)", `%${mean(te1).toFixed(1)} / %${mean(te100).toFixed(1)}`);
+}
+{
+  head("Modül 16 · « Baz istasyonu » (doğru yetmiyor · z = x₁² + x₂² · RBF)");
+  const {el,M}=boot(F);
+  const zacc=()=>{const m=/eşik doğruluğu %([\d.]+)\./.exec(el('c-svm').getAttribute('aria-label')); return m?+m[1]:NaN;};
+  const ltr=[], lm=[], z=[], g2tr=[], g2te=[], g100tr=[], g100te=[]; const N=12;
+  for(let t=0;t<N;t++){ PK(M,'m-svm',2); P(el,'svm-z',false); P(el,'svm-lin',true); S(el,'svm-c',20);
+    ltr.push(V(el,'svm-tr')); lm.push(T(el,'svm-m'));
+    P(el,'svm-z',true); z.push(zacc()); P(el,'svm-z',false);
+    P(el,'svm-rbf',true); S(el,'svm-g',13); g2tr.push(V(el,'svm-tr')); g2te.push(V(el,'svm-te'));
+    S(el,'svm-g',30); g100tr.push(V(el,'svm-tr')); g100te.push(V(el,'svm-te')); }
+  console.log(`       doğrusal: eğitim %${mean(ltr).toFixed(1)} · margin "${lm[0]}" · z eşiği %${mean(z).toFixed(1)} (en az %${Math.min(...z)})`);
+  console.log(`       RBF γ=2: eğitim %${mean(g2tr).toFixed(1)} test %${mean(g2te).toFixed(1)} · γ=100: eğitim %${mean(g100tr).toFixed(1)} test %${mean(g100te).toFixed(1)}`);
+  chk(lm.every(s=>/∞/.test(s)), "doğrusal kernel yön bulamıyor: w ≈ 0 (adım 7, not)", lm[0]);
+  chk(mean(ltr)>=60&&mean(ltr)<=70, "herkese 'kapsama dışı': doğruluk %65 (adım 7, not)", `%${mean(ltr).toFixed(1)}`);
+  chk(mean(z)>=99, "z = x₁² + x₂² eklenince düz eşik hepsini ayırıyor (adım 8, not)", `%${mean(z).toFixed(1)}`);
+  chk(mean(g2tr)>=mean(ltr)+25, "doğrusal çekirdek halkada çaresiz, RBF çözüyor (adım 9)", `%${mean(ltr).toFixed(1)} → %${mean(g2tr).toFixed(1)}`);
+  chk(mean(g2te)>=97&&mean(g2tr)>=97, "RBF γ = 2: eğitim ve test %99 civarı (adım 9, not)", `%${mean(g2tr).toFixed(1)} / %${mean(g2te).toFixed(1)}`);
+  chk(mean(g100te)<=80&&mean(g100tr)>=99, "γ = 100'de test %74'e iniyor, eğitim %100 (not)", `%${mean(g100tr).toFixed(1)} / %${mean(g100te).toFixed(1)}`);
+}
+{
+  head("Modül 16 · « Kızılırmak » (gamma: düz · kıvrım · ada)");
+  const {el,M}=boot(F);
+  const r={0:{tr:[],te:[]},13:{tr:[],te:[]},30:{tr:[],te:[]}}; let up=0, mono=0; const N=14;
+  for(let t=0;t<N;t++){ PK(M,'m-svm',4); P(el,'svm-z',false); P(el,'svm-rbf',true); S(el,'svm-c',20);
+    for(const g of [0,13,30]){ S(el,'svm-g',g); r[g].tr.push(V(el,'svm-tr')); r[g].te.push(V(el,'svm-te')); }
+    if(r[13].te[t]>r[0].te[t]) up++;
+    if(r[0].tr[t]<=r[13].tr[t]&&r[13].tr[t]<=r[30].tr[t]) mono++; }
+  const M_=(g,k)=>mean(r[g][k]);
+  for(const g of [0,13,30]) console.log(`       γ=${({0:"0.1",13:"2",30:"100"})[g]}: eğitim %${M_(g,'tr').toFixed(1)} · test %${M_(g,'te').toFixed(1)}`);
+  console.log(`       γ 0.1 → 2 testte iyileşti ${up}/${N} · eğitim hep arttı ${mono}/${N}`);
+  chk(M_(0,'tr')>=75&&M_(0,'tr')<=88&&M_(0,'te')>=74&&M_(0,'te')<=88, "γ = 0.1: eğitim de test de %80 civarı, underfitting (adım 10, .ask, not)", `%${M_(0,'tr').toFixed(1)} / %${M_(0,'te').toFixed(1)}`);
+  chk(M_(13,'tr')>=90&&M_(13,'tr')<=97.5&&M_(13,'te')>=85&&M_(13,'te')<=94, "γ = 2: eğitim %90'ın üstünde (not: %91–96), test %90 civarı (adım 11, .ask, not)", `%${M_(13,'tr').toFixed(1)} / %${M_(13,'te').toFixed(1)}`);
+  chk(M_(30,'tr')>=99&&M_(30,'te')>=57&&M_(30,'te')<=73, "γ = 100: eğitim %100, test %65 civarı (adım 12, .ask, not)", `%${M_(30,'tr').toFixed(1)} / %${M_(30,'te').toFixed(1)}`);
+  chk(M_(13,'te')>=M_(0,'te')+4&&M_(13,'te')>=M_(30,'te')+15, "test doğruluğu önce artıp sonra düşüyor (.ask)", `${M_(0,'te').toFixed(1)} → ${M_(13,'te').toFixed(1)} → ${M_(30,'te').toFixed(1)}`);
+  chk(mono>=0.8*N, "eğitim doğruluğu gamma ile hep artıyor (.ask)", `${mono}/${N}`);
+}
 /* ── 10 · Yanlılık–varyans: karmaşıklık ikisini ters yönde hareket ettiriyor ── */
 {
   head("Modül 04 · Yanlılık mı, varyans mı (ayrışma)");
