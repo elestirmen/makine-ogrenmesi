@@ -833,9 +833,17 @@ input[type=range]{min-height:28px;margin:0}
         <canvas id="c-km" aria-label="k-ortalamalar kümeleme tuvali"></canvas>
         <div class="bar">
           <label class="ctl"><span class="lab">k</span><input type="range" id="km-k" min="2" max="6" step="1" value="3"><output id="km-ko">3</output></label>
+          <div class="seg" role="group" aria-label="Başlangıç yöntemi (yeniden basmak yeni başlangıç)" id="km-init">
+            <button id="km-ir" aria-pressed="true">Rastgele</button>
+            <button id="km-ip" aria-pressed="false" lang="en">k-means++</button>
+          </div>
+          <div class="seg" role="group" aria-label="Başlangıç merkezleri" id="km-fix" hidden>
+            <button id="km-good" aria-pressed="false">İyi başlangıç</button>
+            <button id="km-bad" aria-pressed="false">Kötü başlangıç</button>
+          </div>
           <button class="btn" id="km-step">Sonraki adım</button>
           <button class="btn primary" id="km-run" aria-pressed="false">Yakınsat</button>
-          <button class="btn" id="km-seed">Merkezleri yeniden at</button>
+          <button class="btn" id="km-ten">10 kez dene</button>
           <button class="btn" id="km-demo">Örnek veri</button>
           <button class="btn" id="km-clr">Temizle</button>
           <span class="hint">Tuvale tıkla → nokta ekle · sürükle → taşı</span>
@@ -845,12 +853,13 @@ input[type=range]{min-height:28px;margin:0}
           <div class="stat"><span class="k">Sıradaki adım</span><span class="v" id="km-s">Ata</span></div>
           <div class="stat"><span class="k">WCSS</span><span class="v" id="km-j">—</span></div>
           <div class="stat"><span class="k">Nokta</span><span class="v" id="km-n">0</span></div>
+          <div class="stat"><span class="k">10 denemede</span><span class="v" id="km-nd">—</span></div>
         </div>
       </div>
       <div class="ask">
         <span class="tag">Dene ve düşün</span>
         <div>
-          <p>« Merkezleri yeniden at »a birkaç kez bas: aynı veri, farklı başlangıç, farklı sonuç. k-ortalamalar neden rastgele başlangıca bu kadar duyarlı?</p>
+          <p>« Rastgele »ye birkaç kez bas: her basış yeni bir başlangıç; aynı veri, farklı sonuç. k-ortalamalar neden başlangıca bu kadar duyarlı? Sonra « Uydu pikselleri »nde k = 3 iken « 10 kez dene »ye bas ve kaç farklı sonuç çıktığına bak. « k-means++ » seçiliyken aynı deneyi yap: farklı sonuç neden azalıyor?</p>
           <p>Bir de k'yı 6 yap. Küme içi kareler toplamı (WCSS) düşüyor; kümeler daha mı anlamlı oldu? "Hata azaldı" ile "model iyileşti" aynı şey mi?</p>
         </div>
       </div>
@@ -1432,25 +1441,31 @@ input[type=range]{min-height:28px;margin:0}
       <div class="head">
         <div class="eyebrow"><span>Modül 17 · Hafta 13</span><span class="chip">BOYUT İNDİRGEME</span></div>
         <h2>İki Sayı Yerine Bir Sayı</h2>
-        <p>Nokta bulutu bir yöne uzamışsa, o yön verinin çoğunu zaten anlatıyor demektir. <b>PCA</b> (ana bileşen analizi) bu yönü bulur ve veriyi oraya izdüşürür. Solda eksenler ve izdüşümler, sağda bir boyuta inince neyi kaybettiğimiz.</p>
+        <p>Nokta bulutu bir yöne uzamışsa, o yön verinin çoğunu zaten anlatıyor demektir. <b>PCA</b> (ana bileşen analizi) bu yönü bulur ve veriyi oraya izdüşürür. Solda izdüşümler, ortada kaybettiğimiz, sağda açıya göre varyans.</p>
       </div>
       <div class="stage">
-        <canvas id="c-pca" aria-label="PCA eksenleri, izdüşümler ve yeniden oluşturma hatası"></canvas>
+        <canvas id="c-pca" aria-label="PCA eksenleri, izdüşümler, yeniden oluşturma ve açıya göre varyans eğrisi"></canvas>
         <div class="bar">
-          <label class="ctl"><span class="lab">Uzama</span><input type="range" id="pca-cor" min="0" max="100" step="1" value="78"><output id="pca-coro">0.78</output></label>
-          <label class="ctl"><span class="lab">Dönme</span><input type="range" id="pca-rot" min="0" max="180" step="1" value="30"><output id="pca-roto">30°</output></label>
+          <label class="ctl" id="pca-corl"><span class="lab">Uzama</span><input type="range" id="pca-cor" min="0" max="100" step="1" value="78"><output id="pca-coro">0.78</output></label>
+          <label class="ctl" id="pca-rotl"><span class="lab">Dönme</span><input type="range" id="pca-rot" min="0" max="180" step="1" value="30"><output id="pca-roto">30°</output></label>
+          <div class="seg" role="group" aria-label="Çalışma süresinin birimi" id="pca-units" hidden>
+            <button id="pca-uh" aria-pressed="true">Saat</button>
+            <button id="pca-um" aria-pressed="false">Dakika</button>
+            <button id="pca-uz" aria-pressed="false">Standart (z)</button>
+          </div>
           <div class="seg" role="group" aria-label="Tutulacak bileşen">
             <button id="pca-c1" aria-pressed="true">1 bileşen</button>
             <button id="pca-c2" aria-pressed="false">2 bileşen</button>
           </div>
           <button class="btn" id="pca-new">Yeni veri</button>
           <button class="btn" id="pca-clr">Temizle</button>
-          <span class="hint">Noktaları sürükleyip eksenlerin nasıl döndüğünü görebilirsin.</span>
+          <span class="hint">Noktaları sürükle · fareyle bir yön dene (solda ya da sağdaki eğride)</span>
         </div>
         <div class="stats">
           <div class="stat"><span class="k">PC1 · 1. bileşen</span><span class="v ok" id="pca-v1">—</span></div>
           <div class="stat"><span class="k">PC2 · 2. bileşen</span><span class="v" id="pca-v2">—</span></div>
-          <div class="stat"><span class="k">Yeniden oluşturma hatası</span><span class="v" id="pca-err">—</span></div>
+          <div class="stat"><span class="k">Özdeğer <span class="sym">λ₁ · λ₂</span></span><span class="v" id="pca-lam">—</span></div>
+          <div class="stat"><span class="k">Geri kurma hatası</span><span class="v" id="pca-err">—</span></div>
           <div class="stat"><span class="k">Saklanan sayı</span><span class="v" id="pca-sz">—</span></div>
         </div>
       </div>
@@ -1458,7 +1473,7 @@ input[type=range]{min-height:28px;margin:0}
         <span class="tag">Dene ve düşün</span>
         <div>
           <p>Uzamayı 0'a indir: bulut yuvarlaklaşıyor, birinci bileşenin payı %60 civarına iniyor (örneklem gürültüsü yüzünden tam %50 çıkmaz). PCA burada bir şey kazandırıyor mu? Hangi veride işe yarar, hangisinde yaramaz? Tek cümleyle yaz.</p>
-          <p>Dönme açısını değiştir: eksenler veriyle birlikte dönüyor ama yüzdeler <b>değişmiyor</b>. Neden? Peki bir özniteliğin ölçeğini değiştirseydin ne olurdu? (Modül 02'yi hatırla.)</p>
+          <p>Dönme açısını değiştir: eksenler veriyle birlikte dönüyor ama yüzdeler <b>değişmiyor</b>. Neden? Sonra « Not ve süre » verisinde süreyi saatten dakikaya çevir: PC1 yine %99'un üstünde ama öbür sütuna döndü. Hangisine inanırsın? « Standart (z) » neden ikisinden de dürüst? (Modül 02'yi hatırla.)</p>
         </div>
       </div>
     </section>
@@ -1571,15 +1586,21 @@ input[type=range]{min-height:28px;margin:0}
         <p>k-ortalamalar (k-means) kümeleri bir merkezin çevresinde yuvarlak varsayar; hilal ya da halkada bu tutmaz. <b>DBSCAN</b> (yoğunluk temelli kümeleme) merkez aramaz, yoğunluğu takip eder; <b>hierarchical clustering</b> (hiyerarşik kümeleme) en yakını birleştirerek ilerler. Solda k-ortalamalar, sağda seçilen yöntem.</p>
       </div>
       <div class="stage">
-        <canvas id="c-dbs" aria-label="Solda k-ortalamalar, sağda DBSCAN ya da hierarchical clustering sonucu"></canvas>
+        <canvas id="c-dbs" aria-label="Solda k-ortalamalar, sağda DBSCAN ya da hierarchical clustering sonucu ve dendrogram"></canvas>
         <div class="bar">
           <label class="ctl"><span class="lab">k</span><input type="range" id="db-k" min="2" max="6" step="1" value="2"><output id="db-ko">2</output></label>
           <div class="seg" role="group" aria-label="Sağ panel yöntemi">
             <button id="db-dbscan" aria-pressed="true">DBSCAN</button>
             <button id="db-hier" aria-pressed="false" lang="en">Hierarchical</button>
           </div>
-          <label class="ctl"><span class="lab">eps</span><input type="range" id="db-eps" min="2" max="30" step="1" value="8"><output id="db-epso">0.08</output></label>
-          <label class="ctl"><span class="lab" lang="en">min_samples</span><input type="range" id="db-mp" min="2" max="12" step="1" value="4"><output id="db-mpo">4</output></label>
+          <label class="ctl" id="db-epsl"><span class="lab">eps</span><input type="range" id="db-eps" min="2" max="30" step="1" value="8"><output id="db-epso">0.08</output></label>
+          <label class="ctl" id="db-mpl"><span class="lab" lang="en">min_samples</span><input type="range" id="db-mp" min="2" max="12" step="1" value="4"><output id="db-mpo">4</output></label>
+          <div class="seg" role="group" aria-label="Linkage" id="db-link" hidden>
+            <button id="db-lsin" aria-pressed="false" lang="en">Single</button>
+            <button id="db-lcom" aria-pressed="false" lang="en">Complete</button>
+            <button id="db-lavg" aria-pressed="false" lang="en">Average</button>
+            <button id="db-lwar" aria-pressed="true" lang="en">Ward</button>
+          </div>
           <button class="btn" id="db-new">Yeni veri</button>
           <button class="btn" id="db-clr">Temizle</button>
           <span class="hint">Sol panele tıkla → nokta ekle · sürükle → taşı</span>
@@ -1597,6 +1618,7 @@ input[type=range]{min-height:28px;margin:0}
         <div>
           <p>İki hilal verisinde k-ortalamalara bak: hilalleri birbirinden ayırmak yerine ikisini de ortadan, enine kesiyor. Neden? k-ortalamalar aslında hangi soruyu soruyor da bu cevabı veriyor?</p>
           <p>DBSCAN'de eps'i çok küçült: her şey gürültü oluyor. Çok büyüt: her şey tek küme. Doğru eps'i kim söyleyecek, veri mi, sen mi? Nasıl seçerdin?</p>
+          <p>Hierarchical'a geç ve linkage'ı Ward'dan Single'a çevir: hilaller neden birden ayrıldı? Aynı Single'ı « Öbek + gürültü »de k = 3 ile dene: ne bozuldu, dendrogramın tepesinde ne görüyorsun? (İpucu: zincirin halkası olan tek bir nokta.)</p>
         </div>
       </div>
     </section>
@@ -2474,21 +2496,29 @@ const CONTENT={
     {name:"Artçı sarsıntılar", x:"doğu (km)", y:"kuzey (km)", gen:"fault",
      note:"Fay hattı boyunca uzamış iki öbek. Kümeler artık coğrafi: k-ortalamalar burada merkezleri fay boyunca diziyor."},
     {name:"Uydu pikselleri", x:"kırmızı bandı", y:"kızılötesi bandı", gen:"bands",
-     note:"Su, bitki ve toprak pikselleri iki bantta ayrı öbekler kurar. Etiketsiz uydu görüntüsünü sınıflandırmanın en eski yolu bu."}
+     note:"Su, bitki ve toprak pikselleri iki bantta ayrı öbekler kurar. Etiketsiz uydu görüntüsünü sınıflandırmanın en eski yolu bu."},
+    {name:"Altı nokta", x:"x₁", y:"x₂", gen:"six",
+     fix:{pts:[[1,2],[2,3],[3,2],[8,7],[9,9],[7,8]], lab:"ABCDEF", sc:10, starts:{good:[[2,2],[8,8]], bad:[[1,2],[2,3]]}},
+     note:"Hafta 14'ün elle çözülen örneği, veri biriminde (eksenler 0–10, WCSS de bu birimde). İyi başlangıç μ = (2, 2), (8, 8): 2 iterasyon, J 7.00 → 6.67. Kötü başlangıç μ = A, B: 3 iterasyon, J 189 → 77.6 → 39.04 → 6.67. İkisi de aynı iki kümede, {A, B, C} ve {D, E, F}'de durur."}
   ],
   lesson:{
     q:"Kimse etiket vermediyse gruplar nereden çıkıyor?",
     short:"Verinin kendisinden. k-ortalamalar (k-means), 'birbirine yakın noktalar aynı gruptadır' varsayımıyla noktaları k gruba ayırır. Doğru cevap diye bir şey yok; bulduğu grupların anlamlı olup olmadığına sen karar verirsin.",
     idea:["Şimdiye kadar her noktanın bir etiketi vardı: uçak mı kuş mu, geçti mi kaldı mı. Burada yok. Elinde yalnız müşterilerin ne sıklıkla geldiği ve ne kadar harcadığı var. Sorduğun soru 'kaç tür müşteri var?'. Buna <b>unsupervised learning</b> (denetimsiz öğrenme) deniyor: cevap anahtarı yok, model kendi kendine düzen arıyor. Çamaşırları renklerine göre ayırmak gibi: kimse sana 'bunlar beyazlar' demiyor, benzerleri kendin bir araya koyuyorsun.",
           "<b>k-ortalamalar</b> (k-means) iki adımı sırayla tekrar eder. <b>Ata</b>: her nokta kendine en yakın merkeze bağlanır. <b>Güncelle</b>: her merkez kendi noktalarının tam ortasına kayar. Mahallede üç market düşün: her ev en yakın markete gider, sonra her market kendi müşterilerinin ortasına taşınır. Merkezin İngilizce adı <b>centroid</b>, sembolü μ ('mü'). Sonra yine ata, yine güncelle; her tura bir iterasyon deniyor. Merkezler artık kımıldamıyorsa iş bitti. Hepsi bu kadar. 'Sıradaki adım' düğmesiyle iki adımı tek tek izleyebilirsin.",
-          "Algoritmanın küçülttüğü sayı <b>WCSS</b> (küme içi kareler toplamı; scikit-learn'de inertia): her noktanın kendi merkezine uzaklığının karesi, hepsinin toplamı. Kümeler ne kadar topluysa WCSS o kadar küçük. İki adımın ikisi de bu sayıyı ya düşürür ya olduğu gibi bırakır; bu yüzden algoritma mutlaka durur. Ama nerede duracağı başlangıç merkezlerine bağlı. Aynı veri, farklı başlangıç, farklı kümeler. « Merkezleri yeniden at »a birkaç kez basıp gör. Bu yüzden pratikte algoritma 10 kez farklı başlangıçla çalıştırılır ve WCSS'i en küçük sonuç tutulur (scikit-learn'de n_init); başlangıç merkezleri de birbirinden uzak seçilir (k-means++)."],
+          "Algoritmanın küçülttüğü sayı <b>WCSS</b> (küme içi kareler toplamı; scikit-learn'de inertia): her noktanın kendi merkezine uzaklığının karesi, hepsinin toplamı. Kümeler ne kadar topluysa WCSS o kadar küçük. İki adımın ikisi de bu sayıyı ya düşürür ya olduğu gibi bırakır; bu yüzden algoritma mutlaka durur. Ama nerede duracağı başlangıç merkezlerine bağlı. Aynı veri, farklı başlangıç, farklı kümeler. « Rastgele »ye birkaç kez basıp gör. Bu yüzden pratikte algoritma 10 kez farklı başlangıçla çalıştırılır ve WCSS'i en küçük sonuç tutulur (scikit-learn'de <b>n_init</b>); « 10 kez dene » tam bunu yapar. Başlangıç merkezleri de birbirinden uzak seçilir: <b>k-means++</b> ilk merkezi rastgele bir noktadan, sonrakileri var olan merkezlerden uzak noktalardan seçer, böylece merkezler baştan aynı öbeğe yığılmaz."],
     read:[["Tuval","Gri noktalar henüz kimseye atanmamış. Soluk renkli bölgeler her merkezin etki alanı: o bölgedeki her konum o merkeze en yakın. Renkli çizgiler hangi noktanın hangi merkeze bağlı olduğunu, kesikli izler merkezlerin adım adım nereden nereye yürüdüğünü gösteriyor. Merkez taşındıktan sonra başka renkte bir bölgede kalan nokta, bir sonraki atamada küme değiştirecek demektir."],
           ["Adımlar","'Sıradaki adım' göstergesi ata mı güncelle mi olduğunu söylüyor. Algoritmayı anlamanın en kolay yolu bu ikisini birer birer çalıştırmak."],
-          ["WCSS","Merkezler atanır atanmaz WCSS düşmeye başlar ve hiçbir adımda artmaz. Artıyorsa kodda hata vardır; bu, algoritmanın matematiksel garantisi."]],
+          ["WCSS","Merkezler atanır atanmaz WCSS düşmeye başlar ve hiçbir adımda artmaz. Artıyorsa kodda hata vardır; bu, algoritmanın matematiksel garantisi. 'İterasyon' atama turlarını sayar: son turda kimse yer değiştirmez ve algoritma durur."],
+          ["Başlangıç","Çubuktaki seçici başlangıç yöntemi: « Rastgele » ya da « k-means++ ». Seçili düğmeye yeniden basmak yeni bir başlangıç demek. « 10 kez dene » on başlangıcı sonuna kadar koşturup WCSS'i en küçük olanı tutar; göstergede kaç farklı sonuç çıktığı, köşede on denemenin J'si (yeşil çubuk en iyisi)."],
+          ["Altı nokta","Sunumun elle örneği: eksenler 0–10, her ızgara karesi bir birim, WCSS veri biriminde. Seçici burada « İyi başlangıç » (μ = (2, 2), (8, 8)) ve « Kötü başlangıç » (μ = A, B) olur; köşede J'nin adım adım yolculuğu ve merkezlerin koordinatı yazar. Noktaları sürükledikten sonra özgün tabloya dönmek için « Altı nokta » düğmesine yeniden bas."]],
     terms:[["k-means","k-ortalamalar","ata ve güncelle adımlarını tekrarlayan kümeleme yöntemi"],
            ["centroid","merkez","bir kümedeki noktaların ortalaması, yani ağırlık merkezi"],
            ["WCSS / inertia","küme içi kareler toplamı","noktaların kendi merkezine uzaklık karelerinin toplamı; küçüğü iyi"],
-           ["unsupervised learning","denetimsiz öğrenme","etiketsiz veriden düzen çıkarma; doğru cevap yok"]],
+           ["unsupervised learning","denetimsiz öğrenme","etiketsiz veriden düzen çıkarma; doğru cevap yok"],
+           ["k-means++","uzak merkezlerden başlatma","ilk merkez rastgele bir nokta, sonrakiler var olan merkezlere uzaklığın karesiyle orantılı şansla seçilir"],
+           ["n_init","başlangıç sayısı","algoritmayı kaç farklı başlangıçla koşturup WCSS'i en küçük sonucu tutacağın; scikit-learn'de 10 yazılır"],
+           ["local optimum","yerel en iyi","hiçbir noktanın küme değiştirmek istemediği ama en küçük WCSS olmayan durak"]],
     life:["Müşteri segmentasyonu, bir fotoğrafın renk sayısını azaltma (palet oluşturma), benzer belgeleri gruplama, uydu görüntüsünde arazi türlerini ayırma.",
           "Bir uyarı: k-ortalamalar her noktayı mutlaka bir kümeye koyar, 'bu hiçbir gruba ait değil' diyemez. Tuhaf noktaları (sensör arızası, sahte işlem) ayırmak için noktaya gürültü etiketi verebilen DBSCAN (Modül 20) daha uygundur."],
     trap:"k-ortalamalar kümelerin yuvarlak ve benzer boyda olduğunu varsayar. Uzun ince kümelerde ya da iç içe halkalarda saçmalar; 'Artçı sarsıntılar' verisinde bunu görebilirsin. Ayrıca uzaklıkla çalıştığı için ölçeğe duyarlı (Modül 02) ve k'yı sana söylemez; sen vereceksin.",
@@ -2557,24 +2587,33 @@ const CONTENT={
   sets:[
     {name:"Boy · Kilo", x:"boy (cm)", y:"kilo (kg)", c1:"iri–ufak ekseni",
      note:"İki ölçüm birbiriyle güçlü ilişkili. Tek bir sayı — 'iri' olma derecesi — ikisinin yerini büyük ölçüde tutuyor."},
-    {name:"Matematik · Fizik", x:"matematik notu", y:"fizik notu", c1:"genel başarı ekseni",
-     note:"İki not birlikte yükseliyor. 1. bileşen 'genel başarı', 2. bileşen ise 'hangi derse daha yatkın' oluyor."},
+    {name:"Beş öğrenci", x:"matematik notu", y:"fizik notu", c1:"genel fen başarısı",
+     fix:{x1:[60,70,76,82,92], x2:[58,66,74,78,84], lab:"ABCDE"},
+     note:"Hafta 13'ün tablosu, kendi biriminde: matematik 60, 70, 76, 82, 92; fizik 58, 66, 74, 78, 84. Ekranda PC1 40.1°, v₁ = (0.765, 0.644); özdeğerler 248.79 ve 1.21 (payda n − 1); PC1 varyansın %99.52'sini açıklıyor. Açı eğrisinde 0° → 146, 90° → 104."},
     {name:"Uydu bantları", x:"kırmızı bandı", y:"kızılötesi bandı", c1:"parlaklık ekseni",
-     note:"Uzaktan algılamanın kalbi: aydınlık pikselde iki bant birlikte yükselir. PC1 iki bandın toplamı, yani genel parlaklık. Bitki örtüsünü anlatan fark (kızılötesi eksi kırmızı; NDVI de bu farkı kullanır) ikinci bileşene düşer. Hafta 13'teki Landsat örneğinde de PC1 parlaklık, PC2 bitki örtüsü çıkıyor."}
+     note:"Uzaktan algılamanın kalbi: aydınlık pikselde iki bant birlikte yükselir. PC1 iki bandın toplamı, yani genel parlaklık. Bitki örtüsünü anlatan fark (kızılötesi eksi kırmızı; NDVI de bu farkı kullanır) ikinci bileşene düşer. Hafta 13'teki Landsat örneğinde de PC1 parlaklık, PC2 bitki örtüsü çıkıyor."},
+    {name:"Not ve süre", x:"matematik notu", y:"çalışma süresi",
+     fix:{x1:[60,70,76,82,92], x2:[3,4,7,5,6], lab:"ABCDE", unit:true,
+          c1:["neredeyse yalnız matematik","neredeyse yalnız süre","ikisi eşit ağırlıkta"]},
+     note:"Aynı beş öğrencinin matematik notu ve haftalık çalışma süresi (3, 4, 7, 5, 6 saat); birim anahtarı çubukta. Ölçtük: saatle PC1 5.3° ve %99.16, dakikayla 84.8° ve %99.21, standartlaştırınca 45° ve %85.33 (λ₁ = 1 + r = 1.71). İki %99 da birimin yanılsaması."}
   ],
   lesson:{
     q:"İki sayının yerini tek bir sayı tutabilir mi?",
     short:"İki sayı birlikte hareket ediyorsa evet. Boy ve kilo çoğunlukla birlikte artar; 'irilik' diye tek bir sayı ikisinin çoğunu anlatır. PCA bu tek sayıyı, yani verinin en çok yayıldığı yönü bulur.",
     idea:["Boy ve kilo noktalarını çizersen bulut yuvarlak değil, çapraz bir yöne uzamış çıkar: uzunlar genelde daha ağırdır. Demek ki verinin çoğu tek bir yön boyunca yaşıyor. <b>PCA</b> (ana bileşen analizi) bu yönü bulur. Noktaların en çok yayıldığı doğru 1. bileşen (PC1), ona dik olan 2. bileşen (PC2); İngilizcesi <b>principal component</b> (ana bileşen). Sonra her nokta 1. doğrunun üstüne düşürülür, yani gölgesi alınır. İki sayı yerine tek bir sayıyla, gölgenin doğru üstündeki yeriyle anlatılır. Bir çaydanlığı el feneriyle duvara düşürdüğün gölgesinden tanıtmaya çalış: ışık tepeden gelirse yuvarlak bir leke görürsün, yandan gelirse emzik ve kulp görünür. PCA en çok ayrıntıyı gösteren gölgenin açısını arar.",
           "Ne kadar kaybettik? Bileşen yüzdeleri söylüyor. Aşağıdaki beş öğrencide '1. bileşen varyansın %99.52'sini açıklıyor' demek, notların yayılımının %99.52'si o yönde demek. Buna <b>explained variance ratio</b> (açıklanan varyans oranı) deniyor. Matematikte bu yön kovaryans matrisinin <b>eigenvector</b>'ü (özvektör), o yöndeki varyans da <b>eigenvalue</b>'su (özdeğer); oran = özdeğer / özdeğerlerin toplamı. Bulut ne kadar uzunsa yüzde o kadar yüksek, kayıp o kadar az. Bulut yuvarlaksa yüzdeler yarı yarıya çıkar ve PCA hiçbir şey kazandırmaz; iki sayıyı bire indirmek o zaman gerçek bir kayıp. 'Uzama' kaydırıcısıyla ikisini de gör.",
-          "İki özniteliği bire indirmek göze küçük geliyor. Ama aynı fikir 50 sütunu 2'ye indirir ve o zaman veriyi ilk kez <i>görebilirsin</i>. Buna <b>dimensionality reduction</b> (boyut indirgeme) deniyor. Bir uyarı: PCA yalnız yayılıma bakar ve ölçeğe çok duyarlıdır. Kilo gram cinsinden yazılırsa 1. bileşen 'kilo' olur, boy görünmez. O yüzden PCA'dan önce standartlaştırma (Modül 02) neredeyse zorunlu."],
-    read:[["Sol panel","Kalın pembe doğru 1. bileşen, ince gri doğru 2. bileşen; boyları o yöndeki yayılımla orantılı. Her noktadan pembe doğruya inen ince çizgi o noktanın 'gölgesi'. Kaybettiğin bilgi tam olarak o çizgilerin uzunluğu. Fareyi bulutun etrafında gezdirirsen turuncu bir deneme ekseni çıkar ve o yöndeki yayılımı yazar: en büyük değer 1. bileşenin yönünde."],
-          ["Sağ panel","Bir (ya da iki) bileşenden geri kurulan veri. Tek bileşenle bütün noktalar bir doğru üstüne diziliyor; sıkıştırmanın bedeli bu. İki bileşenle veri aynen geri geliyor, çünkü zaten iki boyutluydu."],
-          ["Göstergeler","Yüzdeler açıklanan varyans oranı: PC1 ve PC2. 'Yeniden oluşturma hatası' geri kurulan noktaların özgünden ortalama ne kadar uzağa düştüğü. 'Saklanan sayı' nokta başına kaç sayı tuttuğumuz: 2 yerine 1."]],
+          "İki özniteliği bire indirmek göze küçük geliyor. Ama aynı fikir 50 sütunu 2'ye indirir ve o zaman veriyi ilk kez <i>görebilirsin</i>. Buna <b>dimensionality reduction</b> (boyut indirgeme) deniyor. Bir uyarı: PCA yalnız yayılıma bakar ve ölçeğe çok duyarlıdır. Kilo gram cinsinden yazılırsa 1. bileşen 'kilo' olur, boy görünmez. Bir yarışma düşün: iki jüri 10 üzerinden, biri 1000 üzerinden puan veriyor. Puanları toplarsan sıralamayı neredeyse yalnız üçüncü jüri belirler; daha haklı olduğu için değil, kartı büyük olduğu için. Çare her jürinin puanını kendi ortalamasına ve yayılımına göre çevirmek, yani <b>standardization</b> (standartlaştırma, z-skoru; Modül 02). 'Not ve süre' verisinde süreyi saatten dakikaya çevirip PC1'in nasıl döndüğünü gör; PCA'dan önce standartlaştırma bu yüzden neredeyse zorunlu."],
+    read:[["Sol panel","Kalın pembe doğru 1. bileşen, ince gri doğru 2. bileşen; boyları o yöndeki yayılımla orantılı. Köşede PC1'in açısı ve birim vektörü v₁ yazıyor. Her noktadan pembe doğruya inen ince çizgi o noktanın 'gölgesi'. Kaybettiğin bilgi tam olarak o çizgilerin uzunluğu. İki eksen aynı ölçekte çizilir (ızgaranın kareleri kare), yani perdedeki açı gerçek açı. Fareyi bulutun etrafında gezdirirsen turuncu bir deneme ekseni çıkar ve o yöndeki yayılımı yazar: en büyük değer 1. bileşenin yönünde."],
+          ["Orta panel","Bir (ya da iki) bileşenden geri kurulan veri. Tek bileşenle bütün noktalar bir doğru üstüne diziliyor; sıkıştırmanın bedeli bu. İki bileşenle veri aynen geri geliyor, çünkü zaten iki boyutluydu."],
+          ["Sağ panel","Açıya göre varyans: gölgeyi 0°'den 180°'ye her yöne düşürüp varyansını ölçen eğri. Tepesi λ₁ ve PC1'in açısı, dibi λ₂ ve ona dik yön. Sabit veride 0° ile 90°'deki gri noktalar iki sütunun kendi varyansı (beş öğrencide 146 ve 104). Fareyi eğrinin üstünde gezdirirsen soldaki deneme ekseni o açıya döner."],
+          ["Göstergeler","Yüzdeler açıklanan varyans oranı: PC1 ve PC2. Özdeğerler (λ₁ · λ₂) yalnız gerçek birimli veride yazılır: 'Beş öğrenci' ve 'Not ve süre'; rastgele bulutların birimi yok. 'Geri kurma hatası' geri kurulan noktaların özgünden ortalama ne kadar uzağa düştüğü. 'Saklanan sayı' nokta başına kaç sayı tuttuğumuz: 2 yerine 1."],
+          ["Birim anahtarı","Yalnız 'Not ve süre' verisinde: çalışma süresi saat, dakika ya da iki sütun birden z-skoru. Saatle PC1 5°'de, dakikayla 85°'de; ikisinde de %99.2. Standartlaştırınca 45° ve %85.3. Uzama ve dönme kaydırıcıları sabit tablolarda bir şey üretmediği için gizlenir."]],
     terms:[["PCA","ana bileşen analizi","verinin en çok yayıldığı yönleri bulup noktaları oraya düşürmek"],
            ["principal component","ana bileşen","yayılımı (varyansı) en çok açıklayan yön"],
            ["explained variance ratio","açıklanan varyans oranı","bir bileşenin verinin toplam yayılımının yüzde kaçını taşıdığı"],
            ["eigenvalue · eigenvector","özdeğer · özvektör","kovaryans matrisinin özvektörü bileşenin yönü, özdeğeri o yöndeki varyans"],
+           ["covariance matrix","kovaryans matrisi","sütunların varyanslarını (köşegen) ve ikişer ikişer kovaryanslarını tutan tablo; Σ"],
+           ["standardization","standartlaştırma","her sütundan ortalamasını çıkarıp standart sapmasına bölmek (z-skoru); birimi ortadan kaldırır"],
            ["dimensionality reduction","boyut indirgeme","sütun sayısını, bilgiyi olabildiğince koruyarak azaltmak"]],
     life:["Yüz tanımada 'eigenfaces', genetikte binlerce genden iki eksene inmek, uydu görüntüsünde onlarca bandı üç renk kanalına sıkıştırmak.",
           "Görselleştirme: 50 sütunlu bir tabloyu insana göstermenin en hızlı yolu ilk iki bileşeni çizmek."],
@@ -3004,9 +3043,12 @@ const CONTENT={
     {name:"İki hilal", x:"birinci ölçüm", y:"ikinci ölçüm", gen:"moons",
      note:"İki uzun hilal iç içe. k-ortalamalar ikisini de ortadan keser; DBSCAN yoğunluk zincirini takip edip hilalleri olduğu gibi bulur."},
     {name:"İç içe halka", x:"doğu (km)", y:"kuzey (km)", gen:"rings",
-     note:"Merkez aynı, yarıçap farklı. Merkeze dayalı her yöntem burada çaresiz: iki halkanın da ortalaması aynı noktadır."},
+     note:"Merkez aynı, yarıçap farklı. Merkeze dayalı her yöntem burada çaresiz: iki halkanın da ortalaması aynı noktadır. Hierarchical'da yalnız Single linkage ayırıyor (ölçtük, 20 veride 20); Ward halkaları ortadan bölüp ancak %61 tutturuyor."},
     {name:"Öbek + gürültü", x:"sıcaklık sapması", y:"titreşim", gen:"blobs",
-     note:"Üç düzgün öbek ve etrafa serpilmiş gürültü. k-ortalamalar gürültüyü de bir kümeye sokmak zorunda; DBSCAN onları dışarıda bırakır."}
+     note:"Üç düzgün öbek ve etrafa serpilmiş gürültü. k-ortalamalar gürültüyü de bir kümeye sokmak zorunda; DBSCAN onları dışarıda bırakır. Single linkage burada çuvallıyor: k = 3'te 100 veriden 76'sında kümelerden biri bir iki gürültü noktasından ibaret; Ward 100'de 100, Average 100'de 98 üç öbeği buluyor."},
+    {name:"Altı nokta", x:"x₁", y:"x₂", gen:"six",
+     fix:{pts:[[1,2],[2,3],[3,2],[8,7],[9,9],[7,8]], lab:"ABCDEF", sc:10},
+     note:"Hafta 14'ün elle çözülen örneği (eksenler 0–10). Seçince sağ panel hierarchical, average linkage, k = 2 olur. Ağacın yükseklikleri sunumla aynı: 1.41, 1.41, 1.71, 2.24, 8.30; k = 2 5.27'den, k = 3 1.97'den keser."}
   ],
   lesson:{
     q:"Kümeler yuvarlak değilse ne yaparız?",
@@ -3014,16 +3056,18 @@ const CONTENT={
     idea:["k-ortalamalar her noktaya tek bir soru sorar: hangi merkeze daha yakınsın? Bu sorunun cevabı hep iki merkezin tam ortasından geçen düz sınırlardır. Bu yüzden k-ortalamaların kümeleri kabaca yuvarlak topaklar olur. İç içe geçmiş iki hilalde bu soru yanlış sorudur. Cevap da yanlış çıkar: her hilalin bir parçası öbürünün kümesine düşer.",
           "<b>DBSCAN</b> (yoğunluk temelli kümeleme) başka bir soru sorar. Bu noktanın çevresinde, <b>eps</b> (komşuluk yarıçapı) kadar mesafede, en az <b>min_samples</b> (en az komşu; bazı kitaplar minPts yazar) kadar nokta var mı? Varsa bu bir <b>core point</b> (çekirdek nokta). Çekirdek noktalar komşuluk üzerinden birbirine bağlanır ve zincir kendiliğinden kümeyi çizer. Bir konserdeki kalabalığı düşün: çevresi insan dolu olan biri kalabalığın içindedir, kalabalıklar birbirine değerek büyür. Kendisi çekirdek olmayan ama bir çekirdeğin yanında duran nokta kümenin kenarında kalır. Hiçbir zincire bağlanamayan nokta gürültü sayılır ve hiçbir kümeye sokulmaz.",
           "İki büyük avantajı var. Küme sayısını sen söylemezsin, veriden çıkar. Gürültü de bir kümeye zorla tıkıştırılmaz, ayrı işaretlenir. Bedeli şu: eps ile min_samples'ı sen seçersin. Yoğunluğu çok farklı iki küme varsa tek bir eps ikisine birden uymaz.",
-          "<b>hierarchical clustering</b> (hiyerarşik kümeleme) üçüncü bir yol. En yakın iki kümeyi birleştir, tekrarla. Sonuç bir soy ağacı gibi dallanan bir ağaç, <b>dendrogram</b>: önce kardeşler, sonra kuzenler, sonra aileler birleşir. Ağacı istediğin yükseklikten kesersen istediğin sayıda küme alırsın. İki kümenin uzaklığını ölçmenin birkaç yolu (linkage) var: en yakın iki noktası (single), en uzak iki noktası (complete), bütün çiftlerin ortalaması (average; aşağıdaki ağaç bununla kuruldu) ya da Ward. Sağ paneldeki Ward yöntemi küme içi yayılımı en az artıracak birleşmeyi seçer. Bu yüzden o da yuvarlak kümeleri sever ve hilalde k-ortalamalara benzer davranır."],
+          "<b>hierarchical clustering</b> (hiyerarşik kümeleme) üçüncü bir yol. En yakın iki kümeyi birleştir, tekrarla. Sonuç bir soy ağacı gibi dallanan bir ağaç, <b>dendrogram</b>: önce kardeşler, sonra kuzenler, sonra aileler birleşir. Ağacı istediğin yükseklikten kesersen istediğin sayıda küme alırsın; ekranda kesme yüksekliğini soldaki k seçiyor. İki kümenin uzaklığını ölçmenin birkaç yolu, yani <b>linkage</b> (bağlantı ölçütü) var: en yakın iki noktası (single), en uzak iki noktası (complete), bütün çiftlerin ortalaması (average; aşağıdaki ağaç bununla kuruldu) ya da Ward. Ward küme içi yayılımı en az artıracak birleşmeyi seçer; bu yüzden o da yuvarlak kümeleri sever ve hilalde k-ortalamalara benzer davranır. Single tam tersi: el ele tutuşan bir zincir gibi hilali ve halkayı sonuna kadar izler. Bedeli de bu zincir: iki öbeğin arasına düşen birkaç gürültü noktası köprü olur ve öbekleri birbirine yapıştırır."],
     read:[["Sol panel","Her zaman k-ortalamalar. Kümeler renkli, merkezler çarpı işaretiyle. Sınırların düz olduğuna dikkat et: k-ortalamalar başka türlüsünü kuramaz."],
-          ["Sağ panel","Seçtiğin yöntem. DBSCAN'de dolu noktalar çekirdek, içi boş halkalar sınır noktası, gri noktalar gürültüdür (hiçbir kümeye ait değildir). Soluk renkli zemin, çekirdek noktaların eps komşuluklarının birleşimi: küme bu zeminin bağlı bir parçası. Fareyi bir noktanın üstüne getirirsen eps çemberini ve komşu sayısını gösterir. Hierarchical seçiliyken küme sayısı soldaki k ile aynı tutulur ki iki panel karşılaştırılabilsin."],
-          ["Kaydırıcılar","eps komşuluk yarıçapı, min_samples çekirdek olmak için gereken komşu sayısı (nokta kendini de sayar). eps küçüldükçe her şey gürültüye, büyüdükçe her şey tek kümeye döner."]],
+          ["Sağ panel","Seçtiğin yöntem. DBSCAN'de dolu noktalar çekirdek, içi boş halkalar sınır noktası, gri noktalar gürültüdür (hiçbir kümeye ait değildir). Soluk renkli zemin, çekirdek noktaların eps komşuluklarının birleşimi: küme bu zeminin bağlı bir parçası. Fareyi bir noktanın üstüne getirirsen eps çemberini ve komşu sayısını gösterir. Hierarchical seçiliyken küme sayısı soldaki k ile aynı tutulur ki iki panel karşılaştırılabilsin; sol paneldeki renkler sağdaki en çok örtüşen kümenin rengine eşlenir."],
+          ["Dendrogram","Hierarchical seçiliyken sağ panelin altında ağaç çıkar. Her yatay çizgi bir birleşme, yüksekliği birleşme uzaklığı. Kesikli pembe çizgi kesme yüksekliği: k kaç ise o kadar dikey çizgiyi keser. Çizginin altındaki dallar kümenin renginde, üstündekiler gri. 'Altı nokta'da harfler ve her birleşmenin yüksekliği de yazar. Linkage'ı çubuktaki seçiciden değiştir: ağaç baştan kurulur."],
+          ["Kaydırıcılar","eps komşuluk yarıçapı, min_samples çekirdek olmak için gereken komşu sayısı (nokta kendini de sayar). eps küçüldükçe her şey gürültüye, büyüdükçe her şey tek kümeye döner. Hierarchical'da bu iki kaydırıcının yerine linkage seçicisi gelir."]],
     terms:[["DBSCAN","yoğunluk temelli kümeleme","yoğun bölgeleri zincirleyerek küme kuran, seyrek noktaları gürültü sayan yöntem"],
            ["eps","komşuluk yarıçapı","bir noktanın komşusu sayılmak için kalması gereken uzaklık"],
            ["min_samples","en az komşu","çekirdek nokta olmak için komşulukta bulunması gereken nokta sayısı; minPts diye de yazılır"],
            ["core point","çekirdek nokta","komşuluğunda min_samples kadar nokta bulunan nokta"],
            ["hierarchical clustering","hiyerarşik kümeleme","en yakın kümeleri sırayla birleştirip ağaç kuran yöntem"],
-           ["dendrogram","ağaç diyagramı","birleşmelerin hangi uzaklıkta olduğunu gösteren ağaç; bir yükseklikten kesmek k'yı seçmek"]],
+           ["dendrogram","ağaç diyagramı","birleşmelerin hangi uzaklıkta olduğunu gösteren ağaç; bir yükseklikten kesmek k'yı seçmek"],
+           ["linkage","bağlantı ölçütü","iki kümenin uzaklığını ölçme yolu: single en yakın çift, complete en uzak çift, average bütün çiftlerin ortalaması, ward küme içi kareler toplamının artışı"]],
     life:["Coğrafi veride sıcak nokta bulma: suç haritaları, deprem artçıları, arıza ihbarları. Kümeler oralarda hiçbir zaman yuvarlak değildir.",
           "Anomali tespiti: DBSCAN'in gürültü etiketi doğrudan 'şüpheli' listesi olarak kullanılır."],
     trap:"eps'i gözle seçip geçmek. Doğru eps için k-uzaklık grafiği çizilir: her noktanın min_samples. komşusuna uzaklığı sıralanır, eğrinin dirsek yaptığı yer eps olur. Bir de ölçekleme: DBSCAN uzaklıkla çalıştığı için ölçeklenmemiş veride eps hiçbir sütuna uymaz.",
@@ -4083,6 +4127,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const cv=$("#c-km"), {ctx,fit}=setupCanvas(cv);
   const PAL=["--a","--b","--c","--d","--accent","--good"];
   let pts=[], K=3, cent=[], phase="assign", iter=0, timer=0, trails=[];
+  let init="rnd";          /* başlangıç yöntemi: "rnd" rastgele nokta + titreşim · "pp" k-means++ */
+  let fixStart="good";     /* "Altı nokta": sunumun iki sabit başlangıcı, "good" μ = (2,2),(8,8) · "bad" μ = A, B */
+  let hist=[];             /* J'nin adım adım geçmişi (yalnız değiştiğinde eklenir) */
+  let multi=null;          /* « 10 kez dene »: on sonucun sıralı J'leri ve kaç farklı sonuç çıktığı */
   /* Merkez taşıma adımı artık bir KAYMA: eskiden merkez anında yeni yerine
      sıçrıyordu ve "merkez kendi noktalarının ortasına kayıyor" cümlesi ekranda
      bir hareket olarak görünmüyordu. Durum (cent) hemen güncellenir — göstergeler
@@ -4097,19 +4145,48 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     return cent.map((c,i)=>{const f=glide.from[i]||c; return {u:f.u+(c.u-f.u)*e, v:f.v+(c.v-f.v)*e};}); };
   const stopGlide=()=>{ glide=null; if(gT){clearInterval(gT);gT=0;} };
   const lo=document.createElement("canvas"), lox=lo.getContext("2d");
-  /* üç somut veri: müşteri segmenti (öbekler), artçı sarsıntılar (fay boyunca
-     uzamış öbekler), uydu pikselleri (su / bitki / toprak) */
+  /* dört somut veri: müşteri segmenti (öbekler), artçı sarsıntılar (fay boyunca
+     uzamış öbekler), uydu pikselleri (su / bitki / toprak) ve Hafta 14'ün elle
+     çözülen altı noktası (veri biriminde, eksenler 0–10) */
   const DS=SETS("m-km"); let dsi=0;
-  const S=()=>DS[dsi];
+  const S=()=>DS[dsi], FX=()=>S().fix||null;
+  /* WCSS birim karede (0–1) hesaplanır; Altı noktada eksen 0–10 olduğu için veri
+     biriminde J = ×100 — sunumun sayıları (189, 77.6, 39.04, 6.67) böyle tutar */
+  const jk=()=>FX()?FX().sc*FX().sc:1;
+  const fmtJ=(J)=>J===null||!Number.isFinite(J)?"—":FX()?(J*jk()).toFixed(2):fmt(J,4);
+  const SUB="₁₂₃₄₅₆";
+  const useFix=()=>!!(FX()&&K===2);
 
-  function seed(){
-    stopGlide(); cent=[];trails=[];
-    for(let i=0;i<K;i++){
-      const src=pts.length?pts[Math.floor(Math.random()*pts.length)]:{u:rnd(.2,.8),v:rnd(.2,.8)};
-      cent.push({u:clamp(src.u+rnd(-.06,.06),.05,.95),v:clamp(src.v+rnd(-.06,.06),.05,.95)});
-      trails.push([{u:cent[i].u,v:cent[i].v}]);
+  /* Başlangıç merkezleri. Rastgele: bir veri noktası + küçük titreşim.
+     k-means++ (scikit-learn'ün varsayılanı): ilk merkez rastgele bir nokta, her yeni
+     merkez var olan merkezlere uzaklığın KARESİYLE orantılı şansla seçilir — merkezler
+     baştan aynı öbeğe yığılmaz. Altı noktada sunumun iki sabit başlangıcı. */
+  function starts(m){
+    const f=FX();
+    if(m==="fix") return f.starts[fixStart].map(([x,y])=>({u:x/f.sc,v:y/f.sc}));
+    const C=[];
+    if(!pts.length){ for(let i=0;i<K;i++) C.push({u:rnd(.2,.8),v:rnd(.2,.8)}); return C; }
+    if(m==="pp"){
+      const p0=pts[Math.floor(Math.random()*pts.length)]; C.push({u:p0.u,v:p0.v});
+      while(C.length<K){
+        const d=pts.map(p=>Math.min(...C.map(c=>(c.u-p.u)**2+(c.v-p.v)**2)));
+        const tot=d.reduce((a,b)=>a+b,0);
+        let j=Math.floor(Math.random()*pts.length);
+        if(tot>0){ let r=Math.random()*tot; for(j=0;j<pts.length-1;j++){ r-=d[j]; if(r<=0) break; } }
+        C.push({u:pts[j].u,v:pts[j].v});
+      }
+      return C;
     }
-    pts.forEach(p=>p.c=-1); phase="assign"; iter=0; draw();
+    for(let i=0;i<K;i++){
+      const src=pts[Math.floor(Math.random()*pts.length)];
+      C.push({u:clamp(src.u+rnd(-.06,.06),.05,.95),v:clamp(src.v+rnd(-.06,.06),.05,.95)});
+    }
+    return C;
+  }
+  function seed(){
+    stopGlide(); multi=null;
+    cent=starts(useFix()?"fix":init); trails=cent.map(c=>[{u:c.u,v:c.v}]);
+    pts.forEach(p=>p.c=-1); phase="assign"; iter=0; hist=[]; paintBar(); draw();
   }
   function assign(){
     let moved=false;
@@ -4138,6 +4215,35 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const on=pts.filter(p=>p.c>=0); if(!on.length) return null;
     return on.reduce((a,p)=>a+(cent[p.c].u-p.u)**2+(cent[p.c].v-p.v)**2,0);
   }
+  /* « 10 kez dene » (scikit-learn'de n_init=10): on ayrı başlangıç, her biri yakınsayana
+     kadar; WCSS'i en küçük olan tutulur. Kaç FARKLI J çıktığı = kaç ayrı yerel en
+     iyiye düşüldüğü. Animasyonsuz: sonuç basıldığı anda ekranda. */
+  function lloyd(C){
+    const lab=pts.map(()=>-1), tr=C.map(c=>[{u:c.u,v:c.v}]); let it=0;
+    for(let g=0;g<100;g++){
+      let moved=false; it++;
+      pts.forEach((p,i)=>{ let bi=0,bd=Infinity;
+        C.forEach((c,j)=>{const d=(c.u-p.u)**2+(c.v-p.v)**2; if(d<bd){bd=d;bi=j;}});
+        if(lab[i]!==bi){lab[i]=bi;moved=true;} });
+      if(!moved) break;
+      C.forEach((c,j)=>{ const q=pts.filter((p,i)=>lab[i]===j); if(!q.length) return;
+        c.u=q.reduce((a,p)=>a+p.u,0)/q.length; c.v=q.reduce((a,p)=>a+p.v,0)/q.length; tr[j].push({u:c.u,v:c.v}); });
+    }
+    return {C,lab,tr,it,J:pts.reduce((a,p,i)=>a+(C[lab[i]].u-p.u)**2+(C[lab[i]].v-p.v)**2,0)};
+  }
+  function tryTen(){
+    if(!pts.length) return;
+    if(timer){clearInterval(timer);timer=0;runBtn("#km-run",false,"Yakınsat");}
+    stopGlide();
+    /* sabit başlangıç tek bir başlangıçtır: on denemede seçili yöntem (rastgele / k-means++) */
+    const R=[]; for(let r=0;r<10;r++) R.push(lloyd(starts(init)));
+    const best=R.reduce((a,b)=>b.J<a.J-1e-12?b:a);
+    const Js=R.map(r=>r.J).sort((a,b)=>a-b);
+    let distinct=1; for(let i=1;i<Js.length;i++) if(Js[i]-Js[i-1]>1e-9*Math.max(1e-9,Js[i])) distinct++;
+    cent=best.C; trails=best.tr; pts.forEach((p,i)=>p.c=best.lab[i]);
+    iter=best.it; phase="update"; hist=[]; multi={Js,distinct};
+    draw();
+  }
   /* Her merkezin etki alanı: tuvaldeki her konum en yakın merkezin renginde,
      soluk. Atama kuralının KENDİSİ bu: bir nokta hangi bölgedeyse o kümeye gider.
      Merkez kaydıktan sonra bazı noktalar başka renkte bir bölgede kalıyor —
@@ -4159,10 +4265,14 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   }
   function draw(){
     if(!fit()) return;
-    const m=makeMap(cv,26), C=shown();
+    const m=makeMap(cv,26), C=shown(), f=FX();
     ctx.clearRect(0,0,m.w,m.h);ctx.fillStyle=css("--surface");ctx.fillRect(0,0,m.w,m.h);
     regions(m,C);
     grid(ctx,m,10);
+    /* Altı noktada ızgaranın her karesi bir birim: koordinatlar okunabilsin */
+    if(f){ for(let i=1;i<f.sc;i++){
+      label(ctx,String(i),m.x(i/f.sc),m.y(0)-9,css("--ink-soft"),"center",10);
+      label(ctx,String(i),m.x(0)+5,m.y(i/f.sc),css("--ink-soft"),"left",10); } }
     // bağlantılar
     ctx.save();ctx.lineWidth=1;
     pts.forEach(p=>{
@@ -4171,7 +4281,8 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ctx.beginPath();ctx.moveTo(m.x(p.u),m.y(p.v));ctx.lineTo(m.x(C[p.c].u),m.y(C[p.c].v));ctx.stroke();
     });
     ctx.restore();
-    pts.forEach(p=>disc(ctx,m.x(p.u),m.y(p.v),6,p.c<0?css("--ink-soft"):css(PAL[p.c%PAL.length]),css("--surface")));
+    pts.forEach(p=>{ disc(ctx,m.x(p.u),m.y(p.v),6,p.c<0?css("--ink-soft"):css(PAL[p.c%PAL.length]),css("--surface"));
+      if(p.lab) label(ctx,p.lab,m.x(p.u)+10,m.y(p.v)+11,css("--ink"),"left",12); });
     // merkez izleri
     trails.forEach((t,i)=>{
       if(t.length<2)return;
@@ -4188,21 +4299,49 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         ctx.lineTo(Math.cos(ang)*12,Math.sin(ang)*12);
         ctx.lineTo(Math.cos(ang+Math.PI/4)*5,Math.sin(ang+Math.PI/4)*5);}
       ctx.closePath();ctx.stroke();ctx.fill();ctx.restore();
-      label(ctx,"μ"+(i+1),m.x(c.u)+16,m.y(c.v)-12,col);
+      label(ctx,"μ"+(SUB[i]||i+1),m.x(c.u)+16,m.y(c.v)-12,col);
     });
     label(ctx,S().x+" →",m.x(0)+4,m.y(0)+13,css("--ink-soft"));
     ylabel(ctx,S().y+" →",m.x(0)-14,m.y(1),m.y(0),css("--ink-soft"),12);
+    /* Altı noktada sunumun tablosu: J'nin yolculuğu ve merkezler veri biriminde */
+    if(f&&cent.length){
+      legend(ctx,m.x(0)+28,m.y(1)+20,[
+        [hist.length?"J: "+hist.map(fmtJ).join(" → "):"J: —","--ink"],
+        [cent.map((c,i)=>`μ${SUB[i]||i+1} = (${(c.u*f.sc).toFixed(2)}, ${(c.v*f.sc).toFixed(2)})`).join(" · "),"--ink-soft"]],{size:12});
+    }
+    /* « 10 kez dene »: on sonucun J'si küçükten büyüğe; en küçüğü tutuldu */
+    if(multi){
+      const bx=m.x(1)-14, by=m.y(1)+14;
+      const h=legend(ctx,bx,by,[[`10 deneme · ${multi.distinct} farklı sonuç`,"--ink"],
+        [`en iyi J = ${fmtJ(multi.Js[0])} (tutuldu)`,"--good"],[`en kötü J = ${fmtJ(multi.Js[9])}`,"--ink-soft"]],{size:11,align:"right"});
+      const mx=multi.Js[9]||1, bw=12, gap=4, x0=bx-10*(bw+gap)+gap, y0=by+h+4, hh=34;
+      ctx.save();ctx.fillStyle=hexA("--surface",.88);ctx.fillRect(x0-5,y0-3,10*(bw+gap)-gap+10,hh+6);
+      multi.Js.forEach((J,i)=>{ const hb=Math.max(2,J/mx*hh);
+        ctx.fillStyle=J-multi.Js[0]<=1e-9*Math.max(1e-9,J)?css("--good"):hexA("--ink-soft",.7);
+        ctx.fillRect(x0+i*(bw+gap),y0+hh-hb,bw,hb); });
+      ctx.restore();
+    }
     $("#km-i").textContent=iter;
     $("#km-s").textContent=phase==="assign"?"Ata":"Güncelle";   // Hafta 14: ata / güncelle
-    const J=inertia(); $("#km-j").textContent=J===null?"—":fmt(J,4);
+    const J=inertia(); $("#km-j").textContent=fmtJ(J);
     $("#km-n").textContent=pts.length;
+    txt("#km-nd",multi?`${multi.distinct} farklı`:"—");
+    /* tuval metni sahte DOM'da okunmuyor: sınamalar (behaviour.js) buradan okur */
+    cv.setAttribute("aria-label",`k-ortalamalar · ${S().name} · k=${K} · başlangıç ${useFix()?(fixStart==="good"?"iyi":"kötü"):init==="pp"?"k-means++":"rastgele"} · `+
+      `iterasyon ${iter} · J ${fmtJ(J)} · J geçmişi: ${hist.map(fmtJ).join(" → ")||"—"}`+
+      (f?` · merkezler ${cent.map(c=>`(${(c.u*f.sc).toFixed(2)}, ${(c.v*f.sc).toFixed(2)})`).join(" ")}`:"")+
+      (multi?` · 10 deneme: ${multi.Js.map(fmtJ).join(" ")}`:""));
   }
   function step(){
     if(!pts.length) return false;
     if(!cent.length) seed();
+    multi=null;
+    /* iterasyon = atama turu sayısı (scikit-learn'ün n_iter_'i gibi): iyi başlangıç
+       2, kötü başlangıç 3 — son turda kimse yer değiştirmez ve algoritma durur */
     let alive;
-    if(phase==="assign"){alive=assign();phase="update";}
-    else{alive=update();phase="assign";iter++;}
+    if(phase==="assign"){alive=assign();iter++;phase="update";}
+    else{alive=update();phase="assign";}
+    const J=inertia(); if(J!==null&&(!hist.length||Math.abs(hist[hist.length-1]-J)>1e-12)) hist.push(J);
     draw(); return alive;
   }
   function run(){
@@ -4210,16 +4349,31 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     runBtn("#km-run",true,"Durdur");let guard=0;
     timer=setInterval(()=>{if(!step()||++guard>60){clearInterval(timer);timer=0;runBtn("#km-run",false,"Yakınsat");}},380);
   }
+  /* başlangıç seçicisi: rastgele / k-means++ (Altı noktada yerine iyi / kötü başlangıç).
+     Seçili düğmeye yeniden basmak YENİ bir başlangıç demek — ayrı "yeniden at" düğmesi
+     yok, çubuk tek satırda kalsın. */
+  function paintBar(){
+    const f=FX(), on=(s,v)=>{const e=$(s); if(e) e.setAttribute("aria-pressed",String(v));};
+    const a=$("#km-init"), b=$("#km-fix"), d=$("#km-demo"); if(a) a.hidden=!!f; if(b) b.hidden=!f;
+    if(d) d.hidden=!!f;   // Altı noktada veriyi « Altı nokta » düğmesi geri getirir; çubuk tek satırda kalsın
+    on("#km-ir",init==="rnd"); on("#km-ip",init==="pp");
+    on("#km-good",!!f&&K===2&&fixStart==="good"); on("#km-bad",!!f&&K===2&&fixStart==="bad");
+  }
+  const setK=(k)=>{K=k; const e=$("#km-k"); if(e) e.value=String(k); txt("#km-ko",String(k));};
   const ed=editable(cv,{
     pts:()=>pts, setPts:(a)=>{pts=a},
     toPx:(t)=>{const m=makeMap(cv,26);return{x:m.x(t.u),y:m.y(t.v)};},
     toData:(x,y)=>{const m=makeMap(cv,26);return{u:clamp(m.ix(x),0,1),v:clamp(m.iy(y),0,1)};},
     add:(u,v)=>pts.push({u,v,c:-1}),
-    draw:()=>draw(), commit:()=>draw()
+    draw:()=>draw(), commit:()=>{multi=null;draw();}
   });
   $("#km-k").oninput=e=>{K=+e.target.value;$("#km-ko").textContent=K;seed();};
-  $("#km-step").onclick=step; $("#km-run").onclick=run; $("#km-seed").onclick=seed;
-  $("#km-clr").onclick=()=>{ed.reset();stopGlide();pts=[];cent=[];trails=[];iter=0;draw();};
+  $("#km-step").onclick=step; $("#km-run").onclick=run; $("#km-ten").onclick=tryTen;
+  $("#km-ir").onclick=()=>{init="rnd";seed();};
+  $("#km-ip").onclick=()=>{init="pp";seed();};
+  $("#km-good").onclick=()=>{fixStart="good";setK(2);seed();};
+  $("#km-bad").onclick=()=>{fixStart="bad";setK(2);seed();};
+  $("#km-clr").onclick=()=>{ed.reset();stopGlide();pts=[];cent=[];trails=[];hist=[];multi=null;iter=0;draw();};
   const put=(u,v,sd)=>pts.push({u:clamp(u+gauss()*sd,.04,.96),v:clamp(v+gauss()*sd,.04,.96),c:-1});
   function blobs(){
     ed.reset(); pts=[];
@@ -4242,9 +4396,15 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     [[.18,.28],[.26,.80],[.70,.54]].forEach(([u,v])=>{for(let i=0;i<16;i++)put(u,v,.058);});
     seed();
   }
-  const GEN={blobs,fault,bands};
+  /* Hafta 14'ün altı noktası: A(1,2) B(2,3) C(3,2) D(8,7) E(9,9) F(7,8), eksenler 0–10 */
+  function six(){
+    ed.reset(); const f=FX();
+    pts=f.pts.map(([x,y],i)=>({u:x/f.sc,v:y/f.sc,c:-1,lab:f.lab[i]}));
+    setK(2); seed();
+  }
+  const GEN={blobs,fault,bands,six};
   const demo=()=>(GEN[S().gen]||blobs)();
-  function useSet(i){ dsi=clamp(i,0,DS.length-1); demo(); }
+  function useSet(i){ dsi=clamp(i,0,DS.length-1); paintBar(); demo(); }
   $("#km-demo").onclick=demo;
   reg({id:"m-km",draw,space:run,init:demo,undo:()=>ed.undo(),
     scenarioLabel:CONTENT["m-km"].pick,
@@ -4258,10 +4418,24 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
      hl:["#km-j"], run(){press("#km-step");}},
     {t:"Sınırlar hep düz",d:"Bir adım daha: noktalar yeni bölgelerine geçti. İki merkezin arasındaki sınır her zaman ikisinin tam ortasından geçen dik bir doğru — k-ortalamalar başka biçimde sınır çizemez. Modül 20 bunun hangi veride sorun olduğunu soruyor.",
      hl:["#km-i"], run(){press("#km-step");}},
-    {t:"Başlangıca duyarlılık",d:"Merkezler yeniden atıldı ve yakınsama başladı. Birkaç kez tekrarlayın: aynı veri, farklı başlangıç, farklı sonuç. k-ortalamalar yerel bir optimuma yakınsar, en iyisine değil; WCSS'yi karşılaştırın.",
-     hl:["#km-seed","#km-j"], run(){press("#km-seed");setPressed("#km-run",true);}},
+    {t:"Başlangıca duyarlılık",d:"« Rastgele »ye bastık: merkezler rastgele noktalardan yeniden atıldı ve yakınsama başladı. Birkaç kez bas: aynı veri, farklı başlangıç, farklı sonuç. k-ortalamalar yerel bir en iyiye yakınsar, en iyisine değil; WCSS'yi karşılaştır.",
+     hl:["#km-ir","#km-j"], run(){press("#km-ir");setPressed("#km-run",true);}},
     {t:"Uzun kümelerde zorlanır",d:"Artçı sarsıntılar fay hattı boyunca uzamış. k-ortalamalar küresel kümeler varsaydığı için uzun öbeği ortasından ikiye böler, merkezler hattın üstüne dizilir. WCSS düşüyor ama gruplar coğrafyayı anlatmıyor.",
-     set:1, hl:["#km-j"], run(){setR("#km-k",3);setPressed("#km-run",true);}}
+     set:1, hl:["#km-j"], run(){setR("#km-k",3);setPressed("#km-run",true);}},
+    {t:"10 kez dene",d:"Uydu piksellerinde üç belirgin öbek var, k = 3. « 10 kez dene » aynı veride on rastgele başlangıcı sonuna kadar koşturdu ve WCSS'i en küçük olanı tuttu; scikit-learn'de <b>n_init=10</b>. Göstergede kaç farklı sonuç çıktığı yazıyor (ölçtük, rastgele başlangıçta ortalama 2.7). Köşedeki çubuklar on denemenin J'si, yeşiller en iyisi; uzun gri çubuklar iki öbeği tek merkeze verip kötü bir yerel en iyide kalan denemeler.",
+     set:2, hl:["#km-nd","#km-j"], run(){setPressed("#km-run",false);setR("#km-k",3);press("#km-ir");press("#km-ten");}},
+    {t:"k-means++",d:"Şimdi aynı on deneme <b>k-means++</b> ile: ilk merkez rastgele bir nokta, sonrakiler var olan merkezlerden uzak noktalardan, uzaklığın karesiyle orantılı şansla seçiliyor. Merkezler baştan aynı öbeğe yığılmıyor ve on deneme neredeyse her zaman aynı, en küçük J'ye varıyor (ölçtük, ortalama 1.1 farklı sonuç). scikit-learn'ün varsayılanı bu.",
+     hl:["#km-ip","#km-nd"], run(){press("#km-ip");press("#km-ten");}},
+    {t:"Altı nokta · iyi başlangıç",d:"Hafta 14'ün altı noktası, veri biriminde: μ₁ = (2, 2), μ₂ = (8, 8). Yakınsat: {A, B, C} ve {D, E, F}; merkezler (2, 2.33) ve (8, 8). İkinci iterasyonda kimse yer değiştirmiyor, algoritma duruyor. WCSS = 2.67 + 4.00 = <b>6.67</b>.",
+     set:3, hl:["#km-i","#km-j"], run(){press("#km-good");setPressed("#km-run",true);}},
+    {t:"Kötü başlangıç · ata",d:"Şimdi μ₁ = A, μ₂ = B. İlk atamada A tek başına kalıyor, öteki beşi μ₂'ye gidiyor. d²'leri topla: C 2, D 52, E 85, F 50, yani <b>J = 189</b>.",
+     hl:["#km-j","#km-s"], run(){setPressed("#km-run",false);press("#km-bad");press("#km-step");}},
+    {t:"Güncelle · (5.8, 5.8)",d:"μ₂ beş noktasının ortasına, <b>(5.8, 5.8)</b>'e kayıyor; μ₁ A'da kalıyor. J <b>77.6</b>'ya indi.",
+     hl:["#km-j"], run(){press("#km-step");}},
+    {t:"İterasyon 2 · ata",d:"Yeniden ata: B için μ₁'e d² = 2, μ₂'ye 22.28; C için 4'e karşı 22.28. İkisi de küme 1'e geçiyor. <b>J = 39.04</b>.",
+     hl:["#km-j","#km-i"], run(){press("#km-step");}},
+    {t:"Aynı sona varış",d:"Güncelle: merkezler (2, 2.33) ve (8, 8)'e varıyor, <b>J = 6.67</b>. Üçüncü atamada kimse yer değiştirmiyor: iyi başlangıçla aynı iki küme, yalnız bir iterasyon fazla. Köşedeki dizi 189 → 77.6 → 39.04 → 6.67; J hiçbir adımda artmadı.",
+     hl:["#km-j","#km-i"], run(){press("#km-step");press("#km-step");}}
   ],
        stop:()=>{stopGlide();if(timer){clearInterval(timer);timer=0;runBtn("#km-run",false,"Yakınsat");}}});
 })();
@@ -8542,165 +8716,324 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 /* ═════════════ Ana bileşen analizi ═════════════ */
 (function(){
   const cv=$("#c-pca"), {ctx,fit}=setupCanvas(cv);
-  /* üç somut veri: boy–kilo, matematik–fizik notu, uydu bantları.
-     Üçünde de 1. bileşenin bir ADI var: "iri–ufak", "genel başarı", "parlaklık" (bitki örtüsü
-     ikinci bileşende: kızılötesi − kırmızı; Hafta 13 Landsat örneği). */
+  /* dört somut veri: boy–kilo ve uydu bantları rastgele bulut (uzama / dönme
+     kaydırıcıları üretir); "Beş öğrenci" ile "Not ve süre" Hafta 13'ün SABİT
+     tabloları, kendi birimlerinde (n − 1 paydalı kovaryans, sunumun sayıları).
+     Her kümede 1. bileşenin bir ADI var: "iri–ufak", "parlaklık", "genel fen başarısı"
+     (bitki örtüsü uyduda ikinci bileşende: kızılötesi − kırmızı; Landsat örneği). */
   const DS=SETS("m-pca"); let dsi=0;
-  const S=()=>DS[dsi];
-  let pts=[], corr=.78, rot=30, keep=1, probe=null;   /* probe: farenin gösterdiği deneme yönü (birim vektör) */
+  const S=()=>DS[dsi], FX=()=>S().fix||null;
+  let pts=[], corr=.78, rot=30, keep=1, probe=null;   /* probe: deneme yönü (çalışma koordinatında birim vektör) */
+  let unit=0;                                         /* "Not ve süre": 0 saat · 1 dakika · 2 standart (z) */
+  let view={cx:.5,cy:.5,span:1};                      /* eşit ölçekli görünüm; sabit kümede veriyle donar */
+  const UNIT=["saat","dakika","z"];
 
-  const mean=()=>{
-    if(!pts.length) return {u:.5,v:.5};
-    return {u:pts.reduce((a,p)=>a+p.u,0)/pts.length, v:pts.reduce((a,p)=>a+p.v,0)/pts.length};
-  };
-  /* 2x2 kovaryansın özdeğer/özvektörleri — kapalı formül, kütüphane yok */
-  function pca(){
-    const n=pts.length; if(n<3) return null;
-    const m=mean();
+  /* Çalışma koordinatı: rastgele bulutta birim kare (u, v); sabit kümede verinin kendi
+     birimi. "Not ve süre"de ikinci sütun saat, dakika (×60) ya da iki sütun z-skoru.
+     PCA, görünüm ve açı eğrisi hep bu koordinatta — birim değişince PC1'in dönmesi
+     ekranda gerçek açısıyla görünsün diye. */
+  function zpar(){
+    const n=pts.length; if(n<2) return null;
+    const mx=pts.reduce((a,p)=>a+p.x,0)/n, my=pts.reduce((a,p)=>a+p.y,0)/n;
+    const sx=Math.sqrt(pts.reduce((a,p)=>a+(p.x-mx)**2,0)/(n-1))||1, sy=Math.sqrt(pts.reduce((a,p)=>a+(p.y-my)**2,0)/(n-1))||1;
+    return {mx,my,sx,sy};
+  }
+  const isZ=()=>!!(FX()&&FX().unit&&unit===2), yk=()=>FX()&&FX().unit&&unit===1?60:1;
+  function work(){
+    if(!FX()) return pts.map(p=>({x:p.u,y:p.v,lab:""}));
+    if(isZ()){ const z=zpar(); if(z) return pts.map(p=>({x:(p.x-z.mx)/z.sx,y:(p.y-z.my)/z.sy,lab:p.lab||""})); }
+    const k=yk(); return pts.map(p=>({x:p.x,y:p.y*k,lab:p.lab||""}));
+  }
+  /* 2x2 kovaryansın özdeğer/özvektörleri — kapalı formül, kütüphane yok.
+     Payda n − 1 (sunum ve scikit-learn): yüzdeler değişmez, özdeğerler sunumla aynı çıkar. */
+  function pca(w){
+    const n=w.length; if(n<3) return null;
+    const m={x:w.reduce((a,p)=>a+p.x,0)/n, y:w.reduce((a,p)=>a+p.y,0)/n};
     let sxx=0,syy=0,sxy=0;
-    pts.forEach(p=>{const a=p.u-m.u,b=p.v-m.v; sxx+=a*a; syy+=b*b; sxy+=a*b;});
-    sxx/=n; syy/=n; sxy/=n;
+    w.forEach(p=>{const a=p.x-m.x,b=p.y-m.y; sxx+=a*a; syy+=b*b; sxy+=a*b;});
+    sxx/=n-1; syy/=n-1; sxy/=n-1;
     const tr=sxx+syy, det=sxx*syy-sxy*sxy;
-    const disc=Math.max(0,tr*tr/4-det), rt=Math.sqrt(disc);
+    const rt=Math.sqrt(Math.max(0,tr*tr/4-det));
     const l1=tr/2+rt, l2=Math.max(0,tr/2-rt);
     let e1;
-    if(Math.abs(sxy)>1e-12) e1=[sxy, l1-sxx];
+    if(Math.abs(sxy)>1e-12*Math.max(tr,1e-12)) e1=[sxy, l1-sxx];
     else e1 = sxx>=syy ? [1,0] : [0,1];
     const nn=Math.hypot(e1[0],e1[1])||1; e1=[e1[0]/nn,e1[1]/nn];
+    if(e1[1]<0||(e1[1]===0&&e1[0]<0)) e1=[-e1[0],-e1[1]];   // açı 0–180°: işaret keyfî
     const e2=[-e1[1],e1[0]];
-    return {m,l1,l2,e1,e2,total:l1+l2,sxx,syy,sxy};
+    let ang=Math.atan2(e1[1],e1[0])*180/Math.PI; if(ang>=179.95) ang=0;
+    return {m,l1,l2,e1,e2,total:l1+l2,sxx,syy,sxy,ang,n};
   }
+  const varAt=(P,th)=>{const c=Math.cos(th),s=Math.sin(th); return P.sxx*c*c+2*P.sxy*c*s+P.syy*s*s;};
+  /* sabit kümede görünüm: veriyi ortalayıp iki eksende AYNI ölçekle sığdır; nokta
+     sürüklenirken kaymasın diye yalnız veri / birim değişince yeniden kurulur */
+  function frame(){
+    if(!FX()){ view={cx:.5,cy:.5,span:1}; return; }
+    const w=work(); if(!w.length) return;
+    const xs=w.map(p=>p.x), ys=w.map(p=>p.y);
+    const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+    /* üstte başlık ve PC1 yazısı var: bulut kutunun alt %85'ine otursun */
+    const sp=Math.max(x1-x0,y1-y0,1e-6)*1.45;
+    view={cx:(x0+x1)/2, cy:(y0+y1)/2+sp*.07, span:sp};
+  }
+  const nice=(v)=>{const e=Math.pow(10,Math.floor(Math.log10(v))), f=v/e; return (f<1.5?1:f<3.5?2:f<7.5?5:10)*e;};
+  const f2=(v)=>Math.abs(v)>=1000?v.toFixed(1):v.toFixed(2);
+  /* editable() sürüklerken u / v alanına yazar; sabit kümede noktanın alanları x / y */
+  const fixUV=()=>{ if(FX()) pts.forEach(p=>{ if(p.u!==undefined){ p.x=p.u; p.y=p.v; delete p.u; delete p.v; } }); };
+
+  /* yerleşim: geniş tuvalde iki KARE kutu (veri · geri kurulan) + açı eğrisi; kare,
+     çünkü PC1'in perdedeki açısı gerçek açısı olmalı (eğri o açıyı yazıyor) */
+  const geo=()=>{
+    const W=cv.__w,H=cv.__h,p=28,wide=W>760;
+    if(!wide){ const s=Math.max(60,Math.min(W-2*p,H-2*p)); return {W,H,p,wide,L:{x:(W-s)/2,y:(H-s)/2,s}}; }
+    const s=Math.max(60,Math.min(H-2*p,(W-200)/2-2*p));
+    const L={x:p,y:(H-s)/2,s}, R={x:L.x+s+2*p,y:(H-s)/2,s};
+    const cx=R.x+s+2*p;
+    return {W,H,p,wide,L,R,C:{x:cx,y:p,w:W-cx-p/2,h:H-2*p}};
+  };
+  const mapOf=(B)=>({X:(x)=>B.x+B.s/2+(x-view.cx)/view.span*B.s, Y:(y)=>B.y+B.s/2-(y-view.cy)/view.span*B.s,
+    ix:(px)=>view.cx+(px-B.x-B.s/2)/B.s*view.span, iy:(py)=>view.cy-(py-B.y-B.s/2)/B.s*view.span});
+  function box(B,title){
+    const M=mapOf(B);
+    ctx.save();ctx.beginPath();ctx.rect(B.x,B.y,B.s,B.s);ctx.clip();
+    ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
+    /* rastgele bulutta 8 × 8; sabit kümede verinin biriminde KARE ızgara: bir kare iki
+       eksende aynı sayı — "saat"te bulut yassı, "dakika"da dik çıkıyorsa sebep bu */
+    const st=FX()?nice(view.span/7):1/8;
+    const a0=Math.ceil((view.cx-view.span/2)/st), a1=Math.floor((view.cx+view.span/2)/st);
+    const b0=Math.ceil((view.cy-view.span/2)/st), b1=Math.floor((view.cy+view.span/2)/st);
+    for(let i=a0;i<=a1;i++){ctx.beginPath();ctx.moveTo(M.X(i*st),B.y);ctx.lineTo(M.X(i*st),B.y+B.s);ctx.stroke();}
+    for(let j=b0;j<=b1;j++){ctx.beginPath();ctx.moveTo(B.x,M.Y(j*st));ctx.lineTo(B.x+B.s,M.Y(j*st));ctx.stroke();}
+    ctx.restore();
+    ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(B.x,B.y,B.s,B.s);ctx.restore();
+    if(FX()){
+      const dg=st<1?(st<.1?2:1):0, every=B.s/(view.span/st)<30?2:1;
+      for(let i=a0;i<=a1;i++){ const x=M.X(i*st); if(i%every||x<B.x+16||x>B.x+B.s-16) continue;
+        label(ctx,(i*st).toFixed(dg),x,B.y+B.s-9,css("--ink-soft"),"center",10); }
+      for(let j=b0;j<=b1;j++){ const y=M.Y(j*st); if(j%every||y<B.y+52||y>B.y+B.s-20) continue;
+        label(ctx,(j*st).toFixed(dg),B.x+4,y,css("--ink-soft"),"left",10); }
+    }
+    label(ctx,title,B.x+6,B.y+14,css("--accent"),"left",11);
+    return M;
+  }
+  const xName=()=>isZ()?S().x+" (z)":S().x;
+  const yName=()=>FX()&&FX().unit?S().y+" ("+UNIT[unit]+")":S().y;
+  const c1Name=()=>FX()&&FX().unit?FX().c1[unit]:S().c1;
+
+  /* sağ alt: yön açısına göre izdüşüm varyansı. Gölgeyi 0–180°'nin her yönüne düşür,
+     varyansını ölç: tepe λ₁ (PC1'in açısı), dip λ₂ (ona dik). Fareyle denenen yön
+     eğrinin üstünde bir nokta — "PCA bu yönü neden seçiyor?" sorusunun eğrisi. */
+  function curve(Cb,P,pr){
+    const {x,y,w,h}=Cb, l=x+10, r=x+w-10, top=y+64, bot=y+h-22;
+    ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(x,y,w,h);ctx.restore();
+    label(ctx,"açıya göre varyans",x+6,y+14,css("--accent"),"left",11);
+    const vt=Math.max(P.l1,1e-12)*1.08, TX=(d)=>l+d/180*(r-l), TY=(v)=>bot-v/vt*(bot-top);
+    ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
+    [0,45,90,135,180].forEach(d=>{ctx.beginPath();ctx.moveTo(TX(d),top-6);ctx.lineTo(TX(d),bot);ctx.stroke();});
+    ctx.strokeStyle=css("--ink-soft");ctx.beginPath();ctx.moveTo(l,bot);ctx.lineTo(r,bot);ctx.stroke();ctx.restore();
+    [0,90,180].forEach(d=>label(ctx,d+"°",TX(d),bot+11,css("--ink-soft"),d===0?"left":d===180?"right":"center",10));
+    if(r-l>230) [45,135].forEach(d=>label(ctx,d+"°",TX(d),bot+11,css("--ink-soft"),"center",10));
+    ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;ctx.beginPath();
+    for(let d=0;d<=180;d+=1.5){const v=varAt(P,d*Math.PI/180); d?ctx.lineTo(TX(d),TY(v)):ctx.moveTo(TX(d),TY(v));}
+    ctx.stroke();ctx.restore();
+    const a1=P.ang, a2=(P.ang+90)%180, fx=!!FX();
+    const tag=(d,v,txt1,txt2,col,up)=>{
+      const px=TX(d), py=TY(v);
+      disc(ctx,px,py,5,css(col),css("--surface"));
+      const al=px<l+70?"left":px>r-70?"right":"center", ox=al==="left"?-4:al==="right"?4:0;
+      legend(ctx,px+ox,up?py-30:py-36,[[txt1,col],[txt2,"--ink-soft"]],{size:10.5,align:al});
+    };
+    /* sabit kümede eksenlerin kendi varyansı: 0° = x₁, 90° = x₂ — PCA toplamı
+       yeniden paylaştırıyor (146 + 104 = 248.79 + 1.21). Tepeye / dibe 22°'den yakınsa yazılmaz. */
+    if(fx) [[0,P.sxx],[90,P.syy]].forEach(([d,v])=>{
+      if(Math.min(Math.abs(d-a1),180-Math.abs(d-a1))<22||Math.min(Math.abs(d-a2),180-Math.abs(d-a2))<22) return;
+      disc(ctx,TX(d),TY(v),3.6,css("--ink-soft"));
+      label(ctx,f2(v),TX(d)+(d?0:4),TY(v)-11,css("--ink-soft"),d?"center":"left",10);
+    });
+    const pct=(v)=>"%"+(v/P.total*100).toFixed(fx?2:1);
+    tag(a1,P.l1,(fx?"λ₁ "+f2(P.l1):"PC1 "+pct(P.l1)),a1.toFixed(1)+"°","--accent",true);
+    tag(a2,P.l2,(fx?"λ₂ "+f2(P.l2):"PC2 "+pct(P.l2)),a2.toFixed(1)+"°","--ink",false);
+    if(pr){
+      let d=Math.atan2(pr[1],pr[0])*180/Math.PI; d=((d%180)+180)%180;
+      const v=varAt(P,d*Math.PI/180);
+      ctx.save();ctx.strokeStyle=hexA("--b",.7);ctx.setLineDash([4,3]);ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(TX(d),bot);ctx.lineTo(TX(d),TY(v));ctx.stroke();ctx.restore();
+      disc(ctx,TX(d),TY(v),5,css("--b"),css("--surface"));
+    }
+  }
+
   function draw(){
     if(!fit()) return;
-    const W=cv.__w,H=cv.__h;
+    const G=geo(), W=G.W, H=G.H;
     ctx.clearRect(0,0,W,H);ctx.fillStyle=css("--surface");ctx.fillRect(0,0,W,H);
-    const wide=W>760, split=wide?Math.round(W*0.52):W;
-    const p=28;
-    const P=pca();
-
-    const box=(x0,bw,title)=>{
-      const X=(u)=>x0+p+u*(bw-2*p), Y=(v)=>H-p-v*(H-2*p);
-      ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
-      for(let i=0;i<=8;i++){
-        ctx.beginPath();ctx.moveTo(X(i/8),Y(0));ctx.lineTo(X(i/8),Y(1));ctx.stroke();
-        ctx.beginPath();ctx.moveTo(X(0),Y(i/8));ctx.lineTo(X(1),Y(i/8));ctx.stroke();}
-      ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(x0+p,p,bw-2*p,H-2*p);ctx.restore();
-      label(ctx,title,x0+p+6,p+14,css("--accent"),"left",11);
-      return {X,Y};
-    };
+    const w=work(), P=pca(w), fx=!!FX();
 
     /* sol: bulut + eksenler + izdüşümler */
-    const L=box(0,split,"veri · PC1 = "+S().c1);
+    const L=box(G.L,"PC1 = "+c1Name());
     if(P){
-      const sc=(l)=>Math.max(.05,Math.sqrt(Math.max(l,0))*2.2);
-      [[P.e1,P.l1,"--accent",3.2,"PC1"],[P.e2,P.l2,"--ink-soft",2,"PC2"]].forEach(([e,l,col,lw,nm])=>{
+      const lim=view.span*.47, sc=(l)=>Math.min(lim,Math.max(view.span*.05,Math.sqrt(Math.max(l,0))*2.2));
+      const mx=L.X(P.m.x), my=L.Y(P.m.y), k=G.L.s/view.span;
+      ctx.save();ctx.beginPath();ctx.rect(G.L.x,G.L.y,G.L.s,G.L.s);ctx.clip();
+      const rr=[[P.e1,P.l1,"--accent",3.2],[P.e2,P.l2,"--ink-soft",2]].map(([e,l,col,lw])=>{
         const r=sc(l);
-        ctx.save();ctx.strokeStyle=css(col);ctx.lineWidth=lw;ctx.lineCap="round";
-        ctx.beginPath();
-        ctx.moveTo(L.X(P.m.u-e[0]*r),L.Y(P.m.v-e[1]*r));
-        ctx.lineTo(L.X(P.m.u+e[0]*r),L.Y(P.m.v+e[1]*r));
-        ctx.stroke();ctx.restore();
-        label(ctx,nm,clamp(L.X(P.m.u+e[0]*r),p+40,split-p-40),clamp(L.Y(P.m.v+e[1]*r)-9,p+30,H-p-8),css(col),"center",10.5);
-      });
-      /* izdüşümler */
-      ctx.save();ctx.strokeStyle=hexA("--accent",.30);ctx.lineWidth=1.2;
-      pts.forEach(q=>{
-        const du=q.u-P.m.u, dv=q.v-P.m.v, t=du*P.e1[0]+dv*P.e1[1];
-        const pu=P.m.u+P.e1[0]*t, pv=P.m.v+P.e1[1]*t;
-        ctx.beginPath();ctx.moveTo(L.X(q.u),L.Y(q.v));ctx.lineTo(L.X(pu),L.Y(pv));ctx.stroke();
+        ctx.strokeStyle=css(col);ctx.lineWidth=lw;ctx.lineCap="round";
+        ctx.beginPath();ctx.moveTo(L.X(P.m.x-e[0]*r),L.Y(P.m.y-e[1]*r));ctx.lineTo(L.X(P.m.x+e[0]*r),L.Y(P.m.y+e[1]*r));ctx.stroke();
+        return r;
       });
       ctx.restore();
-      pts.forEach(q=>{
-        const du=q.u-P.m.u, dv=q.v-P.m.v, t=du*P.e1[0]+dv*P.e1[1];
-        disc(ctx,L.X(P.m.u+P.e1[0]*t),L.Y(P.m.v+P.e1[1]*t),2.8,hexA("--accent",.85));
+      /* adlar BOŞ yere: noktalar, harfleri, PC1 doğrusu ve köşedeki yazı dolu sayılır,
+         her ad adaylarından en uzağına konur. Sabit konumda kısa PC2'nin adı beş
+         öğrencide C'nin harfine, "ortalama" dakika görünümünde PC2'ye biniyordu. */
+      const busy=[];
+      w.forEach(q=>{busy.push([L.X(q.x),L.Y(q.y)]); if(q.lab) busy.push([L.X(q.x)-13,L.Y(q.y)-9]);});
+      for(let j=-4;j<=4;j++) busy.push([mx+P.e1[0]*j*14, my-P.e1[1]*j*14]);
+      for(let j=0;j<9;j++) busy.push([G.L.x+20+j*28, G.L.y+33]);
+      if(fx) for(let j=0;j<=10;j++){ busy.push([G.L.x+j*G.L.s/10, G.L.y+G.L.s-9]); busy.push([G.L.x+10, G.L.y+j*G.L.s/10]); }  // ızgara sayıları
+      const inb=(x,y)=>[clamp(x,G.L.x+22,G.L.x+G.L.s-22),clamp(y,G.L.y+30,G.L.y+G.L.s-10)];
+      const spot=(c)=>{let best=c[0],bd=-1; c.forEach(o=>{const d=Math.min(...busy.map(([x,y])=>Math.hypot(x-o[0],y-o[1]))); if(d>bd){bd=d;best=o;}}); busy.push([best[0],best[1]]); return best;};
+      const end=(e,r,sg,out)=>{const x=mx+sg*e[0]*r*k, y=my-sg*e[1]*r*k, n=Math.hypot(x-mx,y-my)||1; return inb(x+(x-mx)/n*out,y+(y-my)/n*out);};
+      /* PC1'in adı doğrunun dörtte üçünde, iki yanından biri: uçlar çoğu zaman
+         köşedeki yazıya ya da ızgara sayılarına değiyor */
+      const side=(sg,pp)=>inb(mx+sg*P.e1[0]*rr[0]*k*.72+pp*P.e1[1]*13, my-sg*P.e1[1]*rr[0]*k*.72+pp*P.e1[0]*13);
+      const l1=spot([side(1,1),side(1,-1),side(-1,1),side(-1,-1)]);
+      label(ctx,"PC1",l1[0],l1[1],css("--accent"),"center",10.5);
+      const l2=spot([end(P.e2,rr[1],1,13),end(P.e2,rr[1],-1,13)]);
+      label(ctx,"PC2",l2[0],l2[1],css("--ink-soft"),"center",10.5);
+      const lo=spot([[mx+38,my+13,"left"],[mx-38,my+13,"right"],[mx+38,my-13,"left"],[mx-38,my-13,"right"]]);
+      /* izdüşümler */
+      ctx.save();ctx.strokeStyle=hexA("--accent",.30);ctx.lineWidth=1.2;
+      w.forEach(q=>{
+        const t=(q.x-P.m.x)*P.e1[0]+(q.y-P.m.y)*P.e1[1];
+        ctx.beginPath();ctx.moveTo(L.X(q.x),L.Y(q.y));ctx.lineTo(L.X(P.m.x+P.e1[0]*t),L.Y(P.m.y+P.e1[1]*t));ctx.stroke();
       });
-      disc(ctx,L.X(P.m.u),L.Y(P.m.v),6,css("--good"),css("--surface"));
-      label(ctx,"ortalama",L.X(P.m.u)+10,L.Y(P.m.v)+12,css("--good"),"left",10.5);
-      /* deneme yönü: fare bulutun etrafında gezerken ortalamadan imlece bir eksen.
-         O yöndeki gölgelerin yayılımı = eᵀΣe; en büyük değer tam 1. bileşenin
-         yönünde. "PCA bu yönü neden seçiyor?" sorusunun ekrandaki cevabı. */
+      ctx.restore();
+      w.forEach(q=>{
+        const t=(q.x-P.m.x)*P.e1[0]+(q.y-P.m.y)*P.e1[1];
+        disc(ctx,L.X(P.m.x+P.e1[0]*t),L.Y(P.m.y+P.e1[1]*t),2.8,hexA("--accent",.85));
+      });
+      disc(ctx,mx,my,6,css("--good"),css("--surface"));
+      label(ctx,"ortalama",mx+(lo[2]==="left"?10:-10),lo[1],css("--good"),lo[2],10.5);
+      /* PC1'in yönü: açı ve birim vektör (sunumda v₁ = (0.765, 0.644), ~40°) */
+      legend(ctx,G.L.x+8,G.L.y+33,[[`PC1 ${P.ang.toFixed(1)}° · v₁ = (${P.e1[0].toFixed(3)}, ${P.e1[1].toFixed(3)})`,"--ink"]],{size:10.5});
+      /* deneme yönü: fare bulutun etrafında (ya da açı eğrisinin üstünde) gezerken
+         ortalamadan geçen bir eksen. O yöndeki gölgelerin yayılımı = eᵀΣe; en büyük
+         değer tam 1. bileşenin yönünde. */
       if(probe){
-        const e=probe, r=.6;
+        const e=probe, r=view.span*.47;
         ctx.save();ctx.strokeStyle=hexA("--b",.35);ctx.lineWidth=1;
-        pts.forEach(q=>{ const t=(q.u-P.m.u)*e[0]+(q.v-P.m.v)*e[1];
-          ctx.beginPath();ctx.moveTo(L.X(q.u),L.Y(q.v));ctx.lineTo(L.X(P.m.u+e[0]*t),L.Y(P.m.v+e[1]*t));ctx.stroke(); });
+        w.forEach(q=>{ const t=(q.x-P.m.x)*e[0]+(q.y-P.m.y)*e[1];
+          ctx.beginPath();ctx.moveTo(L.X(q.x),L.Y(q.y));ctx.lineTo(L.X(P.m.x+e[0]*t),L.Y(P.m.y+e[1]*t));ctx.stroke(); });
         ctx.restore();
-        pts.forEach(q=>{ const t=(q.u-P.m.u)*e[0]+(q.v-P.m.v)*e[1];
-          disc(ctx,L.X(P.m.u+e[0]*t),L.Y(P.m.v+e[1]*t),2.6,hexA("--b",.9)); });
-        ctx.save();ctx.strokeStyle=css("--b");ctx.lineWidth=2.4;ctx.setLineDash([7,5]);
-        ctx.beginPath();ctx.moveTo(L.X(P.m.u-e[0]*r),L.Y(P.m.v-e[1]*r));ctx.lineTo(L.X(P.m.u+e[0]*r),L.Y(P.m.v+e[1]*r));ctx.stroke();ctx.restore();
+        w.forEach(q=>{ const t=(q.x-P.m.x)*e[0]+(q.y-P.m.y)*e[1];
+          disc(ctx,L.X(P.m.x+e[0]*t),L.Y(P.m.y+e[1]*t),2.6,hexA("--b",.9)); });
+        ctx.save();ctx.beginPath();ctx.rect(G.L.x,G.L.y,G.L.s,G.L.s);ctx.clip();
+        ctx.strokeStyle=css("--b");ctx.lineWidth=2.4;ctx.setLineDash([7,5]);
+        ctx.beginPath();ctx.moveTo(L.X(P.m.x-e[0]*r),L.Y(P.m.y-e[1]*r));ctx.lineTo(L.X(P.m.x+e[0]*r),L.Y(P.m.y+e[1]*r));ctx.stroke();ctx.restore();
         const vd=P.sxx*e[0]*e[0]+2*P.sxy*e[0]*e[1]+P.syy*e[1]*e[1];
-        legend(ctx,split-p-8,H-p-28,[[`bu yönde yayılım: %${(vd/P.total*100).toFixed(1)}`,"--b"],
+        legend(ctx,G.L.x+G.L.s-8,G.L.y+G.L.s-(fx?44:28),[[`bu yönde yayılım: %${(vd/P.total*100).toFixed(1)}`,"--b"],
           [`PC1: %${(P.l1/P.total*100).toFixed(1)} (en büyük)`,"--accent"]],{size:11,align:"right"});
       }
     }
-    label(ctx,S().x+" →",L.X(0)+4,L.Y(0)+15,css("--ink-soft"),"left",10.5);
-    ylabel(ctx,S().y+" →",L.X(0)-14,L.Y(1),L.Y(0),css("--ink-soft"),10.5);
-    pts.forEach(q=>disc(ctx,L.X(q.u),L.Y(q.v),5,css("--a"),css("--surface")));
+    label(ctx,xName()+" →",G.L.x+4,G.L.y+G.L.s+15,css("--ink-soft"),"left",10.5);
+    ylabel(ctx,yName()+" →",G.L.x-14,G.L.y,G.L.y+G.L.s,css("--ink-soft"),10.5);
+    w.forEach(q=>{ disc(ctx,L.X(q.x),L.Y(q.y),5,css("--a"),css("--surface"));
+      if(q.lab) label(ctx,q.lab,L.X(q.x)-9,L.Y(q.y)-9,css("--ink"),"right",11.5); });
 
-    /* sağ: yeniden oluşturma — HESAP çizimden ayrı, çünkü "Yeniden oluşturma hatası"
+    /* orta: geri kurma — HESAP çizimden ayrı, çünkü "Geri kurma hatası"
        göstergesi dar yerleşimde de yazılmalı (930 px altında "—" donuyordu) */
     let err=null, rec=null;
-    if(P&&pts.length){
-      rec=pts.map(q=>{
-        const du=q.u-P.m.u, dv=q.v-P.m.v;
+    if(P&&w.length){
+      rec=w.map(q=>{
+        const du=q.x-P.m.x, dv=q.y-P.m.y;
         const t1=du*P.e1[0]+dv*P.e1[1], t2=du*P.e2[0]+dv*P.e2[1];
-        return {u:P.m.u+P.e1[0]*t1+(keep===2?P.e2[0]*t2:0),
-                v:P.m.v+P.e1[1]*t1+(keep===2?P.e2[1]*t2:0)};
+        return {x:P.m.x+P.e1[0]*t1+(keep===2?P.e2[0]*t2:0),
+                y:P.m.y+P.e1[1]*t1+(keep===2?P.e2[1]*t2:0)};
       });
-      let se=0; pts.forEach((q,i)=>{se+=(rec[i].u-q.u)**2+(rec[i].v-q.v)**2;});
-      err=Math.sqrt(se/pts.length);
+      let se=0; w.forEach((q,i)=>{se+=(rec[i].x-q.x)**2+(rec[i].y-q.y)**2;});
+      err=Math.sqrt(se/w.length);
     }
-    if(wide&&P&&rec){
-      const R=box(split,W-split,keep===1?"1 bileşenle geri kurulan":"2 bileşenle geri kurulan (kayıpsız)");
-      pts.forEach((q,i)=>{
+    if(G.wide&&P&&rec){
+      const R=box(G.R,keep===1?"1 bileşenle geri kurulan":"2 bileşenle (kayıpsız)");
+      w.forEach((q,i)=>{
         const r=rec[i];
         ctx.save();ctx.strokeStyle=hexA("--bad",.45);ctx.lineWidth=1.6;
-        ctx.beginPath();ctx.moveTo(R.X(q.u),R.Y(q.v));ctx.lineTo(R.X(r.u),R.Y(r.v));ctx.stroke();ctx.restore();
-        disc(ctx,R.X(q.u),R.Y(q.v),3.4,hexA("--ink-soft",.5));
-        disc(ctx,R.X(r.u),R.Y(r.v),4.6,css("--accent"),css("--surface"));
+        ctx.beginPath();ctx.moveTo(R.X(q.x),R.Y(q.y));ctx.lineTo(R.X(r.x),R.Y(r.y));ctx.stroke();ctx.restore();
+        disc(ctx,R.X(q.x),R.Y(q.y),3.4,hexA("--ink-soft",.5));
+        disc(ctx,R.X(r.x),R.Y(r.y),4.6,css("--accent"),css("--surface"));
       });
-      label(ctx,"özgün",split+p+6,p+31,css("--ink-soft"),"left",10.5);
-      label(ctx,"geri kurulan",split+p+6,p+48,css("--accent"),"left",10.5);
+      legend(ctx,G.R.x+12,G.R.y+33,[["özgün","--ink-soft"],["geri kurulan","--accent"]],{size:10.5});
+      curve(G.C,P,probe);
     }
 
+    const fx2=(v)=>"%"+v.toFixed(fx?2:1);
     if(P&&P.total>1e-12){
       const a=P.l1/P.total*100, b=P.l2/P.total*100;
-      $("#pca-v1").textContent="%"+a.toFixed(1);
+      $("#pca-v1").textContent=fx2(a);
       $("#pca-v1").className="v "+(a>85?"ok":a>65?"wr":"bd");
-      $("#pca-v2").textContent="%"+b.toFixed(1);
+      $("#pca-v2").textContent=fx2(b);
     } else {$("#pca-v1").textContent="—";$("#pca-v2").textContent="—";}
-    $("#pca-err").textContent=err==null?"—":fmt(err,4);
+    /* özdeğerler yalnız gerçek birimli (sabit) kümede: rastgele bulutun ekseni birimsiz */
+    txt("#pca-lam",P&&fx?`${f2(P.l1)} · ${f2(P.l2)}`:"—");
+    $("#pca-err").textContent=err==null?"—":fmt(err,fx?2:4);
     $("#pca-sz").textContent=pts.length?`${pts.length*keep} / ${pts.length*2}`:"—";
+    /* tuval metni sahte DOM'da okunmuyor: sınamalar (behaviour.js) buradan okur */
+    cv.setAttribute("aria-label",!P?"PCA: en az üç nokta gerekli":
+      `PCA · ${S().name}${FX()&&FX().unit?" · birim "+UNIT[unit]:""} · PC1 ${P.ang.toFixed(1)}° · v₁ = (${P.e1[0].toFixed(3)}, ${P.e1[1].toFixed(3)}) · `+
+      `PC1 %${(P.l1/P.total*100).toFixed(2)} · λ₁ ${f2(P.l1)} · λ₂ ${f2(P.l2)} · açı eğrisi: 0° → ${f2(P.sxx)}, 90° → ${f2(P.syy)}, `+
+      `tepe ${P.ang.toFixed(1)}° → ${f2(P.l1)}, dip ${((P.ang+90)%180).toFixed(1)}° → ${f2(P.l2)}`);
+  }
+  /* sabit kümede kaydırıcılar (uzama / dönme) bir şey üretmiyor: gizlenir; birim
+     anahtarı yalnız "Not ve süre"de görünür. Çubuk böylece hiç uzamıyor. */
+  function paintBar(){
+    const f=FX();
+    ["#pca-corl","#pca-rotl"].forEach(s=>{const e=$(s); if(e) e.hidden=!!f;});
+    const u=$("#pca-units"); if(u) u.hidden=!(f&&f.unit);
+    ["#pca-uh","#pca-um","#pca-uz"].forEach((s,i)=>{const e=$(s); if(e) e.setAttribute("aria-pressed",String(i===unit));});
   }
   function demo(){
-    ed.reset(); pts=[];
-    /* uzama=0'da yuvarlak, 1'de uzun: iki sapma zıt değil, TEK yönde ayrışmalı */
-    const th=rot*Math.PI/180, sa=.155+.10*corr, sb=.155-.10*corr;
-    for(let i=0;i<44;i++){
-      const x=gauss()*sa, y=gauss()*sb;
-      pts.push({u:clamp(.5+x*Math.cos(th)-y*Math.sin(th),.03,.97),
-                v:clamp(.5+x*Math.sin(th)+y*Math.cos(th),.03,.97)});
+    ed.reset(); pts=[]; probe=null;
+    const f=FX();
+    if(f){ f.x1.forEach((x,i)=>pts.push({x,y:f.x2[i],lab:(f.lab||"")[i]||""})); }
+    else{
+      /* uzama=0'da yuvarlak, 1'de uzun: iki sapma zıt değil, TEK yönde ayrışmalı */
+      const th=rot*Math.PI/180, sa=.155+.10*corr, sb=.155-.10*corr;
+      for(let i=0;i<44;i++){
+        const x=gauss()*sa, y=gauss()*sb;
+        pts.push({u:clamp(.5+x*Math.cos(th)-y*Math.sin(th),.03,.97),
+                  v:clamp(.5+x*Math.sin(th)+y*Math.cos(th),.03,.97)});
+      }
     }
-    draw();
+    frame(); paintBar(); draw();
   }
-  const geo=()=>{const W=cv.__w,H=cv.__h,p=28,wide=W>760,split=wide?Math.round(W*0.52):W;
-    return {p,split,W,H,bw:split-2*p,bh:H-2*p};};
   const ed=editable(cv,{
     pts:()=>pts, setPts:(a)=>{pts=a},
-    toPx:(t)=>{const g=geo();return{x:g.p+t.u*g.bw, y:g.H-g.p-t.v*g.bh};},
-    toData:(x,y)=>{const g=geo(); if(x>g.split-g.p/2) return null;
-      return{u:clamp((x-g.p)/g.bw,0,1), v:clamp((g.H-g.p-y)/g.bh,0,1)};},
-    add:(u,v)=>pts.push({u,v}),
-    draw:()=>draw(), commit:()=>draw()
+    toPx:(t)=>{const G=geo(),M=mapOf(G.L);
+      if(!FX()) return {x:M.X(t.u),y:M.Y(t.v)};
+      if(isZ()){ const z=zpar(); return z?{x:M.X((t.x-z.mx)/z.sx),y:M.Y((t.y-z.my)/z.sy)}:null; }
+      return {x:M.X(t.x),y:M.Y(t.y*yk())};},
+    /* standart görünümde z bütün noktalara bağlı: tek nokta taşınamaz (null) */
+    toData:(px,py)=>{const G=geo(),B=G.L,M=mapOf(B);
+      if(px<B.x-6||px>B.x+B.s+6||isZ()) return null;
+      const X=clamp(px,B.x,B.x+B.s), Y=clamp(py,B.y,B.y+B.s);
+      if(!FX()) return {u:clamp(M.ix(X),0,1), v:clamp(M.iy(Y),0,1)};
+      return {u:M.ix(X), v:M.iy(Y)/yk()};},
+    add:(a,b)=>pts.push(FX()?{x:a,y:b,lab:""}:{u:a,v:b}),
+    draw:()=>{fixUV();draw();}, commit:()=>{fixUV();draw();}
   });
   cv.addEventListener("pointermove",e=>{
     if(cv.__dragging){ if(probe){probe=null;} return; }
-    const g=geo(), q=pointerPos(cv,e), P=pca();
+    const G=geo(), q=pointerPos(cv,e), w=work(), P=pca(w);
     let pr=null;
-    if(P && q.x<g.split-g.p/2){
-      const u=(q.x-g.p)/g.bw, v=(g.H-g.p-q.y)/g.bh, du=u-P.m.u, dv=v-P.m.v, n=Math.hypot(du,dv);
-      if(n>.03) pr=[du/n,dv/n];
+    if(P){
+      const B=G.L, M=mapOf(B);
+      if(q.x>=B.x&&q.x<=B.x+B.s&&q.y>=B.y&&q.y<=B.y+B.s){
+        const du=M.ix(q.x)-P.m.x, dv=M.iy(q.y)-P.m.y, n=Math.hypot(du,dv);
+        if(n>view.span*.03) pr=[du/n,dv/n];
+      } else if(G.wide&&q.x>=G.C.x&&q.x<=G.C.x+G.C.w&&q.y>=G.C.y&&q.y<=G.C.y+G.C.h){
+        /* açı eğrisinin üstünde: yatay konum = yön açısı */
+        const d=clamp((q.x-G.C.x-10)/(G.C.w-20),0,1)*Math.PI;
+        pr=[Math.cos(d),Math.sin(d)];
+      }
     }
     if(pr||probe){ probe=pr; draw(); }
   });
@@ -8709,23 +9042,36 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   $("#pca-rot").oninput=e=>{rot=+e.target.value;$("#pca-roto").textContent=rot+"°";demo();};
   const setK=(k)=>{keep=k;$("#pca-c1").setAttribute("aria-pressed",k===1);$("#pca-c2").setAttribute("aria-pressed",k===2);draw();};
   $("#pca-c1").onclick=()=>setK(1); $("#pca-c2").onclick=()=>setK(2);
+  /* birim anahtarı: aynı beş öğrenci, çalışma süresi saat / dakika / z — Hafta 13 jüri örneği */
+  const setU=(i)=>{unit=i; probe=null; frame(); paintBar(); draw();};
+  $("#pca-uh").onclick=()=>setU(0); $("#pca-um").onclick=()=>setU(1); $("#pca-uz").onclick=()=>setU(2);
   $("#pca-new").onclick=demo;
-  $("#pca-clr").onclick=()=>{ed.reset();pts=[];draw();};
+  $("#pca-clr").onclick=()=>{ed.reset();pts=[];probe=null;draw();};
   function useSet(i){ dsi=clamp(i,0,DS.length-1); demo(); }
   reg({id:"m-pca",draw,space:demo,init:demo,undo:()=>ed.undo(),
     scenarioLabel:CONTENT["m-pca"].pick,
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
       {t:"Uzamış bulut",d:"Veri belirgin bir yöne uzanıyor. 1. bileşen tam o yöne oturdu; varyansın %85'inden fazlasını tek başına açıklıyor.",
-       hl:["#pca-v1"], run(){setR("#pca-cor",90);setR("#pca-rot",30);setPressed("#pca-c1",true);}},
-      {t:"Neden bu yön?",d:"Fareyi sol panelde bulutun etrafında gezdirin: ortalamadan imlece turuncu kesikli bir deneme ekseni çıkıyor, noktaların o eksendeki gölgeleri turuncu. Sağ üstte o yönde ne kadar yayılım kaldığı yazıyor. Ekseni çevirin: en büyük yüzde tam pembe 1. bileşenin üstüne gelince çıkıyor. PCA'nın aradığı yön, gölgelerin en çok yayıldığı yön.",
+       set:0, hl:["#pca-v1"], run(){setR("#pca-cor",90);setR("#pca-rot",30);setPressed("#pca-c1",true);}},
+      {t:"Neden bu yön?",d:"Fareyi sol panelde bulutun etrafında gezdirin: ortalamadan imlece turuncu kesikli bir deneme ekseni çıkıyor, noktaların o eksendeki gölgeleri turuncu. Sağ altta o yönde ne kadar yayılım kaldığı yazıyor. Ekseni çevirin: en büyük yüzde tam pembe 1. bileşenin üstüne gelince çıkıyor. PCA'nın aradığı yön, gölgelerin en çok yayıldığı yön.",
        hl:["#pca-v1"], run(){setR("#pca-cor",90);setPressed("#pca-c1",true);}},
-      {t:"Bir boyuta inmek",d:"Sağda her nokta eksene izdüşürülüp geri kuruldu. Kırmızı çizgiler kaybettiğimiz kısım — çok kısa. İki sayı yerine bir sayı sakladık.",
+      {t:"Bir boyuta inmek",d:"Ortadaki kutuda her nokta eksene izdüşürülüp geri kuruldu. Kırmızı çizgiler kaybettiğimiz kısım — çok kısa. İki sayı yerine bir sayı sakladık.",
        hl:["#pca-err","#pca-sz"], run(){setPressed("#pca-c1",true);}},
       {t:"Dönme fark etmez",d:"Dönme açısını değiştirin: eksenler veriyle dönüyor ama yüzdeler sabit. PCA koordinat sisteminin nasıl kurulduğuna bağlı değil.",
        hl:["#pca-v1","#pca-rot"], run(){setR("#pca-rot",120);}},
       {t:"Yuvarlak bulut",d:"Uzamayı sıfıra indirin: iki bileşen kabaca yarı yarıya (%60 civarı). Ayrıcalıklı bir yön yok, indirgeme bilgi kaybından ibaret. PCA her veride işe yaramaz.",
-       hl:["#pca-v1","#pca-v2"], run(){setR("#pca-cor",0);}}
+       hl:["#pca-v1","#pca-v2"], run(){setR("#pca-cor",0);}},
+      {t:"Beş öğrenci",d:"Hafta 13'ün tablosu: matematik 60, 70, 76, 82, 92; fizik 58, 66, 74, 78, 84. PC1 40° eğimli, <b>v₁ = (0.765, 0.644)</b>. Özdeğerler <b>λ₁ = 248.79</b>, <b>λ₂ = 1.21</b>: PC1 varyansın %99.52'sini taşıyor. İki not yerine tek sayı, 'genel fen başarısı'.",
+       set:1, hl:["#pca-v1","#pca-lam"], run(){setPressed("#pca-c1",true);}},
+      {t:"Açıya göre varyans",d:"Sağdaki eğri gölgeyi 0°'den 180°'ye her yöne düşürüp varyansını ölçüyor. 0°'de matematiğin kendi varyansı 146, 90°'de fiziğinki 104. Tepe 40°'de 248.79, yani λ₁; dip 130°'de 1.21, yani λ₂. Fareyi eğrinin üstünde gezdir: soldaki kesikli yön seninle döner. Toplam hep 250: PCA varyansı yeniden paylaştırıyor.",
+       hl:["#pca-lam"], run(){}},
+      {t:"Saat mi, dakika mı?",d:"Aynı beş öğrencinin matematik notu ve haftalık çalışma süresi: 3, 4, 7, 5, 6 saat. Saatin varyansı 2.5, matematiğinki 146. PC1 5°'de ve %99.2 açıklıyor: neredeyse yalnız matematik, çalışma süresi yokmuş gibi.",
+       set:3, hl:["#pca-v1","#pca-uh"], run(){press("#pca-uh");}},
+      {t:"Dakikaya çevir",d:"Süreyi dakikayla yaz: varyansı 9000'e çıkıyor ve PC1 85°'ye dönüyor. Yine %99.2, ama bu kez neredeyse yalnız çalışma süresi. Aynı veri, iki zıt cevap. Jüri gibi düşün: biri 10, biri 1000 üzerinden puan veriyorsa sıralamayı büyük kartı tutan belirler.",
+       hl:["#pca-v1","#pca-um"], run(){press("#pca-um");}},
+      {t:"Standartlaştır",d:"İki sütunu z-skoruna çevir: her jüri kendi ölçeğinde. PC1 45°'de durdu, iki sütun eşit ağırlıkta ve %85.3 açıklıyor. λ₁ = 1 + r = 1.71; saat de yazsan dakika da, sonuç aynı. PCA'dan önce standartlaştırma bu yüzden neredeyse zorunlu.",
+       hl:["#pca-v1","#pca-lam","#pca-uz"], run(){press("#pca-uz");}}
     ]});
 })();
 
@@ -9317,12 +9663,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 /* ═════════════ 17 · Küre olmayan kümeler ═════════════ */
 (function(){
   const cv=$("#c-dbs"), {ctx,fit}=setupCanvas(cv);
-  const DS=SETS("m-dbs"); let dsi=0; const S=()=>DS[dsi];
+  const DS=SETS("m-dbs"); let dsi=0; const S=()=>DS[dsi], FX=()=>S().fix||null;
   const PAL=["--a","--b","--c","--d","--good","--warn"];
-  let pts=[], K=2, eps=.08, minPts=4, right="dbscan", hoverI=-1;
+  let pts=[], K=2, eps=.08, minPts=4, right="dbscan", link="ward", hoverI=-1;
   let kmLab=[], kmC=[], rLab=[], rN=0, noiseN=0, rCore=[], rNbc=[];
+  let ver=0, tree=null;      /* ağaç önbelleği: veri (ver) ya da linkage değişmedikçe yeniden kurulmaz */
+  const LINK={single:"Single",complete:"Complete",average:"Average",ward:"Ward"};
 
   const d2=(a,b)=>(a.u-b.u)**2+(a.v-b.v)**2;
+  /* Altı noktada eksen 0–10: uzaklık ve birleşme yüksekliği veri biriminde (×10) */
+  const fmtH=(h)=>FX()?(h*FX().sc).toFixed(2):h.toFixed(3);
 
   /* k-ortalamalar · başlangıç deterministik (en uzak nokta): aynı veri hep aynı sonucu versin */
   function kmeans(){
@@ -9380,30 +9730,85 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     }
     return {lab,count:cid,noise:lab.filter(l=>l===-1).length,core,nbc:nb.map(a=>a.length)};
   }
-  /* hiyerarşik · Ward: küme içi yayılımı en az artıran ikiliyi birleştir */
-  function ward(){
-    const n=pts.length;
-    let cl=pts.map((p,i)=>({ids:[i],u:p.u,v:p.v,m:1}));
-    while(cl.length>K){
-      let bi=0,bj=1,bd=Infinity;
-      for(let i=0;i<cl.length;i++) for(let j=i+1;j<cl.length;j++){
-        const w=cl[i].m*cl[j].m/(cl[i].m+cl[j].m)*d2(cl[i],cl[j]);
-        if(w<bd){bd=w;bi=i;bj=j;}
+  /* hierarchical clustering: en yakın iki kümeyi birleştir, tekrarla. İki kümenin
+     uzaklığı linkage'a göre, Lance–Williams güncellemesiyle (scipy'ın yükseklikleri):
+     single en yakın çift, complete en uzak çift, average bütün çiftlerin ortalaması,
+     ward küme içi kareler toplamını en az artıran birleşme. Ağaç BİR KEZ kurulur;
+     k yalnız kesme yüksekliğini seçer. Eşit uzaklıkta önce bulunan çift birleşir
+     (altı noktada A–B, B–C ve D–F hepsi √2; yükseklikler sıradan etkilenmez). */
+  function buildTree(){
+    const n=pts.length, D=new Float64Array(n*n), sz=new Array(n).fill(1), id=pts.map((_,i)=>i), act=new Array(n).fill(true);
+    for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){ const d=Math.sqrt(d2(pts[i],pts[j])); D[i*n+j]=d; D[j*n+i]=d; }
+    const merges=[];
+    for(let s=0;s<n-1;s++){
+      let bi=-1,bj=-1,bd=Infinity;
+      for(let i=0;i<n;i++){ if(!act[i]) continue;
+        for(let j=i+1;j<n;j++){ if(act[j]&&D[i*n+j]<bd-1e-12){bd=D[i*n+j];bi=i;bj=j;} } }
+      merges.push({a:id[bi],b:id[bj],h:bd});
+      for(let k=0;k<n;k++){ if(!act[k]||k===bi||k===bj) continue;
+        const dik=D[bi*n+k], djk=D[bj*n+k]; let d;
+        if(link==="single") d=Math.min(dik,djk);
+        else if(link==="complete") d=Math.max(dik,djk);
+        else if(link==="average") d=(sz[bi]*dik+sz[bj]*djk)/(sz[bi]+sz[bj]);
+        else { const T=sz[bi]+sz[bj]+sz[k]; d=Math.sqrt(Math.max(0,((sz[bi]+sz[k])*dik*dik+(sz[bj]+sz[k])*djk*djk-sz[k]*bd*bd)/T)); }
+        D[bi*n+k]=d; D[k*n+bi]=d;
       }
-      const A=cl[bi],B=cl[bj], m=A.m+B.m;
-      cl[bi]={ids:A.ids.concat(B.ids),u:(A.u*A.m+B.u*B.m)/m,v:(A.v*A.m+B.v*B.m)/m,m};
-      cl.splice(bj,1);
+      act[bj]=false; sz[bi]+=sz[bj]; id[bi]=n+s;
     }
-    const lab=new Array(n).fill(-1);
-    cl.forEach((c,i)=>c.ids.forEach(id=>lab[id]=i));
-    return {lab,count:cl.length,noise:0,core:null,nbc:null};
+    /* yaprak sırası: kökten soldan sağa (dendrogramın x ekseni) */
+    const order=[];
+    if(n){ const st=[2*n-2]; while(st.length){ const v=st.pop(); if(v<n){order.push(v);continue;} const m=merges[v-n]; st.push(m.b,m.a); } }
+    return {n,merges,order,ver,link};
+  }
+  /* ağacı k kümede kes: ilk n − k birleşmeyi uygula. Küme numaraları yaprak
+     sırasına göre, dendrogramdaki renklerle sağ paneldeki renkler aynı olsun. */
+  function cut(T,k){
+    const n=T.n, kk=clamp(k,1,n), mem=new Map();
+    for(let i=0;i<n;i++) mem.set(i,[i]);
+    for(let s=0;s<n-kk;s++){ const m=T.merges[s]; mem.set(n+s,mem.get(m.a).concat(mem.get(m.b))); mem.delete(m.a); mem.delete(m.b); }
+    const pos=new Array(n); T.order.forEach((v,i)=>pos[v]=i);
+    const groups=[...mem.values()].sort((A,B)=>Math.min(...A.map(i=>pos[i]))-Math.min(...B.map(i=>pos[i])));
+    const lab=new Array(n).fill(-1); groups.forEach((g,c)=>g.forEach(i=>lab[i]=c));
+    const h=(s)=>T.merges[clamp(s,0,n-2)].h;
+    const ch=n<2?0:kk>=n?h(0)/2:kk<=1?h(n-2)*1.04:(h(n-kk-1)+h(n-kk))/2;
+    return {lab,count:groups.length,cut:ch};
+  }
+  let cutH=0;
+  function hier(){
+    if(!tree||tree.ver!==ver||tree.link!==link||tree.n!==pts.length) tree=buildTree();
+    const c=cut(tree,K); cutH=c.cut;
+    return {lab:c.lab,count:c.count,noise:0,core:null,nbc:null};
+  }
+  /* k-ortalamaların küme numaraları keyfî: sol paneldeki renkleri sağ panelle en
+     çok örtüşen kümenin rengine eşle (altı noktada {A, B, C} iki panelde ayrı
+     renkteydi). Yalnız RENK değişir; kümeler aynı. */
+  let kmCol=[];
+  function matchColors(){
+    kmCol=kmC.map((_,j)=>j);
+    if(!rN||!kmC.length) return;
+    const ov=kmC.map((_,j)=>{const m=new Map(); pts.forEach((p,i)=>{ if(kmLab[i]===j&&rLab[i]>=0) m.set(rLab[i],(m.get(rLab[i])||0)+1); }); return m;});
+    const pairs=[]; ov.forEach((m,j)=>m.forEach((c,l)=>pairs.push([c,j,l])));
+    pairs.sort((a,b)=>b[0]-a[0]);
+    const usedJ=new Set(), usedL=new Set();
+    pairs.forEach(([c,j,l])=>{ if(usedJ.has(j)||usedL.has(l)) return; kmCol[j]=l; usedJ.add(j); usedL.add(l); });
+    let free=0; kmC.forEach((_,j)=>{ if(usedJ.has(j)) return; while(usedL.has(free)) free++; kmCol[j]=free; usedL.add(free); });
   }
   function compute(){
     kmeans();
-    if(!pts.length){ rLab=[]; rN=0; noiseN=0; rCore=[]; rNbc=[]; return; }
-    const r = right==="dbscan" ? dbscan() : ward();
+    if(!pts.length){ rLab=[]; rN=0; noiseN=0; rCore=[]; rNbc=[]; tree=null; kmCol=[]; return; }
+    const r = right==="dbscan" ? dbscan() : hier();
     rLab=r.lab; rN=r.count; noiseN=r.noise; rCore=r.core||[]; rNbc=r.nbc||[];
+    matchColors();
     if(hoverI>=pts.length) hoverI=-1;
+  }
+  /* gerçek gruplarla uyum (her kümede en kalabalık gerçek grup / nokta sayısı):
+     ekranda yazmaz, tuvalin aria-label'ında — "Ward hilallerin beşte birini yanlış
+     tarafa koyuyor" gibi metin iddiaları behaviour.js'te buradan sınanır */
+  function purity(lab){
+    const on=pts.map((p,i)=>[p.g,lab[i]]).filter(([g])=>g!==undefined&&g>=0); if(!on.length) return null;
+    const by=new Map(); on.forEach(([g,l])=>{ if(!by.has(l)) by.set(l,new Map()); const m=by.get(l); m.set(g,(m.get(g)||0)+1); });
+    let ok=0; by.forEach(m=>{ ok+=Math.max(...m.values()); });
+    return ok/on.length;
   }
   /* sağ panel geometrisi (fare isabeti ve çizim aynı yeri kullansın) */
   const rgeo=()=>{const W=cv.__w,H=cv.__h,p=26,wide=W>700,half=wide?Math.round(W/2):0,bw=W-half;
@@ -9430,6 +9835,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       const col=css(PAL[l%PAL.length]);
       if(right!=="dbscan"||rCore[i]) disc(ctx,x,y,5,col,css("--surface"));
       else { ctx.save();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,4,0,7);ctx.stroke();ctx.restore(); }
+      if(q.lab) label(ctx,q.lab,x+8,y-9,css("--ink"),"left",11.5);
     });
     /* fare bir noktanın üstündeyse: onun eps komşuluğu ve karar */
     if(right==="dbscan"&&hoverI>=0&&hoverI<pts.length){
@@ -9441,47 +9847,87 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       legend(ctx,right2?x-rx-8:x+rx+8,y-8,[[`${n} nokta (kendisi dâhil)`,"--ink"],[`min_samples ${minPts} → ${kind}`,"--accent"]],{size:10.5,align:right2?"right":"left"});
     }
   }
-  function panel(x0,bw,H,p,title){
+  function panel(x0,bw,H,p,title,y0=0){
     ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
     for(let i=0;i<=8;i++){
-      ctx.beginPath();ctx.moveTo(x0+p+i*(bw-2*p)/8,p);ctx.lineTo(x0+p+i*(bw-2*p)/8,H-p);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(x0+p,p+i*(H-2*p)/8);ctx.lineTo(x0+bw-p,p+i*(H-2*p)/8);ctx.stroke();}
-    ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(x0+p,p,bw-2*p,H-2*p);ctx.restore();
-    label(ctx,title,x0+p+6,p+14,css("--accent"),"left",11);
-    return {X:(u)=>x0+p+u*(bw-2*p), Y:(v)=>H-p-v*(H-2*p)};
+      ctx.beginPath();ctx.moveTo(x0+p+i*(bw-2*p)/8,y0+p);ctx.lineTo(x0+p+i*(bw-2*p)/8,y0+H-p);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x0+p,y0+p+i*(H-2*p)/8);ctx.lineTo(x0+bw-p,y0+p+i*(H-2*p)/8);ctx.stroke();}
+    ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(x0+p,y0+p,bw-2*p,H-2*p);ctx.restore();
+    label(ctx,title,x0+p+6,y0+p+14,css("--accent"),"left",11);
+    return {X:(u)=>x0+p+u*(bw-2*p), Y:(v)=>y0+H-p-v*(H-2*p)};
+  }
+  /* dendrogram: her birleşme bir "П" — iki dalın yüksekliğinden birleşme
+     yüksekliğine dikey çizgiler, aralarında yatay çizgi. Kesme çizgisinin altındaki
+     dallar kümenin renginde, üstündekiler gri; kaç dikey çizgiyi kestiği = k. */
+  function dendro(x0,y0,w,h){
+    const T=tree; if(!T||T.n<2) return;
+    const n=T.n, top=T.merges[n-2].h||1e-9, l=x0+10, r=x0+w-10, yb=y0+h-(FX()?24:14), yt=y0+26;
+    const HY=(v)=>yb-v/(top*1.06)*(yb-yt);
+    const xs=new Array(2*n-1), hs=new Array(2*n-1).fill(0), first=new Array(2*n-1);
+    T.order.forEach((v,i)=>{ xs[v]=l+(i+.5)/n*(r-l); first[v]=v; });
+    T.merges.forEach((m,s)=>{ xs[n+s]=(xs[m.a]+xs[m.b])/2; hs[n+s]=m.h; first[n+s]=first[m.a]; });
+    ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(x0,y0,w,h);ctx.restore();
+    label(ctx,`dendrogram · ${LINK[link]} linkage`,x0+6,y0+13,css("--accent"),"left",11);
+    const below=n-clamp(K,1,n);
+    ctx.save();ctx.lineWidth=n>60?1.1:1.6;
+    T.merges.forEach((m,s)=>{
+      const lab=rLab[first[n+s]];
+      ctx.strokeStyle=s<below&&lab>=0?css(PAL[lab%PAL.length]):css("--ink-soft");
+      ctx.beginPath();ctx.moveTo(xs[m.a],HY(hs[m.a]));ctx.lineTo(xs[m.a],HY(m.h));ctx.lineTo(xs[m.b],HY(m.h));ctx.lineTo(xs[m.b],HY(hs[m.b]));ctx.stroke();
+    });
+    ctx.restore();
+    /* az noktada (altı nokta) harfler ve birleşme yükseklikleri — Hafta 14'ün figürü */
+    if(n<=12){
+      T.order.forEach(v=>{ if(pts[v]&&pts[v].lab) label(ctx,pts[v].lab,xs[v],yb+12,css("--ink"),"center",11.5); });
+      T.merges.forEach((m,s)=>label(ctx,fmtH(m.h),xs[n+s],HY(m.h)-8,css("--ink"),"center",10.5));
+    }
+    const yc=HY(cutH);
+    ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=1.8;ctx.setLineDash([6,4]);
+    ctx.beginPath();ctx.moveTo(l,yc);ctx.lineTo(r,yc);ctx.stroke();ctx.restore();
+    legend(ctx,r-4,Math.max(yt+4,yc-12),[[`k = ${K} → kesme ${fmtH(cutH)}`,"--accent"]],{size:10.5,align:"right"});
   }
   function draw(){
     if(!fit()) return;
-    const W=cv.__w,H=cv.__h,p=26,wide=W>700;
+    const W=cv.__w,H=cv.__h,p=26,wide=W>700, hi=right==="hier";
     ctx.clearRect(0,0,W,H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,W,H);
-    const rightName = right==="dbscan" ? "DBSCAN · eps="+eps.toFixed(2) : "hierarchical (Ward) · "+K+" küme";
+    const rightName = right==="dbscan" ? "DBSCAN · eps="+eps.toFixed(2) : "hierarchical ("+LINK[link]+") · "+rN+" küme";
+    /* hierarchical seçiliyken sağ sütun ikiye bölünür: üstte kümeler, altta ağaç */
+    const Ht=hi?Math.round(H*.55):H;
+    const x0=wide?Math.round(W/2):0, bw=W-x0;
 
     if(wide){
-      const half=Math.round(W/2);
+      const half=x0;
       const L=panel(0,half,H,p,"k-ortalamalar · k="+K);
-      pts.forEach((q,i)=>disc(ctx,L.X(q.u),L.Y(q.v),5,
-        kmLab[i]<0?css("--ink-soft"):css(PAL[kmLab[i]%PAL.length]),css("--surface")));
+      pts.forEach((q,i)=>{ disc(ctx,L.X(q.u),L.Y(q.v),5,
+        kmLab[i]<0?css("--ink-soft"):css(PAL[(kmCol[kmLab[i]]??kmLab[i])%PAL.length]),css("--surface"));
+        if(q.lab) label(ctx,q.lab,L.X(q.u)+8,L.Y(q.v)-9,css("--ink"),"left",11.5); });
       kmC.forEach((c,j)=>{
         ctx.save();ctx.translate(L.X(c.u),L.Y(c.v));
-        ctx.strokeStyle=css(PAL[j%PAL.length]);ctx.lineWidth=3;
+        ctx.strokeStyle=css(PAL[(kmCol[j]??j)%PAL.length]);ctx.lineWidth=3;
         ctx.beginPath();ctx.moveTo(-8,-8);ctx.lineTo(8,8);ctx.moveTo(8,-8);ctx.lineTo(-8,8);
         ctx.stroke();ctx.restore();
       });
-      const R=panel(half,W-half,H,p,rightName);
-      drawDensity(R,W-half,H,p);
-      if(right==="dbscan") legend(ctx,half+p+8,H-p-12,[["dolu: çekirdek · halka: sınır · gri: gürültü","--ink-soft"]],{size:10});
       label(ctx,S().x+" →",p+4,H-p+13,css("--ink-soft"),"left",10.5);
-    } else {
-      const R=panel(0,W,H,p,rightName);
-      drawDensity(R,W,H,p);
-      label(ctx,"dar ekran: yalnız sağ panel",p+6,H-p-10,css("--ink-soft"),"left",10.5);
     }
+    const pr=hi?{x:x0+p,y:Ht,w:bw-2*p,h:H-Ht-8}:null;
+    const R=panel(x0,bw,hi?Ht+p-6:H,p,rightName);
+    drawDensity(R,bw,hi?Ht+p-6:H,p);
+    if(right==="dbscan"&&wide) legend(ctx,x0+p+8,H-p-12,[["dolu: çekirdek · halka: sınır · gri: gürültü","--ink-soft"]],{size:10});
+    if(!wide&&!hi) label(ctx,"dar ekran: yalnız sağ panel",p+6,H-p-10,css("--ink-soft"),"left",10.5);
+    if(hi) dendro(pr.x,pr.y,pr.w,pr.h);
     txt("#db-kn",pts.length?String(K):"—");
     txt("#db-rn",pts.length?String(rN):"—");
     txt("#db-noise",pts.length?String(noiseN):"—");
     txt("#db-core",pts.length&&right==="dbscan"?String(rCore.filter(Boolean).length):"—");
     txt("#db-n",String(pts.length));
     const e=$("#db-rn"); if(e) e.className="v "+(rN===2?"ok":rN===0?"bd":"wr");
+    /* tuval metni sahte DOM'da okunmuyor: sınamalar (behaviour.js) buradan okur */
+    const pk=purity(kmLab), pr2=purity(rLab), pc=(x)=>x===null?"—":"%"+Math.round(x*100);
+    const sizes=()=>{const c=new Array(rN).fill(0); rLab.forEach(l=>{if(l>=0&&l<rN)c[l]++;}); return c.sort((a,b)=>b-a);};
+    const lastH=tree&&hi?tree.merges.slice(-5).map(m=>fmtH(m.h)).join(", "):"";
+    cv.setAttribute("aria-label",`${S().name} · solda k-ortalamalar k=${K} (gerçek gruplarla uyum ${pc(pk)}) · sağda `+
+      (hi?`hierarchical ${LINK[link]} linkage · ${rN} küme · boylar ${sizes().join(" / ")} · kesme ${fmtH(cutH)} · son birleşmeler ${lastH}`:`DBSCAN eps=${eps.toFixed(2)} · ${rN} küme · gürültü ${noiseN}`)+
+      ` (uyum ${pc(pr2)})`);
   }
   const ed=editable(cv,{
     pts:()=>pts, setPts:(a)=>{pts=a},
@@ -9491,17 +9937,18 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(x>half-p/2) return null;
       return{u:clamp((x-p)/(half-2*p),0,1),v:clamp((H-p-y)/(H-2*p),0,1)};},
     add:(u,v)=>pts.push({u,v}),
-    draw:()=>draw(), commit:()=>{compute();draw();}
+    draw:()=>draw(), commit:()=>{ver++;compute();draw();}
   });
   cv.addEventListener("pointermove",e=>{
-    if(cv.__dragging) return;
+    if(cv.__dragging||right!=="dbscan") return;
     const q=pointerPos(cv,e), g=rgeo();
     let bi=-1, bd=196;                                    // 14 px içinde en yakın nokta
     if(q.x>g.half) pts.forEach((t,i)=>{const d=(g.X(t.u)-q.x)**2+(g.Y(t.v)-q.y)**2; if(d<bd){bd=d;bi=i;}});
     if(bi!==hoverI){ hoverI=bi; draw(); }
   });
   cv.addEventListener("pointerleave",()=>{ if(hoverI>=0){hoverI=-1;draw();} });
-  const put=(u,v,sd)=>pts.push({u:clamp(u+gauss()*sd,.03,.97),v:clamp(v+gauss()*sd,.03,.97)});
+  /* g: noktanın gerçek grubu (yalnız uyum ölçümü için; gürültü -1, elle eklenen yok) */
+  const put=(u,v,sd,g)=>pts.push({u:clamp(u+gauss()*sd,.03,.97),v:clamp(v+gauss()*sd,.03,.97),g});
   /* klasik make_moons oranları: dx = r, dy = 0.4·r — iki hilal iç içe geçer ama
      aralarında ölçülmüş ~0.12'lik bir yoğunluk boşluğu kalır (eps=0.08 ayırır,
      k-ortalamalar ayıramaz). Oranlar bozulursa ya DBSCAN birleştirir ya k-ortalamalar başarır. */
@@ -9509,37 +9956,55 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ed.reset(); pts=[];
     const r=.24, ax=.30, ay=.34, dx=r, dy=.40*r;
     for(let i=0;i<55;i++){const t=Math.PI*i/54;
-      put(ax+r*Math.cos(t), ay+r*Math.sin(t), .012);}
+      put(ax+r*Math.cos(t), ay+r*Math.sin(t), .012, 0);}
     for(let i=0;i<55;i++){const t=Math.PI*i/54;
-      put(ax+dx+r*Math.cos(t), ay+dy-r*Math.sin(t), .012);}
+      put(ax+dx+r*Math.cos(t), ay+dy-r*Math.sin(t), .012, 1);}
   }
   function rings(){
     ed.reset(); pts=[];
-    [[.14,44],[.36,70]].forEach(([r,n])=>{
+    [[.14,44],[.36,70]].forEach(([r,n],g)=>{
       for(let i=0;i<n;i++){const a=2*Math.PI*i/n;
-        put(.5+r*Math.cos(a), .5+r*Math.sin(a), .022);}
+        put(.5+r*Math.cos(a), .5+r*Math.sin(a), .022, g);}
     });
   }
   function blobs(){
     ed.reset(); pts=[];
-    [[.24,.70],[.72,.72],[.50,.24]].forEach(([u,v])=>{for(let i=0;i<28;i++)put(u,v,.055);});
-    for(let i=0;i<22;i++) pts.push({u:rnd(.05,.95),v:rnd(.05,.95)});
+    [[.24,.70],[.72,.72],[.50,.24]].forEach(([u,v],g)=>{for(let i=0;i<28;i++)put(u,v,.055,g);});
+    for(let i=0;i<22;i++) pts.push({u:rnd(.05,.95),v:rnd(.05,.95),g:-1});
   }
-  const GEN={moons,rings,blobs};
-  function demo(){ (GEN[S().gen]||moons)(); compute(); draw(); }
-  const setRight=(r)=>{right=r;
-    $("#db-dbscan").setAttribute("aria-pressed",String(r==="dbscan"));
-    $("#db-hier").setAttribute("aria-pressed",String(r==="hier"));
-    compute();draw();};
+  /* Hafta 14'ün altı noktası (eksenler 0–10): average linkage ağacı 1.41 / 1.41 / 1.71 / 2.24 / 8.30 */
+  function six(){
+    ed.reset(); const f=FX();
+    pts=f.pts.map(([x,y],i)=>({u:x/f.sc,v:y/f.sc,lab:f.lab[i],g:i<3?0:1}));
+  }
+  const GEN={moons,rings,blobs,six};
+  function demo(){ (GEN[S().gen]||moons)(); ver++; compute(); draw(); }
+  function paintBar(){
+    const hi=right==="hier";
+    $("#db-dbscan").setAttribute("aria-pressed",String(!hi));
+    $("#db-hier").setAttribute("aria-pressed",String(hi));
+    /* eps / min_samples yalnız DBSCAN'de, linkage yalnız hierarchical'da: çubuk uzamasın */
+    ["#db-epsl","#db-mpl"].forEach(s=>{const e=$(s); if(e) e.hidden=hi;});
+    const lk=$("#db-link"); if(lk) lk.hidden=!hi;
+    [["#db-lsin","single"],["#db-lcom","complete"],["#db-lavg","average"],["#db-lwar","ward"]].forEach(([s,v])=>{const e=$(s); if(e) e.setAttribute("aria-pressed",String(link===v));});
+  }
+  const setRight=(r)=>{right=r; hoverI=-1; paintBar(); compute();draw();};
+  const setLink=(v)=>{link=v; paintBar(); compute(); draw();};
+  const setK=(k)=>{K=k; const e=$("#db-k"); if(e) e.value=String(k); txt("#db-ko",String(k));};
   $("#db-k").oninput=e=>{K=+e.target.value;txt("#db-ko",String(K));compute();draw();};
   $("#db-eps").oninput=e=>{eps=+e.target.value/100;txt("#db-epso",eps.toFixed(2));compute();draw();};
   $("#db-mp").oninput=e=>{minPts=+e.target.value;txt("#db-mpo",String(minPts));compute();draw();};
   $("#db-dbscan").onclick=()=>setRight("dbscan");
   $("#db-hier").onclick=()=>setRight("hier");
+  $("#db-lsin").onclick=()=>setLink("single"); $("#db-lcom").onclick=()=>setLink("complete");
+  $("#db-lavg").onclick=()=>setLink("average"); $("#db-lwar").onclick=()=>setLink("ward");
   $("#db-new").onclick=demo;
-  $("#db-clr").onclick=()=>{ed.reset();pts=[];compute();draw();};
-  function useSet(i){ dsi=clamp(i,0,DS.length-1); demo(); }
-  reg({id:"m-dbs",draw,space:demo,init:demo,undo:()=>{const r=ed.undo();compute();draw();return r;},
+  $("#db-clr").onclick=()=>{ed.reset();pts=[];ver++;compute();draw();};
+  /* "Altı nokta" seçilince sağ panel sunumun ağacına geçer: hierarchical, average, k = 2 */
+  function useSet(i){ dsi=clamp(i,0,DS.length-1);
+    if(FX()){ right="hier"; link="average"; setK(2); }
+    paintBar(); demo(); }
+  reg({id:"m-dbs",draw,space:demo,init:()=>{paintBar();demo();},undo:()=>{const r=ed.undo();return r;},
     scenarioLabel:CONTENT["m-dbs"].pick,
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
@@ -9553,10 +10018,18 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
        hl:["#db-noise","#db-core"], run(){setR("#db-eps",2);}},
       {t:"eps çok büyükse",d:"eps'i 0.30'a çıkarın: bütün noktalar tek bir zincire bağlanıyor ve tek küme kalıyor. Doğru eps iki uç arasında dar bir aralıkta.",
        hl:["#db-rn"], run(){setR("#db-eps",30);}},
-      {t:"Hierarchical de yuvarlak seviyor",d:"Sağ paneli <b>Hierarchical</b>'a alın. Ward yöntemi küme içi yayılımı en az artıracak birleşmeyi seçer; ölçtük, hilallerin yaklaşık beşte birini yanlış tarafa koyuyor (k-ortalamalar dörtte biri). Sorun algoritmanın adında değil, varsayımında.",
-       run(){setPressed("#db-hier",true);setR("#db-k",2);}},
+      {t:"Hierarchical de yuvarlak seviyor",d:"Sağ paneli <b>Hierarchical</b>'a alın, linkage Ward. Ward küme içi yayılımı en az artıracak birleşmeyi seçer; ölçtük, hilallerin yaklaşık beşte birini yanlış tarafa koyuyor (k-ortalamalar dörtte biri). Altta ağaç, yani dendrogram: k = 2 onu en üstteki iki dalın arasından kesiyor. Sorun algoritmanın adında değil, varsayımında.",
+       hl:["#db-lwar"], run(){setPressed("#db-hier",true);press("#db-lwar");setR("#db-k",2);}},
+      {t:"Single linkage zincirliyor",d:"Linkage'ı <b>Single</b> yap: iki kümenin uzaklığı artık en yakın iki noktası. Hilal boyunca her nokta komşusuna el uzatıyor, zincir hilali sonuna kadar takip ediyor. Ağacın en üstündeki birleşme iki hilalin arasındaki boşluk; k = 2 oradan kesiyor ve hilaller ayrılıyor. Ward'ın ağacında o boşluk yoktu.",
+       hl:["#db-lsin","#db-rn"], run(){setPressed("#db-hier",true);press("#db-lsin");setR("#db-k",2);}},
       {t:"İç içe halka",d:"Halka verisinde iki kümenin ortalaması aynı noktada. Merkeze dayalı her yöntem burada kaybeder; DBSCAN'e dönün ve eps'i 0.10 yapın.",
-       set:1, run(){setPressed("#db-dbscan",true);setR("#db-eps",10);setR("#db-mp",4);}}
+       set:1, run(){setPressed("#db-dbscan",true);setR("#db-eps",10);setR("#db-mp",4);}},
+      {t:"Single'ın bedeli: gürültü",d:"Öbek + gürültü verisinde Single linkage: öbeklerin arasına serpilmiş gürültü noktaları zinciri bir öbekten ötekine taşıyor, tek başına kalan bir gürültü noktası ise en son birleşiyor. k = 3'te çoğu zaman kümelerden biri bir iki noktadan ibaret, iki öbek de birbirine yapışık. Ward'a geç: üç öbek yerli yerinde.",
+       set:2, hl:["#db-lsin","#db-rn"], run(){setPressed("#db-hier",true);press("#db-lsin");setR("#db-k",3);}},
+      {t:"Dendrogramı oku",d:"Hafta 14'ün altı noktası, <b>Average</b> linkage: iki kümenin uzaklığı bütün nokta çiftlerinin ortalaması. A–B ve D–F 1.41'de, C 1.71'de, E 2.24'te katılıyor; iki büyük küme ancak 8.30'da birleşiyor. k = 2 ağacı 5.27'den kesiyor: {A, B, C} ve {D, E, F}.",
+       set:3, hl:["#db-lavg","#db-k"], run(){setPressed("#db-hier",true);press("#db-lavg");setR("#db-k",2);}},
+      {t:"Kesme yüksekliğini k seçer",d:"k'yı 3 yap: kesme çizgisi 1.97'ye iniyor ve 2.24'teki birleşme kopuyor. Üç küme: {A, B, C}, {D, F} ve tek başına {E}. Ağaç bir kez kuruldu; k yalnız nereden kestiğini seçiyor.",
+       hl:["#db-k","#db-rn"], run(){setR("#db-k",3);}}
     ]});
 })();
 
@@ -9583,10 +10056,10 @@ const META=[
   ["14","m-dt",    "decision tree ve Gini kazancı","Bölerek karar ver","Hafta 10","karar ağacı decision tree gini bölme split eşik threshold yaprak leaf bağ hastalığı mildiyö sahte işlem dolandırıcılık fraud kalite kontrol hafta 10 safsızlık impurity gini kazancı"],
   ["15","m-ens",   "bagging, random forest ve OOB","Kırk ağaç","Hafta 11","topluluk ensemble torbalama bagging rastgele orman random forest oob out-of-bag bootstrap oylama voting varyans ağaç kredi onayı pivot sulama halka hafta 11 ensemble yerine koyarak örnekleme max_features"],
   ["16","m-svm",   "SVM: margin, support vector ve kernel","En geniş yol","Hafta 12","svm destek vektör makinesi support vector machine marj margin destek vektörü support vector kernel çekirdek rbf gamma hinge menteşe c parametresi kalite kontrol kredi riski baz istasyonu halka hafta 12 margin support vector yol"],
-  ["17","m-pca",   "PCA ile boyut indirgeme","İki sayı yerine bir","Hafta 13","pca ana bileşen principal component boyut indirgeme dimensionality reduction varyans variance özvektör eigenvector izdüşüm projection boy kilo matematik fizik uydu bandı ndvi kızılötesi hafta 13 pc1 pc2 açıklanan varyans oranı explained variance ratio"],
-  ["18","m-km",    "k-ortalamalar (k-means) ile kümeleme","Etiketsiz gruplama","Hafta 14","kümeleme clustering k-ortalamalar k-means merkez centroid etiketsiz unsupervised yakınsama convergence müşteri segmenti artçı sarsıntı deprem uydu pikseli hafta 14 k-ortalamalar ata güncelle iterasyon küme içi kareler toplamı"],
+  ["17","m-pca",   "PCA ile boyut indirgeme","İki sayı yerine bir","Hafta 13","pca ana bileşen principal component boyut indirgeme dimensionality reduction varyans variance özvektör eigenvector izdüşüm projection boy kilo matematik fizik uydu bandı ndvi kızılötesi hafta 13 pc1 pc2 açıklanan varyans oranı explained variance ratio beş öğrenci özdeğer eigenvalue kovaryans matrisi covariance matrix standartlaştırma standardization z-skoru birim saat dakika jüri açıya göre varyans"],
+  ["18","m-km",    "k-ortalamalar (k-means) ile kümeleme","Etiketsiz gruplama","Hafta 14","kümeleme clustering k-ortalamalar k-means merkez centroid etiketsiz unsupervised yakınsama convergence müşteri segmenti artçı sarsıntı deprem uydu pikseli hafta 14 k-ortalamalar ata güncelle iterasyon küme içi kareler toplamı k-means++ n_init 10 kez dene başlangıç yerel en iyi local optimum altı nokta"],
   ["19","m-kch",   "elbow yöntemi ve silhouette skoru","Kaç küme var?","Hafta 14","küme sayısı dirsek elbow siluet silhouette wcss inertia k seçimi model selection müşteri segmenti bağ çeşidi yerleşim yerleri hafta 14 küme içi kareler toplamı"],
-  ["20","m-dbs",   "DBSCAN ve hierarchical clustering","Küme yuvarlak olmak zorunda mı","Hafta 14","dbscan yoğunluk density eps minpts çekirdek nokta core point gürültü noise hiyerarşik hierarchical ward dendrogram aglomeratif hilal moons halka ring küme şekli hafta 14 min_samples dendrogram"],
+  ["20","m-dbs",   "DBSCAN ve hierarchical clustering","Küme yuvarlak olmak zorunda mı","Hafta 14","dbscan yoğunluk density eps minpts çekirdek nokta core point gürültü noise hiyerarşik hierarchical ward dendrogram aglomeratif hilal moons halka ring küme şekli hafta 14 min_samples dendrogram linkage bağlantı ölçütü single complete average kesme yüksekliği altı nokta"],
   ["21","m-neu",   "artificial neuron ve activation function","Bir nöron ne hesaplar","Ek · Sinir ağları","yapay nöron artificial neuron nöron neuron girdi input ağırlık weight bias sabit terim ağırlıklı toplam weighted sum aktivasyon activation function basamak step sigmoid relu tanh ölçekleme balon turu rüzgar görüş kredi onayı lamba devresi anahtar and or mantık kapısı"],
   ["22","m-per",   "perceptron ve linear separability","Tek nöron öğreniyor","Ek · Sinir ağları","perceptron nöron neuron xor doğrusal ayrılabilirlik linearly separable yakınsama convergence kalite kontrol ilaç etkileşimi xor"],
   ["23","m-mlp",   "MLP XOR'u nasıl çözüyor","Gizli katmanı eğitmek","Ek · Sinir ağları","çok katmanlı ağ mlp neural network xor gizli katman hidden layer geri yayılım backpropagation epoch tanh sigmoid ilaç etkileşimi baz istasyonu iki ay make_moons"],

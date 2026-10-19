@@ -534,7 +534,7 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   const rise=seq.filter((v,i)=>i&&v>seq[i-1]+1e-9).length;
   chk(seq.length>2, "adımlar WCSS üretiyor");
   chk(rise===0, "algoritmanın küçülttüğü nicelik hiçbir adımda artmıyor", `${rise} artış`);
-  el('km-seed').click();
+  el('km-ir').click();   // « Rastgele »ye yeniden basmak = yeni başlangıç (eski « Merkezleri yeniden at »)
   chk(T(el,'km-j')==="—", "merkezler yeniden atılınca gösterge tekrar '—'", T(el,'km-j'));
 }
 
@@ -1120,6 +1120,132 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(el('dig-cen').getAttribute('aria-pressed')==='false'&&T(el,'dig-acc')==='0 / 22', "kaymış rakamlar, ortalamasız: 22'nin hiçbiri (adım 6, not)", T(el,'dig-acc'));
   P(el,'dig-cen',true);
   chk(T(el,'dig-acc')==='21 / 22', "« Ortala » açılınca 21 / 22 (adım 7, not)", T(el,'dig-acc'));
+}
+
+/* ══ 3. aşama: Hafta 13–14 sunumlarından gelen etkileşimler ══
+   Sunumun sayıları (beş öğrenci, altı nokta) SABİT veride birebir sınanır; rastgele
+   veride ORTALAMA ve pay kullanılır (eşikler 20–30 turluk ölçümle konuldu). */
+
+/* ── 17 · PCA: beş öğrenci, açıya göre varyans, birim anahtarı ── */
+{
+  head("Modül 17 · beş öğrenci, açı eğrisi ve birim anahtarı (Hafta 13)");
+  const {el,M}=boot(F); const AR=()=>el('c-pca').getAttribute('aria-label')||'';
+  const ang=()=>num((/PC1 (-?[\d.]+)°/.exec(AR())||[])[1]);
+  PK(M,'m-pca',1);
+  chk(T(el,'pca-v1')==='%99.52', "beş öğrenci: PC1 varyansın %99.52'si (adım 6, not, ex)", T(el,'pca-v1'));
+  chk(T(el,'pca-lam')==='248.79 · 1.21', "özdeğerler n − 1 paydayla λ₁ = 248.79, λ₂ = 1.21 (adım 6)", T(el,'pca-lam'));
+  chk(/PC1 40\.1° · v₁ = \(0\.765, 0\.644\)/.test(AR()), "PC1 yaklaşık 40°, v₁ = (0.765, 0.644) (adım 6, ex)", (/PC1 [^·]+· v₁ = \([^)]+\)/.exec(AR())||[''])[0]);
+  chk(/0° → 146\.00, 90° → 104\.00/.test(AR()), "açı eğrisi: 0°'de matematiğin varyansı 146, 90°'de fiziğin 104 (adım 7)");
+  chk(/tepe 40\.1° → 248\.79, dip 130\.1° → 1\.21/.test(AR()), "eğrinin tepesi 40°'de λ₁ = 248.79, dibi 130°'de λ₂ = 1.21 (adım 7)");
+  { const g=(re)=>num((re.exec(AR())||[])[1]);
+    const tot1=g(/0° → ([\d.]+)/)+g(/90° → ([\d.]+)/), tot2=g(/λ₁ ([\d.]+)/)+g(/λ₂ ([\d.]+)/);
+    chk(Math.abs(tot1-250)<0.02&&Math.abs(tot2-250)<0.02, "toplam varyans korunuyor: 146 + 104 = 248.79 + 1.21 = 250 (adım 7, figür)", `${tot1.toFixed(2)} / ${tot2.toFixed(2)}`); }
+  PK(M,'m-pca',3);
+  chk(el('pca-units').hidden===false&&el('pca-corl').hidden===true&&el('pca-rotl').hidden===true,
+      "birim anahtarı yalnız « Not ve süre »de görünür, uzama / dönme sabit tabloda gizli (ders notu)");
+  el('pca-uh').click(); const h={a:ang(),p:V(el,'pca-v1')};
+  el('pca-um').click(); const mi={a:ang(),p:V(el,'pca-v1')};
+  el('pca-uz').click(); const z={a:ang(),p:V(el,'pca-v1'),l:T(el,'pca-lam')};
+  console.log(`       saat ${h.a}° %${h.p} · dakika ${mi.a}° %${mi.p} · standart ${z.a}° %${z.p} (λ ${z.l})`);
+  chk(Math.abs(h.a-5)<1&&Math.abs(h.p-99.2)<0.1, "süre saatle: PC1 yaklaşık 5°, %99.2 — neredeyse yalnız matematik (adım 8, not)", `${h.a}° %${h.p}`);
+  chk(Math.abs(mi.a-85)<1&&Math.abs(mi.p-99.2)<0.1, "süre dakikayla: PC1 yaklaşık 85°, yine %99.2 (adım 9, not)", `${mi.a}° %${mi.p}`);
+  chk(Math.abs(z.a-45)<0.05&&Math.abs(z.p-85.3)<0.05, "standartlaştırınca PC1 45°'de, %85.3 (adım 10, not, kendini sına)", `${z.a}° %${z.p}`);
+  chk(z.l==='1.71 · 0.29', "standartta λ₁ = 1 + r = 1.71 (adım 10)", z.l);
+  PK(M,'m-pca',0);
+  chk(el('pca-units').hidden===true&&el('pca-corl').hidden===false, "rastgele bulutta kaydırıcılar geri, birim anahtarı gizli");
+  chk(T(el,'pca-lam')==='—', "rastgele (birimsiz) bulutta özdeğer yazılmıyor (ders notu: göstergeler)", T(el,'pca-lam'));
+}
+
+/* ── 18 · k-ortalamalar: altı nokta, iyi / kötü başlangıç, veri biriminde J ── */
+{
+  head("Modül 18 · altı nokta: iyi ve kötü başlangıç (Hafta 14)");
+  const {el,M,tick}=boot(F); const AR=()=>el('c-km').getAttribute('aria-label')||'';
+  PK(M,'m-km',3);
+  chk(T(el,'km-ko')==='2'&&el('km-fix').hidden===false&&el('km-init').hidden===true, "altı noktada k = 2 ve seçici iyi / kötü başlangıç (ders notu)");
+  el('km-bad').click();
+  const seq=[]; let mid='';
+  for(let i=0;i<4;i++){ el('km-step').click(); seq.push(T(el,'km-j')); if(i===1) mid=AR(); }
+  console.log(`       kötü başlangıç J: ${seq.join(' → ')}`);
+  chk(seq.join(' → ')==='189.00 → 77.60 → 39.04 → 6.67', "kötü başlangıç (μ = A, B): J 189 → 77.6 → 39.04 → 6.67 (adım 10–13, not, ex)", seq.join(' → '));
+  chk(/merkezler \(1\.00, 2\.00\) \(5\.80, 5\.80\)/.test(mid), "ilk güncellemede μ₂ (5.8, 5.8)'e kayıyor, μ₁ A'da (adım 11)");
+  chk(/J geçmişi: 189\.00 → 77\.60 → 39\.04 → 6\.67/.test(AR()), "köşedeki J dizisi adım adım okunuyor (adım 13)");
+  chk(/merkezler \(2\.00, 2\.33\) \(8\.00, 8\.00\)/.test(AR()), "merkezler (2, 2.33) ve (8, 8)'e varıyor (adım 13, ex)");
+  el('km-step').click();
+  chk(T(el,'km-i')==='3'&&T(el,'km-j')==='6.67', "kötü başlangıç üçüncü atamada duruyor: 3 iterasyon (adım 13, not)", `${T(el,'km-i')} · ${T(el,'km-j')}`);
+  el('km-good').click(); el('km-run').click();
+  for(let g=0;g<20&&T(el,'km-run')!=='Yakınsat';g++) tick(10);
+  chk(T(el,'km-run')==='Yakınsat'&&T(el,'km-i')==='2'&&T(el,'km-j')==='6.67', "iyi başlangıç (μ = (2, 2), (8, 8)): 2 iterasyon, J = 6.67 (adım 9, not)", `${T(el,'km-i')} · ${T(el,'km-j')}`);
+}
+
+/* ── 18 · « 10 kez dene » (n_init) ve k-means++ ──
+   Ölçüm (300 tur, uydu pikselleri, k = 3): rastgele başlangıçla on denemede ortalama
+   2.68 farklı sonuç (sd 1.1; 20 turluk ortalamalar 2.35–3.05), k-means++ ile 1.15
+   (sd 0.36). Müşteri verisinde (3 ya da 4 öbek, iç içe) fark yok — metin bu yüzden
+   uydu piksellerini söylüyor. */
+{
+  head("Modül 18 · 10 kez dene (n_init) ve k-means++");
+  const {el,M}=boot(F); const AR=()=>el('c-km').getAttribute('aria-label')||'';
+  const dR=[], dP=[]; let kept=0; const N=20;
+  for(let t=0;t<N;t++){
+    PK(M,'m-km',2); S(el,'km-k',3);
+    el('km-ir').click(); el('km-ten').click(); dR.push(V(el,'km-nd'));
+    const Js=(AR().split('10 deneme: ')[1]||'').split(' ').map(Number);
+    if(Js.length===10&&Math.abs(Math.min(...Js)-V(el,'km-j'))<1e-4) kept++;
+    el('km-ip').click(); el('km-ten').click(); dP.push(V(el,'km-nd'));
+  }
+  console.log(`       uydu pikselleri k=3, ${N} tur: farklı sonuç rastgele ${mean(dR).toFixed(2)} · k-means++ ${mean(dP).toFixed(2)}`);
+  chk(kept===N, "« 10 kez dene » on sonucun J'si en küçük olanını tutuyor (adım 7)", `${kept}/${N}`);
+  chk(Math.abs(mean(dR)-2.7)<0.8, "rastgele başlangıçta on denemeden ortalama 2.7 farklı sonuç (adım 7)", mean(dR).toFixed(2));
+  chk(Math.abs(mean(dP)-1.15)<0.3&&mean(dP)<mean(dR)-0.8, "k-means++ ile farklı sonuç azalıyor, ortalama 1.1 (adım 8, .ask)", mean(dP).toFixed(2));
+}
+
+/* ── 20 · hierarchical: dendrogram, linkage, kesme yüksekliği ──
+   Ölçüm (20–30 tur): hilalde Single %100 (20/20), Ward %78.8 doğru, k-ortalamalar
+   %75.8; halkada Single 20/20, Ward %61; öbek + gürültüde (100 tur) Single k = 3'te
+   76'sında bir iki noktalık küme, Ward 100'de 100, Average 98 üç öbek. */
+{
+  head("Modül 20 · dendrogram ve linkage (Hafta 14)");
+  const {el,M}=boot(F); const AR=()=>el('c-dbs').getAttribute('aria-label')||'';
+  const uy=()=>[...AR().matchAll(/uyum %(\d+)/g)].map(x=>+x[1]);
+  const boy=()=>((/boylar ([\d /]+)/.exec(AR())||[])[1]||'').split(' / ').map(Number);
+  PK(M,'m-dbs',3);
+  chk(el('db-hier').getAttribute('aria-pressed')==='true'&&el('db-lavg').getAttribute('aria-pressed')==='true'&&T(el,'db-ko')==='2',
+      "« Altı nokta » seçilince sağ panel hierarchical, average linkage, k = 2 (not)");
+  chk(/son birleşmeler 1\.41, 1\.41, 1\.71, 2\.24, 8\.30/.test(AR()), "average linkage yükseklikleri 1.41 / 1.41 / 1.71 / 2.24 / 8.30 (adım 11, ex, figür)",
+      (/son birleşmeler [\d., ]+/.exec(AR())||[''])[0]);
+  chk(/kesme 5\.27/.test(AR())&&T(el,'db-rn')==='2'&&boy().join('/')==='3/3', "k = 2 ağacı 5.27'den kesiyor: {A, B, C} ve {D, E, F} (adım 11)");
+  S(el,'db-k',3);
+  chk(/kesme 1\.97/.test(AR())&&boy().join('/')==='3/2/1', "k = 3: kesme 1.97, {A, B, C}, {D, F} ve tek başına {E} (adım 12)", boy().join('/'));
+  const sg=[], wd=[], km=[];
+  for(let t=0;t<16;t++){
+    PK(M,'m-dbs',0); P(el,'db-hier',true); S(el,'db-k',2);
+    el('db-lwar').click(); const u=uy(); km.push(u[0]); wd.push(u[1]);
+    el('db-lsin').click(); sg.push(uy()[1]);
+  }
+  console.log(`       hilal k=2, 16 tur: k-ortalamalar %${mean(km).toFixed(1)} · Ward %${mean(wd).toFixed(1)} · Single %${mean(sg).toFixed(1)} doğru`);
+  chk(sg.every(x=>x===100), "Single linkage hilalleri her seferinde ayırıyor (adım 7, .ask)", `${sg.filter(x=>x===100).length}/16`);
+  chk(Math.abs(100-mean(wd)-20)<7, "Ward hilallerin yaklaşık beşte birini yanlış tarafa koyuyor (adım 6)", `%${(100-mean(wd)).toFixed(1)} yanlış`);
+  chk(Math.abs(100-mean(km)-25)<7, "k-ortalamalar yaklaşık dörtte birini (adım 6)", `%${(100-mean(km)).toFixed(1)} yanlış`);
+  let ring=0; const ringW=[];
+  for(let t=0;t<12;t++){ PK(M,'m-dbs',1); P(el,'db-hier',true); S(el,'db-k',2);
+    el('db-lsin').click(); if(uy()[1]===100) ring++;
+    el('db-lwar').click(); ringW.push(uy()[1]); }
+  chk(ring===12, "iç içe halkada yalnız Single ayırıyor (not)", `${ring}/12`);
+  chk(Math.abs(mean(ringW)-61)<6, "Ward halkaları ortadan bölüp ~%61 tutturuyor (not)", `%${mean(ringW).toFixed(1)}`);
+  let tiny=0, wOk=0, aOk=0; const N=30;
+  for(let t=0;t<N;t++){ PK(M,'m-dbs',2); P(el,'db-hier',true); S(el,'db-k',3);
+    el('db-lsin').click(); if(boy().some(x=>x<=2)) tiny++;
+    el('db-lwar').click(); if(boy().every(x=>x>=20)) wOk++;
+    el('db-lavg').click(); if(boy().every(x=>x>=20)) aOk++; }
+  console.log(`       öbek + gürültü k=3, ${N} tur: Single'da bir iki noktalık küme ${tiny} · üç öbek Ward ${wOk}, Average ${aOk}`);
+  /* p = 0.76 için 30 turda ≥ 17'nin altına düşme olasılığı ~%0.4 */
+  chk(tiny>=17, "öbek + gürültüde Single k = 3'te çoğu zaman bir kümesi bir iki gürültü noktası (adım 9, not)", `${tiny}/${N}`);
+  chk(wOk>=N-1, "Ward üç öbeği buluyor (adım 9: 'Ward'a geç', not)", `${wOk}/${N}`);
+  chk(aOk>=N-4, "Average da neredeyse her seferinde (not: 100'de 98)", `${aOk}/${N}`);
+  P(el,'db-dbscan',true);
+  chk(el('db-link').hidden===true&&el('db-epsl').hidden===false, "DBSCAN'de linkage gizli, eps / min_samples görünür (ders notu)");
+  P(el,'db-hier',true);
+  chk(el('db-link').hidden===false&&el('db-epsl').hidden===true&&el('db-mpl').hidden===true, "hierarchical'da eps / min_samples yerine linkage seçicisi");
 }
 
 console.log(`\n${fail?fail+" DENETİM DÜŞTÜ":"tüm davranış denetimleri geçti"}`);
