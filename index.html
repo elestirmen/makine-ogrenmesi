@@ -110,8 +110,15 @@ main{padding:30px 34px 60px;display:flex;flex-direction:column;gap:20px;min-widt
 
 .stage{
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-  box-shadow:var(--shadow);overflow:hidden;
+  box-shadow:var(--shadow);overflow:hidden;position:relative;
 }
+/* fare ipucu (tipShow): tuvalin üstünde, imleci yutmaz; projeksiyonda okunsun diye 13 px */
+.ptip{position:absolute;z-index:6;pointer-events:none;left:0;top:0;opacity:0;transition:opacity .08s;
+  background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);
+  padding:6px 10px;font:600 13px/1.45 "IBM Plex Mono",ui-monospace,monospace;color:var(--ink-soft);
+  white-space:nowrap;max-width:min(420px,90vw)}
+.ptip.on{opacity:1}
+.ptip .tt-h{color:var(--ink);font-weight:700;margin-bottom:1px}
 /* Tuval yüksekliği tek değişkende: kırılımlar ve m-cn yalnız --cvh'yi değiştirir.
    Rehber şeridi (.guided) açıkken tuval o şerit kadar kısalır, böylece gösterge
    satırı perdede kalır — adım metni tuvalin ÜSTÜNDE olduğu için önce okunur,
@@ -1959,16 +1966,80 @@ const fmt=(v,d=3)=>Number.isFinite(v)?v.toFixed(d):"—";
 
 function setupCanvas(cv){
   const ctx = cv.getContext("2d");
+  /* fare ipucu: draw() çizerken her öğeyi tip(şekil, satırlar) ile kaydeder; fit() her
+     çizimin başında listeyi boşaltır, yani liste hep son çizimin öğeleri (bkz. tipHit) */
+  cv.__tips=[];
+  let raf=0, last=null, hideT=0;
+  const hide=()=>{ last=null; cv.__tipOn=false; if(cv.__tipEl) cv.__tipEl.classList.remove("on"); };
+  const upd=()=>{ raf=0; if(last) tipShow(cv,last[0],last[1]); };
+  const sched=()=>{ if(!raf) raf=requestAnimationFrame(upd); };
+  cv.addEventListener("pointermove",e=>{ if(e.pointerType!=="mouse") return; const q=pointerPos(cv,e); last=[q.x,q.y]; sched(); });
+  cv.addEventListener("pointerleave",e=>{ if(e.pointerType==="mouse") hide(); });
+  /* dokunmatikte üzerine gelme yok: dokununca açılır, 2.5 sn sonra kapanır */
+  cv.addEventListener("pointerdown",e=>{ if(e.pointerType==="mouse") return; const q=pointerPos(cv,e); last=[q.x,q.y]; sched();
+    clearTimeout(hideT); hideT=setTimeout(hide,2500); });
   const fit = ()=>{
     const r = cv.getBoundingClientRect();
     const dpr = window.devicePixelRatio||1;
+    cv.__tips=[];
+    if(last&&cv.__tipOn) sched();          /* veri değişti: açık kutu yeni çizimden yeniden okunsun */
     if(r.width<2||r.height<2) return false;
     cv.width = Math.round(r.width*dpr); cv.height = Math.round(r.height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     cv.__w = r.width; cv.__h = r.height;
     return true;
   };
-  return {ctx, fit};
+  const tip=(s,rows)=>{ cv.__tips.push({s,rows}); };
+  return {ctx, fit, tip};
+}
+/* ───────────── fare ipucu ─────────────
+   Tuvaldeki nokta, çubuk, hücre, eğri ve çizgiler çizilirken tip(şekil, satırlar) ile kaydedilir;
+   fare üstüne gelince değerleri küçük bir kutuda görünür (dokunmatikte dokununca).
+   Şekil (tuval pikseli): {x,y,r} daire · {x,y,w,h} dikdörtgen · {x0,x1,fy,d} eğri, fy(mx) eğrinin
+   y'si, d yakalama payı (7) · {all:true} bütün tuval (zemin haritası). Öncelik z: daire 3, eğri 2,
+   dikdörtgen 1, zemin 0 (s.z ile değişir); eşitte dairede en yakın, ötekilerde SONRA çizilen.
+   Satırlar: dizi ya da (mx,my)=>dizi (çok hücreli ızgarada tek dikdörtgen + fonksiyon); satır
+   "metin" ya da ["metin","--token"], ilk satır başlık. Metin rengi --ink, --ink-soft, --accent,
+   --a, --c, --good, --bad. Kutu HTML (tema token'larıyla): tuvale çizilmez, draw() bilmez.
+   harness.js her çizimden sonra kayıtlı satırları üretip undefined / NaN arar. */
+function tipRows(t,mx,my){ return typeof t.rows==="function"?t.rows(mx,my):t.rows; }
+function tipAnchor(s){
+  if(s.all) return null;
+  if(s.r!==undefined) return [s.x,s.y];
+  if(s.fy){ const x=(s.x0+s.x1)/2; return [x,s.fy(x)]; }
+  return [s.x+s.w/2,s.y+s.h/2];
+}
+function tipHit(cv,mx,my){
+  let best=null, bz=-1, bd=Infinity;
+  (cv.__tips||[]).forEach(t=>{ const s=t.s; let z, d;
+    if(s.all){ z=0; d=0; }
+    else if(s.r!==undefined){ d=Math.hypot(mx-s.x,my-s.y); if(d>Math.max(s.r+4,9)) return; z=3; }
+    else if(s.fy){ if(mx<s.x0||mx>s.x1) return; d=Math.abs(my-s.fy(mx)); if(!(d<=(s.d||7))) return; z=2; }
+    else { if(mx<s.x||mx>s.x+s.w||my<s.y||my>s.y+s.h) return; z=1; d=0; }
+    if(s.z!==undefined) z=s.z;
+    if(z>bz||(z===bz&&(z===3?d<bd:true))){ best=t; bz=z; bd=d; } });
+  return best;
+}
+function tipShow(cv,mx,my){
+  const t=tipHit(cv,mx,my); let rows=null;
+  if(t){ try{ rows=tipRows(t,mx,my); }catch(e){ rows=null; } }
+  let el=cv.__tipEl;
+  if(!rows||!rows.length){ if(el) el.classList.remove("on"); cv.__tipOn=false; return; }
+  const host=cv.parentNode; if(!host) return;
+  if(!el){ el=document.createElement("div"); el.className="ptip"; el.setAttribute("aria-hidden","true"); host.appendChild(el); cv.__tipEl=el; }
+  const esc=(v)=>String(v).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  el.innerHTML=rows.filter(r=>r!==null&&r!==undefined&&r!=="").map((r,i)=>{ const [tx,tok]=Array.isArray(r)?r:[r,null];
+    return "<div"+(i?"":' class="tt-h"')+(tok?' style="color:var('+tok+')"':"")+">"+esc(tx)+"</div>"; }).join("");
+  const hr=host.getBoundingClientRect(), cr=cv.getBoundingClientRect();
+  const a=t.s.r!==undefined?[t.s.x,t.s.y]:[mx,my];      /* daire: kutu noktaya yapışır */
+  el.classList.add("on"); cv.__tipOn=true;
+  const w=el.offsetWidth, h=el.offsetHeight, W=cv.__w||cr.width, H=cv.__h||cr.height;
+  let x=a[0]+14, y=a[1]-h-12;
+  if(x+w>W-4) x=a[0]-w-14;
+  if(x<4) x=4;
+  if(y<4) y=a[1]+16;
+  if(y+h>H-4) y=Math.max(4,H-h-4);
+  el.style.left=(cr.left-hr.left+x)+"px"; el.style.top=(cr.top-hr.top+y)+"px";
 }
 /* veri koordinatı (0..1) ↔ piksel */
 function makeMap(cv,pad){
@@ -12807,7 +12878,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
    Hesap çizimden ayrı (stats()); göstergeler ve aria-label oradan, behaviour.js aria'yı okur.
    Yalnız ▲'nın « Dengele » kayması ve medyan sırasının dizilişi çizimdir: durum hemen son değerde. */
 (function(){
-  const cv=$("#c-stat"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-stat"), {ctx,fit,tip}=setupCanvas(cv);
   const DS=SETS("m-stat"); let dsi=0; const S=()=>DS[dsi];
   const VN=["ortalama","medyan","mod","varyans","kutu"];
   const VB=["#st-v0","#st-v1","#st-v2","#st-v3","#st-v4"];
@@ -12849,6 +12920,9 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     if(st.modes.length>3) return st.modes.length+" değer";
     return st.modes.map(g=>S().bin?fmt(g.a)+"–"+fmt(g.a+S().bin):fmt(g.x)).join(" ve "); };
   const tiltWord=(st)=>st.bal?"dengede":st.mean>fv?"sağa yatık":"sola yatık";
+  /* fare ipucu: noktanın değeri başlıkta, altında o görünümün hesabındaki payı */
+  const ptHead=(q)=>fmt(q.u)+" "+S().unit+(q.out?" · uç değer":"");
+  const vtip=(x,y0,y1,rows)=>tip({x:x-5,y:Math.min(y0,y1),w:10,h:Math.abs(y1-y0)},rows);
 
   function geo(){
     const W=cv.__w, H=cv.__h, p=28, wide=W>=760, split=wide?Math.round(W*0.60):W;
@@ -12899,14 +12973,21 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.restore();
     const xs=pts.map(q=>g.X(q.u)), lv=levels(xs);
     pts.forEach((q,i)=>{ const r=rot(xs[i],yb-2-DOT-lv[i]*STEP); q.__px=r.x; q.__py=r.y;
-      disc(ctx,r.x,r.y,DOT,dotFill(q),css("--surface")); });
+      disc(ctx,r.x,r.y,DOT,dotFill(q),css("--surface"));
+      tip({x:r.x,y:r.y,r:DOT},()=>[ptHead(q),
+        "▲'ya uzaklık "+fmt(Math.abs(q.u-fv))+(q.u<fv?" (solda)":q.u>fv?" (sağda)":""),
+        st?"ortalamadan farkı "+sgn(q.u-st.mean):null]); });
     /* ▲ destek noktası */
     ctx.save();ctx.fillStyle=css("--accent");ctx.beginPath();
     ctx.moveTo(piv,yb+4);ctx.lineTo(piv-11,yb+24);ctx.lineTo(piv+11,yb+24);ctx.closePath();ctx.fill();ctx.restore();
     if(!st) return;
+    tip({x:piv-12,y:yb,w:24,h:26},()=>[["▲ destek noktası "+fmt(fv)+" "+s.unit,"--accent"],
+      "sol Σ uzaklık "+fmt(st.L)+" · sağ Σ uzaklık "+fmt(st.R),
+      st.bal?["dengede: iki toplam eşit","--good"]:["tahta "+tiltWord(st)+" · sürükle ya da « Dengele »","--bad"]]);
     /* ortalamanın yeri: tahtanın üstünde ince pembe kesikli çizgi */
     const m=rot(g.X(st.mean),yb-2);
     vline(m.x,top+72,m.y,"--accent",[5,4],1.6);
+    vtip(m.x,top+56,m.y,()=>[["ortalama x̄ = "+fmt(st.mean),"--accent"],"Σx / n = "+fmt(st.sum)+" / "+st.n,"tahta yalnız burada düz durur"]);
     label(ctx,"x̄ = "+fmt(st.mean),m.x,top+63,css("--accent"),"center",11.5);
     legend(ctx,g.L0-4,top+8,[["▲ destek noktası "+fmt(fv)+" · "+tiltWord(st),st.bal?"--good":"--ink"],
       ["sol Σ uzaklık "+fmt(st.L)+" · sağ Σ uzaklık "+fmt(st.R),"--ink-soft"]],{size:11});
@@ -12918,19 +12999,25 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     axis(g,yb,true);
     const xs=pts.map(q=>g.X(q.u)), lv=levels(xs);
     pts.forEach((q,i)=>{ q.__px=xs[i]; q.__py=yb-2-DOT-lv[i]*STEP;
-      disc(ctx,q.__px,q.__py,DOT,hexA(q.out?"--warn":"--a",.45),css("--surface")); });
+      disc(ctx,q.__px,q.__py,DOT,hexA(q.out?"--warn":"--a",.45),css("--surface"));
+      tip({x:q.__px,y:q.__py,r:DOT},[ptHead(q),"sayı doğrusundaki yeri"]); });
     if(!st) return;
     const n=st.n, ord=pts.map((q,i)=>i).sort((i,j)=>pts[i].u-pts[j].u||i-j);
     const w=(g.L1-g.L0)/n, rq=Math.max(3,Math.min(DOT,w*.36)), e=1-(1-qa)**3;
     const mids=n%2?[(n-1)/2]:[n/2-1,n/2];
     const xm=g.X(st.med);
     vline(xm,yq+26,yb,"--good",[6,4],2);
+    vtip(xm,yq+26,yb,()=>[["medyan = "+fmt(st.med),"--good"],
+      n%2?"ortadaki değer: "+((n+1)/2)+". sırada":"(" +fmt(st.a[n/2-1])+" + "+fmt(st.a[n/2])+") / 2",
+      "ortalama "+fmt(st.mean)+" ile kıyasla"]);
     ord.forEach((i,r)=>{
       const q=pts[i], qx=g.L0+(r+.5)*w, x=q.__px+(qx-q.__px)*e, y=q.__py+(yq-q.__py)*e;
       ctx.save();ctx.strokeStyle=hexA("--ink-soft",.30);ctx.lineWidth=1;
       ctx.beginPath();ctx.moveTo(q.__px,q.__py);ctx.lineTo(x,y);ctx.stroke();ctx.restore();
       disc(ctx,x,y,rq,dotFill(q),css("--surface"));
       const mid=mids.includes(r);
+      tip({x,y,r:rq},[ptHead(q),"sıra "+(r+1)+" / "+n,
+        mid?["ortadaki değer"+(n%2?": medyan":" (ikisinden biri)"),"--good"]:(r<mids[0]?"medyanın solunda":"medyanın sağında")]);
       if(mid) ring(x,y,"--good",rq+3.5);
       if(e>.98){
         if(n<=12) label(ctx,fmt(q.u),x,y-15,css(mid?"--good":"--ink"),"center",mid?12:11);
@@ -12951,17 +13038,24 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     if(s.bin) st.groups.forEach(gr=>{
       const x0=g.X(gr.a), x1=g.X(gr.a+s.bin), hgt=gr.n*STEP+5, mod=modal.has(gr.key);
       ctx.save();ctx.fillStyle=hexA("--c",mod?.20:.07);ctx.strokeStyle=hexA("--c",mod?.9:.35);ctx.lineWidth=mod?2:1;
-      ctx.fillRect(x0+1,yb-hgt,x1-x0-2,hgt);ctx.strokeRect(x0+1,yb-hgt,x1-x0-2,hgt);ctx.restore(); });
+      ctx.fillRect(x0+1,yb-hgt,x1-x0-2,hgt);ctx.strokeRect(x0+1,yb-hgt,x1-x0-2,hgt);ctx.restore();
+      tip({x:x0+1,y:yb-hgt,w:x1-x0-2,h:hgt},[fmt(gr.a)+"–"+fmt(gr.a+s.bin)+" "+s.unit+" aralığı",
+        gr.n+" değer",mod?["en kalabalık aralık: mod","--c"]:null]); });
     const ord=pts.map((q,i)=>i).sort((i,j)=>pts[i].u-pts[j].u||i-j);
     ord.forEach(i=>{ const q=pts[i], kk=key(q.u), j=cnt.get(kk)||0; cnt.set(kk,j+1);
       const gx=s.bin?g.X(s.lo+(kk+.5)*s.bin):g.X(q.u);
       q.__px=gx; q.__py=yb-2-DOT-j*STEP;
       disc(ctx,q.__px,q.__py,DOT,dotFill(q),css("--surface"));
-      if(modal.has(kk)) ring(q.__px,q.__py,"--c"); });
+      if(modal.has(kk)) ring(q.__px,q.__py,"--c");
+      const gr=st.groups.find(x=>x.key===kk);
+      tip({x:q.__px,y:q.__py,r:DOT},[ptHead(q),
+        s.bin?fmt(gr.a)+"–"+fmt(gr.a+s.bin)+" aralığında "+gr.n+" değer":"bu değerden "+gr.n+" tane",
+        modal.has(kk)?["en sık: mod","--c"]:null]); });
     const gx=st.groups.map(gr=>g.X(gr.x)), roomy=gx.every((x,i)=>!i||x-gx[i-1]>=26);
     st.groups.forEach(gr=>{ const mod=modal.has(gr.key);
       if(roomy||mod) label(ctx,"×"+gr.n,g.X(gr.x),yb-2-DOT-gr.n*STEP-(s.bin?8:4),css(mod?"--c":"--ink-soft"),"center",mod?12:10.5); });
-    [[st.mean,"--accent"],[st.med,"--good"]].forEach(([v,tok])=>vline(g.X(v),top+34,yb,tok,[4,4],1.4));
+    [[st.mean,"--accent","ortalama"],[st.med,"--good","medyan"]].forEach(([v,tok,nm])=>{ vline(g.X(v),top+34,yb,tok,[4,4],1.4);
+      vtip(g.X(v),top+34,yb,[[nm+" "+fmt(v),tok],"modla karşılaştırmak için"]); });
     legend(ctx,g.L0-4,top+8,[[st.modes.length?"mod "+modeStr(st)+" · "+st.fmax+" kez":"her değer bir kez: mod yok","--c"],
       ["ortalama "+fmt(st.mean)+" · medyan "+fmt(st.med),"--ink-soft"]],{size:11});
   }
@@ -12974,6 +13068,8 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     if(st){
       const mx=g.X(st.mean), sx=g.X(st.mean+st.sd)-mx, yT=top+44;
       ctx.save();ctx.fillStyle=hexA("--accent",.07);ctx.fillRect(mx-sx,yT,2*sx,yb-yT);ctx.restore();
+      tip({x:mx-sx,y:yT,w:2*sx,h:yb-yT},[["x̄ ± s bandı","--accent"],fmt(st.mean-st.sd)+" – "+fmt(st.mean+st.sd)+" "+S().unit,
+        "içinde "+st.band+" / "+st.n+" değer"]);
       vline(mx-sx,yT,yb,"--accent",[3,4],1); vline(mx+sx,yT,yb,"--accent",[3,4],1);
       /* her farkın karesi: kenarı |x − x̄|, ortalamaya yaslı; büyükler arkada */
       ctx.save();ctx.beginPath();ctx.rect(g.L0-12,yT,g.L1-g.L0+24,yb-yT);ctx.clip();
@@ -12982,9 +13078,14 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         const d=pts[i].u-st.mean, side=Math.abs(xs[i]-mx); if(side<.5) return;
         const tok=d<0?"--bad":"--good"; if(yb-side<yT) cut=true;
         ctx.fillStyle=hexA(tok,.09);ctx.strokeStyle=hexA(tok,.6);ctx.lineWidth=1.2;
-        ctx.fillRect(Math.min(xs[i],mx),yb-side,side,side);ctx.strokeRect(Math.min(xs[i],mx),yb-side,side,side); });
+        ctx.fillRect(Math.min(xs[i],mx),yb-side,side,side);ctx.strokeRect(Math.min(xs[i],mx),yb-side,side,side);
+        const sy=Math.max(yb-side,yT);
+        tip({x:Math.min(xs[i],mx),y:sy,w:side,h:yb-sy},[["kare: ("+fmt(pts[i].u)+" − "+fmt(st.mean)+")²",tok],
+          "kenar "+fmt(Math.abs(d))+" → alan "+fmt(d*d),"karelerin %"+(100*d*d/st.ss).toFixed(1)+"'i"]); });
       ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;ctx.strokeRect(mx,yb-sx,sx,sx);
       ctx.restore();
+      { const sy=Math.max(yb-sx,yT); tip({x:mx,y:sy,w:sx,h:yb-sy,z:1.5},[["ortalama kare s² = "+fmt(st.vr)+" "+S().u2,"--accent"],
+          "Σ(x − x̄)² / (n − 1) = "+fmt(st.ss)+" / "+(st.n-1),"kenarı s = "+fmt(st.sd)+" "+S().unit]); }
       if(sx>22&&yb-sx/2>yT+8) label(ctx,"s²",mx+sx/2,yb-sx/2,css("--accent"),"center",12.5);
       vline(mx,yT,yb,"--accent",[6,4],2);
       label(ctx,"x̄ − s",mx-sx-4,yT+9,css("--accent"),"right",10.5);
@@ -12994,7 +13095,9 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     }
     pts.forEach((q,i)=>{ q.__px=xs[i]; q.__py=yb-2-DOT-lv[i]*STEP;
       const tok=!st||Math.abs(q.u-st.mean)<1e-9?"--ink-soft":q.u<st.mean?"--bad":"--good";
-      disc(ctx,q.__px,q.__py,DOT,q.out?css("--warn"):css(tok),css("--surface")); });
+      disc(ctx,q.__px,q.__py,DOT,q.out?css("--warn"):css(tok),css("--surface"));
+      if(st){ const d=q.u-st.mean; tip({x:q.__px,y:q.__py,r:DOT},[ptHead(q),["x − x̄ = "+sgn(d),tok],
+        "(x − x̄)² = "+fmt(d*d)+" · karelerin %"+(st.ss>0?(100*d*d/st.ss).toFixed(1):"0")+"'i"]); } });
     if(st) legend(ctx,g.L0-4,top+8,[[g.wide?"kare = (x − x̄)² · kalın kare = s², kenarı s":"kalın kare = s², kenarı s","--ink-soft"]],{size:10.5});
   }
 
@@ -13010,6 +13113,8 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       const yT=top+44, cx=(v)=>clamp(g.X(v),g.L0-10,g.L1+10);
       [[st.f1,"alt sınır "+fmt(st.f1)],[st.f2,"üst sınır "+fmt(st.f2)]].forEach(([v,nm],j)=>{
         const x=cx(v); vline(x,yT,yb,"--bad",[4,4],1.6);
+        vtip(x,yT,yb,[[nm,"--bad"],j?"Q3 + 1.5·IQR = "+fmt(st.q3)+" + "+fmt(1.5*st.iqr):"Q1 − 1.5·IQR = "+fmt(st.q1)+" − "+fmt(1.5*st.iqr),
+          "dışarıdaki değer outlier"]);
         legend(ctx,clamp(x,g.L0+46,g.L1-46),yT+(j?14:0),[[nm,"--bad"]],{size:10.5,align:"center"}); });
       ctx.save();ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.6;ctx.beginPath();
       ctx.moveTo(g.X(st.wl),yc);ctx.lineTo(g.X(st.q1),yc);ctx.moveTo(g.X(st.q3),yc);ctx.lineTo(g.X(st.wh),yc);
@@ -13019,6 +13124,9 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ctx.save();ctx.fillStyle=hexA("--a",.16);ctx.strokeStyle=css("--a");ctx.lineWidth=2;
       ctx.fillRect(bx,yc-bh/2,bw,bh);ctx.strokeRect(bx,yc-bh/2,bw,bh);ctx.restore();
       vline(g.X(st.med),yc-bh/2,yc+bh/2,"--good",null,3);
+      tip({x:g.X(st.wl),y:yc-6,w:Math.max(2,g.X(st.wh)-g.X(st.wl)),h:12},["bıyıklar: "+fmt(st.wl)+" – "+fmt(st.wh),"sınırların içindeki en uç değerler"]);
+      tip({x:bx,y:yc-bh/2,w:bw,h:bh},[["kutu: Q1 "+fmt(st.q1)+" – Q3 "+fmt(st.q3),"--a"],"IQR = "+fmt(st.iqr)+" "+S().unit,"ortadaki değerlerin yarısı"]);
+      vtip(g.X(st.med),yc-bh/2,yc+bh/2,[["medyan "+fmt(st.med),"--good"],"kutuyu ikiye bölen çizgi"]);
       label(ctx,"Q1",bx,yc+bh/2+8,css("--a"),"center",10.5);
       label(ctx,"Q3",bx+bw,yc+bh/2+8,css("--a"),"center",10.5);
       st.out.forEach(v=>disc(ctx,cx(v),yc,5,css("--bad"),css("--surface")));
@@ -13027,7 +13135,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       const isOut=st&&(q.u<st.f1-1e-9||q.u>st.f2+1e-9);
       const fill=isOut?css("--bad"):cls[i]===1?css("--a"):cls[i]===2?css("--c"):css("--ink-soft");
       disc(ctx,q.__px,q.__py,DOT,fill,css("--surface"));
-      if(cls[i]===3) ring(q.__px,q.__py,"--good"); });
+      if(cls[i]===3) ring(q.__px,q.__py,"--good");
+      if(st) tip({x:q.__px,y:q.__py,r:DOT},[ptHead(q),
+        cls[i]===1?["alt yarı → Q1 = "+fmt(st.q1),"--a"]:cls[i]===2?["üst yarı → Q3 = "+fmt(st.q3),"--c"]:["medyan: iki yarıya da girmez","--good"],
+        isOut?["sınırın dışında: outlier","--bad"]:"sınırların içinde"]); });
     if(st) legend(ctx,g.L0-4,top+8,[["alt yarı","--a"],["üst yarı","--c"]],{size:10.5});
   }
 

@@ -65,9 +65,10 @@ for(const m of html.matchAll(/<(input|button|output|section|canvas|nav|main|asid
   REG.set(m[2], mkEl(m[1], m[2]));
 }
 /* her modülün .stats değer kutuları: <span class="v" id="..."> */
-const STATS=new Map();
+const STATS=new Map(), CANV=new Map();
 for(const m of html.matchAll(/<section id="(m-[\w-]+)"[^>]*>([\s\S]*?)<\/section>/g)){
   STATS.set(m[1], [...m[2].matchAll(/class="v" id="([\w-]+)"/g)].map(x=>x[1]));
+  CANV.set(m[1], [...m[2].matchAll(/<canvas[^>]*id="(c-[\w-]+)"/g)].map(x=>x[1]));
 }
 const doc={
   documentElement:mkEl('html'),
@@ -111,10 +112,10 @@ const tick=(n)=>{ for(let i=0;i<n;i++){ let alive=false;
   for(const f of TIMERS){ if(f){ alive=true; try{f();}catch(e){warnings.push('timer: '+e.message);} } }
   if(!alive) break; } };
 const el=(id)=>REG.get(id);
-return {sandbox,M,SEQ,META,CONTENT,tick,el,REG,warnings,TIMERS,STATS,W,H};
+return {sandbox,M,SEQ,META,CONTENT,tick,el,REG,warnings,TIMERS,STATS,CANV,W,H};
 }
 if(require.main!==module){ module.exports={boot}; } else {
-const {M,SEQ,META,CONTENT,sandbox:SB,warnings:warn2,STATS,el:EL,W:BW,H:BH}=boot(process.argv[2]);
+const {M,SEQ,META,CONTENT,sandbox:SB,warnings:warn2,STATS,CANV,el:EL,W:BW,H:BH}=boot(process.argv[2]);
 console.log(`yüklendi · MODULES=${M.length} SEQ=${SEQ.length} META=${META.length} · tuval ${BW}×${BH}\n`);
 /* Yalnız imleç hareketiyle ya da eğitim sırasında yazılan göstergeler: draw()
    bunlara dokunmaz, bu beklenen davranıştır. Listeye ekleme yapmadan önce
@@ -123,34 +124,59 @@ console.log(`yüklendi · MODULES=${M.length} SEQ=${SEQ.length} META=${META.leng
 const OLAYA_BAGLI=new Set(['knn-p','knn-v','cn-val','cn-par','sc-ch','sc-flip','mlp-st']);
 const warnings=warn2;
 let fail=0;
+/* fare ipucu: modülün tuvallerine son çizimde kaydedilen her öğenin satırlarını üret
+   (dairede merkez, dikdörtgende orta, eğride orta x, zeminde tuvalin ortası) ve
+   "undefined" / NaN / boş satır ara. Ipucu hiç kaydetmeyen modül de yazılır. */
+const tipSeen=new Map();
+function tipCheck(mod){
+  const errs=[];
+  for(const cid of (CANV.get(mod.id)||[])){
+    const tips=(EL(cid)&&EL(cid).__tips)||[];
+    tipSeen.set(mod.id,(tipSeen.get(mod.id)||0)+tips.length);
+    tips.slice(0,600).forEach((t,k)=>{
+      const a=SB.tipAnchor(t.s)||[BW/2,BH/2];
+      let rows; try{ rows=SB.tipRows(t,a[0],a[1]); }catch(e){ errs.push(`${cid} ipucu ${k}: ${e.message}`); return; }
+      if(rows===null) return;                                 /* bilerek boş: o noktada söylenecek yok */
+      if(!Array.isArray(rows)||!rows.length){ errs.push(`${cid} ipucu ${k}: satır yok`); return; }
+      const txt=rows.map(r=>Array.isArray(r)?r[0]:r).join(' | ');
+      if(/undefined|NaN|Infinity|\[object|null/.test(txt)) errs.push(`${cid} ipucu ${k}: "${txt.slice(0,90)}"`);
+    });
+  }
+  return errs;
+}
 for(let i=0;i<SEQ.length;i++){
   const mod=SEQ[i], no=META[i][0], name=META[i][2];
   const before=warnings.length;
-  let err=null;
-  try{ mod.draw(); }catch(e){ err=e; }
+  let err=null; const tipErr=[];
+  try{ mod.draw(); tipErr.push(...tipCheck(mod)); }catch(e){ err=e; }
   // rehberli adımları da çalıştır
   let stepErr=null;
   if(!err && mod.steps) for(const st of mod.steps){
     /* st.set adımın veri kümesi: uygulamada senaryo düğmesine basılıyor, burada da öyle */
     try{ if(st.set!==undefined && mod.__pick) mod.__pick(st.set);
-         st.run&&st.run(); mod.draw(); }catch(e){ stepErr=stepErr||`"${st.t}": ${e.message}`; }
+         st.run&&st.run(); mod.draw(); tipErr.push(...tipCheck(mod)); }catch(e){ stepErr=stepErr||`"${st.t}": ${e.message}`; }
   }
   // senaryolar
   let scErr=null;
   if(!err && mod.scenarios) for(const sc of mod.scenarios){
-    try{ sc.apply(); mod.draw(); }catch(e){ scErr=scErr||`"${sc.name}": ${e.message}`; }
+    try{ sc.apply(); mod.draw(); tipErr.push(...tipCheck(mod)); }catch(e){ scErr=scErr||`"${sc.name}": ${e.message}`; }
   }
   /* draw() bu modülün hangi göstergesine hiç dokunmadı? (dar yerleşim dalında
      unutulan gösterge derste son geniş çizimin değerinde donup kalıyor) */
   const sessiz=(STATS.get(mod.id)||[]).filter(id=>!OLAYA_BAGLI.has(id)&&!EL(id).__written);
   const w=warnings.slice(before);
-  const bad=err||stepErr||scErr||w.length||sessiz.length;
+  /* ML_TIPS=0: ipucu henüz bağlanmamış modül hata sayılmaz (yayılım sırasında) */
+  const tipYok=!tipSeen.get(mod.id) && process.env.ML_TIPS!=="0";
+  const bad=err||stepErr||scErr||w.length||sessiz.length||tipErr.length||tipYok;
   if(bad) fail++;
   console.log(`${bad?'HATA ':'OK   '} ${no} ${name}`);
   if(err) console.log(`        draw(): ${err.message}`);
   if(stepErr) console.log(`        adım ${stepErr}`);
   if(scErr) console.log(`        senaryo ${scErr}`);
   if(sessiz.length) console.log(`        draw() hiç yazmadı: ${sessiz.join(', ')}`);
+  if(tipYok) console.log(`        fare ipucu yok: tuvale hiç tip() kaydedilmedi`);
+  else if(!tipSeen.get(mod.id)) console.log(`        (ipucu henüz yok)`);
+  [...new Set(tipErr)].slice(0,3).forEach(x=>console.log(`        ${x}`));
   [...new Set(w)].slice(0,3).forEach(x=>console.log(`        ${x}`));
 }
 /* ── ders notu ve veri kümesi kapsaması ──
