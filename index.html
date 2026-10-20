@@ -1270,6 +1270,42 @@ input[type=range]{min-height:28px;margin:0}
       </div>
     </section>
 
+    <!-- ══════════ 31 · Boosting ══════════ -->
+    <section id="m-boost" hidden>
+      <div class="head">
+        <div class="eyebrow"><span>Modül 31 · Hafta 11</span><span class="chip">BOOSTING</span></div>
+        <h2>Kalabalık Değil, Bayrak Yarışı</h2>
+        <p>Random forest'ta ağaçlar aynı anda ve birbirinden habersiz oy veriyordu. <b>boosting</b> (güçlendirme) onları sıraya dizer: her yeni <b>decision stump</b> (karar kütüğü, tek soruluk ağaç) öncekilerin yanıldığı noktalara bakar. İlk örneği: <b>AdaBoost</b>.</p>
+      </div>
+      <div class="stage">
+        <canvas id="c-boost" aria-label="AdaBoost: noktaların ağırlıkları, son kütük, topluluk sınırı ve tura göre hata eğrisi"></canvas>
+        <div class="bar">
+          <label class="ctl"><span class="lab">Tur</span><input type="range" id="bst-t" min="0" max="200" step="1" value="1"><output id="bst-to">1</output></label>
+          <label class="ctl"><span class="lab"><span lang="en">Learning rate</span></span><input type="range" id="bst-lr" min="0" max="6" step="1" value="6"><output id="bst-lro">1.0</output></label>
+          <button class="btn" id="bst-step">Sonraki tur</button>
+          <button class="btn primary" id="bst-run" aria-pressed="false">Koştur</button>
+          <button class="btn" id="bst-reset">Sıfırla</button>
+          <button class="btn" id="bst-new">Yeni veri</button>
+          <button class="btn" id="bst-clr">Temizle</button>
+          <span class="hint">Nokta boyu = ağırlık. Tuvale tıkla → nokta ekle (Shift ile ikinci sınıf).</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k">Son kütük <span class="sym">ε → α</span></span><span class="v" id="bst-a">—</span></div>
+          <div class="stat"><span class="k">Eğitim hatası</span><span class="v" id="bst-tr">—</span></div>
+          <div class="stat"><span class="k">Test hatası</span><span class="v" id="bst-te">—</span></div>
+          <div class="stat"><span class="k"><span lang="en">Random forest</span> · test</span><span class="v" id="bst-rf">—</span></div>
+          <div class="stat"><span class="k">Tek ağaç · test</span><span class="v" id="bst-one">—</span></div>
+        </div>
+      </div>
+      <div class="ask">
+        <span class="tag">Dene ve düşün</span>
+        <div>
+          <p>« Sıfırla »ya, sonra « Sonraki tur »a birer birer bas. Her turda hangi noktalar büyüyor, yeni kütük nereye konuyor? İkinci turda eğitim hatası çoğunlukla hiç değişmiyor, üçüncüde düşüyor. Neden? (İpucu: anlaşamayan iki kütükten hangisinin oyu ağır basar?)</p>
+          <p>« Kayıt hatası » verisinde learning rate 1.0 iken « Koştur »a bas: eğitim hatası sıfıra yaklaşırken test hatası 10–20. turdan sonra yükseliyor, random forest çizgisinin üstüne çıkıyor ve en büyük daireler ters etiketli noktalar oluyor. Learning rate'i 0.1 yapıp tekrarla. Boosting yanlış etikete neden random forest'tan daha hassas?</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ══════════ 12 · Düzenlileştirme ══════════ -->
     <section id="m-reg" hidden>
       <div class="head">
@@ -2433,6 +2469,56 @@ const CONTENT={
     next:"Modül 16 · En geniş yol — iki sınıfın arasından en geniş yolu açan bir sınıflandırıcı."
   }},
 
+/* ══ 31 ══ */
+"m-boost":{ pick:"Veri seti",
+  sets:[
+    {name:"Deneme kullanıcıları", x:"aktif gün", y:"günlük dakika", xr:[0,14], yr:[0,40], cls:["Ayrıldı","Abone oldu"], gen:"deneme",
+     note:"Yaklaşık üçte biri abone oluyor (Hafta 11'deki senaryoda %32). Etiket bir olasılıktan çekildiği için sınırın yakını karışık. 30 veri kümesinde ölçtük, test hatası: tek ağaç %19, random forest %15.5, AdaBoost (learning rate 0.1, 200 tur) %14. Hafta 11'deki sıra (AUC 0.658 / 0.800 / 0.841) burada da çıkıyor. Learning rate 1.0 ile 200 turda ise boosting %17'ye çıkıp ormanın gerisine düşüyor."},
+    {name:"Müşteri kaybı · köşe", x:"sözleşme süresi (ay)", y:"aylık fatura (₺)", xr:[0,36], yr:[100,700], cls:["Kaldı","Ayrıldı"], gen:"kose",
+     note:"Ayrılanlar bir köşede: kısa sözleşme VE yüksek fatura. Tek kütük köşenin yalnız bir kenarını görüyor (test hatası %19); üç kütükte %11, beş kütükte %8. Veri temiz olduğu için 200 tura çıkmak test hatasını pek bozmuyor (%6–7); random forest %5."},
+    {name:"Kayıt hatası · ters etiket", x:"aktif gün", y:"günlük dakika", xr:[0,14], yr:[0,40], cls:["Ayrıldı","Abone oldu"], gen:"ters",
+     note:"Deneme kullanıcılarının kuralı daha keskin, ama etiketlerin %12'si ters girilmiş. Learning rate 1.0'da eğitim hatası 200 turda %4'e inerken test hatası %25'e çıkıyor; random forest %20'de kalıyor. 200. turda en büyük 10 dairenin ortalama 6–7'si ters etiketli nokta (rastgele 10 noktada 1 beklenirdi): AdaBoost onları düzeltmeye uğraşıyor. Learning rate 0.1'de test hatası ormanınkine iniyor."}
+  ],
+  lesson:{
+    q:"Tek başına zayıf ağaçları sıraya dizip birbirinin hatasını düzelttirmek neden işe yarıyor?",
+    short:"Bagging'de ağaçlar aynı anda ve birbirinden habersiz oy verir; ortalama varyansı düşürür. Boosting'de ağaçlar sırayla kurulur: her yeni kütük, öncekilerin yanıldığı noktalara daha çok ağırlık verir. Tek soruluk zayıf ağaçlar toplanınca güçlü bir model çıkar; düşen şey bias'tır, ama fazla turda model gürültüyü de öğrenir.",
+    idea:["Random forest bir kalabalık gibiydi: herkes aynı anda ve birbirinden habersiz tahmin ediyor, sonra oylar toplanıyor. <b>boosting</b> (güçlendirme) ise bir bayrak yarışı. Birinci koşucu kaba bir tahmin yapar. İkincisi birincinin yanıldığı yerlere odaklanır, üçüncüsü kalan hatalara. Koşucular burada <b>decision stump</b> (karar kütüğü): tek soru soran, derinliği 1 olan bir ağaç, 'aktif gün 7.5'ten az mı?' gibi. Tek başına zayıf bir modeldir, bu yüzden <b>weak learner</b> (zayıf öğrenici) denir. Yazı turadan biraz iyi olması yeter.",
+          "<b>AdaBoost</b> (adaptive boosting) bu ailenin ilk ve en sade üyesi. Her noktanın bir ağırlığı var; başta hepsi eşit. Her turda ağırlıklı hatası ε en küçük olan kütük seçilir. Kütüğün oyu α = ½ ln((1 − ε)/ε): az yanılan kütük yüksek sesle konuşur, yazı tura kadar kötü olanın (ε = 0.5) oyu sıfırdır. Sonra ağırlıklar güncellenir. Kütüğün yanıldığı noktalar e^α katına çıkar, doğru bildikleri e^−α katına iner, toplam yeniden 1 yapılır. Sonuçta yanlışların toplam ağırlığı tam 0.5 olur: eski kütük yeni ağırlıklarla yazı tura kadar kötüdür, sıradaki kütük başka bir şey bulmak zorundadır. Son karar oyların toplamıdır: α₁h₁ + α₂h₂ + … sıfırdan büyükse bir sınıf, küçükse öteki (h, kütüğün +1 ya da −1 cevabı).",
+          "Bagging varyansı düşürüyordu: derin, ezberci ağaçları ortalayıp sakinleştiriyordu. Boosting ise bias'ı düşürür: tek başına çok basit kalan kütükleri üst üste koyup karmaşık bir sınır kurar. Bunun bir bedeli var. Her yeni kütük kalan hatayı kovaladığı için, çok turdan sonra gürültüyü de öğrenmeye başlar. Yanlış girilmiş bir etiket boosting için düzeltilmesi gereken bir hatadır; ağırlığı tur tur büyür. <b>learning rate</b> (öğrenme oranı) her kütüğün oyunu küçültür: α'yı onunla çarparsın. Küçük learning rate'le her adım daha temkinli olur. Aynı yere varmak için daha çok tur gerekir, ama ezber de geç gelir. Bu yüzden tur sayısı ve learning rate birlikte ayarlanır.",
+          "Bugün tablo verisinde en çok kazanan aile <b>gradient boosting</b> (gradyan güçlendirme): XGBoost, LightGBM, CatBoost. Fikir aynı bayrak yarışı. Farkı şu: ağırlıkları değiştirmek yerine her yeni ağaç, topluluğun o ana kadar kapatamadığı farkı, yani artıkları tahmin etmeye çalışır ve learning rate ile küçültülerek eklenir. Hafta 11'deki abonelik verisinde (3000 kullanıcı, 5 katlı cross-validation, ROC-AUC) tek ağaç 0.658, random forest 0.800, gradient boosting 0.841 aldı."],
+    read:[["Sol panel","Eksenler verinin iki sütunu. Noktanın rengi gerçek sınıfı, boyu ağırlığı gösterir: büyük nokta, sıradaki kütüğün en çok dikkat edeceği nokta. Kesikli siyah çizgi son eklenen kütük; lejant sorusunu ve eşiğin altında kalanlara ne dediğini yazar. Pembe çizgi bütün kütüklerin oy toplamının sıfır olduğu yer, yani topluluğun karar sınırı. Zeminin tonu oyların ne kadar tek yanlı olduğunu gösterir. Test noktaları haritada yok: model onları hiç görmez, yalnız sağdaki kırmızı eğri onlarla ölçülür."],
+          ["Sağ panel, üstte","Tur sayısına göre hata. Yatay eksen logaritmik (1, 2, 5, 10, …, 200): ilk turlar geniş, sonrakiler sıkışık. Camgöbeği eğitim hatası, kırmızı test hatası. Yeşil kesikli çizgi aynı eğitim noktalarıyla kurulmuş 100 ağaçlık random forest'ın test hatası, turuncu kesikli tek bir derin ağacınki. Pembe dikey çizgi şu anki tur."],
+          ["Sağ panel, altta","Her çubuk bir kütüğün oyu α. İlk kütükler yüksek sesle konuşur. Sonrakiler zor noktalarla uğraştığı için ağırlıklı hataları 0.5'e yaklaşır ve oyları küçülür."],
+          ["Göstergeler","'ε → α': son kütüğün ağırlıklı hatası ve oyu. Eğitim ve test hatası topluluğun o turdaki hatası; test hatası random forest'tan iyi ya da onunla eşitse yeşil, gerideyse turuncu yazılır. Son iki gösterge aynı test noktalarında random forest'ın ve tek bir derin ağacın hatası: Hafta 11'deki 'tek ağaç, orman, boosting' yarışı."]],
+    terms:[["boosting","güçlendirme","modelleri sırayla kurmak; her yeni model öncekilerin hatasına odaklanır"],
+           ["weak learner","zayıf öğrenici","tek başına yazı turadan biraz iyi olan basit bir model"],
+           ["decision stump","karar kütüğü","tek soru soran, derinliği 1 olan karar ağacı"],
+           ["AdaBoost","—","yanılınan noktaların ağırlığını büyüten boosting; her kütüğün oyu α = ½ ln((1 − ε)/ε)"],
+           ["learning rate","öğrenme oranı","her kütüğün oyunu küçülten çarpan; küçüldükçe daha çok tur gerekir"],
+           ["n_estimators","—","kütük (ağaç) sayısı, yani tur sayısı; boosting'de fazlası overfitting yapabilir"],
+           ["early stopping","erken durdurma","doğrulama hatası yükselmeye başlayınca turları kesmek"],
+           ["gradient boosting","gradyan güçlendirme","her yeni ağaç topluluğun artıklarını tahmin eder; XGBoost, LightGBM, CatBoost"]],
+    life:["Bankacılık, satış, müşteri verisi gibi satır ve sütunlardan oluşan tablolarda en yüksek skorlar çoğunlukla gradient boosting ailesinden gelir: XGBoost, LightGBM, CatBoost. scikit-learn'deki HistGradientBoostingClassifier hem hızlıdır hem de eksik değerleri kendisi işler.",
+          "Sektörde yaygın strateji (Hafta 11): önce random forest ile hızlıca bir temel skor al; az ayar ister, OOB ile kendini ölçer. Sonra boosting ile o skoru geçmeye çalış; tur sayısını ve learning rate'i cross-validation ile seç.",
+          "Fotoğraf makinelerindeki ilk hızlı yüz bulucu (Viola ve Jones, 2001) AdaBoost'tu: binlerce basit 'bu bölge şu bölgeden açık mı?' sorusundan en iyi birkaç yüzünü seçip oylatıyordu."],
+    trap:"Boosting'de ağaç sayısını random forest'taki gibi 'ne kadar çok o kadar iyi' sanmak. Ormanda ağaç eklemek overfitting yaratmaz. Boosting'de her yeni ağaç kalan hatayı kovaladığı için sonunda gürültüyü de öğrenir; ekranda learning rate 1.0 ile 200 turda test hatası 20. turdakinden yüksek. Tur sayısını (n_estimators) ve learning rate'i test kümesine bakarak değil, cross-validation ya da early stopping (erken durdurma) ile seç. Bir de: boosting'e derin ağaç verme. İlk ağaç veriyi ezberlerse sıradakine düzeltecek hata kalmaz; boosting'in ağaçları bilerek sığ tutulur.",
+    fig:{at:1, cap:"On deneme kullanıcısı, iki tur. Solda ağırlıklar eşit: ilk kütük 'aktif gün < 7.5 → ayrıldı' D ve J'de yanılıyor, ε₁ = 0.2, α₁ = 0.693. Sağda D ile J'nin ağırlığı 0.25'e çıktı, ötekiler 0.0625'e indi; ikinci kütük artık dakikaya bakıyor ve D ile J'yi doğru biliyor, ε₂ = 0.25, α₂ = 0.549. Yeni kullanıcı X'te iki kütük anlaşamıyor: oyu büyük olan ilki kazanıyor, toplam −0.144 → ayrıldı."},
+    ex:{t:"İki tur AdaBoost, on kullanıcı",
+      s:["On deneme kullanıcısı (aktif gün, günlük dakika, durum): A 1, 28, ayrıldı · B 2, 23, ayrıldı · C 3, 5, ayrıldı · D 4, 18, abone · E 5, 27, ayrıldı · F 6, 9, ayrıldı · G 9, 24, abone · H 10, 29, abone · I 11, 7, abone · J 12, 12, ayrıldı. Başta her birinin ağırlığı 1/10 = <b>0.1</b>.",
+         "Kütük 1: 'aktif gün < 7.5 ise ayrıldı, değilse abone'. Yanıldığı iki kişi: D (4 gün ama abone) ve J (12 gün ama ayrıldı). Ağırlıklı hata ε₁ = 0.1 + 0.1 = <b>0.2</b>. Öteki bütün sorular en az üç kişide yanılıyor. Oyu α₁ = ½ ln(0.8 / 0.2) = ½ ln 4 ≈ <b>0.693</b>.",
+         "Ağırlıkları güncelle: yanlışlar e^0.693 = 2 katına, doğrular e^−0.693 = 0.5 katına. D ve J 0.2, öteki sekizi 0.05 oldu; toplam 0.4 + 0.4 = 0.8. Toplamı 1 yapmak için 0.8'e böl: D ve J <b>0.25</b>, ötekiler <b>0.0625</b>. Yanlışların payı 0.5'e çıktı: kütük 1 yeni ağırlıklarla yazı tura kadar kötü.",
+         "Kütük 2 yeni ağırlıklarla seçilir: 'günlük dakika < 15 ise ayrıldı'. D'yi (18 dk) ve J'yi (12 dk) doğru biliyor. Yanıldıkları A, B, E (ayrıldı ama 23–28 dk) ve I (abone ama 7 dk). ε₂ = 4 × 0.0625 = <b>0.25</b>, α₂ = ½ ln(0.75 / 0.25) = ½ ln 3 ≈ <b>0.549</b>. Eşit ağırlıklarla bu kütüğün hatası 0.4 olurdu; ilk turda seçilmemesi bu yüzden.",
+         "Oylama. Yeni kullanıcı X: 4 gün, 26 dakika. Kütük 1 'ayrıldı' der (−0.693), kütük 2 'abone' der (+0.549). Toplam −0.693 + 0.549 = <b>−0.144</b>, sıfırdan küçük → ayrıldı. İki kütük anlaşamayınca oyu büyük olan kazanır. Üçüncü bir kütük X'e 'abone' der ve oyu 0.144'ten büyük olursa karar döner."],
+      end:"Kütükler tek başına zayıf: biri günlere, öteki dakikalara bakıyor. Ağırlık her turda dikkati kalan hatalara kaydırıyor; oylar toplanınca ikisinin de tek başına çizemeyeceği bir sınır çıkıyor. Tuvaldeki noktaların boyu bu ağırlıklar."},
+    check:[["Bagging ile boosting'i dört satırda karşılaştır: ağaçlar nasıl kurulur, ne kadar derindir, neyi düşürür, ağaç eklemek ne yapar? Sekiz çekirdekli bir bilgisayarda hangisi daha hızlı eğitilir?",
+            "Bagging ve random forest: ağaçlar paralel ve birbirinden bağımsız kurulur (her biri kendi bootstrap torbasıyla); derin ve güçlüdür; varyansı düşürür; ağaç eklemek overfitting yaratmaz, bir hesap bütçesi kararıdır. Boosting: ağaçlar sırayla kurulur, her biri öncekilerin hatasına odaklanır; sığ ve zayıftır (kütük); bias'ı düşürür; çok ağaç overfitting'e yol açabilir. Bagging daha hızlı eğitilir: sekiz ağaç aynı anda kurulabilir, boosting'de her ağaç bir öncekini beklemek zorunda."],
+           ["Bir kütüğün ağırlıklı hatası ε = 0.1. Oyu α kaçtır? ε = 0.5 olsaydı? Learning rate 0.1 olsaydı?",
+            "α = ½ ln(0.9 / 0.1) = ½ ln 9 ≈ 1.099. ε = 0.5'te α = ½ ln 1 = 0: yazı tura kadar kötü bir kütüğün oyu yok. Learning rate 0.1'de oy onda birine iner, ≈ 0.110. Her kütük daha az şey değiştirir; aynı yere varmak için daha çok tur gerekir. Bu yüzden learning rate küçülünce tur sayısı büyütülür."],
+           ["Verindeki etiketlerin bir kısmı yanlış girilmiş. Random forest mu daha çok etkilenir, boosting mi? Neden?",
+            "Boosting. Yanlış etiketli nokta her turda 'hata' olarak kalır, ağırlığı tur tur büyür ve sıradaki kütükler onu düzeltmeye uğraşır; sınır o noktaya doğru kıvrılır. Random forest'ta bir ağaç o noktayı ezberlese de öteki ağaçların oyu onu bastırır, ağaç eklemek de bunu kötüleştirmez. « Kayıt hatası » verisinde ölçtük: learning rate 1.0 ile 200 turda en büyük 10 dairenin ortalama 6–7'si ters etiketli nokta; test hatası %25 civarı, random forest %20 civarı."]],
+    next:"Modül 16 · En geniş yol — iki sınıfın arasından en geniş yolu açan bir sınıflandırıcı."
+  }},
+
 /* ══ 07 ══ */
 "m-fit":{ pick:"Veri seti", sets:CURVES,
   lesson:{
@@ -3296,6 +3382,7 @@ const FIGS={
 "m-dbs":`<svg viewBox="0 0 640 336" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Altı noktanın average linkage dendrogramı: A–B ve D–F 1.41'de, C 1.71'de, E 2.24'te, iki büyük küme 8.30'da birleşiyor; 4'ten kesmek 2 küme, 2'den kesmek {A, B, C}, {D, F}, {E} verir."><path d="M60 25V304" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M60 118H466M60 56H466" fill="none" stroke="var(--grid)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13" text-anchor="end"><text x="52" y="309">0</text><text x="52" y="247">2</text><text x="52" y="185">4</text><text x="52" y="123">6</text><text x="52" y="61">8</text></g><path d="M55 304H60M55 242H60M55 180H60M55 118H60M55 56H60" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><text x="66" y="17" fill="var(--ink-soft)" font-size="13">birleşme uzaklığı (average linkage)</text><path d="M100 304V260.2H165V304M132.5 260.2V251.1H230V304" fill="none" stroke="var(--a)" stroke-width="2.2"/><path d="M320 304V260.2H385V304M352.5 260.2V234.7H450V304" fill="none" stroke="var(--b)" stroke-width="2.2"/><path d="M181.2 251.1V46.6H401.2V234.7" fill="none" stroke="var(--ink)" stroke-width="2.2"/><path d="M60 180H466" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="7 5"/><path d="M60 242H466" fill="none" stroke="var(--c)" stroke-width="2" stroke-dasharray="7 5"/><g fill="var(--a)"><circle cx="100" cy="304" r="5"/><circle cx="165" cy="304" r="5"/><circle cx="230" cy="304" r="5"/></g><g fill="var(--b)"><circle cx="320" cy="304" r="5"/><circle cx="385" cy="304" r="5"/><circle cx="450" cy="304" r="5"/></g><g fill="var(--ink)" font-size="14" text-anchor="middle"><text x="100" y="326">A</text><text x="165" y="326">B</text><text x="230" y="326">C</text><text x="320" y="326">D</text><text x="385" y="326">F</text><text x="450" y="326">E</text></g><g fill="var(--ink)" font-size="13" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="132.5" y="285.4">1.41</text><text x="197.5" y="285.4">1.71</text><text x="352.5" y="285.4">1.41</text><text x="417.5" y="285.4">2.24</text><text x="291.2" y="38.6">8.30</text></g><text x="474" y="185" fill="var(--accent)" font-size="14" font-weight="700">4'ten kes: 2 küme</text><text x="474" y="204" fill="var(--ink)" font-size="13">{A, B, C} · {D, E, F}</text><text x="474" y="247" fill="var(--c)" font-size="14" font-weight="700">2'den kes: 3 küme</text><text x="474" y="266" fill="var(--ink)" font-size="13">{A, B, C} · {D, F} · {E}</text></svg>`,
 "m-dt":`<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="On kredi başvurusunun tablosu ve kökteki Gelir bölmesi: 5 onay 5 ret olan kök, Yüksek dalında 4 onay 1 ret, Düşük dalında 1 onay 4 ret; Gini 0.500 iken bölmeden sonra 0.320, Gini kazancı 0.180."><rect x="50" y="10" width="60" height="278" rx="6" fill="var(--accent)" fill-opacity="0.08" stroke="var(--accent)" stroke-width="1.8"/><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="26" y="26">No</text><text x="80" y="26">Gelir</text><text x="148" y="26">Gecikme</text><text x="216" y="26">Ev sahibi</text><text x="276" y="26">Onay</text></g><path d="M10 33H306" stroke="var(--line)" stroke-width="1.5"/><g fill="var(--ink)" font-size="14" text-anchor="middle"><text x="26" y="54">1</text><text x="80" y="54">Yüksek</text><text x="148" y="54">Yok</text><text x="216" y="54">Evet</text><text x="26" y="79">2</text><text x="80" y="79">Yüksek</text><text x="148" y="79">Yok</text><text x="216" y="79">Hayır</text><text x="26" y="104">3</text><text x="80" y="104">Düşük</text><text x="148" y="104">Yok</text><text x="216" y="104">Evet</text><text x="26" y="129">4</text><text x="80" y="129">Düşük</text><text x="148" y="129">Var</text><text x="216" y="129">Hayır</text><text x="26" y="154">5</text><text x="80" y="154">Yüksek</text><text x="148" y="154">Var</text><text x="216" y="154">Evet</text><text x="26" y="179">6</text><text x="80" y="179">Düşük</text><text x="148" y="179">Yok</text><text x="216" y="179">Hayır</text><text x="26" y="204">7</text><text x="80" y="204">Düşük</text><text x="148" y="204">Var</text><text x="216" y="204">Evet</text><text x="26" y="229">8</text><text x="80" y="229">Yüksek</text><text x="148" y="229">Var</text><text x="216" y="229">Hayır</text><text x="26" y="254">9</text><text x="80" y="254">Yüksek</text><text x="148" y="254">Yok</text><text x="216" y="254">Evet</text><text x="26" y="279">10</text><text x="80" y="279">Düşük</text><text x="148" y="279">Var</text><text x="216" y="279">Hayır</text></g><circle cx="258" cy="49" r="5.5" fill="var(--a)"/><text x="268" y="54" fill="var(--ink)" font-size="14">onay</text><circle cx="258" cy="74" r="5.5" fill="var(--a)"/><text x="268" y="79" fill="var(--ink)" font-size="14">onay</text><circle cx="258" cy="99" r="5.5" fill="var(--a)"/><text x="268" y="104" fill="var(--ink)" font-size="14">onay</text><rect x="252.5" y="118" width="11" height="11" fill="var(--b)"/><text x="268" y="129" fill="var(--ink)" font-size="14">ret</text><circle cx="258" cy="149" r="5.5" fill="var(--a)"/><text x="268" y="154" fill="var(--ink)" font-size="14">onay</text><rect x="252.5" y="168" width="11" height="11" fill="var(--b)"/><text x="268" y="179" fill="var(--ink)" font-size="14">ret</text><rect x="252.5" y="193" width="11" height="11" fill="var(--b)"/><text x="268" y="204" fill="var(--ink)" font-size="14">ret</text><rect x="252.5" y="218" width="11" height="11" fill="var(--b)"/><text x="268" y="229" fill="var(--ink)" font-size="14">ret</text><circle cx="258" cy="249" r="5.5" fill="var(--a)"/><text x="268" y="254" fill="var(--ink)" font-size="14">onay</text><rect x="252.5" y="268" width="11" height="11" fill="var(--b)"/><text x="268" y="279" fill="var(--ink)" font-size="14">ret</text><path d="M322 12V287" stroke="var(--line)" stroke-width="1.5"/><rect x="382" y="10" width="200" height="70" rx="8" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><text x="482" y="30" text-anchor="middle" fill="var(--ink)" font-size="14">10 başvuru · 5 onay, 5 ret</text><circle cx="423.5" cy="46" r="5" fill="var(--a)"/><circle cx="436.5" cy="46" r="5" fill="var(--a)"/><circle cx="449.5" cy="46" r="5" fill="var(--a)"/><circle cx="462.5" cy="46" r="5" fill="var(--a)"/><circle cx="475.5" cy="46" r="5" fill="var(--a)"/><rect x="483.5" y="41" width="10" height="10" fill="var(--b)"/><rect x="496.5" y="41" width="10" height="10" fill="var(--b)"/><rect x="509.5" y="41" width="10" height="10" fill="var(--b)"/><rect x="522.5" y="41" width="10" height="10" fill="var(--b)"/><rect x="535.5" y="41" width="10" height="10" fill="var(--b)"/><text x="482" y="71" text-anchor="middle" fill="var(--ink)" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace">Gini 0.500</text><text x="482" y="100" text-anchor="middle" fill="var(--accent)" font-size="15" font-weight="700">Gelir?</text><path d="M468 106L408 146M496 106L560 146" stroke="var(--ink-soft)" stroke-width="2" fill="none"/><text x="428" y="126" text-anchor="end" fill="var(--ink)" font-size="14">Yüksek</text><text x="540" y="126" fill="var(--ink)" font-size="14">Düşük</text><rect x="337" y="148" width="142" height="70" rx="8" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><text x="408" y="168" text-anchor="middle" fill="var(--ink)" font-size="14">1, 2, 5, 8, 9</text><circle cx="382.0" cy="184" r="5" fill="var(--a)"/><circle cx="395.0" cy="184" r="5" fill="var(--a)"/><circle cx="408.0" cy="184" r="5" fill="var(--a)"/><circle cx="421.0" cy="184" r="5" fill="var(--a)"/><rect x="429.0" y="179" width="10" height="10" fill="var(--b)"/><text x="408" y="209" text-anchor="middle" fill="var(--ink)" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace">Gini 0.320</text><rect x="489" y="148" width="142" height="70" rx="8" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><text x="560" y="168" text-anchor="middle" fill="var(--ink)" font-size="14">3, 4, 6, 7, 10</text><circle cx="534.0" cy="184" r="5" fill="var(--a)"/><rect x="542.0" y="179" width="10" height="10" fill="var(--b)"/><rect x="555.0" y="179" width="10" height="10" fill="var(--b)"/><rect x="568.0" y="179" width="10" height="10" fill="var(--b)"/><rect x="581.0" y="179" width="10" height="10" fill="var(--b)"/><text x="560" y="209" text-anchor="middle" fill="var(--ink)" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace">Gini 0.320</text><g font-size="14"><text x="338" y="246" fill="var(--ink)">ağırlıklı: 0.5 · 0.320 + 0.5 · 0.320 = 0.320</text><text x="338" y="268" fill="var(--accent)" font-weight="700">Gini kazancı = 0.500 − 0.320 = 0.180</text><text x="338" y="290" fill="var(--ink-soft)">information gain = 1.000 − 0.722 = 0.278</text></g></svg>`,
 "m-ens":`<svg viewBox="0 0 640 327" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Altı müşteriden yerine koyarak doldurulan üç torba, her torbanın dışında kalan OOB müşterileri ve yeni müşteri X için üç ağacın verdiği olasılıklar: 0.00, 0.67, 1.00; hard voting 2–1 ayrılır, soft voting 0.56."><g fill-opacity="0.35" stroke-width="1.5"><rect x="12" y="12" width="14" height="14" fill="var(--a)" stroke="var(--a)"/><rect x="92" y="12" width="14" height="14" fill="var(--b)" stroke="var(--b)"/></g><g fill="var(--ink)" font-size="13"><text x="32" y="24">ayrıldı</text><text x="112" y="24">kaldı</text></g><g fill="var(--ink-soft)" font-size="13"><text x="12" y="48">torba: 6 kez çek, geri koy</text><text x="210" y="48">OOB</text></g><text x="300" y="24" fill="var(--ink)" font-size="14" font-weight="700">X: süre 26, çağrı 5</text><g fill-opacity="0.35" stroke-width="1.5"><g fill="var(--a)" stroke="var(--a)"><rect x="12" y="73" width="27" height="26"/><rect x="132" y="73" width="27" height="26"/><rect x="42" y="149" width="27" height="26"/><rect x="162" y="149" width="27" height="26"/><rect x="12" y="225" width="27" height="26"/><rect x="42" y="225" width="27" height="26"/></g><g fill="var(--b)" stroke="var(--b)"><rect x="42" y="73" width="27" height="26"/><rect x="72" y="73" width="27" height="26"/><rect x="102" y="73" width="27" height="26"/><rect x="162" y="73" width="27" height="26"/><rect x="12" y="149" width="27" height="26"/><rect x="72" y="149" width="27" height="26"/><rect x="102" y="149" width="27" height="26"/><rect x="132" y="149" width="27" height="26"/><rect x="72" y="225" width="27" height="26"/><rect x="102" y="225" width="27" height="26"/><rect x="132" y="225" width="27" height="26"/><rect x="162" y="225" width="27" height="26"/></g></g><g fill="var(--ink)" font-size="14" font-weight="700" text-anchor="middle"><text x="25.5" y="91">A</text><text x="55.5" y="91">B</text><text x="85.5" y="91">B</text><text x="115.5" y="91">D</text><text x="145.5" y="91">E</text><text x="175.5" y="91">F</text><text x="25.5" y="167">B</text><text x="55.5" y="167">C</text><text x="85.5" y="167">D</text><text x="115.5" y="167">D</text><text x="145.5" y="167">D</text><text x="175.5" y="167">E</text><text x="25.5" y="243">A</text><text x="55.5" y="243">C</text><text x="85.5" y="243">D</text><text x="115.5" y="243">D</text><text x="145.5" y="243">F</text><text x="175.5" y="243">F</text></g><g fill="none" stroke="var(--ink-soft)" stroke-width="1.5" stroke-dasharray="4 3"><rect x="210" y="73" width="27" height="26"/><rect x="210" y="149" width="27" height="26"/><rect x="241" y="149" width="27" height="26"/><rect x="210" y="225" width="27" height="26"/><rect x="241" y="225" width="27" height="26"/></g><g fill="var(--ink-soft)" font-size="14" text-anchor="middle"><text x="223.5" y="91">C</text><text x="223.5" y="167">A</text><text x="254.5" y="167">F</text><text x="223.5" y="243">B</text><text x="254.5" y="243">E</text></g><g fill="var(--ink-soft)" font-size="13"><text x="12" y="67">Torba 1</text><text x="12" y="143">Torba 2</text><text x="12" y="219">Torba 3</text></g><path d="M272 86H294M299 86l-7 -4v8zM272 162H294M299 162l-7 -4v8zM272 238H294M299 238l-7 -4v8z" stroke="var(--ink-soft)" stroke-width="1.8" fill="var(--ink-soft)"/><path d="M486 86L514 132M486 162L514 162M486 238L514 192" stroke="var(--ink-soft)" stroke-width="1.5" fill="none"/><g fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"><rect x="300" y="54" width="186" height="64" rx="8"/><rect x="300" y="130" width="186" height="64" rx="8"/><rect x="300" y="206" width="186" height="64" rx="8"/></g><g fill="var(--ink)" font-size="14"><text x="310" y="75"><tspan font-weight="700">Ağaç 1</tspan> · süre ≤ 25?</text><text x="310" y="151"><tspan font-weight="700">Ağaç 2</tspan> · çağrı ≤ 3.5?</text><text x="310" y="227"><tspan font-weight="700">Ağaç 3</tspan> · çağrı ≤ 3.5?</text></g><g fill="var(--ink-soft)" font-size="13"><text x="310" y="93">X: 26 > 25 → yaprak B B F</text><text x="310" y="169">X: 5 > 3.5 → yaprak B C E</text><text x="310" y="245">X: 5 > 3.5 → yaprak A C</text></g><g fill="var(--ink)" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="310" y="111">P = 0.00 → kalır</text><text x="310" y="187">P = 0.67 → ayrılır</text><text x="310" y="263">P = 1.00 → ayrılır</text></g><rect x="514" y="103" width="118" height="118" rx="8" fill="none" stroke="var(--accent)" stroke-width="2"/><g font-size="14" text-anchor="middle"><text x="573" y="128" fill="var(--ink-soft)" font-size="13">hard voting</text><text x="573" y="148" fill="var(--ink)" font-weight="700">2–1 ayrılır</text><text x="573" y="180" fill="var(--ink-soft)" font-size="13">soft voting</text><text x="573" y="200" fill="var(--accent)" font-weight="700">0.56 ayrılır</text></g><path d="M12 278H628" stroke="var(--line)" stroke-width="1.5"/><text x="12" y="296" fill="var(--ink)" font-size="14">OOB: A ✓ (Ağaç 2) · B ✗ (Ağaç 3) · C ✓ (Ağaç 1) · E ✓ (Ağaç 3) · F ✓ (Ağaç 2) → <tspan font-weight="700">4/5 = 0.80</tspan></text><text x="12" y="317" fill="var(--ink-soft)" font-size="13">D üç torbada da var: hiçbir ağaç onu sınayamaz.</text></svg>`,
+"m-boost":`<svg viewBox="0 0 640 346" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="On deneme kullanıcısıyla iki tur AdaBoost: ilk kütük aktif gün 7.5 eşiğinde D ve J'de yanılır, ε 0.2, α 0.693; yeni ağırlıklarla D ve J 0.25, ötekiler 0.0625 olur; ikinci kütük günlük dakika 15 eşiğinde, ε 0.25, α 0.549; yeni kullanıcı X için oy toplamı −0.144, ayrıldı."><g font-size="13" fill="var(--ink)"><circle cx="26" cy="16" r="6" fill="var(--a)"/><text x="38" y="21">ayrıldı</text><circle cx="110" cy="16" r="6" fill="var(--b)"/><text x="122" y="21">abone</text><circle cx="190" cy="16" r="8" fill="none" stroke="var(--bad)" stroke-width="2"/><text x="204" y="21">kütüğün yanıldığı</text><path d="M335 10l10 12M345 10l-10 12" stroke="var(--accent)" stroke-width="2.4"/><text x="353" y="21">yeni kullanıcı X</text></g><text x="30" y="46" fill="var(--ink)" font-size="14" font-weight="700">Tur 1 · bütün ağırlıklar 0.1</text><rect x="30" y="58" width="262" height="170" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><path d="M170.4 58V228" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/><circle cx="48.7" cy="69.3" r="6" fill="var(--a)"/><text x="60.7" y="74.3" fill="var(--ink)" font-size="13">A</text><circle cx="67.4" cy="97.7" r="6" fill="var(--a)"/><text x="79.4" y="102.7" fill="var(--ink)" font-size="13">B</text><circle cx="86.1" cy="199.7" r="6" fill="var(--a)"/><text x="98.1" y="204.7" fill="var(--ink)" font-size="13">C</text><circle cx="104.9" cy="126.0" r="6" fill="var(--b)"/><circle cx="104.9" cy="126.0" r="10" fill="none" stroke="var(--bad)" stroke-width="2"/><text x="120.9" y="131.0" fill="var(--ink)" font-size="13">D</text><circle cx="123.6" cy="75.0" r="6" fill="var(--a)"/><text x="135.6" y="80.0" fill="var(--ink)" font-size="13">E</text><circle cx="142.3" cy="177.0" r="6" fill="var(--a)"/><text x="154.3" y="182.0" fill="var(--ink)" font-size="13">F</text><circle cx="198.4" cy="92.0" r="6" fill="var(--b)"/><text x="210.4" y="97.0" fill="var(--ink)" font-size="13">G</text><circle cx="217.1" cy="63.7" r="6" fill="var(--b)"/><text x="229.1" y="68.7" fill="var(--ink)" font-size="13">H</text><circle cx="235.9" cy="188.3" r="6" fill="var(--b)"/><text x="247.9" y="193.3" fill="var(--ink)" font-size="13">I</text><circle cx="254.6" cy="160.0" r="6" fill="var(--a)"/><circle cx="254.6" cy="160.0" r="10" fill="none" stroke="var(--bad)" stroke-width="2"/><text x="270.6" y="165.0" fill="var(--ink)" font-size="13">J</text><path d="M99.9 75.7l10 10M109.9 75.7l-10 10" stroke="var(--accent)" stroke-width="2.4"/><g fill="var(--ink-soft)" font-size="13"><text x="292" y="244" text-anchor="end">aktif gün →</text><text x="24" y="143.0" text-anchor="middle" transform="rotate(-90 24 143.0)">günlük dk</text></g><text x="348" y="46" fill="var(--ink)" font-size="14" font-weight="700">Tur 2 · D, J 0.25 · ötekiler 0.0625</text><rect x="348" y="58" width="262" height="170" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><path d="M348 143.0H610" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/><circle cx="366.7" cy="69.3" r="5" fill="var(--a)"/><circle cx="366.7" cy="69.3" r="9" fill="none" stroke="var(--bad)" stroke-width="2"/><text x="381.7" y="74.3" fill="var(--ink)" font-size="13">A</text><circle cx="385.4" cy="97.7" r="5" fill="var(--a)"/><circle cx="385.4" cy="97.7" r="9" fill="none" stroke="var(--bad)" stroke-width="2"/><text x="400.4" y="102.7" fill="var(--ink)" font-size="13">B</text><circle cx="404.1" cy="199.7" r="5" fill="var(--a)"/><text x="415.1" y="204.7" fill="var(--ink)" font-size="13">C</text><circle cx="422.9" cy="126.0" r="10" fill="var(--b)"/><text x="438.9" y="131.0" fill="var(--ink)" font-size="13">D</text><circle cx="441.6" cy="75.0" r="5" fill="var(--a)"/><circle cx="441.6" cy="75.0" r="9" fill="none" stroke="var(--bad)" stroke-width="2"/><text x="456.6" y="80.0" fill="var(--ink)" font-size="13">E</text><circle cx="460.3" cy="177.0" r="5" fill="var(--a)"/><text x="471.3" y="182.0" fill="var(--ink)" font-size="13">F</text><circle cx="516.4" cy="92.0" r="5" fill="var(--b)"/><text x="527.4" y="97.0" fill="var(--ink)" font-size="13">G</text><circle cx="535.1" cy="63.7" r="5" fill="var(--b)"/><text x="546.1" y="68.7" fill="var(--ink)" font-size="13">H</text><circle cx="553.9" cy="188.3" r="5" fill="var(--b)"/><circle cx="553.9" cy="188.3" r="9" fill="none" stroke="var(--bad)" stroke-width="2"/><text x="568.9" y="193.3" fill="var(--ink)" font-size="13">I</text><circle cx="572.6" cy="160.0" r="10" fill="var(--a)"/><text x="588.6" y="165.0" fill="var(--ink)" font-size="13">J</text><path d="M417.9 75.7l10 10M427.9 75.7l-10 10" stroke="var(--accent)" stroke-width="2.4"/><g fill="var(--ink-soft)" font-size="13"><text x="610" y="244" text-anchor="end">aktif gün →</text><text x="342" y="143.0" text-anchor="middle" transform="rotate(-90 342 143.0)">günlük dk</text></g><g font-size="13" fill="var(--ink)" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="30" y="266">gün &lt; 7.5 → ayrıldı</text><text x="30" y="285">yanlış D, J: ε₁ = 0.2</text><text x="30" y="304" fill="var(--a)">α₁ = ½ ln 4 = 0.693</text><text x="348" y="266">dk &lt; 15 → ayrıldı</text><text x="348" y="285">yanlış A, B, E, I: ε₂ = 0.25</text><text x="348" y="304" fill="var(--a)">α₂ = ½ ln 3 = 0.549</text></g><text x="30" y="334" fill="var(--accent)" font-size="14" font-weight="700">X (4 gün, 26 dk): −0.693 + 0.549 = −0.144 &lt; 0 → ayrıldı</text></svg>`,
 "m-fit":`<svg viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beş evin gerçek ve tahmin fiyatı arasındaki hatalar; D evinin 1.6 milyonluk hatası mutlak hataların yüzde 64'ü, kare hataların yüzde 90'ı. MAE 0.500, RMSE 0.752."><text x="12" y="22" font-size="15" font-weight="700" fill="var(--ink)">beş ev, milyon TL</text><circle cx="18" cy="40" r="5" fill="var(--a)"/><text x="28" y="45" font-size="13" fill="var(--ink)">gerçek y</text><line x1="96" y1="40" x2="114" y2="40" stroke="var(--ink)" stroke-width="2.5"/><text x="120" y="45" font-size="13" fill="var(--ink)">tahmin ŷ</text><line x1="194" y1="33" x2="194" y2="47" stroke="var(--bad)" stroke-width="3"/><text x="202" y="45" font-size="13" fill="var(--ink)">hata y − ŷ</text><g stroke="var(--grid)" stroke-width="1"><line x1="60" y1="230" x2="330" y2="230"/><line x1="60" y1="190" x2="330" y2="190"/><line x1="60" y1="150" x2="330" y2="150"/><line x1="60" y1="110" x2="330" y2="110"/><line x1="60" y1="70" x2="330" y2="70"/></g><path d="M60 62V250H330M54 230h6M54 190h6M54 150h6M54 110h6M54 70h6" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)" text-anchor="end"><text x="50" y="234">2</text><text x="50" y="194">3</text><text x="50" y="154">4</text><text x="50" y="114">5</text><text x="50" y="74">6</text></g><line x1="60" y1="158" x2="330" y2="158" stroke="var(--ink-soft)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="66" y="152" font-size="13" fill="var(--ink-soft)">ȳ = 3.8</text><g stroke="var(--bad)" stroke-width="3"><line x1="84" y1="190" x2="84" y2="206"/><line x1="136" y1="130" x2="136" y2="118"/><line x1="188" y1="230" x2="188" y2="226"/><line x1="240" y1="70" x2="240" y2="134"/><line x1="292" y1="170" x2="292" y2="166"/></g><g fill="var(--a)"><circle cx="84" cy="190" r="5.5"/><circle cx="136" cy="130" r="5.5"/><circle cx="188" cy="230" r="5.5"/><circle cx="240" cy="70" r="5.5"/><circle cx="292" cy="170" r="5.5"/></g><path d="M75 206h18M127 118h18M179 226h18M231 134h18M283 166h18" stroke="var(--ink)" stroke-width="2.5"/><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)"><text x="96" y="202">+0.4</text><text x="148" y="128">−0.3</text><text x="200" y="232">−0.1</text><text x="304" y="172">−0.1</text></g><text x="252" y="106" font-size="14" font-weight="700" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--bad)">+1.6</text><g font-size="14" fill="var(--ink)" text-anchor="middle"><text x="84" y="270">A</text><text x="136" y="270">B</text><text x="188" y="270">C</text><text x="240" y="270" font-weight="700">D</text><text x="292" y="270">E</text></g><line x1="346" y1="8" x2="346" y2="272" stroke="var(--line)" stroke-width="1.5"/><text x="360" y="22" font-size="15" font-weight="700" fill="var(--ink)">D evinin payı</text><text x="360" y="70" font-size="14" fill="var(--ink)">mutlak hata |y − ŷ|, toplam 2.5</text><g stroke="var(--surface)" stroke-width="1"><rect x="360" y="80" width="83.2" height="24" fill="var(--a)" fill-opacity="0.45"/><rect x="443.2" y="80" width="166.4" height="24" fill="var(--bad)" fill-opacity="0.75"/><rect x="609.6" y="80" width="10.4" height="24" fill="var(--a)" fill-opacity="0.45"/></g><path d="M401.6 80v24M432.8 80v24" stroke="var(--surface)" stroke-width="1"/><text x="360" y="124" font-size="13" fill="var(--ink-soft)">öteki 4 ev %36</text><text x="620" y="124" text-anchor="end" font-size="14" font-weight="700" fill="var(--bad)">D %64</text><text x="360" y="148" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)">MAE = 2.5 / 5 = 0.500</text><text x="360" y="184" font-size="14" fill="var(--ink)">kare hata (y − ŷ)², toplam 2.83</text><g stroke="var(--surface)" stroke-width="1"><rect x="360" y="194" width="23.9" height="24" fill="var(--a)" fill-opacity="0.45"/><rect x="383.9" y="194" width="235.2" height="24" fill="var(--bad)" fill-opacity="0.75"/></g><text x="360" y="238" font-size="13" fill="var(--ink-soft)">öteki 4 ev %10</text><text x="620" y="238" text-anchor="end" font-size="14" font-weight="700" fill="var(--bad)">D %90</text><text x="360" y="262" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)">RMSE = √(2.83 / 5) ≈ 0.752</text></svg>`,
 "m-gd":`<svg viewBox="0 0 640 296" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="J(θ) = (θ − 3)² çukurunda θ₀ = 0 başlangıcından üç learning rate: α = 0.02 on adımda 1.01, α = 0.4 üç adımda 2.976, α = 1.1 her adımda öbür yana sekip beş adımda 10.46."><text x="320" y="20" fill="var(--ink)" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="14" text-anchor="middle">J(θ) = (θ − 3)² · θ ← θ − α · J′(θ) · θ₀ = 0</text><path d="M 216 34 V 286 M 424 34 V 286" fill="none" stroke="var(--line)" stroke-width="1.5"/><text x="112" y="46" fill="var(--ink)" font-size="15" font-weight="700" text-anchor="middle">α = 0.02</text><text x="112" y="64" fill="var(--ink-soft)" font-size="13" text-anchor="middle">çarpan 0.96</text><path d="M 112 78 V 236" fill="none" stroke="var(--grid)" stroke-width="1.5"/><path d="M 12 236 H 212 M 40 236 v 4 M 112 236 v 4 M 184 236 v 4" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="40" y="254">0</text><text x="112" y="254">3</text><text x="184" y="254">6</text></g><path d="M 16 78 Q 112 394 208 78" fill="none" stroke="var(--ink)" stroke-width="2"/><path d="M 40 147.1 L 42.9 154.1 L 45.6 160.5 L 48.3 166.4 L 50.8 171.9 L 53.3 176.9 L 55.6 181.5 L 57.9 185.8 L 60.1 189.7 L 62.1 193.4 L 64.1 196.7" fill="none" stroke="var(--accent)" stroke-width="1.5"/><g fill="var(--accent)"><circle cx="40" cy="147.1" r="5"/><circle cx="42.9" cy="154.1" r="3.5"/><circle cx="45.6" cy="160.5" r="3.5"/><circle cx="48.3" cy="166.4" r="3.5"/><circle cx="50.8" cy="171.9" r="3.5"/><circle cx="53.3" cy="176.9" r="3.5"/><circle cx="55.6" cy="181.5" r="3.5"/><circle cx="57.9" cy="185.8" r="3.5"/><circle cx="60.1" cy="189.7" r="3.5"/><circle cx="62.1" cy="193.4" r="3.5"/><circle cx="64.1" cy="196.7" r="5"/></g><text x="112" y="282" fill="var(--ink)" font-size="14" text-anchor="middle">yavaş: 10 adımda 1.01</text><text x="320" y="46" fill="var(--ink)" font-size="15" font-weight="700" text-anchor="middle">α = 0.4</text><text x="320" y="64" fill="var(--ink-soft)" font-size="13" text-anchor="middle">çarpan 0.2</text><path d="M 320 78 V 236" fill="none" stroke="var(--grid)" stroke-width="1.5"/><path d="M 220 236 H 420 M 248 236 v 4 M 320 236 v 4 M 392 236 v 4" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="248" y="254">0</text><text x="320" y="254">3</text><text x="392" y="254">6</text></g><path d="M 224 78 Q 320 394 416 78" fill="none" stroke="var(--ink)" stroke-width="2"/><path d="M 251.4 152.1 L 297.8 220.8 M 305.6 232.4 L 317.1 235.9 M 317.1 235.9 L 319.4 236" fill="none" stroke="var(--accent)" stroke-width="2"/><path d="M 301.7 226.6 L 293.3 221.4 L 300 216.9 Z" fill="var(--accent)"/><g fill="var(--accent)"><circle cx="248" cy="147.1" r="5"/><circle cx="305.6" cy="232.4" r="5"/><circle cx="317.1" cy="235.9" r="5"/><circle cx="319.4" cy="236" r="5"/></g><text x="320" y="282" fill="var(--ink)" font-size="14" text-anchor="middle">hızlı: 3 adımda 2.976</text><text x="528" y="46" fill="var(--ink)" font-size="15" font-weight="700" text-anchor="middle">α = 1.1</text><text x="528" y="64" fill="var(--ink-soft)" font-size="13" text-anchor="middle">çarpan −1.2 · ölçek farklı</text><path d="M 528 78 V 236" fill="none" stroke="var(--grid)" stroke-width="1.5"/><path d="M 428 236 H 628 M 456 236 v 4 M 492 236 v 4 M 528 236 v 4 M 564 236 v 4 M 600 236 v 4" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="456" y="254">−3</text><text x="492" y="254">0</text><text x="528" y="254">3</text><text x="564" y="254">6</text><text x="600" y="254">9</text></g><path d="M 432 78 Q 528 394 624 78" fill="none" stroke="var(--ink)" stroke-width="2"/><path d="M 498 213 L 557.3 205.7 M 565.3 203.1 L 490 192 M 482.1 188.9 L 576.4 172.1 M 584.3 168.4 L 467 143.4 M 459.2 139 L 604 101.9" fill="none" stroke="var(--bad)" stroke-width="2"/><path d="M 564.3 204.9 L 555.8 209.9 L 554.8 202 Z M 483.1 191 L 492.6 188.3 L 491.4 196.2 Z M 583.3 170.9 L 575.2 176.4 L 573.8 168.5 Z M 460.2 141.9 L 469.8 139.9 L 468.2 147.7 Z M 610.8 100.2 L 603.1 106.3 L 601.1 98.5 Z" fill="var(--bad)"/><g fill="var(--bad)"><circle cx="492" cy="213.8" r="5"/><circle cx="571.2" cy="204" r="5"/><circle cx="476.2" cy="189.9" r="5"/><circle cx="590.2" cy="169.7" r="5"/><circle cx="453.4" cy="140.5" r="5"/><circle cx="617.6" cy="98.4" r="5"/></g><text x="528" y="282" fill="var(--bad)" font-size="14" text-anchor="middle">ıraksar: 5 adımda 10.46</text></svg>`,
 "m-kch":`<svg viewBox="0 0 640 294" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Solda WCSS eğrisi k = 1'den 6'ya 980, 420, 250, 215, 195, 180 iniyor ve dirsek k = 3'te; sağda A noktasının kendi kümesine ortalama uzaklığı a = 1.71, komşu kümeye b = 9.24, silhouette s = 0.815."><text x="160" y="22" text-anchor="middle" fill="var(--ink)" font-size="15" font-weight="700">elbow</text><path d="M60 147H298M60 62H298" fill="none" stroke="var(--grid)" stroke-width="1.5"/><path d="M60 62V232H298" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13" text-anchor="end"><text x="54" y="237">0</text><text x="54" y="152">500</text><text x="54" y="67">1000</text></g><text x="66" y="54" fill="var(--ink-soft)" font-size="13">WCSS</text><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="78" y="250">1</text><text x="120" y="250">2</text><text x="162" y="250">3</text><text x="204" y="250">4</text><text x="246" y="250">5</text><text x="288" y="250">6</text></g><text x="298" y="268" text-anchor="end" fill="var(--ink-soft)" font-size="13">k</text><path d="M78 65.4L120 160.6L162 189.5L204 195.4L246 198.8L288 201.4" fill="none" stroke="var(--a)" stroke-width="2.2" stroke-linejoin="round"/><g fill="var(--a)"><circle cx="78" cy="65.4" r="5"/><circle cx="120" cy="160.6" r="5"/><circle cx="162" cy="189.5" r="5"/><circle cx="204" cy="195.4" r="5"/><circle cx="246" cy="198.8" r="5"/><circle cx="288" cy="201.4" r="5"/></g><circle cx="162" cy="189.5" r="10" fill="none" stroke="var(--accent)" stroke-width="2.5"/><g fill="var(--ink)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="88" y="70.4" text-anchor="start">980</text><text x="112" y="180.6" text-anchor="end">420</text><text x="162" y="173.5" text-anchor="middle">250</text><text x="204" y="183.4" text-anchor="middle">215</text><text x="246" y="186.8" text-anchor="middle">195</text><text x="288" y="189.4" text-anchor="middle">180</text></g><path d="M170 157.5L192 127.5" fill="none" stroke="var(--accent)" stroke-width="1.5"/><text x="196" y="125.5" fill="var(--accent)" font-size="14" font-weight="700">dirsek: k = 3</text><text x="160" y="284" text-anchor="middle" fill="var(--ink)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace">düşüş: 560 · 170 · 35 · 20 · 15</text><path d="M320 12V288" fill="none" stroke="var(--line)" stroke-width="1.5"/><text x="470" y="22" text-anchor="middle" fill="var(--ink)" font-size="15" font-weight="700">silhouette · A noktası</text><path d="M392 207L415 184" fill="none" stroke="var(--a)" stroke-width="2"/><path d="M392 207L438 207" fill="none" stroke="var(--a)" stroke-width="2"/><path d="M392 207L553 92" fill="none" stroke="var(--b)" stroke-width="1.8" stroke-dasharray="6 4"/><path d="M392 207L576 46" fill="none" stroke="var(--b)" stroke-width="1.8" stroke-dasharray="6 4"/><path d="M392 207L530 69" fill="none" stroke="var(--b)" stroke-width="1.8" stroke-dasharray="6 4"/><circle cx="392" cy="207" r="6" fill="var(--a)"/><circle cx="415" cy="184" r="6" fill="var(--a)"/><circle cx="438" cy="207" r="6" fill="var(--a)"/><circle cx="553" cy="92" r="6" fill="var(--b)"/><circle cx="576" cy="46" r="6" fill="var(--b)"/><circle cx="530" cy="69" r="6" fill="var(--b)"/><circle cx="392" cy="207" r="10" fill="none" stroke="var(--accent)" stroke-width="2.5"/><g fill="var(--ink)" font-size="14"><text x="377" y="212" text-anchor="end">A</text><text x="415" y="172" text-anchor="middle">B</text><text x="451" y="212" text-anchor="start">C</text><text x="553" y="114" text-anchor="middle">D</text><text x="564" y="51" text-anchor="end">E</text><text x="530" y="56" text-anchor="middle">F</text></g><g fill="var(--ink-soft)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="393.5" y="181.5" text-anchor="end">1.41</text><text x="426" y="226" text-anchor="middle">2.00</text><text x="564" y="97">8.60</text><text x="587" y="51">10.63</text><text x="518" y="74" text-anchor="end">8.49</text></g><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="336" y="246" fill="var(--a)">a = ort(1.41, 2.00) = 1.71</text><text x="336" y="265" fill="var(--ink)">b = ort(8.60, 10.63, 8.49) = 9.24</text><text x="336" y="284" fill="var(--accent)" font-weight="700">s = (9.24 − 1.71) / 9.24 = 0.815</text></g></svg>`,
@@ -8279,6 +8366,357 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     stop:()=>{if(timer){clearInterval(timer);timer=0;runBtn("#ens-grow",false,"Ormanı büyüt");}}});
 })();
 
+/* ═════════════ 31 · Boosting (AdaBoost, karar kütükleri) ═════════════ */
+(function(){
+  const cv=$("#c-boost"), {ctx,fit}=setupCanvas(cv);
+  /* Bütün turlar (TMAX) veri ya da learning rate değişince BİR KEZ hesaplanır; « Tur »
+     kaydırıcısı yalnız kaçıncı turun gösterileceğini seçer (m-ens'in ağaç sayısı gibi).
+     « Sonraki tur » ve « Koştur » da yalnız kaydırıcıyı sürer: durum hep tutarlı,
+     behaviour.js zamanlayıcıyı sürmeden okuyabilir. */
+  const TMAX=200, NTR=120, NTE=600, NRF=100;
+  const LRS=[0.05,0.1,0.2,0.3,0.5,0.7,1.0];
+  const DS=SETS("m-boost"); let dsi=0;
+  const S=()=>DS[dsi];
+  let pts=[], test=[], seed=11, t=1, lri=6, timer=0;
+  /* B: boosting sonucu. st[k] = (k+1). kütük {f, thr, pol, eps, alpha}; W[k] = k. turdan
+     SONRAKİ ağırlıklar (W[0] eşit); trE / teE[k] = k+1 kütüklü topluluğun hatası. */
+  let B={st:[],W:[],trE:[],teE:[]}, rfE=null, oneE=null, dirtyB=true, dirtyF=true;
+
+  function seeded(a){return function(){a|=0;a=a+0x6D2B79F5|0;
+    let q=Math.imul(a^a>>>15,1|a); q=q+Math.imul(q^q>>>7,61|q)^q;
+    return((q^q>>>14)>>>0)/4294967296;};}
+  const gn=(R)=>{let u=0,v=0;while(!u)u=R();while(!v)v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+
+  /* ── veri: u, v ∈ [0, 1]; eksen birimi CONTENT'teki xr / yr ──
+     deneme: Hafta 11 senaryo 3'ün ruhu, abone olma eğilimi aktif gün ve dakikayla artar,
+             etiket sigmoid olasılığından çekilir (sınırın yakını doğal olarak karışık);
+     ters:   aynı kural daha keskin, ama etiketlerin %12'si ters girilmiş (fl = true);
+     kose:   kısa sözleşme VE yüksek fatura → ayrılır (iki eksen sorusu yeter). */
+  function sample(R,gen){
+    const u=.03+R()*.94, v=.03+R()*.94;
+    if(gen==="kose") return {u,v,c:(Math.min(.40-u,v-.45)+gn(R)*.05)>0?1:0,fl:false};
+    const z=(gen==="ters"?30:11)*((u-.60)+.6*(v-.62));
+    let c=R()<1/(1+Math.exp(-z))?1:0, fl=false;
+    if(gen==="ters"&&R()<.12){c=1-c;fl=true;}
+    return {u,v,c,fl};
+  }
+  function demo(){
+    stopRun(); ed.reset(); seed=(seed*31+17)|0;
+    const R=seeded(seed^0x5F3759DF), gen=S().gen;
+    pts=[]; test=[];
+    for(let i=0;i<NTR;i++) pts.push(sample(R,gen));
+    for(let i=0;i<NTE;i++) test.push(sample(R,gen));
+    dirtyB=dirtyF=true; draw();
+  }
+
+  /* ── AdaBoost: her turda ağırlıklı hatası en küçük kütük, oyu α = lr · ½ ln((1 − ε)/ε),
+       yanılınan noktanın ağırlığı e^α, bilinenin e^−α katı; sonra toplam 1. ── */
+  const hs=(s,x)=>((s.pol===1)===(x<s.thr))?-1:1;          /* kütüğün cevabı: −1 = 1. sınıf, +1 = 2. sınıf */
+  const hq=(s,q)=>hs(s,s.f?q.v:q.u);
+  function boost(){
+    if(!dirtyB) return; dirtyB=false;
+    const n=pts.length, lr=LRS[lri], st=[], W=[], trE=[], teE=[];
+    B={st,W,trE,teE};
+    let c1=0; pts.forEach(q=>c1+=q.c);
+    if(n<4||c1===0||c1===n) return;
+    const w=new Float64Array(n).fill(1/n); W.push(w.slice());
+    const ord=[0,1].map(f=>pts.map((_,i)=>i).sort((a,b)=>f?pts[a].v-pts[b].v:pts[a].u-pts[b].u));
+    const Ftr=new Float64Array(n), Fte=new Float64Array(test.length);
+    for(let r=0;r<TMAX;r++){
+      /* eşik taraması: sol → 1. sınıf, sağ → 2. sınıf (pol 1) ve tersi (pol −1) */
+      let tot=0, e0=0; for(let i=0;i<n;i++){tot+=w[i]; if(!pts[i].c) e0+=w[i];}
+      let best=null;
+      for(let f=0;f<2;f++){
+        const o=ord[f]; let e=e0;
+        for(let s=0;s<n-1;s++){
+          const i=o[s]; e+=pts[i].c?w[i]:-w[i];
+          const a=f?pts[i].v:pts[i].u, b=f?pts[o[s+1]].v:pts[o[s+1]].u;
+          if(b-a<1e-9) continue;
+          const ee=e/tot;
+          if(!best||ee<best.eps-1e-12) best={f,thr:(a+b)/2,pol:1,eps:ee};
+          if(1-ee<best.eps-1e-12) best={f,thr:(a+b)/2,pol:-1,eps:1-ee};
+        }
+      }
+      /* ε ≥ 0.5: kütük yazı turadan iyi değil, AdaBoost durur (scikit-learn de öyle) */
+      if(!best||best.eps>=.5-1e-12) break;
+      const eps=Math.max(best.eps,1e-6);
+      best.alpha=lr*.5*Math.log((1-eps)/eps);
+      let z=0;
+      for(let i=0;i<n;i++){ const y=pts[i].c?1:-1, h=hq(best,pts[i]);
+        w[i]*=Math.exp(-best.alpha*y*h); z+=w[i]; Ftr[i]+=best.alpha*h; }
+      for(let i=0;i<n;i++) w[i]/=z;
+      W.push(w.slice()); st.push(best);
+      let a=0,b=0;
+      for(let i=0;i<n;i++) if((Ftr[i]>0?1:0)!==pts[i].c) a++;
+      for(let i=0;i<test.length;i++){ Fte[i]+=best.alpha*hq(best,test[i]); if((Fte[i]>0?1:0)!==test[i].c) b++; }
+      trE.push(a/n); teE.push(test.length?b/test.length:null);
+      /* kusursuz kütük (ε = 0): ağırlıklar artık değişmez, AdaBoost burada durur */
+      if(best.eps<=1e-12) break;
+    }
+  }
+
+  /* ── kıyas: aynı eğitim noktalarıyla tek bir derin ağaç ve 100 ağaçlık random forest
+       (bootstrap + her bölmede kurayla tek öznitelik, derinlik sınırsız; scikit-learn varsayılanları) ── */
+  const gini2=(c0,c1)=>{const m=c0+c1; if(!m) return 0; const p=c0/m; return 2*p*(1-p);};
+  function split(idx,feats){
+    let best=null, n=idx.length, c0=0,c1=0;
+    idx.forEach(i=>pts[i].c?c1++:c0++);
+    for(const f of feats){
+      const so=idx.slice().sort((a,b)=>f?pts[a].v-pts[b].v:pts[a].u-pts[b].u);
+      let l0=0,l1=0;
+      for(let s=0;s<n-1;s++){
+        pts[so[s]].c?l1++:l0++;
+        const x1=f?pts[so[s]].v:pts[so[s]].u, x2=f?pts[so[s+1]].v:pts[so[s+1]].u;
+        if(x2-x1<1e-9) continue;
+        const g=((s+1)*gini2(l0,l1)+(n-s-1)*gini2(c0-l0,c1-l1))/n;
+        if(!best||g<best.g-1e-12) best={f,t:(x1+x2)/2,g};
+      }
+    }
+    return best;
+  }
+  function tree(idx,R,mtry){
+    let c1=0; idx.forEach(i=>c1+=pts[i].c);
+    const n=idx.length;
+    if(c1===0||c1===n||n<2) return {leaf:true,c:c1*2>n?1:0};
+    /* kurada gelen öznitelikte geçerli bölme yoksa öteki de denenir (scikit-learn gibi) */
+    let b=split(idx,mtry===1?[R()<.5?0:1]:[0,1]);
+    if(!b&&mtry===1) b=split(idx,[0,1]);
+    if(!b) return {leaf:true,c:c1*2>n?1:0};
+    const L=[],Rt=[]; idx.forEach(i=>((b.f?pts[i].v:pts[i].u)<b.t?L:Rt).push(i));
+    return {leaf:false,f:b.f,t:b.t,L:tree(L,R,mtry),R:tree(Rt,R,mtry)};
+  }
+  const leafC=(nd,q)=>{while(!nd.leaf) nd=((nd.f?q.v:q.u)<nd.t)?nd.L:nd.R; return nd.c;};
+  function forest(){
+    if(!dirtyF) return; dirtyF=false; rfE=oneE=null;
+    const n=pts.length; let c1=0; pts.forEach(q=>c1+=q.c);
+    if(n<4||c1===0||c1===n||!test.length) return;
+    const R=seeded((seed*2654435761)>>>0^0x9E3779B9), all=pts.map((_,i)=>i);
+    const one=tree(all,R,2), vote=new Float64Array(test.length);
+    for(let k=0;k<NRF;k++){
+      const idx=[]; for(let i=0;i<n;i++) idx.push(Math.floor(R()*n));
+      const tr=tree(idx,R,1); test.forEach((q,i)=>vote[i]+=leafC(tr,q));
+    }
+    let a=0,b=0;
+    test.forEach((q,i)=>{ if(leafC(one,q)!==q.c) a++; if((vote[i]/NRF>.5?1:0)!==q.c) b++; });
+    oneE=a/test.length; rfE=b/test.length;
+  }
+
+  /* ── göstergelerin hesabı: çizimden AYRI (dar yerleşimde sağ panel yokken de güncel) ── */
+  function stats(){
+    boost(); forest();
+    const nt=B.st.length, k=Math.min(t,nt), s=k?B.st[k-1]:null, w=B.W[k]||null;
+    /* en büyük 10 ağırlığın kaçı ters etiketli nokta (« Kayıt hatası »nın dersi) */
+    let big=null, wmax=null;
+    if(w&&pts.length){ const o=pts.map((_,i)=>i).sort((a,b)=>w[b]-w[a]);
+      big=o.slice(0,10).filter(i=>pts[i].fl).length; wmax=w[o[0]]*pts.length; }
+    let tmin=null; for(let i=0;i<nt;i++) if(B.teE[i]!==null&&(tmin===null||B.teE[i]<B.teE[tmin])) tmin=i;
+    /* son kütüğün yanıldığı noktaların yeni ağırlık payı: learning rate 1'de tam 0.5 */
+    let share=null; if(s&&w){ share=0; pts.forEach((q,i)=>{ if((hq(s,q)>0?1:0)!==q.c) share+=w[i]; }); }
+    return {nt,k,s,w,tr:k?B.trE[k-1]:null,te:k?B.teE[k-1]:null,big,wmax,tmin,share};
+  }
+
+  const geo=()=>{const W=cv.__w,H=cv.__h,p=26,wide=W>760,split=wide?Math.round(W*.62):W;
+    return {p,split,W,H,wide,mw:split-2*p,mh:H-2*p};};
+  const pc=(x)=>x===null||x===undefined?"—":"%"+(x*100).toFixed(1);
+  const FN=(f)=>f?S().y:S().x;
+  /* eşik verinin biriminde: u → xr, v → yr */
+  const unit=(f,x)=>{const r=(f?S().yr:S().xr)||[0,1]; const val=r[0]+x*(r[1]-r[0]);
+    return Math.abs(r[1]-r[0])>=100?Math.round(val).toString():val.toFixed(1);};
+  const say=(s)=>s?`${FN(s.f)} < ${unit(s.f,s.thr)} → ${S().cls[s.pol===1?0:1]}`:"";
+
+  /* ── zemin: oy toplamı F = Σ αₖhₖ. Kütükler eksene dik olduğu için F(u, v) = g₁(u) + g₂(v):
+       her sütun ve satır için bir kez toplanır. Hücre başına BİR piksel, yumuşatılarak büyütülür. ── */
+  const lo=document.createElement("canvas"), lox=lo.getContext("2d");
+  function field(k,cols,rows){
+    const g1=new Float64Array(cols), g2=new Float64Array(rows); let sa=0;
+    for(let j=0;j<k;j++){ const s=B.st[j]; sa+=s.alpha;
+      if(!s.f) for(let i=0;i<cols;i++) g1[i]+=s.alpha*hs(s,i/(cols-1));
+      else for(let r=0;r<rows;r++) g2[r]+=s.alpha*hs(s,1-r/(rows-1)); }
+    const P=new Float64Array(cols*rows);
+    for(let r=0;r<rows;r++) for(let i=0;i<cols;i++) P[r*cols+i]=sa>0?(g1[i]+g2[r])/sa:0;
+    return P;
+  }
+
+  function draw(){
+    if(!fit()) return;
+    const W=cv.__w,H=cv.__h;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,W,H);
+    const g=geo(), p=g.p, rx=p, ry=p, rw=g.mw, rh=g.mh;
+    const X=(u)=>rx+u*rw, Y=(v)=>ry+rh-v*rh;
+    const st=stats(), k=st.k, cls=S().cls;
+
+    /* topluluğun oyu: renk = tarafı, ton = oyların ne kadar tek yanlı olduğu */
+    const cols=Math.max(3,Math.floor(rw/4)+1), rows=Math.max(3,Math.floor(rh/4)+1);
+    let P=null;
+    if(k){
+      P=field(k,cols,rows);
+      const A=rgbOf("--a"), Bc=rgbOf("--b");
+      lo.width=cols; lo.height=rows;
+      const img=lox.createImageData(cols,rows), d=img.data;
+      for(let id=0;id<cols*rows;id++){ const v=P[id], c=v>1e-9?Bc:A, o=id*4;
+        d[o]=c[0]; d[o+1]=c[1]; d[o+2]=c[2]; d[o+3]=Math.round((.05+.22*Math.min(1,Math.abs(v)))*255); }
+      lox.putImageData(img,0,0);
+      const cw=rw/(cols-1), chh=rh/(rows-1);
+      ctx.save(); ctx.imageSmoothingEnabled=true;
+      ctx.drawImage(lo,0,0,cols,rows,rx-cw/2,ry-chh/2,rw+cw,rh+chh); ctx.restore();
+    }
+    ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    for(let i=0;i<=10;i++){
+      ctx.beginPath();ctx.moveTo(X(i/10),Y(0));ctx.lineTo(X(i/10),Y(1));ctx.stroke();
+      ctx.beginPath();ctx.moveTo(X(0),Y(i/10));ctx.lineTo(X(1),Y(i/10));ctx.stroke();
+    }
+    ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.strokeRect(rx,ry,rw,rh); ctx.restore();
+    /* topluluk sınırı: F = 0 (eşitlikte 1. sınıf, bu yüzden düzey 0'ın hemen üstü) */
+    if(P){ ctx.save(); ctx.beginPath();
+      isoline(ctx,P,cols,rows,rx,ry,rw/(cols-1),rh/(rows-1),1e-9);
+      ctx.strokeStyle=css("--accent"); ctx.lineWidth=3.2; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.stroke(); ctx.restore(); }
+    /* son kütük: kesikli çizgi */
+    if(st.s){ const s=st.s; ctx.save(); ctx.strokeStyle=css("--ink"); ctx.lineWidth=2; ctx.setLineDash([7,5]); ctx.beginPath();
+      if(!s.f){ctx.moveTo(X(s.thr),Y(0));ctx.lineTo(X(s.thr),Y(1));} else {ctx.moveTo(X(0),Y(s.thr));ctx.lineTo(X(1),Y(s.thr));}
+      ctx.stroke(); ctx.restore(); }
+
+    /* noktalar: renk gerçek sınıf, boy ağırlık (eşit ağırlıkta 4.6 px, ortalamanın 10 katında 11). Büyükler önce çizilir,
+       küçükler üstte kalsın; büyük daire yarı saydam, altındaki nokta görünsün. */
+    const n=pts.length, w=st.w;
+    const rad=(i)=>w?clamp(1.6+3*Math.sqrt(w[i]*n),2,17):4.6;
+    pts.map((_,i)=>i).sort((a,b)=>rad(b)-rad(a)).forEach(i=>{
+      const q=pts[i], tok=q.c?"--b":"--a", x=X(q.u), y=Y(q.v), r=rad(i);
+      if(r>7){ ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fillStyle=hexA(tok,.42); ctx.fill();
+        ctx.lineWidth=1.8; ctx.strokeStyle=css(tok); ctx.stroke(); ctx.restore(); }
+      else disc(ctx,x,y,r,css(tok),hexA("--surface",.85));
+    });
+
+    /* lejant: veri noktası en az olan köşeye (köşe verisinde kayıp bölgesi sol üstte) */
+    const rows2=[[k?`topluluk sınırı · ${k} kütük`:"henüz kütük yok · bütün ağırlıklar eşit","--accent"],
+      st.s&&[`kesikli: ${k}. kütük · ${say(st.s)}`,"--ink"],
+      ["nokta boyu = ağırlık","--ink-soft"],
+      [cls[0]+"  ·  "+cls[1],"--ink-soft"]];
+    const lw=Math.min(.75,330/Math.max(rw,1)), lh=Math.min(.5,74/Math.max(rh,1));
+    const box=[[0,1-lh,lw,1],[1-lw,1-lh,1,1],[0,0,lw,lh],[1-lw,0,1,lh]];
+    const cnt=box.map(b=>pts.filter(q=>q.u>=b[0]&&q.u<=b[2]&&q.v>=b[1]&&q.v<=b[3]).length);
+    const bi=cnt.indexOf(Math.min(...cnt)), right=bi%2===1, top=bi<2;
+    const ly=top?ry+14:ry+rh-14-(rows2.filter(Boolean).length-1)*16;
+    legend(ctx,right?rx+rw-8:rx+8,ly,rows2,{size:11,lh:16,align:right?"right":"left"});
+    label(ctx,"x₁: "+S().x+" →",X(1),Y(0)+14,css("--ink-soft"),"right",11);
+    ylabel(ctx,"x₂: "+S().y+" →",X(0)-13,Y(1),Y(0),css("--ink-soft"),11);
+    if(!st.nt&&!B.W.length)
+      label(ctx,"İki sınıftan nokta ekle ya da « Yeni veri » de.",X(.5),Y(.5),css("--ink-soft"),"center",13);
+
+    /* ── sağ panel: üstte tura göre hata (log eksen), altta her kütüğün oyu α ── */
+    if(g.wide){
+      const q0=g.split+16, qw=W-g.split-58, qy=p+8, qh=Math.round((H-2*p-16)*.60), EM=.4;
+      const CX=(r)=>q0+Math.log(r)/Math.log(TMAX)*qw, CY=(e)=>qy+qh-clamp(e,0,EM)/EM*qh;
+      label(ctx,"hata oranı · tura göre",q0,qy-14,css("--ink-soft"),"left",11);
+      ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+      for(let i=0;i<=4;i++){const gy=qy+i*qh/4;ctx.beginPath();ctx.moveTo(q0,gy);ctx.lineTo(q0+qw,gy);ctx.stroke();}
+      [2,5,10,20,50,100].forEach(r=>{ctx.beginPath();ctx.moveTo(CX(r),qy);ctx.lineTo(CX(r),qy+qh);ctx.stroke();});
+      ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.strokeRect(q0,qy,qw,qh); ctx.restore();
+      label(ctx,"%40",q0+qw+5,qy,css("--ink-soft"),"left",10);
+      label(ctx,"%20",q0+qw+5,qy+qh/2,css("--ink-soft"),"left",10);
+      label(ctx,"%0", q0+qw+5,qy+qh,css("--ink-soft"),"left",10);
+      [1,2,5,10,20,50,100,200].forEach(r=>label(ctx,String(r),CX(r),qy+qh+11,css("--ink-soft"),"center",10));
+      label(ctx,"tur (log ölçek) →",q0+qw,qy+qh+25,css("--ink-soft"),"right",10.5);
+      const hline=(e,tok)=>{ if(e===null) return; ctx.save(); ctx.strokeStyle=css(tok); ctx.lineWidth=1.7; ctx.setLineDash([6,4]);
+        ctx.beginPath(); ctx.moveTo(q0,CY(e)); ctx.lineTo(q0+qw,CY(e)); ctx.stroke(); ctx.restore(); };
+      hline(oneE,"--warn"); hline(rfE,"--good");
+      const curve=(arr,tok,lwd)=>{ if(!k) return; ctx.save(); ctx.strokeStyle=css(tok); ctx.lineWidth=lwd; ctx.lineJoin="round";
+        ctx.beginPath(); for(let r=1;r<=k;r++){ const x=CX(r), y=CY(arr[r-1]); r>1?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+        if(k===1){ ctx.lineTo(CX(1)+2,CY(arr[0])); } ctx.stroke(); ctx.restore(); };
+      curve(B.trE,"--a",2.2); curve(B.teE,"--bad",2.6);
+      if(k){ ctx.save(); ctx.strokeStyle=css("--accent"); ctx.lineWidth=1.5; ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(CX(k),qy); ctx.lineTo(CX(k),qy+qh); ctx.stroke(); ctx.restore();
+        disc(ctx,CX(k),CY(st.tr),4.5,css("--a"),css("--surface"));
+        if(st.te!==null) disc(ctx,CX(k),CY(st.te),5,css("--bad"),css("--surface")); }
+      legend(ctx,q0+qw-8,qy+14,[["eğitim hatası","--a"],["test hatası","--bad"],
+        rfE!==null&&["random forest · test","--good"],oneE!==null&&["tek ağaç · test","--warn"]],{size:10.5,lh:15,align:"right"});
+
+      /* her kütüğün oyu α: ilk kütükler yüksek sesle, sonrakiler kısık */
+      const iy=qy+qh+44, ih=H-p+6-iy;
+      if(ih>30){
+        legendRow(ctx,q0,iy,[["her çubuk bir kütüğün oyu α","--ink-soft"],k?[`son: ${st.s.alpha.toFixed(3)}`,"--accent"]:null],10.5,qw+30);
+        const by=iy+10, bh=ih-12, am=Math.max(1e-9,...B.st.map(s=>s.alpha));
+        ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(q0,by+bh); ctx.lineTo(q0+qw,by+bh); ctx.stroke(); ctx.restore();
+        for(let r=1;r<=k;r++){ const a=B.st[r-1].alpha, x=CX(r), hgt=Math.max(1,bh*a/am);
+          ctx.fillStyle=css(r===k?"--accent":"--c"); ctx.fillRect(x-(r===k?1.5:1),by+bh-hgt,r===k?3:2,hgt); }
+      }
+    }
+
+    /* ── göstergeler ── */
+    txt("#bst-a",st.s?`${st.s.eps.toFixed(3)} → ${st.s.alpha.toFixed(3)}`:"—");
+    txt("#bst-tr",pc(st.tr));
+    const te=$("#bst-te"); te.textContent=pc(st.te);
+    te.className="v "+(st.te===null||rfE===null?"":st.te<=rfE+.005?"ok":"wr");
+    txt("#bst-rf",pc(rfE)); txt("#bst-one",pc(oneE));
+    /* tuval metni sahte DOM'da okunmuyor: behaviour.js sayıları buradan okur */
+    const f1=B.st.length?B.st[0].f:null, f2=B.st.length>1?B.st[1].f:null;
+    cv.setAttribute("aria-label",`AdaBoost: tur ${k} / ${st.nt}, learning rate ${LRS[lri].toFixed(2)}. `+
+      (st.s?`Son kütük: ${say(st.s)}, ε ${st.s.eps.toFixed(3)}, α ${st.s.alpha.toFixed(3)}; yanıldığı noktaların ağırlık payı ${st.share.toFixed(3)}. `:"Henüz kütük yok. ")+
+      `Eğitim hatası ${pc(st.tr)}, test hatası ${pc(st.te)}. `+
+      (st.tmin!==null?`En düşük test hatası ${pc(B.teE[st.tmin])} (tur ${st.tmin+1}). `:"")+
+      `Random forest testi ${pc(rfE)}, tek ağaç testi ${pc(oneE)}. `+
+      (st.wmax!==null?`En büyük ağırlık ortalamanın ${st.wmax.toFixed(1)} katı; en büyük 10 noktadan ters etiketli olan: ${st.big}. `:"")+
+      (f1!==null?`İlk iki kütüğün ekseni: ${f1+1}, ${f2===null?"—":f2+1}.`:""));
+  }
+
+  /* ── tuval düzenleme: eklenen nokta eğitim verisine girer, test noktaları aynı kalır ── */
+  const ed=editable(cv,{
+    pts:()=>pts, setPts:(a)=>{pts=a},
+    toPx:(q)=>{const g=geo();return{x:g.p+q.u*g.mw,y:g.p+g.mh-q.v*g.mh};},
+    toData:(x,y)=>{const g=geo(); if(x>g.split-g.p/2) return null;
+      return{u:clamp((x-g.p)/g.mw,0,1), v:clamp((g.H-g.p-y)/g.mh,0,1)};},
+    add:(u,v,e)=>pts.push({u,v,c:e&&e.shiftKey?1:0,fl:false}),
+    draw:()=>draw(), commit:()=>{dirtyB=dirtyF=true;draw();}
+  });
+
+  /* ── kontroller: hepsi « Tur » kaydırıcısını sürer ── */
+  function setT(v){ t=clamp(Math.round(v),0,TMAX); $("#bst-t").value=t; $("#bst-to").textContent=t; draw(); }
+  $("#bst-t").oninput=e=>{ t=clamp(+e.target.value,0,TMAX); $("#bst-to").textContent=t; draw(); };
+  $("#bst-lr").oninput=e=>{ lri=clamp(+e.target.value,0,LRS.length-1); $("#bst-lro").textContent=LRS[lri].toFixed(lri<1?2:1); dirtyB=true; draw(); };
+  function stopRun(){ if(timer){clearInterval(timer);timer=0;} runBtn("#bst-run",false,"Koştur"); }
+  $("#bst-step").onclick=()=>{ stopRun(); boost(); setT(Math.min(t+1,Math.max(B.st.length,1))); };
+  $("#bst-reset").onclick=()=>{ stopRun(); setT(0); };
+  function run(){
+    if(timer){ stopRun(); return; }
+    boost(); const end=Math.max(1,B.st.length);
+    if(t>=end) setT(0);
+    runBtn("#bst-run",true,"Durdur");
+    /* ilk turlar tek tek, sonra hızlanır: 0 → 200 yaklaşık 3.5 sn */
+    timer=setInterval(()=>{
+      if(t>=end){ stopRun(); return; }
+      setT(Math.min(end,t+(t<10?1:t<40?2:5)));
+    },60);
+  }
+  $("#bst-run").onclick=run;
+  $("#bst-new").onclick=demo;
+  $("#bst-clr").onclick=()=>{ stopRun(); ed.reset(); pts=[]; dirtyB=dirtyF=true; draw(); };
+
+  function useSet(i){ dsi=clamp(i,0,DS.length-1); demo(); }
+  reg({id:"m-boost",draw,space:run,init:demo,undo:()=>ed.undo(),
+    scenarioLabel:CONTENT["m-boost"].pick,
+    scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
+    steps:[
+      {t:"Tur 0 · herkes eşit",d:"« Deneme kullanıcıları »: 14 günlük denemenin kaç gününde uygulamayı açtı (x₁), günde kaç dakika kullandı (x₂); yaklaşık üçte biri abone oldu. Henüz kütük yok. Bütün noktalar aynı boyda: her birinin ağırlığı 1/120.",
+       set:0, hl:["#bst-t"], run(){setR("#bst-lr",6);setR("#bst-t",0);}},
+      {t:"İlk kütük",d:"Tek soruluk bir ağaç kuruldu: kesikli çizgi, sorusu lejantta. Ağırlıklı hatası ε çoğunlukla 0.13–0.23, oyu α = ½ ln((1 − ε)/ε). Yanıldığı noktalar büyüdü, doğru bildikleri küçüldü: artık toplam ağırlığın tam yarısı yanlışlarda.",
+       hl:["#bst-a"], run(){setR("#bst-lr",6);setR("#bst-t",1);}},
+      {t:"İkinci kütük",d:"Sıradaki kütük büyük noktalara bakıyor ve çoğunlukla öteki eksene geçiyor. Eğitim hatası ise çoğunlukla hiç değişmedi: iki kütük anlaşamadığında oyu büyük olan kazanır ve ikinci kütüğün α'sı birincininkinden küçük.",
+       hl:["#bst-a","#bst-tr"], run(){setR("#bst-lr",6);setR("#bst-t",2);}},
+      {t:"Üçüncü kütük",d:"İkinci ve üçüncü kütüğün aynı şeyi söylediği yerde oyları birincininkini geçiyor: sınır ilk kez kırıldı ve eğitim hatası düştü. Bayrak yarışı böyle ilerler: her koşucu öncekinin bıraktığı hatadan devam eder.",
+       hl:["#bst-tr"], run(){setR("#bst-lr",6);setR("#bst-t",3);}},
+      {t:"20 tur · bayrak yarışı",d:"Kütükler birbirinin hatasını düzelte düzelte merdiven biçimli bir sınır kurdu. Eğitim hatası %7 civarına indi. Test hatası (%15 civarı) tek ağacın (%19) çok altında, random forest'la başa baş. Alttaki çubuklar: sonraki kütüklerin oyu küçülüyor.",
+       hl:["#bst-te","#bst-rf","#bst-one"], run(){setR("#bst-lr",6);setR("#bst-t",20);}},
+      {t:"200 tur · ezber",d:"Eğitim hatası %0'a ya da çok yakınına indi: model eğitim noktalarını neredeyse tek tek biliyor. Test hatası ise 20. turdakinden yüksek (%17 civarı) ve random forest'ın gerisine düştü. Ormanda ağaç eklemek zarar vermiyordu; boosting'de çok tur ve büyük learning rate overfitting yapar.",
+       hl:["#bst-tr","#bst-te"], run(){setR("#bst-lr",6);setR("#bst-t",200);}},
+      {t:"Learning rate küçülünce",d:"Learning rate 0.1: her kütüğün oyu onda birine indi, ağırlıklar yavaş değişiyor. 200 turda eğitim hatası hâlâ %8 civarı, test hatası en düşük yerinde (%14 civarı) ve çoğunlukla random forest'ı geçiyor. Küçük adım daha çok tur ister ama ezber geç gelir.",
+       hl:["#bst-lr","#bst-te"], run(){setR("#bst-lr",1);setR("#bst-t",200);}},
+      {t:"Kayıt hatası · gürültü",d:"Aynı kural, ama etiketlerin %12'si ters girilmiş. Learning rate 1.0 ile 200 tur: en büyük dairelerin çoğu ters etiketli noktalar, AdaBoost onları düzeltmek için tur tur ağırlık yığıyor. Test hatası (%25 civarı) random forest'ın (%20) çok gerisinde. Boosting gürültüye duyarlıdır.",
+       set:2, hl:["#bst-te","#bst-rf"], run(){setR("#bst-lr",6);setR("#bst-t",200);}},
+      {t:"Köşe · üç kütük yeter",d:"« Müşteri kaybı »: ayrılanlar köşede, kısa sözleşme VE yüksek fatura. İlk kütük köşenin bir kenarını, sonrakiler öteki kenarını buluyor. Test hatası tek kütükte %19, üç kütükte %11 civarı, beş kütükte %8. Zayıf sorular toplanınca keskin bir köşe çıkıyor.",
+       set:1, hl:["#bst-te"], run(){setR("#bst-lr",6);setR("#bst-t",3);}}
+    ],
+    stop:stopRun});
+})();
+
 /* ═════════════ 12 · Düzenlileştirme ═════════════ */
 (function(){
   const cv=$("#c-reg"), {ctx,fit}=setupCanvas(cv);
@@ -11567,6 +12005,7 @@ const META=[
   ["24","m-lay",   "neural network playground: layer ve neuron","Katman ekle, nöron ekle","Ek · Sinir ağları","oyun alanı playground tensorflow playground katman layer gizli katman hidden layer nöron neuron derin deep ileri yayılım forward pass epoch eğitim training aktivasyon activation relu tanh sigmoid doğrusal linear learning rate öğrenme oranı öznitelik feature daire wi-fi xor ilaç etkileşimi iki öbek sarmal spiral test kaybı"],
   ["25","m-dig",   "MNIST: piksel girdisi ve softmax","Rakamı tanıyan ağ","Ek · Sinir ağları","rakam tanıma digit recognition mnist el yazısı handwriting piksel pixel resim image girdi input softmax çıkış katmanı output layer sınıflandırma classification çiz draw gizli katman hidden layer ağırlık resmi şablon template ortalama centering konum"],
   ["26","m-cn",    "convolution ve feature map","Filtre gezdirmek","Ek · Sinir ağları","konvolüsyon convolution çekirdek kernel filtre filter cnn öznitelik haritası feature map havuzlama pooling relu sobel hava fotoğrafı tarla parseli test deseni sobel"],
+  ["31","m-boost", "boosting: AdaBoost ve decision stump","Bayrak yarışı","Hafta 11","boosting güçlendirme adaboost adaptive boosting karar kütüğü decision stump zayıf öğrenici weak learner ağırlık weight oy alfa α epsilon ε ağırlıklı hata learning rate öğrenme oranı tur n_estimators gradient boosting gradyan güçlendirme xgboost lightgbm catboost bagging torbalama random forest rastgele orman bayrak yarışı kalabalık bias varyans overfitting aşırı öğrenme gürültü ters etiket kayıt hatası abonelik deneme kullanıcısı müşteri kaybı churn sözleşme fatura hafta 11 topluluk ensemble"],
 ];
 /* ders sırasına dizilmiş modüller — gezinme hep bunun üzerinden */
 const SEQ=META.map(r=>MODULES.find(m=>m.id===r[1])).filter(Boolean);
@@ -11644,6 +12083,19 @@ TH["m-ens"]=(c,w,h)=>{thumbBase(c,w,h);
   c.beginPath();c.moveTo(0,L(0));c.lineTo(w,L(1));c.stroke();
   for(let i=0;i<5;i++){const u=.10+i*.07;tdot(c,u*w,L(u)+h*.15,3.2,css("--a"));}
   for(let i=0;i<5;i++){const u=.56+i*.07;tdot(c,u*w,L(u)-h*.17,3.2,css("--b"));}};
+TH["m-boost"]=(c,w,h)=>{thumbBase(c,w,h);
+  /* kütüklerin oy toplamı: merdiven sınır; kesikli son kütük; yanlış taraftaki noktalar büyük */
+  const xs=[0,.22,.42,.62,.80,1], ys=[.22,.36,.50,.62,.76];
+  const stair=()=>{c.lineTo(0,ys[0]*h); for(let i=0;i<5;i++){c.lineTo(xs[i]*w,ys[i]*h); c.lineTo(xs[i+1]*w,ys[i]*h);}};
+  c.fillStyle=hexA("--b",.13); c.fillRect(0,0,w,h);
+  c.fillStyle=hexA("--a",.15); c.beginPath(); c.moveTo(0,h); stair(); c.lineTo(w,h); c.closePath(); c.fill();
+  c.strokeStyle=hexA("--ink",.55); c.lineWidth=1.4; c.setLineDash([5,4]);
+  c.beginPath(); c.moveTo(.62*w,4); c.lineTo(.62*w,h-4); c.stroke(); c.setLineDash([]);
+  c.strokeStyle=css("--accent"); c.lineWidth=2.6; c.lineJoin="round"; c.beginPath(); c.moveTo(0,ys[0]*h); stair(); c.stroke();
+  [[.08,.62],[.18,.82],[.30,.70],[.48,.86],[.70,.90],[.88,.88]].forEach(q=>tdot(c,q[0]*w,q[1]*h,3.2,css("--a")));
+  [[.12,.10],[.34,.18],[.52,.30],[.72,.40],[.90,.52],[.86,.20]].forEach(q=>tdot(c,q[0]*w,q[1]*h,3.2,css("--b")));
+  [[.46,.66,"--b",10],[.70,.52,"--a",8]].forEach(q=>{c.beginPath();c.arc(q[0]*w,q[1]*h,q[3],0,7);
+    c.fillStyle=hexA(q[2],.40);c.fill();c.lineWidth=1.6;c.strokeStyle=css(q[2]);c.stroke();});};
 TH["m-reg"]=(c,w,h)=>{thumbBase(c,w,h);
   const n=10,pad=8,bw=(w-2*pad)/n,y0=h-11,hh=h-26;
   const ref=[.92,.44,.80,.66,.58,.71,.35,.50,.28,.41], cur=[.62,.13,.47,0,.24,.33,0,.11,0,.09];
