@@ -2025,9 +2025,9 @@ function tipCands(cv,mx,my){
     else { if(mx<s.x||mx>s.x+s.w||my<s.y||my>s.y+s.h) return; z=1; d=0; }
     if(s.z!==undefined) z=s.z;
     C.push({t,z,d,i}); });
-  /* daire ve parça: en yakın, eşitte ÖNCE kaydedilen (merkez noktanın üstündeyse merkez anlatılır);
-     ötekiler: sonra kaydedilen (üstte çizilen) */
-  const nearish=(c)=>c.t.s.r!==undefined||(c.t.s.y0!==undefined&&!c.t.s.fy);
+  /* daire, eğri ve parça: en yakın, eşitte ÖNCE kaydedilen (merkez noktanın üstündeyse merkez
+     anlatılır; üst üste iki eğride yakın olan); dikdörtgen ve zemin: sonra kaydedilen (üstte çizilen) */
+  const nearish=(c)=>c.t.s.r!==undefined||c.t.s.fy||c.t.s.y0!==undefined;
   C.sort((a,b)=>b.z-a.z||(nearish(a)&&nearish(b)?(a.d-b.d||a.i-b.i):b.i-a.i));
   return C.map(c=>c.t);
 }
