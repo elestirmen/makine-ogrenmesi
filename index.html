@@ -1724,34 +1724,45 @@ input[type=range]{min-height:28px;margin:0}
       </div>
     </section>
 
-    <!-- ══════════ 01 · Ortalama mı, medyan mı ══════════ -->
+    <!-- ══════════ 02 · Merkez ve yayılım ══════════ -->
     <section id="m-stat" hidden>
       <div class="head">
         <div class="eyebrow"><span>Modül 02 · Hafta 2</span><span class="chip">TANIMSAL İSTATİSTİK</span></div>
-        <h2>Ortalama mı, Medyan mı</h2>
-        <p>Bir veriyi tek sayıyla özetlemenin iki yolu var ve ikisi aynı şeyi söylemez. Tek bir uç değer <b>ortalamayı</b> (mean) peşinden sürükler, <b>medyan</b> (median) yerinde durur. Solda noktalar ve iki çizgi, sağda kutu grafiği ve aykırı değer sınırları.</p>
+        <h2>Merkez ve Yayılım</h2>
+        <p>Tipik değeri üç sayı söyler: <b>ortalama</b> (mean) denge noktası, <b>medyan</b> (median) sıranın ortası, <b>mod</b> (mode) en sık değer. Dağınıklığı <b>varyans</b> (variance) ve <b>standart sapma</b> (standard deviation) ölçer.</p>
       </div>
       <div class="stage">
-        <canvas id="c-stat" aria-label="Sayı doğrusu üzerinde noktalar, ortalama ve medyan çizgileri, yanında kutu grafiği"></canvas>
+        <canvas id="c-stat" aria-label="Sayı doğrusu üzerinde noktalar; seçilen ölçünün hesabı tuvalde ve yandaki panelde"></canvas>
         <div class="bar">
-          <label class="ctl"><span class="lab">Uç değer</span><input type="range" id="st-out" min="0" max="100" step="1" value="78"><output id="st-outo">—</output></label>
-          <label class="ctl"><span class="lab">Nokta</span><input type="range" id="st-n" min="8" max="40" step="1" value="20"><output id="st-no">20</output></label>
-          <button class="btn" id="st-new">Yeni veri</button>
+          <div class="seg" role="group" aria-label="Gösterilen ölçü">
+            <button id="st-v0" aria-pressed="true">Ortalama</button>
+            <button id="st-v1" aria-pressed="false">Medyan</button>
+            <button id="st-v2" aria-pressed="false">Mod</button>
+            <button id="st-v3" aria-pressed="false">Varyans · s</button>
+            <button id="st-v4" aria-pressed="false">Kutu</button>
+          </div>
+          <label class="ctl"><span class="lab">Uç değer</span><input type="range" id="st-out" min="50" max="150" step="1" value="99" aria-label="Turuncu noktanın değeri"><output id="st-outo" style="min-width:4.5ch">99</output></label>
+          <label class="ctl" id="st-spl" hidden><span class="lab">Yayılım</span><input type="range" id="st-sp" min="25" max="200" step="5" value="100" aria-label="Bütün farkları ortalamaya göre ölçekle"><output id="st-spo" style="min-width:4.5ch">×1.00</output></label>
+          <button class="btn" id="st-bal">Dengele</button>
+          <button class="btn" id="st-new" hidden>Yeni veri</button>
+          <button class="btn" id="st-rst">Sıfırla</button>
           <button class="btn" id="st-clr">Temizle</button>
-          <span class="hint">Noktaları sürükleyebilir, tuvale tıklayıp yeni nokta ekleyebilirsin.</span>
+          <span class="hint">Noktayı sürükle · tıkla → ekle · sağ tık → sil · « Ortalama »da ▲'yı da sürükleyebilirsin.</span>
         </div>
         <div class="stats">
-          <div class="stat"><span class="k">Ortalama</span><span class="v" id="st-mean">—</span></div>
+          <div class="stat"><span class="k">Ortalama <span class="sym">x̄</span></span><span class="v" id="st-mean">—</span></div>
           <div class="stat"><span class="k">Medyan</span><span class="v ok" id="st-med">—</span></div>
-          <div class="stat"><span class="k">Std sapma</span><span class="v" id="st-sd">—</span></div>
-          <div class="stat"><span class="k">IQR · <span lang="en">outlier</span></span><span class="v" id="st-iqr">—</span></div>
+          <div class="stat"><span class="k">Mod</span><span class="v" id="st-mode">—</span></div>
+          <div class="stat"><span class="k">Varyans <span class="sym">s²</span></span><span class="v" id="st-var">—</span></div>
+          <div class="stat"><span class="k">Std sapma <span class="sym">s</span></span><span class="v" id="st-sd">—</span></div>
+          <div class="stat"><span class="k">IQR</span><span class="v" id="st-iqr">—</span></div>
         </div>
       </div>
       <div class="ask">
         <span class="tag">Dene ve düşün</span>
         <div>
-          <p>Uç değeri sağa kadar çek: ortalama peşinden gidiyor, medyan neredeyse kıpırdamıyor. Bir mahallenin "ortalama geliri" açıklanırken hangisini duymak isterdin? Neden?</p>
-          <p>Kutu grafiğindeki kırmızı sınırlar Q1 − 1.5·IQR ve Q3 + 1.5·IQR. Bu sınırın dışına düşen bir nokta her zaman bir hata mıdır? Aradığın şeyin tam da o aykırı nokta olduğu bir örnek düşün.</p>
+          <p>« Ortalama »da ▲'yı sürükle: tahta nerede düzleşiyor? Sonra « Uç değer »i 150'ye çek. Tahta neden yine yattı, dengelemek için ▲ ne kadar kaymalı? Aynı hamleyi « Medyan »da yap: medyan neden kıpırdamıyor?</p>
+          <p>« Varyans · s »te « Yayılım »ı ×2'ye çek: s kaç katına çıkıyor, s² kaç katına? Neden aynı oranda büyümüyorlar? (İpucu: karelere bak.) Sonra « Ayakkabı numarası »nda « Mod »a geç: mağaza ortalamaya mı, moda mı göre stok yapmalı?</p>
         </div>
       </div>
     </section>
@@ -2256,7 +2267,7 @@ const CONTENT={
             "2.4 ve 11.2 parametre: kimse elle yazmadı, eğitim veriden buldu, tıpkı ekrandaki β₀ ve β₁ gibi. α ve k hiperparametre: eğitimden önce sen seçersin, veri söylemez; farklı değerler deneyerek en iyisini ararsın. Kısaca: parametreyi model öğrenir, hiperparametreyi sen seçersin."],
            ["Bir model eğitim verisinde %99, test verisinde %62 doğruluk alıyor. En olası açıklama ne: model mükemmel mi, ezberlemiş mi, çok mu basit kalmış, yoksa test kümesi mi büyük?",
             "Ezberlemiş, yani overfitting. Eğitim ile test arasındaki büyük fark ezberin işareti: model gördüğü örnekleri biliyor ama yenilere genelleyemiyor. Çok basit kalsaydı (underfitting) eğitimde de düşük alırdı. Test kümesinin büyüklüğü sonucu biraz oynatır ama bu kadar büyük bir farkı açıklamaz. « Balon turu »nda eğitim ve test doğruluğu ortalamada birbirine yakın: orada ezber yok."]],
-    next:"Modül 02 · Ortalama mı, medyan mı — model kurmadan önce veriyi tanımak: merkez, yayılım ve aykırı değer."
+    next:"Modül 02 · Merkez ve yayılım — model kurmadan önce veriyi tanımak: ortalama, medyan, mod, varyans ve standart sapma."
   }},
 
 /* ══ 01 ══ */
@@ -2797,7 +2808,7 @@ const CONTENT={
     {name:"Pivot sulama · halka", x:"doğu (km)", y:"kuzey (km)", cls:["Sulanan","Sulanmayan"], gen:"halka",
      note:"Döner pivot sulama uydu görüntüsünde bir DAİRE bırakır. Sınır kapalı bir eğri; topluluk bunu da yumuşatarak öğreniyor."},
     {name:"Abonelik · güçlü sütun", x:"sözleşme süresi", y:"aylık destek çağrısı", cls:["Kaldı","Ayrıldı"], gen:"guclu",
-     note:"Sözleşme süresi (x₁) tek başına çok güçlü bir sütun, destek çağrısı (x₂) zayıf bir yardımcı. Ölçtük (20 veri kümesi): bagging'de 40 ağacın 40'ı kökte süreyi soruyor; random forest'ta ortalama 20'si (en az 14, en çok 27). Hafta 11'deki hesap: P = m/p = 1/2."}
+     note:"Sözleşme süresi (x₁) tek başına çok güçlü bir sütun, destek çağrısı (x₂) zayıf bir yardımcı. Ölçtük (20 veri kümesi): bagging'de 40 ağacın 40'ı kökte süreyi soruyor; random forest'ta ortalama 20'si; tek bir veride çoğunlukla 14 ile 26 arası, çünkü her ağaç kökte kırk kez atılan bir yazı tura gibi. Hafta 11'deki hesap: P = m/p = 1/2."}
   ],
   lesson:{
     q:"Ezberleyen bir modeli düzeltmek yerine ondan kırk tane yapmak niye işe yarıyor?",
@@ -3609,32 +3620,49 @@ const CONTENT={
 ,
 /* ══ 01 ══ */
 "m-stat":{ pick:"Veri seti",
+  /* data: sabit küme (Hafta 2'nin sekiz notu, mağazanın 20 çifti); gen "skew": rastgele maaş.
+     step: sürüklenen nokta bu adıma oturur · tick: eksen adımı · bin: mod bu genişlikte aralıklarla
+     sayılır (sürekli veride değerler tekrar etmez) · u2: varyansın birimi. */
   sets:[
-    {name:"Maaş", x:"aylık net maaş (bin ₺)", lo:20, hi:160, unit:" bin ₺", gen:"skew",
-     note:"Çoğunluk 30–60 bin bandında, birkaç kişi çok yukarıda. Klasik sağa çarpık veri: ortalama medyanın belirgin üstünde kalır."},
-    {name:"Sınav notu", x:"sınav notu (100 üzerinden)", lo:0, hi:100, unit:" puan", gen:"normal",
-     note:"Simetriğe yakın dağılım. Ortalama ile medyan birbirine çok yakın; uç değer eklenene kadar ikisi arasında seçim yapmak fark etmiyor."},
-    {name:"Ev fiyatı", x:"satış fiyatı (milyon ₺)", lo:1, hi:22, unit:" milyon ₺", gen:"skew2",
-     note:"Aynı mahallede birkaç lüks daire bütün ortalamayı yukarı çekiyor. Emlak raporları bu yüzden medyan fiyat yayımlar."}
+    {name:"Sekiz not", x:"sınav notu (puan)", unit:"puan", u2:"puan²", lo:50, hi:150, step:1, tick:10, gen:"fixed",
+     data:[62,68,68,71,75,85,90,99],
+     note:"Hafta 2'nin sekiz notu: 62, 68, 68, 71, 75, 85, 90, 99. Ortalama 618 / 8 = 77.25, medyan (71 + 75) / 2 = 73, mod 68. Farkların kareleri toplamı 1143.5: s² = 1143.5 / 7 ≈ 163.36 puan², s ≈ 12.78 puan; x̄ ± s bandında 6 not. Q1 68, Q3 87.5, IQR 19.5, outlier yok. « Uç değer » 99'u taşır: 150'de ortalama 83.63'e, s 28.38'e çıkar; medyan 73'te, IQR 19.5'te kalır ve 150 outlier olur."},
+    {name:"Ayakkabı numarası", x:"satılan numara", unit:"numara", u2:"numara²", lo:34, hi:50, step:1, tick:2, gen:"fixed",
+     data:[37,38,38,39,39,39,40,40,40,40,41,41,41,41,41,41,42,42,43,44],
+     note:"Bir mağazanın bir günde sattığı 20 çift. En sık numara 41, altı çift: mod 41. Ortalama 40.35, medyan (40 + 41) / 2 = 40.5; ikisi de rafta olmayan numaralar. s ≈ 1.73 numara, Q1 39, Q3 41, IQR 2; 44 üst sınırın tam üstünde, outlier değil. Bir müşteri 50 numara alırsa ortalama 40.65'e çıkar, medyan ve mod yerinde kalır, 50 outlier olur."},
+    {name:"Maaş", x:"aylık net maaş (bin ₺)", unit:"bin ₺", u2:"(bin ₺)²", lo:20, hi:160, step:1, tick:20, bin:10, gen:"skew", n:25,
+     note:"25 kişi (üretilmiş, her « Yeni veri »de başka): çoğunluk 20–50 bin ₺ bandında, birkaç kişi çok yukarıda. Sağa çarpık: ortalama medyanın ortalama 9 bin ₺ üstünde (tek bir örneklemde çoğunlukla 3 ile 16 arası). Maaşlar neredeyse hiç tekrar etmez; mod 10 bin ₺'lik aralıklarla sayılır: en kalabalık aralık çoğunlukla 30–40, bazen 20–30."}
   ],
   lesson:{
-    q:"Bir veriyi tek bir sayıyla özetlersek hangi sayıyı seçmeliyiz?",
-    short:"İki aday var: ortalama ve medyan. Ortalama bütün değerleri toplayıp böler, o yüzden tek bir uç değer onu kendine çeker. Medyan sıralamanın tam ortasıdır, uç değeri umursamaz. Veri çarpıksa medyan daha dürüst bir özettir.",
-    idea:["On kişilik bir mahalle düşün. Dokuz kişi ayda 20 bin TL kazanıyor, biri 5 milyon. Hepsini topla (5 milyon 180 bin), ona böl: 518 bin. Bu mahallede 518 bin kazanan tek bir kişi yok. Bu sayıya <b>ortalama</b> (mean) deniyor. Ortalamayı bir tahterevallinin denge noktası gibi düşün. Her kişi tahtaya asılmış eşit bir ağırlık. Biri çok uzağa oturursa denge noktası da ona doğru kaymak zorunda kalır.",
-          "<b>Medyan</b> (median) başka bir soru sorar: herkesi maaşına göre sıraya dizsem, tam ortada kim durur? Bu mahallede cevap 20 bin. 5 milyon kazanan kişi 50 milyon kazansaydı da cevap değişmezdi. Medyan uçtaki sayının ne kadar büyük olduğuna bakmaz, yalnız hangi tarafta durduğuna bakar. Öbür değerlerden bu kadar uzak düşen sayıya <b>outlier</b> (aykırı değer) deniyor. Tek bir outlier'a teslim olmayan ölçülere de <b>dayanıklı</b> (robust) ölçü deniyor.",
-          "Verinin ne kadar yayıldığını ölçerken de aynı ikilik var. <b>Standart sapma</b> (standard deviation) her değerin ortalamadan ne kadar uzak olduğuna bakar; örneklemde kareler toplamı n − 1'e bölünür. Uzaklığın karesini aldığı için uç değer onu da kendine çeker. <b>IQR</b> (çeyrekler açıklığı) ise sıralamanın ortasındaki yarıya bakar. En küçük dörtte biri ve en büyük dörtte biri kenara ayır; kalan grubun genişliği IQR. Alt sınırı Q1, üst sınırı Q3: IQR = Q3 − Q1. Kutu grafiğindeki kutu tam olarak bu grup. Q1 − 1.5·IQR'nin altında ya da Q3 + 1.5·IQR'nin üstünde kalan değer outlier diye işaretlenir."],
-    read:[["Sol panel","Her nokta bir gözlem; birbirine çok yakın düşenler üst üste yığılır. Pembe dikey çizgi ortalama; altındaki ▲ tahterevallinin destek noktası, çubuk ancak orada dengede kalır. Yeşil kesikli çizgi medyan; yeşil halkalı nokta sıralamanın tam ortasındaki gözlem (nokta sayısı çiftse ortadaki iki nokta). İki çizgi arasındaki mesafe verinin ne kadar çarpık olduğunu gösterir."],
-          ["Sağ panel","Kutu grafiği. Kutunun sol kenarı Q1, sağ kenarı Q3, içindeki çizgi medyan. Bıyıklar en fazla 1.5·IQR uzanır; dışarıda kalan noktalar kırmızıya döner ve aykırı değer sayılır."],
-          ["Göstergeler","Ortalama ve medyan yan yana duruyor ki farkı canlı görebilesin. Std sapma ile IQR aynı işi yapar ama biri uç değere teslim olur, diğeri olmaz."]],
-    terms:[["mean","ortalama","bütün değerlerin toplamının sayıya bölümü"],
-           ["median","medyan","sıralanmış verinin tam ortasındaki değer"],
-           ["standard deviation","standart sapma","değerlerin ortalamadan tipik uzaklığı"],
-           ["IQR","çeyrekler açıklığı","Q3 − Q1: ortadaki yüzde ellinin genişliği"],
-           ["outlier","aykırı değer","kalabalıktan belirgin biçimde ayrılan gözlem"]],
+    q:"Bir sütunu tek bir sayıyla nasıl özetleriz ve değerler o sayının etrafında ne kadar dağınık?",
+    short:"Tipik değerin üç cevabı var: ortalama (denge noktası), medyan (sıranın ortası) ve mod (en sık değer). Tek bir uç değer ortalamayı sürükler, medyanı ve modu oynatamaz. Dağınıklığı varyans ve standart sapma ölçer: her değerin ortalamadan farkının karesi alınır, karelerin ortalaması varyans, karekökü standart sapmadır.",
+    idea:["Uzun bir tahterevalli düşün. Aynı ağırlıkta beş çocuk farklı yerlere oturuyor. Destek noktasını nereye koyarsan tahta dengede durur? Tam olarak oturdukları yerlerin <b>ortalama</b>sına (mean): x̄ = (x₁ + x₂ + … + xₙ) / n, yani hepsini topla, sayısına böl. Dengenin sırrı şu: soldaki çocukların destek noktasına uzaklıkları toplamı, sağdakilerinkine eşit. Bu yüzden ortalamadan farkların toplamı her veride 0'dır. Bir çocuk tahtanın ucuna kayarsa denge noktası da o yana kaymak zorunda kalır.",
+          "<b>Medyan</b> (median) başka bir soru sorar: herkesi küçükten büyüğe sıraya dizsem, tam ortada kim durur? Değer sayısı tekse ortadaki değer, çiftse ortadaki iki değerin ortalaması. Uçtaki çocuk parkın öbür ucuna gitse bile sıradaki yeri değişmez: hâlâ en sonda. Medyan bu yüzden uç değerin ne kadar büyük olduğuna bakmaz. Öbür değerlerden bu kadar uzak düşen sayıya <b>outlier</b> (aykırı değer), ona teslim olmayan ölçüye de <b>dayanıklı</b> (robust) ölçü denir. Bir mahallede dokuz kişi ayda 20 bin, biri 5 milyon kazanıyorsa ortalama 518 bin, medyan 20 bin çıkar. Mahalleyi hangisi anlatıyor?",
+          "<b>Mod</b> (mode) en sık tekrar eden değerdir; sorusu 'en çok hangisi görülüyor?'. Ayakkabı mağazası ortalama numarayı (40.35) stoklayamaz, öyle bir numara yok. En çok satılan numarayı, yani modu stoklar. Şehir, renk gibi sırasız kategorik veride kullanılabilen tek merkez ölçüsü de moddur: şehirlerin ortalaması alınmaz. Bir veride birden fazla mod olabilir, hiç olmayabilir de. Maaş gibi her değerin bir kez geçtiği veride değerleri önce aralıklara ayırırsın, en kalabalık aralığa bakarsın.",
+          "Merkez tek başına yetmez. İki okçu düşün: ikisinin de oklarının ortalaması tam merkez. Ama birinin okları merkezin dibinde, öbürününki hedefin her yerinde. Dağınıklığı ölçmek için her değerin ortalamadan farkını al: x − x̄. Farkları doğrudan toplayamazsın; toplamları hep 0 (tahterevallinin dengesi). Bu yüzden her farkın karesi alınır, eksiler artıya döner. Karelerin toplamını n − 1'e bölersen <b>varyans</b> (variance) çıkar: s² = Σ(x − x̄)² / (n − 1). Birimi karedir: puan². Karekökünü alınca <b>standart sapma</b> (standard deviation) s, yine verinin biriminde: bir değerin ortalamadan tipik uzaklığı. Ekranda her fark bir karenin kenarı; varyans bu karelerin ortalaması, s de o ortalama karenin kenarı. Kare büyük farkı daha da büyütür: iki kat uzaktaki değer dört kat ağırlık taşır. Bu yüzden tek bir uç değer varyansı da sürükler.",
+          "Yayılımı dayanıklı ölçmenin yolu <b>IQR</b> (çeyrekler açıklığı). Veriyi medyandan ikiye böl. Alt yarının ortası Q1, üst yarının ortası Q3; IQR = Q3 − Q1, yani ortadaki yarının genişliği. Kutu grafiğinde kutu tam bu yarı. Q1 − 1.5·IQR'nin altında ya da Q3 + 1.5·IQR'nin üstünde kalan değer outlier diye işaretlenir. Kısa kural: simetrik veride ortalama ve standart sapma, çarpık veride medyan ve IQR raporlanır."],
+    read:[["Görünüm düğmeleri","Aynı noktalar beş ayrı gözle: « Ortalama », « Medyan », « Mod », « Varyans · s », « Kutu ». Tuval seçtiğin sayının nasıl bulunduğunu çizer; sağdaki panel aynı hesabı ekrandaki sayılarla adım adım yazar. Alttaki göstergeler altı sayıyı hep birlikte gösterir."],
+          ["Ortalama","Sayı doğrusu bir tahterevalli, her nokta eşit bir ağırlık, pembe ▲ destek noktası. Açılışta ▲ medyanda durur ve tahta yatıktır. ▲'yı sürükle ya da « Dengele »ye bas: tahta yalnız ortalamada düzleşir. Panel ▲'nın solundaki ve sağındaki uzaklıkların toplamını yazar; dengede ikisi eşittir."],
+          ["Medyan","Noktalar küçükten büyüğe bir sıraya dizilir; ince çizgiler her noktayı sıradaki yerine bağlar, altlarında sıra numarası. Ortadaki değer (sayı çiftse ortadaki iki değer) yeşil halkalı. Yeşil kesikli çizgi medyanın sayı doğrusundaki yeri."],
+          ["Mod","Aynı değerdeki noktalar üst üste yığılır; Maaş'ta aynı 10 bin ₺'lik aralıktakiler bir sütunda toplanır. En yüksek yığın mor halkalı: mod. Pembe ve yeşil kesikli çizgiler ortalama ve medyan, karşılaştırmak için."],
+          ["Varyans · s","Pembe kesikli çizgi ortalama. Her noktanın ortalamaya uzaklığı bir karenin kenarı: kırmızılar ortalamanın altında, yeşiller üstünde. Kalın pembe kare bu karelerin ortalaması (s²), kenarı s; soluk pembe bant x̄ − s ile x̄ + s arası. « Yayılım » bütün noktaları ortalamaya göre yaklaştırır ya da uzaklaştırır, ortalama yerinde kalır."],
+          ["Kutu","Alt yarının noktaları camgöbeği, üst yarınınkiler mor; değer sayısı tekse ortadaki gri nokta iki yarıya da girmez. Kutu Q1'den Q3'e uzanır, içindeki yeşil çizgi medyan; bıyıklar sınırların içindeki en uç değerlere kadar gider. Kesikli kırmızı çizgiler alt ve üst sınır; dışarıdaki nokta kırmızı."],
+          ["Kontroller","« Uç değer » turuncu noktayı taşır (açılışta en büyük değer). Noktaları sürükleyebilir, tuvale tıklayıp ekleyebilir, sağ tıkla silebilirsin; nokta tam sayıya oturur. « Sıfırla » veriyi ilk hâline döndürür. Tuval dar olduğunda panel gizlenir; en üstte tek satırlık hesap kalır."]],
+    terms:[["mean","ortalama","toplam / adet; verinin denge noktası"],
+           ["median","medyan","sıralanmış verinin tam ortası; uç değere dayanıklı"],
+           ["mode","mod","en sık tekrar eden değer (sürekli veride en kalabalık aralık)"],
+           ["variance","varyans","ortalamadan farkların karelerinin ortalaması (örneklemde n − 1'e bölünür); birimi kare"],
+           ["standard deviation","standart sapma","varyansın karekökü: bir değerin ortalamadan tipik uzaklığı, verinin biriminde"],
+           ["IQR (interquartile range)","çeyrekler açıklığı","Q3 − Q1: ortadaki yarının genişliği; uç değere dayanıklı"],
+           ["box plot","kutu grafiği","en küçük, Q1, medyan, Q3, en büyük ve outlier'lar tek çizimde"],
+           ["outlier","aykırı değer","kalabalıktan belirgin biçimde ayrılan gözlem"],
+           ["robust","dayanıklı","tek bir uç değere teslim olmayan ölçü"]],
     life:["Gelir, ev fiyatı ve bekleme süresi istatistiklerinde kurumlar ortalama değil medyan yayımlar; sebebi tam olarak bu ekrandaki fark.",
+          "Mağaza, anket ve seçimde soru moddur: en çok satılan beden, en sık işaretlenen şık, en çok oy alan aday.",
+          "Fabrikada vidaların ortalama boyu tam istenen değerde olsa bile standart sapma büyükse vidaların bir kısmı kısa, bir kısmı uzundur; müşteri şikâyet eder. Kalite kontrol ortalamayla birlikte s'yi izler.",
           "Veri temizliğinde IQR kuralı ilk filtredir: sınır dışındaki satırlar önce gözle incelenir, sonra düzeltilir ya da işaretlenir."],
-    trap:"Aykırı değeri görür görmez silmek. Bir uç değer bazen veri giriş hatasıdır (boy sütununda 1750 cm), bazen de tam aradığın şeydir (dolandırıcılık, arıza, deprem). Silmeden önce sorulacak soru hep aynı: bu sayı yanlış mı, yoksa nadir mi?",
-    fig:{at:2, cap:"Sekiz notun ortalaması 77.25, medyanı 73. 90 ve 99 tahterevalliyi sağa yatırıyor, ortalama medyanın sağında kalıyor. Kutu Q1 = 68'den Q3 = 87.5'e uzanıyor; kesikli kırmızı çizgiler Q1 − 1.5·IQR ve Q3 + 1.5·IQR. Bütün notlar arada: outlier yok. 99 yerine 990 yazılsaydı ortalama 188.6'ya fırlardı; medyan, kutu ve sınırlar yerinde kalırdı."},
+    trap:"Ortalamayı tek başına raporlamak ya da aykırı değeri görür görmez silmek. 'Ortalama derinliği 1 metre olan bir nehirde boğulabilirsin': merkez yayılımla birlikte okunur. Bir uç değer bazen veri giriş hatasıdır (boy sütununda 1750 cm), bazen de tam aradığın şeydir (dolandırıcılık, arıza, deprem). Silmeden önce sorulacak soru hep aynı: bu sayı yanlış mı, yoksa nadir mi?",
+    fig:{at:4, cap:"Sekiz notun ortalaması 77.25, medyanı 73, modu 68. 90 ve 99 tahterevalliyi sağa yatırıyor, ortalama medyanın sağında kalıyor. Kutu Q1 = 68'den Q3 = 87.5'e uzanıyor; kesikli kırmızı çizgiler Q1 − 1.5·IQR ve Q3 + 1.5·IQR. Bütün notlar arada: outlier yok. 99 yerine 990 yazılsaydı ortalama 188.6'ya fırlardı; medyan, kutu ve sınırlar yerinde kalırdı."},
     ex:{t:"Sekiz not, sonra tek bir yanlış tuş",
       s:["Sekiz öğrencinin notu: 62, 75, 68, 90, 71, 68, 85, 99. Önce sırala: 62, 68, 68, 71, 75, 85, 90, 99. Toplam 618, sekize böl: <b>ortalama = 77.25</b>. Sayı çift, ortada iki not var: 71 ve 75. Onların ortalaması <b>medyan = 73</b>. İki kez geçen tek not 68: mod 68.",
          "Yayılım: her notun ortalamadan farkını al. Farklar −15.25'ten +21.75'e uzanıyor ve toplamları 0. Bu yüzden kareleri alınır. Karelerin toplamı 1143.5. Örneklemde n − 1'e böl: s² = 1143.5 / 7 ≈ 163.36. Karekökü <b>s ≈ 12.78 puan</b>: bir not ortalamadan tipik olarak 13 puan kadar uzakta.",
@@ -3646,7 +3674,9 @@ const CONTENT={
            ["Bir veride Q1 = 40, Q3 = 60. IQR kuralına göre 12, 55, 85 ve 95'ten hangisi outlier?",
             "Yalnız 95. IQR = 20, 1.5 · IQR = 30, sınırlar 10 ve 90. 12 küçük görünür ama 10'un üstünde kalıyor. 85 kutunun dışında ama bıyığın içinde. Bir değeri 'büyük görünüyor' diye değil, kuralı uygulayarak outlier ilan edersin."],
            ["Sekiz öğrencinin boyu (cm): 160, 165, 168, 170, 172, 175, 178, 1750. 1750'yi IQR kuralı mı yakalar, z kuralı mı (z = (x − x̄) / s, |z| > 3 ise outlier)?",
-            "IQR yakalar: Q1 166.5, Q3 176.5, IQR 10, üst sınır 191.5; 1750 çok dışarıda. z kuralı kaçırır: ortalama 367.25, s ≈ 558.7, z = (1750 − 367.25) / 558.7 ≈ 2.47 < 3. Uç değer kendini ölçen cetveli kendisi şişirdi; üstelik sekiz değerde |z| 2.47'yi geçemez. Değer büyük ihtimalle 1750 mm = 175 cm: düzeltilir."]],
+            "IQR yakalar: Q1 166.5, Q3 176.5, IQR 10, üst sınır 191.5; 1750 çok dışarıda. z kuralı kaçırır: ortalama 367.25, s ≈ 558.7, z = (1750 − 367.25) / 558.7 ≈ 2.47 < 3. Uç değer kendini ölçen cetveli kendisi şişirdi; üstelik sekiz değerde |z| 2.47'yi geçemez. Değer büyük ihtimalle 1750 mm = 175 cm: düzeltilir."],
+           ["Sekiz notun hepsine 5 puan eklersen ortalama, medyan, mod ve s ne olur? Bunun yerine her notu ortalamadan iki kat uzağa taşırsan (« Yayılım » ×2)?",
+            "5 puan eklemek bütün tahtayı sağa kaydırır: ortalama 82.25, medyan 78, mod 73; üç merkez de 5 artar. Farklar değişmediği için s 12.78'de kalır. Yayılımı iki katına çıkarmak ortalamayı yerinde bırakır (77.25) ama her farkı iki katına çıkarır: s iki katı (25.56), s² dört katı (163.36 → 653.43), çünkü farkın karesi alınıyor. Merkez 'nerede?', yayılım 'ne kadar dağınık?' sorusunu cevaplar; biri değişirken öbürü yerinde kalabilir."]],
     next:"Modül 03 · Birlikte artıyorlar mı — tek sütunu tanıdın; şimdi iki sütunun birlikte nasıl değiştiğini tek sayıyla ölçüyoruz: korelasyon."
   }},
 
@@ -12762,193 +12792,475 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ]});
 })();
 
-/* ═════════════ 01 · Ortalama mı, medyan mı ═════════════ */
+/* ═════════════ 02 · Merkez ve yayılım ═════════════
+   Aynı noktalar beş görünümde (st-v0…4):
+   0 ortalama — sayı doğrusu bir tahterevalli, ▲ destek noktası; tahta yalnız ▲ ortalamadayken
+     düz durur (soldaki ve sağdaki uzaklıkların toplamı eşit). Açılışta ▲ medyanda: tahta yatık.
+   1 medyan — noktalar küçükten büyüğe bir sıraya dizilir, ortadaki (çiftse ortadaki iki) seçilir.
+   2 mod — aynı değerler (bin'li kümede aynı aralık) üst üste yığılır, en yüksek yığın mod.
+   3 varyans · s — her farkın karesi ortalamaya yaslı bir kare; kalın kare onların ortalaması
+     (s², kenarı s); bant x̄ ± s.
+   4 kutu — veri medyandan ikiye bölünür, yarıların ortası Q1 ve Q3 (Hafta 2 sl. 20'nin yöntemi;
+     tek sayıda nokta varsa medyan iki yarıya da girmez).
+   Noktalar verinin biriminde (u = değer); kesikli kümede sürüklenen nokta adıma (step) oturur.
+   « Yayılım » bütün farkları ortalamaya göre ölçekler: ortalama yerinde, s k, s² k² katına.
+   Hesap çizimden ayrı (stats()); göstergeler ve aria-label oradan, behaviour.js aria'yı okur.
+   Yalnız ▲'nın « Dengele » kayması ve medyan sırasının dizilişi çizimdir: durum hemen son değerde. */
 (function(){
   const cv=$("#c-stat"), {ctx,fit}=setupCanvas(cv);
   const DS=SETS("m-stat"); let dsi=0; const S=()=>DS[dsi];
-  let pts=[];                 /* {u} 0..1 · out:true → kaydırıcının sürdüğü uç değer */
-  let N=20, outU=.78;
-
-  const val=(u)=>S().lo+u*(S().hi-S().lo);
-  const uOf=(x)=>(x-S().lo)/(S().hi-S().lo);
-  const shortNum=(x)=>Math.abs(x)>=100?x.toFixed(0):Math.abs(x)>=10?x.toFixed(1):x.toFixed(2);
-  const quant=(a,q)=>{ if(!a.length) return 0;
-    const i=(a.length-1)*q, lo=Math.floor(i), hi=Math.ceil(i);
-    return a[lo]+(a[hi]-a[lo])*(i-lo); };
-  /* bütün özetler tek yerden: gösterge de çizim de aynı sayıyı kullansın */
-  function stats(){
-    if(!pts.length) return null;
-    const a=pts.map(p=>val(p.u)).sort((x,y)=>x-y);
-    const mean=a.reduce((s,x)=>s+x,0)/a.length;
-    const med=quant(a,.5), q1=quant(a,.25), q3=quant(a,.75), iqr=q3-q1;
-    const sd=Math.sqrt(a.reduce((s,x)=>s+(x-mean)**2,0)/Math.max(a.length-1,1));
-    const lo=q1-1.5*iqr, hi=q3+1.5*iqr;
-    const inb=a.filter(x=>x>=lo&&x<=hi);
-    return {a,mean,med,q1,q3,iqr,sd,lo,hi,
-            out:a.filter(x=>x<lo||x>hi),
-            wl:inb.length?inb[0]:q1, wh:inb.length?inb[inb.length-1]:q3};
-  }
-  /* Nokta yığını (dot plot): her nokta kendi GERÇEK konumunda durur, yalnız
-     komşusuyla çakışırsa bir üst sıraya çıkar. Eski hâlde bütün noktalar tek
-     sıradaydı ve üst üste biniyordu — ders notu "aynı değere düşenler üst üste
-     yığılır" diyordu ama ekranda yığılma yoktu. Sıra numarası noktanın üstüne
-     yazılır (__lv) ki sürükleme isabet testi (toPx) de aynı yeri kullansın. */
+  const VN=["ortalama","medyan","mod","varyans","kutu"];
+  const VB=["#st-v0","#st-v1","#st-v2","#st-v3","#st-v4"];
+  let pts=[], orig=[];          /* {u: değer, out?: « Uç değer »in sürdüğü nokta} */
+  let view=0, fv=0, fvD=0, k=1; /* görünüm · destek noktası (durum / çizim) · yayılım çarpanı */
+  let qa=1, tq=null, tb=null;   /* medyan sırasının dizilişi (0→1) · zamanlayıcılar */
   const DOT=6, STEP=13;
-  function stack(X){
-    const ord=pts.map((q,i)=>i).sort((i,j)=>pts[i].u-pts[j].u), last=[];
-    ord.forEach(i=>{
-      const x=X(pts[i].u); let lv=0;
-      while(last[lv]!==undefined && x-last[lv]<2*DOT+1) lv++;
-      last[lv]=x; pts[i].__lv=lv;
-    });
-    return ord;
+  const MINUS="−";
+  const fmt=(x)=>{ if(!isFinite(x)) return "—"; const r=Math.round(x);
+    if(Math.abs(x-r)<1e-9) return (r<0?MINUS:"")+Math.abs(r);
+    return (x<0?MINUS:"")+Math.abs(x).toFixed(2).replace(/0$/,""); };
+  const sgn=(x)=>(x>0?"+":"")+fmt(x);
+  const snap=(v)=>{ const st=S().step||1; return clamp(Math.round(v/st)*st,S().lo,S().hi); };
+  const mOf=(b)=>{const m=b.length; return !m?NaN:m%2?b[(m-1)/2]:(b[m/2-1]+b[m/2])/2;};
+
+  /* bütün sayılar tek yerden: göstergeler, panel, aria ve çizim aynı sayıyı kullanır */
+  function stats(){
+    const a=pts.map(q=>q.u).sort((x,y)=>x-y), n=a.length; if(!n) return null;
+    const s=S(), sum=a.reduce((t,x)=>t+x,0), mean=sum/n, med=mOf(a);
+    const G=new Map();
+    a.forEach(x=>{ const key=s.bin?Math.floor((x-s.lo)/s.bin+1e-9):Math.round(x*1e6);
+      let g=G.get(key); if(!g){ g={key,x:s.bin?s.lo+(key+.5)*s.bin:x,a:s.bin?s.lo+key*s.bin:x,n:0}; G.set(key,g); }
+      g.n++; });
+    const groups=[...G.values()].sort((p,q)=>p.x-q.x), fmax=Math.max(...groups.map(g=>g.n));
+    const modes=fmax>=2?groups.filter(g=>g.n===fmax):[];
+    const sq=a.map(x=>(x-mean)**2), ss=sq.reduce((t,x)=>t+x,0);
+    const vr=n>1?ss/(n-1):0, sd=Math.sqrt(vr);
+    const h=Math.floor(n/2), lowH=a.slice(0,h), upH=a.slice(n%2?h+1:h);
+    const q1=n>1?mOf(lowH):med, q3=n>1?mOf(upH):med, iqr=q3-q1, f1=q1-1.5*iqr, f2=q3+1.5*iqr;
+    const out=a.filter(x=>x<f1-1e-9||x>f2+1e-9), inb=a.filter(x=>x>=f1-1e-9&&x<=f2+1e-9);
+    const band=a.filter(x=>x>=mean-sd-1e-9&&x<=mean+sd+1e-9).length;
+    const L=a.filter(x=>x<fv).reduce((t,x)=>t+(fv-x),0), R=a.filter(x=>x>fv).reduce((t,x)=>t+(x-fv),0);
+    let im=0; sq.forEach((v,i)=>{ if(v>sq[im]) im=i; });
+    const bal=Math.abs(mean-fv)<0.002*(s.hi-s.lo);
+    return {a,n,sum,mean,med,groups,fmax,modes,sq,ss,vr,sd,lowH,upH,q1,q3,iqr,f1,f2,out,band,L,R,bal,
+            wl:inb.length?inb[0]:q1, wh:inb.length?inb[inb.length-1]:q3, top:{x:a[im],share:ss>0?sq[im]/ss:0}};
   }
-  const baseOf=(H,p)=>H-p-26;
+  const modeStr=(st)=>{ if(!st) return "—"; if(!st.modes.length) return "yok";
+    if(st.modes.length>3) return st.modes.length+" değer";
+    return st.modes.map(g=>S().bin?fmt(g.a)+"–"+fmt(g.a+S().bin):fmt(g.x)).join(" ve "); };
+  const tiltWord=(st)=>st.bal?"dengede":st.mean>fv?"sağa yatık":"sola yatık";
+
+  function geo(){
+    const W=cv.__w, H=cv.__h, p=28, wide=W>=760, split=wide?Math.round(W*0.60):W;
+    const L0=p+10, L1=split-(wide?22:p+4), s=S();
+    return {W,H,p,wide,split,L0,L1,
+      X:(v)=>L0+(v-s.lo)/(s.hi-s.lo)*(L1-L0),
+      V:(x)=>s.lo+(x-L0)/(L1-L0)*(s.hi-s.lo)};
+  }
+  /* yığın: her nokta kendi konumunda, komşusuyla çakışırsa bir üst sıraya çıkar */
+  function levels(xs){
+    const ord=xs.map((x,i)=>i).sort((i,j)=>xs[i]-xs[j]), last=[], lv=[];
+    ord.forEach(i=>{ let l=0; while(last[l]!==undefined && xs[i]-last[l]<2*DOT+1) l++; last[l]=xs[i]; lv[i]=l; });
+    return lv;
+  }
+  function axis(g,y,showLine){
+    const s=S(), t=s.tick||10;
+    if(showLine){ ctx.save();ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.moveTo(g.L0-8,y);ctx.lineTo(g.L1+8,y);ctx.stroke();ctx.restore(); }
+    for(let v=Math.ceil(s.lo/t)*t; v<=s.hi+1e-9; v+=t){
+      const x=g.X(v);
+      if(showLine){ ctx.save();ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+4);ctx.stroke();ctx.restore(); }
+      label(ctx,fmt(v),x,y+14,css("--ink-soft"),"center",10.5);
+    }
+    label(ctx,s.x+" →",g.L1+8,y+29,css("--ink-soft"),"right",10.5);
+  }
+  const vline=(x,y0,y1,tok,dash,w=2)=>{ ctx.save();ctx.strokeStyle=css(tok);ctx.lineWidth=w;
+    if(dash) ctx.setLineDash(dash); ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.stroke();ctx.restore(); };
+  const dotFill=(q)=>q.out?css("--warn"):css("--a");
+  function ring(x,y,tok,r=DOT+3.5){ ctx.save();ctx.strokeStyle=css(tok);ctx.lineWidth=2.4;
+    ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.stroke();ctx.restore(); }
+
+  /* ── 0 · ortalama: tahterevalli ── */
+  function drawMean(g,st,top){
+    const s=S(), yb=g.H-62, piv=g.X(fvD);
+    /* en çok ~20 px iner: ▲ kenara yakınken uzun kol tahtanın ucunu eksen sayılarına gömüyordu */
+    const arm=Math.max(piv-g.L0,g.L1-piv)+10, tmax=Math.min(0.10,20/arm);
+    const th=st?tmax*Math.tanh((st.mean-fvD)/(0.035*(s.hi-s.lo))):0, c=Math.cos(th), sn=Math.sin(th);
+    const rot=(x,y)=>({x:piv+(x-piv)*c-(y-yb)*sn, y:yb+(x-piv)*sn+(y-yb)*c});
+    /* zemin ve sayılar dönmez; tahta, çentikleri ve noktalar ▲'nın ucunda döner */
+    ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.4;
+    ctx.beginPath();ctx.moveTo(g.L0-14,yb+24);ctx.lineTo(g.L1+14,yb+24);ctx.stroke();ctx.restore();
+    axis(g,yb+26,false);
+    ctx.save();ctx.translate(piv,yb);ctx.rotate(th);ctx.translate(-piv,-yb);
+    ctx.fillStyle=css("--ink-soft");ctx.fillRect(g.L0-10,yb-1,g.L1-g.L0+20,5);
+    const t=s.tick||10; ctx.strokeStyle=css("--surface");ctx.lineWidth=1;
+    for(let v=Math.ceil(s.lo/t)*t; v<=s.hi+1e-9; v+=t){ const x=g.X(v); ctx.beginPath();ctx.moveTo(x,yb);ctx.lineTo(x,yb+3);ctx.stroke(); }
+    ctx.restore();
+    const xs=pts.map(q=>g.X(q.u)), lv=levels(xs);
+    pts.forEach((q,i)=>{ const r=rot(xs[i],yb-2-DOT-lv[i]*STEP); q.__px=r.x; q.__py=r.y;
+      disc(ctx,r.x,r.y,DOT,dotFill(q),css("--surface")); });
+    /* ▲ destek noktası */
+    ctx.save();ctx.fillStyle=css("--accent");ctx.beginPath();
+    ctx.moveTo(piv,yb+4);ctx.lineTo(piv-11,yb+24);ctx.lineTo(piv+11,yb+24);ctx.closePath();ctx.fill();ctx.restore();
+    if(!st) return;
+    /* ortalamanın yeri: tahtanın üstünde ince pembe kesikli çizgi */
+    const m=rot(g.X(st.mean),yb-2);
+    vline(m.x,top+72,m.y,"--accent",[5,4],1.6);
+    label(ctx,"x̄ = "+fmt(st.mean),m.x,top+63,css("--accent"),"center",11.5);
+    legend(ctx,g.L0-4,top+8,[["▲ destek noktası "+fmt(fv)+" · "+tiltWord(st),st.bal?"--good":"--ink"],
+      ["sol Σ uzaklık "+fmt(st.L)+" · sağ Σ uzaklık "+fmt(st.R),"--ink-soft"]],{size:11});
+  }
+
+  /* ── 1 · medyan: sıraya diz ── */
+  function drawMedian(g,st,top){
+    const yb=g.H-46, yq=top+64;
+    axis(g,yb,true);
+    const xs=pts.map(q=>g.X(q.u)), lv=levels(xs);
+    pts.forEach((q,i)=>{ q.__px=xs[i]; q.__py=yb-2-DOT-lv[i]*STEP;
+      disc(ctx,q.__px,q.__py,DOT,hexA(q.out?"--warn":"--a",.45),css("--surface")); });
+    if(!st) return;
+    const n=st.n, ord=pts.map((q,i)=>i).sort((i,j)=>pts[i].u-pts[j].u||i-j);
+    const w=(g.L1-g.L0)/n, rq=Math.max(3,Math.min(DOT,w*.36)), e=1-(1-qa)**3;
+    const mids=n%2?[(n-1)/2]:[n/2-1,n/2];
+    const xm=g.X(st.med);
+    vline(xm,yq+26,yb,"--good",[6,4],2);
+    ord.forEach((i,r)=>{
+      const q=pts[i], qx=g.L0+(r+.5)*w, x=q.__px+(qx-q.__px)*e, y=q.__py+(yq-q.__py)*e;
+      ctx.save();ctx.strokeStyle=hexA("--ink-soft",.30);ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(q.__px,q.__py);ctx.lineTo(x,y);ctx.stroke();ctx.restore();
+      disc(ctx,x,y,rq,dotFill(q),css("--surface"));
+      const mid=mids.includes(r);
+      if(mid) ring(x,y,"--good",rq+3.5);
+      if(e>.98){
+        if(n<=12) label(ctx,fmt(q.u),x,y-15,css(mid?"--good":"--ink"),"center",mid?12:11);
+        if(n<=12||mid||r===0||r===n-1) label(ctx,String(r+1),x,y+16,css(mid?"--good":"--ink-soft"),"center",10);
+      }
+    });
+    label(ctx,"medyan "+fmt(st.med),xm+6,yq+38,css("--good"),"left",11.5);
+    legend(ctx,g.L0-4,top+8,[[n+" değer sıralı · ortadaki "+(n%2?((n+1)/2)+".":(n/2)+". ve "+(n/2+1)+"."),"--ink"]],{size:11});
+  }
+
+  /* ── 2 · mod: aynı değerler yığılır ── */
+  function drawMode(g,st,top){
+    const s=S(), yb=g.H-46;
+    axis(g,yb,true);
+    if(!st){ pts.forEach(q=>{q.__px=g.X(q.u);q.__py=yb-2-DOT;}); return; }
+    const key=(x)=>s.bin?Math.floor((x-s.lo)/s.bin+1e-9):Math.round(x*1e6), cnt=new Map();
+    const modal=new Set(st.modes.map(m=>m.key));
+    if(s.bin) st.groups.forEach(gr=>{
+      const x0=g.X(gr.a), x1=g.X(gr.a+s.bin), hgt=gr.n*STEP+5, mod=modal.has(gr.key);
+      ctx.save();ctx.fillStyle=hexA("--c",mod?.20:.07);ctx.strokeStyle=hexA("--c",mod?.9:.35);ctx.lineWidth=mod?2:1;
+      ctx.fillRect(x0+1,yb-hgt,x1-x0-2,hgt);ctx.strokeRect(x0+1,yb-hgt,x1-x0-2,hgt);ctx.restore(); });
+    const ord=pts.map((q,i)=>i).sort((i,j)=>pts[i].u-pts[j].u||i-j);
+    ord.forEach(i=>{ const q=pts[i], kk=key(q.u), j=cnt.get(kk)||0; cnt.set(kk,j+1);
+      const gx=s.bin?g.X(s.lo+(kk+.5)*s.bin):g.X(q.u);
+      q.__px=gx; q.__py=yb-2-DOT-j*STEP;
+      disc(ctx,q.__px,q.__py,DOT,dotFill(q),css("--surface"));
+      if(modal.has(kk)) ring(q.__px,q.__py,"--c"); });
+    const gx=st.groups.map(gr=>g.X(gr.x)), roomy=gx.every((x,i)=>!i||x-gx[i-1]>=26);
+    st.groups.forEach(gr=>{ const mod=modal.has(gr.key);
+      if(roomy||mod) label(ctx,"×"+gr.n,g.X(gr.x),yb-2-DOT-gr.n*STEP-(s.bin?8:4),css(mod?"--c":"--ink-soft"),"center",mod?12:10.5); });
+    [[st.mean,"--accent"],[st.med,"--good"]].forEach(([v,tok])=>vline(g.X(v),top+34,yb,tok,[4,4],1.4));
+    legend(ctx,g.L0-4,top+8,[[st.modes.length?"mod "+modeStr(st)+" · "+st.fmax+" kez":"her değer bir kez: mod yok","--c"],
+      ["ortalama "+fmt(st.mean)+" · medyan "+fmt(st.med),"--ink-soft"]],{size:11});
+  }
+
+  /* ── 3 · varyans · s: farkların kareleri ── */
+  function drawVar(g,st,top){
+    const yb=g.H-46;
+    axis(g,yb,true);
+    const xs=pts.map(q=>g.X(q.u)), lv=levels(xs);
+    if(st){
+      const mx=g.X(st.mean), sx=g.X(st.mean+st.sd)-mx, yT=top+44;
+      ctx.save();ctx.fillStyle=hexA("--accent",.07);ctx.fillRect(mx-sx,yT,2*sx,yb-yT);ctx.restore();
+      vline(mx-sx,yT,yb,"--accent",[3,4],1); vline(mx+sx,yT,yb,"--accent",[3,4],1);
+      /* her farkın karesi: kenarı |x − x̄|, ortalamaya yaslı; büyükler arkada */
+      ctx.save();ctx.beginPath();ctx.rect(g.L0-12,yT,g.L1-g.L0+24,yb-yT);ctx.clip();
+      let cut=false;
+      pts.map((q,i)=>i).sort((i,j)=>Math.abs(pts[j].u-st.mean)-Math.abs(pts[i].u-st.mean)).forEach(i=>{
+        const d=pts[i].u-st.mean, side=Math.abs(xs[i]-mx); if(side<.5) return;
+        const tok=d<0?"--bad":"--good"; if(yb-side<yT) cut=true;
+        ctx.fillStyle=hexA(tok,.09);ctx.strokeStyle=hexA(tok,.6);ctx.lineWidth=1.2;
+        ctx.fillRect(Math.min(xs[i],mx),yb-side,side,side);ctx.strokeRect(Math.min(xs[i],mx),yb-side,side,side); });
+      ctx.strokeStyle=css("--accent");ctx.lineWidth=2.4;ctx.strokeRect(mx,yb-sx,sx,sx);
+      ctx.restore();
+      if(sx>22&&yb-sx/2>yT+8) label(ctx,"s²",mx+sx/2,yb-sx/2,css("--accent"),"center",12.5);
+      vline(mx,yT,yb,"--accent",[6,4],2);
+      label(ctx,"x̄ − s",mx-sx-4,yT+9,css("--accent"),"right",10.5);
+      label(ctx,"x̄ + s",mx+sx+4,yT+9,css("--accent"),"left",10.5);
+      label(ctx,"x̄ = "+fmt(st.mean),mx,yT-9,css("--accent"),"center",11.5);
+      if(cut) legend(ctx,g.L1+4,yT+34,[["↑ en büyük kare tuvale sığmıyor","--bad"]],{size:10.5,align:"right"});
+    }
+    pts.forEach((q,i)=>{ q.__px=xs[i]; q.__py=yb-2-DOT-lv[i]*STEP;
+      const tok=!st||Math.abs(q.u-st.mean)<1e-9?"--ink-soft":q.u<st.mean?"--bad":"--good";
+      disc(ctx,q.__px,q.__py,DOT,q.out?css("--warn"):css(tok),css("--surface")); });
+    if(st) legend(ctx,g.L0-4,top+8,[[g.wide?"kare = (x − x̄)² · kalın kare = s², kenarı s":"kalın kare = s², kenarı s","--ink-soft"]],{size:10.5});
+  }
+
+  /* ── 4 · kutu: yarıların ortası ── */
+  function drawBox(g,st,top){
+    const yb=g.H-46, bh=26, yc=yb-30, yd=yc-bh/2-8;
+    axis(g,yb,true);
+    const xs=pts.map(q=>g.X(q.u)), lv=levels(xs);
+    let cls=pts.map(()=>0);
+    if(st){
+      const n=st.n, h=Math.floor(n/2), ord=pts.map((q,i)=>i).sort((i,j)=>pts[i].u-pts[j].u||i-j);
+      ord.forEach((i,r)=>{ cls[i]=r<h?1:(n%2&&r===h)?3:2; });
+      const yT=top+44, cx=(v)=>clamp(g.X(v),g.L0-10,g.L1+10);
+      [[st.f1,"alt sınır "+fmt(st.f1)],[st.f2,"üst sınır "+fmt(st.f2)]].forEach(([v,nm],j)=>{
+        const x=cx(v); vline(x,yT,yb,"--bad",[4,4],1.6);
+        legend(ctx,clamp(x,g.L0+46,g.L1-46),yT+(j?14:0),[[nm,"--bad"]],{size:10.5,align:"center"}); });
+      ctx.save();ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.6;ctx.beginPath();
+      ctx.moveTo(g.X(st.wl),yc);ctx.lineTo(g.X(st.q1),yc);ctx.moveTo(g.X(st.q3),yc);ctx.lineTo(g.X(st.wh),yc);
+      ctx.moveTo(g.X(st.wl),yc-9);ctx.lineTo(g.X(st.wl),yc+9);ctx.moveTo(g.X(st.wh),yc-9);ctx.lineTo(g.X(st.wh),yc+9);
+      ctx.stroke();ctx.restore();
+      const bx=g.X(st.q1), bw=Math.max(2,g.X(st.q3)-bx);
+      ctx.save();ctx.fillStyle=hexA("--a",.16);ctx.strokeStyle=css("--a");ctx.lineWidth=2;
+      ctx.fillRect(bx,yc-bh/2,bw,bh);ctx.strokeRect(bx,yc-bh/2,bw,bh);ctx.restore();
+      vline(g.X(st.med),yc-bh/2,yc+bh/2,"--good",null,3);
+      label(ctx,"Q1",bx,yc+bh/2+8,css("--a"),"center",10.5);
+      label(ctx,"Q3",bx+bw,yc+bh/2+8,css("--a"),"center",10.5);
+      st.out.forEach(v=>disc(ctx,cx(v),yc,5,css("--bad"),css("--surface")));
+    }
+    pts.forEach((q,i)=>{ q.__px=xs[i]; q.__py=yd-DOT-lv[i]*STEP;
+      const isOut=st&&(q.u<st.f1-1e-9||q.u>st.f2+1e-9);
+      const fill=isOut?css("--bad"):cls[i]===1?css("--a"):cls[i]===2?css("--c"):css("--ink-soft");
+      disc(ctx,q.__px,q.__py,DOT,fill,css("--surface"));
+      if(cls[i]===3) ring(q.__px,q.__py,"--good"); });
+    if(st) legend(ctx,g.L0-4,top+8,[["alt yarı","--a"],["üst yarı","--c"]],{size:10.5});
+  }
+
+  /* ── sağ panel: aynı hesap, ekrandaki sayılarla ── */
+  function panel(g,st){
+    const x0=g.split+14, x1=g.W-g.p*0.5, y0=g.p-6, yMax=g.H-g.p+6;
+    ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(g.split,g.p-10);ctx.lineTo(g.split,g.H-g.p+10);ctx.stroke();ctx.restore();
+    const R=[];                                   /* satır: [[metin,token,x?,hiza?],…] */
+    const line=(...cells)=>R.push(cells.map(c=>Array.isArray(c)?c:[c,"--ink"]));
+    const u=S().unit, n=st?st.n:0;
+    const title=["ortalamanın hesabı","medyanın hesabı","modun hesabı","varyansın hesabı","kutunun hesabı"][view];
+    line([title,"--accent"]);
+    if(!st){ line(["nokta yok: tuvale tıkla","--ink-soft"]); return render(R,x0,x1,y0,yMax); }
+    const list=(items)=>{ /* [metin, token] parçalarını panele sığacak satırlara böl */
+      ctx.save();ctx.font='600 12px "IBM Plex Mono", monospace';
+      let row=[], w=0; const sp=ctx.measureText(" ").width, max=x1-x0-4;
+      items.forEach(([t,tok])=>{ const tw=ctx.measureText(t).width;
+        if(w&&w+sp+tw>max){ R.push(row); row=[]; w=0; }
+        row.push([t,tok,x0+w+(w?sp:0)]); w+=(w?sp:0)+tw; });
+      if(row.length) R.push(row); ctx.restore(); };
+    const nums=(arr,hl)=>arr.map((v,i)=>[fmt(v),hl?hl(i):"--ink"]);
+    if(view===0){
+      if(n<=12){ const it=[["Σx =","--ink-soft"]]; st.a.forEach((v,i)=>{ if(i) it.push(["+","--ink-soft"]); it.push([fmt(v),"--ink"]); });
+        list(it); line("   = "+fmt(st.sum)); }
+      else line("Σx = "+fmt(st.sum)+"  ("+n+" değer)");
+      line(["x̄ = "+fmt(st.sum)+" / "+n+" = "+fmt(st.mean),"--accent"]);
+      line([""]);
+      line("▲ destek noktası = "+fmt(fv));
+      line(["sol Σ uzaklık = "+fmt(st.L),"--ink-soft"]);
+      line(["sağ Σ uzaklık = "+fmt(st.R),"--ink-soft"]);
+      line(st.bal?["→ dengede: iki toplam eşit","--good"]:["→ tahta "+tiltWord(st)+"; « Dengele »","--bad"]);
+      line([""]);
+      line(["ortalamada Σ(x − x̄) = 0","--ink-soft"]);
+    } else if(view===1){
+      const mids=n%2?[(n-1)/2]:[n/2-1,n/2];
+      line(["1. küçükten büyüğe diz:","--ink-soft"]);
+      if(n<=16) list(nums(st.a,(i)=>mids.includes(i)?"--good":"--ink"));
+      else { const lo=Math.max(0,mids[0]-3), hi=Math.min(n,mids[mids.length-1]+4);
+        line(["… "+st.a.slice(lo,hi).map(fmt).join(" ")+" …","--ink"]); }
+      line(["2. n = "+n+", "+(n%2?"tek: ortadaki "+((n+1)/2)+". değer":"çift: "+(n/2)+". ve "+(n/2+1)+". değer"),"--ink-soft"]);
+      line(["3. medyan = "+(n%2?fmt(st.med):"("+fmt(st.a[n/2-1])+" + "+fmt(st.a[n/2])+") / 2 = "+fmt(st.med)),"--good"]);
+      line([""]);
+      line(["ortalama "+fmt(st.mean)+" ile kıyasla:","--ink-soft"]);
+      line(["medyan sıraya bakar, büyüklüğe değil","--ink-soft"]);
+    } else if(view===2){
+      const s=S(), modal=new Set(st.modes.map(m=>m.key));
+      line([s.bin?"aralık":"değer","--ink-soft"],["kaç kez","--ink-soft",x0+96]);
+      let gs=st.groups; const MAXR=9;
+      if(gs.length>MAXR) gs=[...gs].sort((p,q)=>q.n-p.n).slice(0,MAXR).sort((p,q)=>p.x-q.x);
+      gs.forEach(gr=>{ const mod=modal.has(gr.key), tok=mod?"--c":"--ink";
+        R.push([[s.bin?fmt(gr.a)+"–"+fmt(gr.a+s.bin):fmt(gr.x),tok,x0],["bar",tok,x0+96,gr.n],[String(gr.n),tok,x0+102+gr.n*7]]); });
+      if(gs.length<st.groups.length) line(["… "+(st.groups.length-gs.length)+" aralık daha (birer-ikişer)","--ink-soft"]);
+      line([""]);
+      line([st.modes.length?"en sık: "+modeStr(st)+" · "+st.fmax+" kez → mod":"her değer bir kez: mod yok","--c"]);
+      line(["ortalama "+fmt(st.mean)+" · medyan "+fmt(st.med),"--ink-soft"]);
+    } else if(view===3){
+      const d=(x)=>x-st.mean;
+      if(n<=9){
+        line(["x","--ink-soft",x0+34,"right"],["x − x̄","--ink-soft",x0+118,"right"],["(x − x̄)²","--ink-soft",x1-4,"right"]);
+        st.a.forEach(x=>{ const tok=Math.abs(d(x))<1e-9?"--ink-soft":d(x)<0?"--bad":"--good";
+          R.push([[fmt(x),"--ink",x0+34,"right"],[sgn(d(x)),tok,x0+118,"right"],[fmt(d(x)**2),"--ink",x1-4,"right"]]); });
+        R.push([["Σ","--ink",x0,"left"],["0","--ink-soft",x0+118,"right"],[fmt(st.ss),"--accent",x1-4,"right"]]);
+      } else {
+        line(["en büyük kareler · payı","--ink-soft"]);
+        const idx=st.a.map((x,i)=>i).sort((i,j)=>st.sq[j]-st.sq[i]).slice(0,4);
+        idx.forEach(i=>{ const x=st.a[i], tok=d(x)<0?"--bad":"--good";
+          R.push([[fmt(x),tok,x0],[fmt(st.sq[i]),"--ink",x0+150,"right"],["%"+(100*st.sq[i]/st.ss).toFixed(1),"--ink-soft",x1-4,"right"]]); });
+        line("Σ(x − x̄)² = "+fmt(st.ss)+"  ("+n+" değer)");
+      }
+      line(["s² = "+fmt(st.ss)+" / "+(n-1)+" = "+fmt(st.vr)+" "+S().u2,"--accent"]);
+      line(["s = √"+fmt(st.vr)+" = "+fmt(st.sd)+" "+u,"--accent"]);
+      line(["x̄ ± s bandında "+st.band+" / "+n+" değer","--ink-soft"]);
+    } else {
+      const short=(arr)=>arr.length<=6?arr.map(fmt).join(" "):arr.length+" değer ("+fmt(arr[0])+" … "+fmt(arr[arr.length-1])+")";
+      line(["alt yarı: "+short(st.lowH),"--a"]);
+      line(["→ Q1 = "+fmt(st.q1),"--ink"]);
+      line(["üst yarı: "+short(st.upH),"--c"]);
+      line(["→ Q3 = "+fmt(st.q3),"--ink"]);
+      line("IQR = "+fmt(st.q3)+" − "+fmt(st.q1)+" = "+fmt(st.iqr));
+      line(["1.5 · IQR = "+fmt(1.5*st.iqr),"--ink-soft"]);
+      line(["alt sınır = "+fmt(st.f1),"--bad"]);
+      line(["üst sınır = "+fmt(st.f2),"--bad"]);
+      line(st.out.length?["outlier: "+st.out.map(fmt).join(", "),"--bad"]:["outlier: yok","--good"]);
+    }
+    render(R,x0,x1,y0,yMax);
+  }
+  function render(R,x0,x1,y0,yMax){
+    const lh=clamp((yMax-y0)/(R.length+.5),13,20), size=lh<15.5?11:12;
+    R.forEach((row,i)=>{ const y=y0+(i+1)*lh;
+      row.forEach(([t,tok,x,al])=>{
+        if(t==="bar"){ const nn=al; ctx.save();ctx.fillStyle=hexA(tok,.75);ctx.fillRect(x,y-4,nn*7-2,8);ctx.restore(); return; }
+        label(ctx,t,x===undefined?x0:x,y,css(tok),al||"left",i===0?12.5:size); }); });
+  }
+  /* dar tuval: panel yok, en üstte tek satır */
+  function compact(g,st){
+    if(!st) return;
+    const n=st.n, t=[
+      "x̄ = "+fmt(st.sum)+" / "+n+" = "+fmt(st.mean),
+      "medyan = "+(n%2?fmt(st.med):"("+fmt(st.a[n/2-1])+" + "+fmt(st.a[n/2])+") / 2 = "+fmt(st.med)),
+      st.modes.length?"mod "+modeStr(st)+" ("+st.fmax+" kez)":"mod yok",
+      "s² = "+fmt(st.ss)+" / "+(n-1)+" = "+fmt(st.vr)+" · s = "+fmt(st.sd),
+      "Q1 "+fmt(st.q1)+" · Q3 "+fmt(st.q3)+" · IQR "+fmt(st.iqr)][view];
+    legend(ctx,g.L0-4,g.p-8,[[t,"--accent"]],{size:11});
+  }
+
   function draw(){
     if(!fit()) return;
-    const W=cv.__w,H=cv.__h,p=30,wide=W>720;
-    const split=wide?Math.round(W*0.60):W;
-    ctx.clearRect(0,0,W,H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,W,H);
-    const st=stats();
-
-    /* ── sol: nokta yığını + ortalama (denge noktası) + medyan (ortadaki nokta) ── */
-    const X=(u)=>p+u*(split-2*p), base=baseOf(H,p);
-    ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
-    for(let i=0;i<=10;i++){const gx=X(i/10);ctx.beginPath();ctx.moveTo(gx,p);ctx.lineTo(gx,base);ctx.stroke();}
-    ctx.restore();
-    for(let i=0;i<=4;i++){
-      const u=i/4;
-      label(ctx,shortNum(val(u)),X(u),base+21,css("--ink-soft"),"center",10.5);
-    }
-    label(ctx,S().x+" →",X(0)+2,base+36,css("--ink-soft"),"left",10.5);
-
-    const ord=stack(X);
-    /* medyan: sıralanmış dizinin ortası — tek sayıda nokta varsa bir, çiftse iki nokta */
-    const mid=new Set();
-    if(ord.length){ const n=ord.length;
-      if(n%2) mid.add(ord[(n-1)/2]); else { mid.add(ord[n/2-1]); mid.add(ord[n/2]); } }
-    if(st){
-      [[st.mean,"--accent","ortalama"],[st.med,"--good","medyan"]].forEach(([v,tok,nm],i)=>{
-        const x=X(uOf(v));
-        ctx.save();ctx.strokeStyle=css(tok);ctx.lineWidth=2.4;
-        if(i)ctx.setLineDash([6,4]);
-        ctx.beginPath();ctx.moveTo(x,p);ctx.lineTo(x,base);ctx.stroke();ctx.restore();
-        label(ctx,nm+" "+shortNum(v),x+(i?6:-6),p+12+i*15,css(tok),i?"left":"right",11);
-      });
-    }
-    /* taban çizgisi bir tahterevalli: noktalar eşit ağırlıklar, ▲ destek noktası.
-       Destek ORTALAMANIN altında durur — çubuk ancak orada dengede kalır. */
-    ctx.save();ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=3;ctx.lineCap="round";
-    ctx.beginPath();ctx.moveTo(X(0),base);ctx.lineTo(X(1),base);ctx.stroke();ctx.restore();
-    pts.forEach((q,i)=>{
-      const x=X(q.u), y=base-DOT-2-(q.__lv||0)*STEP;
-      disc(ctx,x,y,DOT,q.out?css("--warn"):css("--a"),css("--surface"));
-      if(mid.has(i)){ ctx.save();ctx.strokeStyle=css("--good");ctx.lineWidth=2.4;
-        ctx.beginPath();ctx.arc(x,y,DOT+3.5,0,7);ctx.stroke();ctx.restore(); }
-    });
-    if(st){
-      const fx=X(clamp(uOf(st.mean),0,1));
-      ctx.save();ctx.fillStyle=css("--accent");ctx.beginPath();
-      ctx.moveTo(fx,base+1.5);ctx.lineTo(fx-9,base+13);ctx.lineTo(fx+9,base+13);ctx.closePath();ctx.fill();ctx.restore();
-    }
-
-    /* ── sağ: kutu grafiği ── */
-    if(wide&&st){
-      const x0=split, BW=W-split;
-      const BX=(v)=>x0+p*0.6+(uOf(v))*(BW-1.6*p);
-      ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;
-      ctx.strokeRect(x0+p*0.5,p,BW-p,H-2*p);ctx.restore();
-      const cy=Math.round((p+H-p)/2), bh=44;
-      /* 1.5·IQR sınırları — başlık ve sınır adları zeminli: kesikli çizgi başlığın
-         ("kutu grafiği") ortasından geçiyordu */
-      [[st.lo,"alt sınır"],[st.hi,"üst sınır"]].forEach(([v,nm])=>{
-        const x=clamp(BX(v),x0+p*0.5+2,W-p*0.5-2);
-        ctx.save();ctx.strokeStyle=hexA("--bad",.75);ctx.lineWidth=1.6;ctx.setLineDash([4,4]);
-        ctx.beginPath();ctx.moveTo(x,p+8);ctx.lineTo(x,H-p-8);ctx.stroke();ctx.restore();
-        legend(ctx,clamp(x,x0+p*0.5+34,W-p*0.5-34),p+44,[[nm,"--bad"]],{size:10,align:"center"});
-      });
-      legend(ctx,x0+p*0.5+8,p+14,[["kutu grafiği","--accent"]]);
-      /* bıyıklar */
-      ctx.save();ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.6;
-      ctx.beginPath();ctx.moveTo(BX(st.wl),cy);ctx.lineTo(BX(st.q1),cy);
-      ctx.moveTo(BX(st.q3),cy);ctx.lineTo(BX(st.wh),cy);
-      ctx.moveTo(BX(st.wl),cy-12);ctx.lineTo(BX(st.wl),cy+12);
-      ctx.moveTo(BX(st.wh),cy-12);ctx.lineTo(BX(st.wh),cy+12);
-      ctx.stroke();ctx.restore();
-      /* kutu */
-      ctx.save();
-      ctx.fillStyle=hexA("--a",.22);ctx.strokeStyle=css("--a");ctx.lineWidth=2;
-      const bx=BX(st.q1), bw=Math.max(2,BX(st.q3)-BX(st.q1));
-      ctx.fillRect(bx,cy-bh/2,bw,bh);ctx.strokeRect(bx,cy-bh/2,bw,bh);
-      ctx.strokeStyle=css("--good");ctx.lineWidth=3;
-      ctx.beginPath();ctx.moveTo(BX(st.med),cy-bh/2);ctx.lineTo(BX(st.med),cy+bh/2);ctx.stroke();
-      ctx.restore();
-      label(ctx,"Q1",BX(st.q1),cy-bh/2-11,css("--a"),"center",10);
-      label(ctx,"Q3",BX(st.q3),cy-bh/2-11,css("--a"),"center",10);
-      label(ctx,"medyan",BX(st.med),cy+bh/2+12,css("--good"),"center",10);
-      /* aykırı değerler */
-      st.out.forEach(v=>disc(ctx,clamp(BX(v),x0+p*0.5+4,W-p*0.5-4),cy,6,css("--bad"),css("--surface")));
-      legend(ctx,W-p*0.5-8,p+14,[["IQR = "+shortNum(st.iqr),"--ink-soft"]],{size:10.5,align:"right"});
-    }
-
-    txt("#st-mean",st?shortNum(st.mean)+S().unit:"—");
-    txt("#st-med", st?shortNum(st.med)+S().unit:"—");
-    txt("#st-sd",  st?shortNum(st.sd):"—");
-    txt("#st-iqr", st?shortNum(st.iqr)+" · "+st.out.length:"—");
-    const el=$("#st-mean");
-    if(el) el.className="v "+(!st?"":Math.abs(st.mean-st.med)>0.12*(S().hi-S().lo)?"bd":"ok");
+    const g=geo(), st=stats();
+    ctx.clearRect(0,0,g.W,g.H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,g.W,g.H);
+    const top=g.wide?g.p-10:g.p+12;
+    [drawMean,drawMedian,drawMode,drawVar,drawBox][view](g,st,top);
+    if(g.wide) panel(g,st); else compact(g,st);
+    const o=pts.find(q=>q.out), so=$("#st-out");
+    if(o&&so) so.value=o.u;
+    txt("#st-outo",o?fmt(o.u):"—");
+    txt("#st-mean",st?fmt(st.mean):"—");
+    txt("#st-med", st?fmt(st.med):"—");
+    txt("#st-mode",modeStr(st));
+    txt("#st-var", st?fmt(st.vr):"—");
+    txt("#st-sd",  st?fmt(st.sd):"—");
+    txt("#st-iqr", st?fmt(st.iqr):"—");
+    cv.setAttribute("aria-label",!st?"Görünüm "+VN[view]+". Nokta yok.":
+      "Görünüm "+VN[view]+". n "+st.n+". Toplam "+fmt(st.sum)+". Ortalama "+fmt(st.mean)+", medyan "+fmt(st.med)+
+      ", mod "+modeStr(st)+(st.modes.length?" ("+st.fmax+" kez)":"")+". Kareler toplamı "+fmt(st.ss)+", varyans "+fmt(st.vr)+
+      ", standart sapma "+fmt(st.sd)+"; x̄ ± s bandında "+st.band+"/"+st.n+"; en büyük kare "+fmt(st.top.x)+", payı %"+(100*st.top.share).toFixed(1)+
+      ". Q1 "+fmt(st.q1)+", Q3 "+fmt(st.q3)+", IQR "+fmt(st.iqr)+", sınırlar "+fmt(st.f1)+" ve "+fmt(st.f2)+
+      ", outlier "+(st.out.length?st.out.map(fmt).join(" "):"yok")+". Destek noktası "+fmt(fv)+", "+tiltWord(st)+
+      " (sol "+fmt(st.L)+", sağ "+fmt(st.R)+"). Yayılım ×"+k.toFixed(2)+".");
   }
-  const geo=()=>{const W=cv.__w,H=cv.__h,p=30,wide=W>720,split=wide?Math.round(W*0.60):W;
-    return {p,split,base:baseOf(H,p),W,H};};
+
   const ed=editable(cv,{
     pts:()=>pts, setPts:(a)=>{pts=a},
-    toPx:(t)=>{const g=geo();return{x:g.p+t.u*(g.split-2*g.p), y:g.base-DOT-2-(t.__lv||0)*STEP};},
-    toData:(x,y)=>{const g=geo(); if(x>g.split-g.p/2) return null;
-      return{u:clamp((x-g.p)/(g.split-2*g.p),0,1), v:0};},
+    toPx:(t)=>({x:t.__px!==undefined?t.__px:geo().X(t.u), y:t.__py!==undefined?t.__py:0}),
+    toData:(x,y)=>{ const g=geo(); if(x>g.split-10||x<g.L0-16) return null; return {u:snap(g.V(x)), v:0}; },
     add:(u)=>pts.push({u}),
     draw:()=>draw(), commit:()=>draw()
   });
-  /* üç dağılım: çarpık, simetrik, çok çarpık */
-  function sample(){
-    ed.reset(); pts=[];
-    const g=S().gen;
-    for(let i=0;i<N;i++){
-      let u;
-      if(g==="normal") u=clamp(.50+gauss()*.10,.03,.97);
-      else if(g==="skew2") u=clamp(.10+Math.pow(Math.random(),2.4)*.72,.02,.96);
-      else u=clamp(.10+(-Math.log(1-Math.random()))*.20,.02,.96);
-      pts.push({u});
-    }
-    pts.push({u:outU,out:true});
+  /* ▲ destek noktası sürüklenir: editable'dan ÖNCE yakalanır (yoksa tıklama nokta ekler) */
+  let fdrag=false;
+  cv.addEventListener("pointerdown",e=>{
+    if(view!==0||e.button!==0) return;
+    const g=geo(), q=pointerPos(cv,e), yb=g.H-62;
+    if(Math.abs(q.x-g.X(fvD))<18&&q.y>yb-6&&q.y<yb+32){
+      fdrag=true; if(tb){clearInterval(tb);tb=null;}
+      e.stopImmediatePropagation(); try{cv.setPointerCapture(e.pointerId);}catch(_){} }
+  });
+  cv.addEventListener("pointermove",e=>{ if(!fdrag) return;
+    const g=geo(), q=pointerPos(cv,e); fv=fvD=clamp(g.V(q.x),S().lo,S().hi); draw(); });
+  ["pointerup","pointercancel","pointerleave"].forEach(ev=>cv.addEventListener(ev,()=>{fdrag=false;}));
+
+  function genSkew(n){
+    /* çoğunluk: 20 + 9·(iki üstel sayının toplamı), tepe ~29, 20–50 bandı; beşte biri yüksek
+       maaşlı kuyruk: 65 + 25·üstel. Ortalama medyanı yukarı çeker (Hafta 2'nin çarpık verisi). */
+    const E=()=>-Math.log(1-Math.random()), a=[], nt=Math.round(n/5);
+    for(let i=0;i<n;i++) a.push(clamp(Math.round(i<n-nt?20+9*(E()+E()):65+25*E()),20,155));
+    return a;
+  }
+  function syncCtl(){
+    const s=S(), so=$("#st-out");
+    if(so){ so.min=s.lo; so.max=s.hi; so.step=s.step||1; }
+    const sp=$("#st-sp"); if(sp) sp.value=Math.round(k*100);
+    txt("#st-spo","×"+k.toFixed(2));
+    const sh=(sel,on)=>{const el=$(sel); if(el) el.hidden=!on;};
+    sh("#st-new",s.gen==="skew"); sh("#st-spl",view===3); sh("#st-bal",view===0);
+  }
+  function stopAnim(){ if(tq){clearInterval(tq);tq=null;} if(tb){clearInterval(tb);tb=null;} qa=1; fvD=fv; }
+  function load(fresh){
+    stopAnim(); ed.reset();
+    const s=S();
+    if(s.gen==="skew"){ if(fresh||!orig.length) orig=genSkew(s.n); } else orig=s.data.slice();
+    pts=orig.map(u=>({u}));
+    let mi=0; pts.forEach((q,i)=>{ if(q.u>pts[mi].u) mi=i; }); if(pts.length) pts[mi].out=true;
+    k=1; const st=stats(); fv=fvD=st?st.med:(s.lo+s.hi)/2;
+    syncCtl(); draw();
+  }
+  function setView(v){
+    stopAnim(); view=v;
+    VB.forEach((sel,i)=>{ const b=$(sel); if(b) b.setAttribute("aria-pressed",i===v?"true":"false"); });
+    if(v===1&&pts.length){ qa=0; tq=setInterval(()=>{ qa=Math.min(1,qa+1/18); if(qa>=1){clearInterval(tq);tq=null;} draw(); },30); }
+    syncCtl(); draw();
+  }
+  function balance(){
+    const st=stats(); if(!st) return;
+    if(tb){ clearInterval(tb); tb=null; fvD=fv; draw(); return; }     /* ikinci basış sona atlar */
+    const a=fvD, b=st.mean; fv=b; if(Math.abs(a-b)<1e-9){ draw(); return; }
+    let t=0; tb=setInterval(()=>{ t++; fvD=a+(b-a)*(1-(1-t/20)**3); if(t>=20){clearInterval(tb);tb=null;fvD=b;} draw(); },30);
     draw();
   }
-  function sync(){
-    txt("#st-outo",shortNum(val(outU))+S().unit);
-    txt("#st-no",String(N));
-  }
-  $("#st-out").oninput=e=>{
-    outU=+e.target.value/100;
-    const k=pts.find(q=>q.out); if(k) k.u=outU;
-    sync(); draw();
-  };
-  $("#st-n").oninput=e=>{N=+e.target.value;sync();sample();};
-  $("#st-new").onclick=()=>sample();
-  $("#st-clr").onclick=()=>{ed.reset();pts=[];draw();};
-  function useSet(i){ dsi=clamp(i,0,DS.length-1); sync(); sample(); }
-  reg({id:"m-stat",draw,space:()=>sample(),init:()=>{sync();sample();},undo:()=>ed.undo(),
+  VB.forEach((sel,i)=>{ const b=$(sel); if(b) b.onclick=()=>setView(i); });
+  $("#st-out").oninput=e=>{ let o=pts.find(q=>q.out);
+    if(!o){ o={u:0,out:true}; pts.push(o); }
+    o.u=+e.target.value; draw(); };
+  $("#st-sp").oninput=e=>{ const k2=+e.target.value/100, st=stats();
+    if(st){ const r=k2/k, m=st.mean; pts.forEach(q=>{q.u=m+r*(q.u-m);}); fv=m+r*(fv-m); fvD=fv; }
+    k=k2; syncCtl(); draw(); };
+  $("#st-bal").onclick=()=>balance();
+  $("#st-new").onclick=()=>load(true);
+  $("#st-rst").onclick=()=>load(false);
+  $("#st-clr").onclick=()=>{ stopAnim(); ed.reset(); pts=[]; draw(); };
+  function useSet(i){ dsi=clamp(i,0,DS.length-1); load(true); }
+  reg({id:"m-stat",draw,init:()=>{ view=0; load(true); },
+    space:()=>{ if(view===0) balance(); else setView((view+1)%5); },
+    stop:()=>{ stopAnim(); draw(); }, undo:()=>ed.undo(),
     scenarioLabel:CONTENT["m-stat"].pick,
     scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
     steps:[
-      {t:"Simetrik veride fark yok",d:"Sınav notlarında dağılım simetriğe yakın. Pembe (ortalama) ve yeşil (medyan) çizgiler neredeyse üst üste; hangisini raporladığın fark etmiyor. Taban çizgisini bir tahterevalli, her noktayı eşit bir ağırlık say: ▲ destek noktası tam ortalamanın altında duruyor.",
-       set:1, hl:["#st-mean","#st-med"], run(){setR("#st-n",24);setR("#st-out",55);}},
-      {t:"Tek bir uç değer",d:"Uç değeri sağa çekin. <b>Ortalama peşinden gidiyor, medyan yerinde duruyor.</b> Tahterevalli dengede kalsın diye ▲ destek noktası uzaktaki ağırlığa doğru kaymak zorunda; medyan ise hâlâ sıranın ortasındaki aynı kişi (yeşil halka).",
-       hl:["#st-out","#st-mean","#st-med"], run(){setR("#st-out",99);}},
-      {t:"Kutu grafiği ne diyor",d:"Sağdaki kutu ortadaki yüzde elliyi gösteriyor. Kesikli kırmızı çizgiler Q1−1.5·IQR ve Q3+1.5·IQR; uç değer bu sınırın dışına düştüğü an kırmızıya dönüyor.",
-       hl:["#st-iqr"], run(){setR("#st-out",100);}},
-      {t:"Çarpık veri",d:"Maaş verisinde kuyruk sağda. Ortalama medyanın belirgin üstünde: 'ortalama maaş' cümlesi çoğunluğu temsil etmiyor.",
-       set:0, hl:["#st-mean","#st-med"], run(){setR("#st-n",30);setR("#st-out",60);}},
-      {t:"Dayanıklı yayılım",d:"Uç değeri uçtan uca gezdirin: standart sapma zıplıyor, IQR neredeyse sabit. Yayılımı da dayanıklı ölçmek mümkün.",
-       hl:["#st-sd","#st-iqr"], run(){setR("#st-out",20);}}
+      {t:"Tahterevalli",d:"Sekiz not bir tahterevalliye oturdu; her not eşit bir ağırlık, ▲ destek noktası. ▲ şu an 73'te ve tahta <b>sağa yatık</b>: sağdaki notların ▲'ya uzaklıkları toplamı 57, soldakilerin 23. ▲'yı sürükleyebilirsin. Tahta nerede düzleşir?",
+       set:0, hl:["#st-v0"], run(){press("#st-v0");}},
+      {t:"Denge noktası = ortalama",d:"« Dengele » ▲'yı 77.25'e taşıdı ve tahta düzleşti: soldaki uzaklıklar 42.25, sağdakiler 42.25. Bu nokta <b>ortalama</b>: 618 / 8 = 77.25. Ortalamadan farkların toplamı her veride 0'dır; tahterevallinin dengesi bu.",
+       set:0, hl:["#st-bal","#st-mean"], run(){press("#st-v0");press("#st-bal");}},
+      {t:"Tek bir yanlış tuş",d:"99 yerine yanlışlıkla 150 yazıldı. Tahta yine sağa yattı; « Dengele » ▲'yı <b>83.63</b>'e taşıyor. Tek bir değer ortalamayı 6.4 puan sürükledi.",
+       set:0, hl:["#st-out","#st-mean"], run(){press("#st-v0");setR("#st-out",150);press("#st-bal");}},
+      {t:"Medyan: sıranın ortası",d:"Notlar küçükten büyüğe sıraya dizildi. 8 not var, çift: ortada 4. ve 5. sıradaki 71 ile 75 duruyor. <b>Medyan</b> (71 + 75) / 2 = 73. 150 en sonda duruyor ama ortadakiler değişmedi.",
+       set:0, hl:["#st-v1","#st-med"], run(){setR("#st-out",150);press("#st-v1");}},
+      {t:"Medyan uca aldırmaz",d:"« Uç değer »i 99'a geri çek: ortalama 83.63'ten 77.25'e iniyor, medyan hâlâ 73. Medyan bir değerin ne kadar büyük olduğuna değil, sırada nerede durduğuna bakar: <b>dayanıklı</b> (robust).",
+       set:0, hl:["#st-out","#st-med","#st-mean"], run(){press("#st-v1");setR("#st-out",99);}},
+      {t:"Mod: en sık değer",d:"Aynı değerdeki notlar üst üste yığıldı. En yüksek yığın 68: iki kez geçiyor. <b>Mod</b> 68. Öteki notlar birer kez.",
+       set:0, hl:["#st-v2","#st-mode"], run(){press("#st-v2");}},
+      {t:"Ayakkabı mağazası",d:"Bir mağazanın bir günde sattığı 20 çift. Mod 41: altı çift. Ortalama 40.35, medyan 40.5; ikisi de rafta olmayan numaralar. Mağaza stoğu modla planlar. Mod, sırasız kategorik veride (renk, şehir) kullanılabilen tek merkez ölçüsüdür.",
+       set:1, hl:["#st-mode","#st-mean","#st-med"], run(){press("#st-v2");}},
+      {t:"Varyans: farkların kareleri",d:"Her notun ortalamadan farkı bir karenin kenarı: 62'nin farkı −15.25, karesi 232.56. Farkların toplamı 0, karelerin toplamı 1143.5. <b>Varyans</b> s² = 1143.5 / 7 ≈ 163.36 puan²: karelerin ortalaması (örneklemde n − 1'e bölünür).",
+       set:0, hl:["#st-v3","#st-var"], run(){press("#st-v3");}},
+      {t:"Standart sapma",d:"Varyansın birimi puan²; karekökü <b>standart sapma</b> s ≈ 12.78 puan, kalın karenin kenarı. Pembe bant x̄ ± s: sekiz notun 6'sı içinde. Bir not ortalamadan tipik olarak 13 puan kadar uzakta.",
+       set:0, hl:["#st-sd"], run(){press("#st-v3");}},
+      {t:"İki okçu: yayılım iki katına",d:"« Yayılım » ×2: ortalama 77.25'te kaldı, bütün notlar iki kat uzağa gitti. s iki katına çıktı (25.56), s² dört katına (653.43): kenar iki katına çıkınca kare dört katına çıkar. Aynı merkez, iki kat dağınık okçu.",
+       set:0, hl:["#st-sp","#st-sd","#st-var"], run(){press("#st-v3");setR("#st-sp",200);}},
+      {t:"Uç değerin karesi",d:"Yayılım ×1, uç değer 150. 150'nin karesi tek başına bütün karelerin %78'i; s 12.78'den 28.38'e fırladı. Varyans ve standart sapma da ortalama gibi uç değere teslim olur.",
+       set:0, hl:["#st-out","#st-sd"], run(){press("#st-v3");setR("#st-sp",100);setR("#st-out",150);}},
+      {t:"Kutu: dayanıklı yayılım",d:"Veri medyandan ikiye bölündü. Alt yarının ortası Q1 = 68, üst yarınınki Q3 = 87.5; <b>IQR</b> = 19.5 ve 150 olsa da değişmiyor. Sınırlar 38.75 ve 116.75: 150 dışarıda, kırmızı outlier. Çarpık veride medyan ve IQR, simetrik veride ortalama ve s raporlanır.",
+       set:0, hl:["#st-v4","#st-iqr"], run(){press("#st-v4");setR("#st-out",150);}},
+      {t:"Çarpık veri: maaş",d:"25 kişinin maaşı: çoğunluk 20–50 bin ₺ bandında, birkaç kişi çok yukarıda. Ortalama medyanın belirgin üstünde. Bu veride 'ortalama maaş' çoğunluğu anlatmaz; medyan anlatır. Mod için maaşlar 10 bin ₺'lik aralıklara ayrılır.",
+       set:2, hl:["#st-mean","#st-med"], run(){press("#st-v0");}}
     ]});
 })();
 
@@ -14298,7 +14610,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
    MODULES kayıt sırası (IIFE) ile bu sıra ARTIK bağımsız — eşleşme id üzerinden. */
 const META=[
   ["01","m-intro", "model, parameter ve generalization","Ayar düğmeli makine","Hafta 1","makine öğrenmesi machine learning giriş introduction model parametre parameter hiperparametre hyperparameter theta θ eğitim training eğitim döngüsü tur loss function kayıp fonksiyonu mse log-loss learning rate öğrenme oranı genelleme generalization eğitim kümesi test kümesi training set test set overfitting aşırı öğrenme underfitting yetersiz öğrenme ezber örnek sample öznitelik feature etiket label denetimli supervised denetimsiz unsupervised sınıflandırma classification regresyon regression knn k en yakın komşu lazy learner tembel öğrenen temel model baseline on öğrenci altı öğrenci yeni öğrenci balon turu göreme rüzgâr rüzgar görüş hafta 1"],
-  ["02","m-stat",  "tanımsal istatistik ve outlier","Ortalama mı, medyan mı","Hafta 2","ortalama mean medyan median mod standart sapma standard deviation iqr çeyrek quartile kutu grafiği boxplot aykırı değer outlier çarpıklık skew dayanıklı robust maaş sınav notu ev fiyatı hafta 2 veri tanıma"],
+  ["02","m-stat",  "ortalama, medyan, mod ve standart sapma","Merkez ve yayılım","Hafta 2","ortalama mean medyan median mod mode varyans variance standart sapma standard deviation yayılım spread tahterevalli denge iki okçu iqr çeyrek quartile kutu grafiği boxplot aykırı değer outlier çarpıklık skew dayanıklı robust maaş sınav notu ayakkabı numarası tanımsal istatistik hafta 2 veri tanıma"],
   ["03","m-corr",  "korelasyon: Pearson r ve tuzakları","Birlikte artıyorlar mı","Hafta 2","korelasyon correlation pearson r r kare kovaryans covariance saçılım grafiği scatter plot anscombe dörtlüsü quartet aykırı değer outlier doğrusal ilişki linear nedensellik causation karıştırıcı değişken confounding variable dondurma boğulma kahve sıcaklık hafta 2 veri tanıma"],
   ["04","m-scale", "ölçekleme: min‑maks ve z‑skoru","Metre ile kilometre","Hafta 2","ölçekleme scaling normalizasyon z-skoru z-score min-maks min-max standardization uzaklık ön işleme preprocessing boy maaş yıldız puanı yorum otel araç yaşı kilometre normalizasyon standartlaştırma min-maks z-skoru hafta 2"],
   ["05","m-err",   "MAE, RMSE, R² ve temel model","Ne kadar yanıldık?","Hafta 3","hata ölçütü error metric kayıp fonksiyonu loss function maliyet fonksiyonu cost function j theta mae ortalama mutlak hata mean absolute error mse ortalama kare hata mean squared error rmse kök ortalama kare hata root mean squared error r2 r kare belirlilik katsayısı temel model baseline dummyregressor dummyclassifier en sık sınıf huber kaybı huber loss delta 0-1 kaybı büyük hata outlier aykırı değer beş ev ev fiyatı göreme ziyaretçi bayram müze hafta 3 doğruluk"],
@@ -14571,17 +14883,16 @@ TH["m-cn"]=(c,w,h)=>{thumbBase(c,w,h);
   c.strokeStyle=css("--accent");c.lineWidth=2;c.strokeRect(ox+2*s2,oy+2*s2,s2*3,s2*3);};
 
 TH["m-stat"]=(c,w,h)=>{thumbBase(c,w,h);
-  const base=h*.72;
-  c.strokeStyle=css("--line");c.lineWidth=1.4;c.beginPath();c.moveTo(8,base);c.lineTo(w-8,base);c.stroke();
-  const xs=[.14,.19,.24,.24,.29,.31,.36,.41,.47,.88];
+  /* tahterevalli: sekiz not, ▲ medyanda, tahta ortalamaya doğru yatık; pembe çizgi ortalama */
+  const base=h*.66, L=12, R=w-12, X=(v)=>L+(v-55)/50*(R-L), piv=X(73), th=.07;
+  c.save();c.translate(piv,base);c.rotate(th);c.translate(-piv,-base);
+  c.fillStyle=css("--ink-soft");c.fillRect(L,base-1,R-L,4);
   const lv={};
-  xs.forEach(u=>{const k=Math.round(u*22);lv[k]=(lv[k]||0)+1;
-    tdot(c,8+u*(w-16),base-7-(lv[k]-1)*9,3.8,u>.8?css("--warn"):css("--a"));});
-  const mean=xs.reduce((a,b)=>a+b,0)/xs.length, med=.30;
-  c.strokeStyle=css("--accent");c.lineWidth=2.2;c.beginPath();
-  c.moveTo(8+mean*(w-16),10);c.lineTo(8+mean*(w-16),base);c.stroke();
-  c.strokeStyle=css("--good");c.setLineDash([5,4]);c.beginPath();
-  c.moveTo(8+med*(w-16),10);c.lineTo(8+med*(w-16),base);c.stroke();c.setLineDash([]);};
+  [62,68,68,71,75,85,90,99].forEach(v=>{lv[v]=(lv[v]||0)+1; tdot(c,X(v),base-7-(lv[v]-1)*9,3.8,v===99?css("--warn"):css("--a"));});
+  c.strokeStyle=css("--accent");c.lineWidth=1.8;c.setLineDash([4,3]);c.beginPath();c.moveTo(X(77.25),12);c.lineTo(X(77.25),base-2);c.stroke();c.setLineDash([]);
+  c.restore();
+  c.fillStyle=css("--accent");c.beginPath();c.moveTo(piv,base+3);c.lineTo(piv-8,base+17);c.lineTo(piv+8,base+17);c.closePath();c.fill();
+  c.strokeStyle=css("--line");c.lineWidth=1.2;c.beginPath();c.moveTo(6,base+17);c.lineTo(w-6,base+17);c.stroke();};
 TH["m-corr"]=(c,w,h)=>{thumbBase(c,w,h);
   const mx=w*.5, my=h*.5;
   c.fillStyle=hexA("--good",.13); c.fillRect(mx,6,w-6-mx,my-6); c.fillRect(6,my,mx-6,h-6-my);

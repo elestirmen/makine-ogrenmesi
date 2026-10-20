@@ -66,7 +66,7 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   | scree plot · cumulative explained variance · Kaiser criterion · loading | scree grafiği · kümülatif açıklanan varyans · Kaiser ölçütü · yük |
 
   **Sunumun Türkçe önde yazdığı terimler** (`<b>Türkçe</b> (English)`): genelleme
-  (generalization), korelasyon (correlation), ortalama (mean),
+  (generalization), korelasyon (correlation), ortalama (mean), mod (mode), varyans (variance),
   medyan (median), standart sapma, dayanıklı (robust), standartlaştırma (z-skoru),
   normalizasyon (min-maks), kümeleme, k-ortalamalar (k-means; adımları **ata / güncelle**,
   tur **iterasyon**). SVM benzetmesi "iki köy arasındaki en geniş yol" (koridor değil).
@@ -142,6 +142,21 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   paylaşır: aynı veri dört modülde, dört ayrı ders. `note` alanı ders notu kutusunda
   görünür, bu yüzden **ölçülmüş** olmalı — "en iyi derece çoğunlukla 5" gibi bir
   cümle `tools/behaviour.js`'te sınanır.
+- **Modül 02 (`m-stat`) beş görünümle öğretir** (2026-10-20; eski nokta yığını + kutu için hoca
+  "ne olduğu anlaşılmıyor" dedi). Aynı noktalar « Ortalama | Medyan | Mod | Varyans · s | Kutu »
+  düğmeleriyle beş ayrı hesaba bakar; sağ panel (tuval ≥ 760) aynı hesabı ekrandaki sayılarla
+  yazar, dar tuvalde en üstte tek satır kalır. Ortalama: sayı doğrusu bir tahterevalli; ▲ açılışta
+  medyanda (tahta yatık), « Dengele » ▲'yı ortalamaya taşır (yalnız çizim kayar, durum hemen),
+  ▲ elle de sürüklenir (pointerdown editable'dan ÖNCE yakalanır, yoksa tıklama nokta ekliyor);
+  eğim en çok ~20 px, uzun kol tahtanın ucunu eksen sayılarına gömüyordu. Medyan: noktalar
+  küçükten büyüğe sıraya dizilir (18 tık × 30 ms, yalnız çizim). Mod: aynı değer, `bin`'li
+  kümede aynı aralık yığılır. Varyans: her farkın karesi ortalamaya yaslı bir kare, kalın kare
+  s² (kenarı s), bant x̄ ± s; « Yayılım » bütün farkları ortalamaya göre ölçekler (s ×k, s² ×k²).
+  Kutu: çeyrekler sunumun yöntemiyle (medyandan ikiye böl, yarıların medyanı; tek n'de medyan
+  iki yarıya da girmez), numpy'ın aradeğerlemesiyle değil. Kümeler: « Sekiz not » (Hafta 2
+  sl. 10–20, sayılar birebir), « Ayakkabı numarası » (mod dersi: ortalama 40.35 ve medyan 40.5
+  rafta yok, mod 41), « Maaş » (rastgele: gövde 20 + 9·(E + E), beşte biri 65 + 25·E;
+  ortalama medyanın ~9 bin ₺ üstünde). Bütün sayılar `aria-label`'da, `behaviour.js` oradan okur.
 - **Modül 09 (`m-lin`) cevabı gizli başlatır.** Least squares doğrusu (yeşil
   kesikli) ve sağ paneldeki dip işareti yalnız « Least squares çözümü »nden sonra
   çizilir; yeni veri, veri kümesi değişimi ve « Temizle » cevabı yeniden gizler.

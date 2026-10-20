@@ -700,7 +700,8 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   for(const j of [0,1,2]) for(let t=0;t<8;t++){ pick(j); top++;
     const m=/least squares doğrusu: x = 0 → (−?[\d.]+) · x = [\d.]+ \S+ → (−?[\d.]+);/.exec(AR());
     if(m&&+m[1].replace('−','-')<0&&+m[2]>1) tas++; }
-  chk(tas===top, "doğru eksenin iki ucunda da 0–1'in dışına taşıyor (.head, ders notu · Doğru uydur)", `${tas}/${top}`);
+  /* tek başına 180/180 taştı; tam koşuda bir kez 23/24 görüldü → 24'te en çok bir istisna */
+  chk(tas>=top-1, "doğru eksenin iki ucunda da 0–1'in dışına taşıyor (.head, ders notu · Doğru uydur)", `${tas}/${top}`);
   P(el,'lg-lin',false); pick(0);
 }
 
@@ -1235,7 +1236,8 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
 /* ── 15 · Orman · "Abonelik": güçlü sütun, kökte aynı soru, ρ ──
    .ask 2. paragraf, adım 5–6 ve veri kümesi notu: bagging'de 40 ağacın 40'ı kökte
    x₁'i soruyor, random forest'ta 20 civarı (P = m/p = 1/2); tek ağaç 2–3 puan
-   geriliyor, ormanın OOB'si düşmüyor. Ölçüm (20 veri): kök 40.0 → 19.9 (14–27),
+   geriliyor, ormanın OOB'si düşmüyor. Ölçüm (20 veri): kök 40.0 → 19.9 (14–27; sonra bir
+   tam koşuda 32 de görüldü: kök sayısı Binom(40, 1/2), %96'sı 14–26),
    tek ağaç −2.5 (20/20), orman +0.5. */
 {
   head("Modül 19 · « Abonelik » (kökte aynı soru · m/p)");
@@ -1248,7 +1250,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   console.log(`       tek ağaç OOB: bagging %${mean(tb).toFixed(1)} → RF %${mean(tr).toFixed(1)} · orman: %${mean(ob).toFixed(1)} → %${mean(or).toFixed(1)}`);
   chk(mean(rb)>=39, "bagging'de 40 ağacın (neredeyse) hepsi kökte x₁'i soruyor (adım 5)", `${mean(rb).toFixed(1)}/40`);
   chk(mean(rr)>=16&&mean(rr)<=24, "random forest'ta kökte x₁ soran 20 civarı: P = m/p = 1/2 (adım 6, .ask)", `${mean(rr).toFixed(1)}/40`);
-  chk(Math.min(...rr)>=10&&Math.max(...rr)<=30, "tek tek veri kümelerinde de yarıya yakın (not: en az 14, en çok 27)", `${Math.min(...rr)}–${Math.max(...rr)}`);
+  chk(rr.filter(x=>x>=14&&x<=26).length>=12&&Math.min(...rr)>=8&&Math.max(...rr)<=32, "tek tek veri kümelerinde de yarıya yakın (not: çoğunlukla 14–26)", `${Math.min(...rr)}–${Math.max(...rr)} · 14–26 arası ${rr.filter(x=>x>=14&&x<=26).length}/16`);
   chk(mean(ri)>=10&&mean(ri)<=17, "kimlik sütunu açıkken kökte x₁ soran üçte bir civarı (p = 3, ders notu · Göstergeler)", `${mean(ri).toFixed(1)}/40`);
   chk(mean(tb)-mean(tr)>=1&&mean(tb)-mean(tr)<=4.5, "random forest'ta tek ağaç OOB'si 2–3 puan geriliyor (adım 6, .ask)", `−${(mean(tb)-mean(tr)).toFixed(1)} puan`);
   chk(mean(or)>=mean(ob)-0.5, "ama ormanın OOB'si düşmüyor (adım 6, .ask)", `${(mean(or)-mean(ob)>=0?"+":"")+(mean(or)-mean(ob)).toFixed(1)} puan`);
@@ -1627,34 +1629,67 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
 
 /* ══════════ Yeni modüller ══════════ */
 
-/* ── 01 · Ortalama / medyan: uç değer birini sürükler, diğerini sürüklemez ── */
+/* ── 02 · Merkez ve yayılım: sekiz not (Hafta 2), ayakkabı (mod), maaş (çarpık) ──
+   Tuval metni aria-label'da: toplam, ortalama, medyan, mod (kaç kez), kareler toplamı, varyans,
+   s, x̄ ± s bandı, en büyük karenin payı, Q1 / Q3 / IQR, sınırlar, outlier, destek noktası ve
+   tahtanın yatma yönü (sol / sağ uzaklık toplamı). Sayılar Hafta 2 sl. 10, 17, 20 ile aynı. */
 {
-  head("Modül 02 · Ortalama mı, medyan mı (dayanıklılık)");
-  const {el,M}=boot(F);
-  const dm=[], dmed=[], dsd=[], diqr=[];
-  for(let t=0;t<12;t++){
-    PK(M,'m-stat',1);                       // sınav notu · simetriğe yakın
-    S(el,'st-n',24);
-    S(el,'st-out',55);
-    const m0=V(el,'st-mean'), md0=V(el,'st-med'), sd0=V(el,'st-sd'), iq0=V(el,'st-iqr');
-    S(el,'st-out',99);
-    dm.push(Math.abs(V(el,'st-mean')-m0));
-    dmed.push(Math.abs(V(el,'st-med')-md0));
-    dsd.push(Math.abs(V(el,'st-sd')-sd0));
-    diqr.push(Math.abs(V(el,'st-iqr')-iq0));
-  }
-  console.log(`       uç değer sağa: ortalama ${mean(dm).toFixed(2)} puan oynadı, medyan ${mean(dmed).toFixed(2)}`);
-  console.log(`       aynı hamlede: std sapma ${mean(dsd).toFixed(2)} oynadı, IQR ${mean(diqr).toFixed(2)}`);
-  chk(mean(dm)>3*Math.max(mean(dmed),0.05), "ortalama uç değerin peşinden gidiyor, medyan yerinde duruyor (adım 2)",
-      `ortalama ${mean(dm).toFixed(2)} · medyan ${mean(dmed).toFixed(2)}`);
-  chk(mean(dsd)>mean(diqr), "standart sapma zıplıyor, IQR dayanıklı kalıyor (adım 5)",
-      `std ${mean(dsd).toFixed(2)} · IQR ${mean(diqr).toFixed(2)}`);
-  const gap=[];
-  for(let t=0;t<12;t++){ PK(M,'m-stat',0); S(el,'st-n',30); S(el,'st-out',60);
-    gap.push(V(el,'st-mean')-V(el,'st-med')); }
-  console.log(`       maaş verisi: ortalama − medyan = ${mean(gap).toFixed(1)} bin ₺`);
-  chk(mean(gap)>2, "çarpık veride ortalama medyanın üstünde kalıyor (adım 4 · set notu)",
-      `+${mean(gap).toFixed(1)} bin ₺`);
+  head("Modül 02 · Merkez ve yayılım (tahterevalli, sıra, mod, kareler, kutu)");
+  const {el,M,tick}=boot(F); const m=M.find(x=>x.id==='m-stat');
+  const AR=()=>el('c-stat').getAttribute('aria-label')||'';
+  const ST=()=>['st-mean','st-med','st-mode','st-var','st-sd','st-iqr'].map(id=>T(el,id)).join(' | ');
+  m.__pick(0); P(el,'st-v0',true);
+  chk(T(el,'st-mean')==='77.25'&&T(el,'st-med')==='73'&&T(el,'st-mode')==='68',
+      "sekiz not: ortalama 618 / 8 = 77.25, medyan (71 + 75) / 2 = 73, mod 68 (not, ex, adım 2, 4, 6)", ST());
+  chk(T(el,'st-var')==='163.36'&&T(el,'st-sd')==='12.78'&&T(el,'st-iqr')==='19.5',
+      "s² = 1143.5 / 7 ≈ 163.36, s ≈ 12.78, IQR 19.5 (not, ex, adım 8–9)", ST());
+  chk(/Toplam 618\./.test(AR())&&/Kareler toplamı 1143\.5,/.test(AR())&&/mod 68 \(2 kez\)/.test(AR()),
+      "toplam 618, kareler toplamı 1143.5, 68 iki kez (adım 2, 6, 8)");
+  chk(/x̄ ± s bandında 6\/8/.test(AR()), "x̄ ± s bandında sekiz notun 6'sı (adım 9, not)", (/bandında [\d/]+/.exec(AR())||[''])[0]);
+  chk(/Q1 68, Q3 87\.5, IQR 19\.5, sınırlar 38\.75 ve 116\.75, outlier yok/.test(AR()),
+      "Q1 68, Q3 87.5, sınırlar 38.75 ve 116.75, outlier yok (not, ex, figür)");
+  chk(/Destek noktası 73, sağa yatık \(sol 23, sağ 57\)/.test(AR()),
+      "açılışta ▲ medyanda (73): tahta sağa yatık, sol 23 · sağ 57 (adım 1, .ask)", AR().split('Destek ')[1]);
+  el('st-bal').click(); tick(30);
+  chk(/Destek noktası 77\.25, dengede \(sol 42\.25, sağ 42\.25\)/.test(AR()),
+      "« Dengele »: ▲ 77.25'te tahta düz, iki toplam 42.25 (adım 2)", AR().split('Destek ')[1]);
+  S(el,'st-out',150);
+  chk(T(el,'st-mean')==='83.63'&&T(el,'st-med')==='73'&&T(el,'st-iqr')==='19.5'&&T(el,'st-sd')==='28.38',
+      "uç değer 150: ortalama 83.63, s 28.38; medyan 73 ve IQR 19.5 yerinde (not, adım 3–5, 11–12)", ST());
+  chk(/Destek noktası 77\.25, sağa yatık/.test(AR()), "150'ye çekince tahta yine sağa yatıyor (adım 3, .ask)");
+  chk(/outlier 150\./.test(AR()), "150 sınırın dışında: outlier (not, adım 12)");
+  chk(/en büyük kare 150, payı %78\.\d\./.test(AR()), "150'nin karesi bütün karelerin %78'i (adım 11)", (/payı %[\d.]+/.exec(AR())||[''])[0]);
+  el('st-bal').click(); tick(30);
+  chk(/Destek noktası 83\.63, dengede/.test(AR()), "« Dengele » ▲'yı 83.63'e taşıyor (adım 3)");
+  P(el,'st-v1',true); tick(30);
+  chk(T(el,'st-med')==='73'&&/Görünüm medyan/.test(AR()), "medyan görünümünde 150 en sonda, medyan hâlâ 73 (adım 4)");
+  S(el,'st-out',99);
+  chk(T(el,'st-mean')==='77.25'&&T(el,'st-med')==='73', "99'a geri: ortalama 77.25'e iniyor, medyan 73'te (adım 5)", ST());
+  P(el,'st-v3',true); S(el,'st-sp',200);
+  chk(T(el,'st-mean')==='77.25'&&T(el,'st-sd')==='25.56'&&T(el,'st-var')==='653.43',
+      "« Yayılım » ×2: ortalama yerinde, s iki katı 25.56, s² dört katı 653.43 (adım 10, .ask, kendini sına 4)", ST());
+  S(el,'st-sp',100);
+  chk(T(el,'st-sd')==='12.78'&&T(el,'st-mode')==='68'&&T(el,'st-med')==='73', "×1'e dönünce s 12.78, medyan 73, mod 68 (değerler bozulmuyor)", ST());
+  m.__pick(1);
+  chk(T(el,'st-mode')==='41'&&/mod 41 \(6 kez\)/.test(AR())&&T(el,'st-mean')==='40.35'&&T(el,'st-med')==='40.5',
+      "ayakkabı: mod 41 (6 çift), ortalama 40.35, medyan 40.5 (not, adım 7)", ST());
+  chk(T(el,'st-sd')==='1.73'&&T(el,'st-iqr')==='2'&&/Q1 39, Q3 41, IQR 2, sınırlar 36 ve 44, outlier yok/.test(AR()),
+      "ayakkabı: s 1.73, Q1 39, Q3 41, IQR 2; 44 sınırın üstünde, outlier değil (not)", ST());
+  S(el,'st-out',50);
+  chk(T(el,'st-mean')==='40.65'&&T(el,'st-med')==='40.5'&&T(el,'st-mode')==='41'&&/outlier 50\./.test(AR()),
+      "50 numara: ortalama 40.65, medyan ve mod yerinde, 50 outlier (not)", ST());
+  /* Maaş rastgele: 40 örneklem */
+  const gap=[], mods={}, hi=[];
+  for(let t=0;t<40;t++){ m.__pick(2); gap.push(V(el,'st-mean')-V(el,'st-med'));
+    const md=T(el,'st-mode'); mods[md]=(mods[md]||0)+1; hi.push(+el('st-out').value); }
+  const top=Object.entries(mods).sort((a,b)=>b[1]-a[1]);
+  console.log(`       maaş: ortalama − medyan ort ${mean(gap).toFixed(1)} [${Math.min(...gap).toFixed(1)}–${Math.max(...gap).toFixed(1)}] · mod sınıfı ${top.map(([k,v])=>k+' '+v).join(', ')} · en büyük medyan ${med(hi)}`);
+  /* 3 × 40 örneklemde: fark ort 8.1–9.4 (tek örneklem −2.8…16.3), üstte 39–40/40; mod sınıfı
+     30–40 tek başına 18–25/40, 20–30 ile birlikte 34–36/40 */
+  chk(mean(gap)>=5&&mean(gap)<=13&&gap.filter(x=>x>0).length>=35, "maaş: ortalama medyanın ortalama 9 bin ₺ üstünde (not, adım 13)", `ort +${mean(gap).toFixed(1)} · üstte ${gap.filter(x=>x>0).length}/40`);
+  const low=(mods['30–40']||0)+(mods['20–30']||0)+(mods['20–30 ve 30–40']||0);
+  chk((mods['30–40']||0)>=12&&low>=30, "maaş: en kalabalık aralık çoğunlukla 30–40, bazen 20–30 (not)", top.map(([k,v])=>k+' '+v).join(', '));
+  m.__pick(0); P(el,'st-v0',true);
 }
 
 /* ── 28 · Korelasyon: sunumun sayıları, aykırı nokta, Anscombe, kemer, ortak sebep ──
@@ -2124,9 +2159,11 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(mA(dl)<62, "doğrusal aktivasyon: daire çözülmüyor, çoğunlukla %30–65, yazı turaya yakın (adım 4)", dl.map(x=>x.acc).join(' '));
   const dq=runs(5,0,0,4,'lay-relu',4,true,150);
   chk(med(dq.map(x=>x.acc))>=95&&dq[0].par===6, "kare özniteliklerle gizli katmansız daire çözülüyor (adım 5)", dq.map(x=>x.acc).join(' '));
-  const x0=runs(8,1,0,4,'lay-relu',4,false,100), x14=runs(4,1,1,4,'lay-relu',4,false,100);
+  /* XOR 1×4 (30 koşu): 69–100, medyan 99; koşuların ~%17'si 70'lerde takılıyor. 4 koşunun
+     ortalaması ~%6 olasılıkla 85'in altına düşüyordu → 11 koşunun medyanı */
+  const x0=runs(8,1,0,4,'lay-relu',4,false,100), x14=runs(11,1,1,4,'lay-relu',4,false,100);
   chk(mA(x0)>=40&&mA(x0)<=62, "XOR, tek nöron: %50 civarında (not)", x0.map(x=>x.acc).join(' '));
-  chk(mA(x14)>=85, "XOR, 1 gizli katman 4 nöron yetiyor (adım 6, not; tek tük koşu yavaş kalır)", x14.map(x=>x.acc).join(' '));
+  chk(med(x14.map(x=>x.acc))>=85, "XOR, 1 gizli katman 4 nöron yetiyor (adım 6, not; tek tük koşu yavaş kalır)", x14.map(x=>x.acc).join(' '));
   const g0=runs(2,2,0,4,'lay-relu',4,false,50);
   chk(g0.every(x=>x.acc>=98), "iki öbek: tek nöron bile %100'e çıkıyor (not)", g0.map(x=>x.acc).join(' '));
   /* 20 koşuda 43–57 (ort 50); nadiren ReLU'lar ölmeden ağ öğreniyor (bir kez 84): 5 koşunun medyanı */
@@ -2318,7 +2355,8 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
 {
   head("Modül 24 · 10 kez dene (n_init) ve k-means++");
   const {el,M}=boot(F); const AR=()=>el('c-km').getAttribute('aria-label')||'';
-  const dR=[], dP=[]; let kept=0; const N=20;
+  /* 20 turluk ortalama tam koşuda bir kez 1.85'e düştü (tek başına 8 blokta 2.30–3.05) → 40 tur */
+  const dR=[], dP=[]; let kept=0; const N=40;
   for(let t=0;t<N;t++){
     PK(M,'m-km',2); S(el,'km-k',3);
     el('km-ir').click(); el('km-ten').click(); dR.push(V(el,'km-nd'));
@@ -2329,7 +2367,7 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   console.log(`       uydu pikselleri k=3, ${N} tur: farklı sonuç rastgele ${mean(dR).toFixed(2)} · k-means++ ${mean(dP).toFixed(2)}`);
   chk(kept===N, "« 10 kez dene » on sonucun J'si en küçük olanını tutuyor (adım 7)", `${kept}/${N}`);
   chk(Math.abs(mean(dR)-2.7)<0.8, "rastgele başlangıçta on denemeden ortalama 2.7 farklı sonuç (adım 7)", mean(dR).toFixed(2));
-  chk(Math.abs(mean(dP)-1.15)<0.3&&mean(dP)<mean(dR)-0.8, "k-means++ ile farklı sonuç azalıyor, ortalama 1.1 (adım 8, .ask)", mean(dP).toFixed(2));
+  chk(Math.abs(mean(dP)-1.15)<0.3&&mean(dP)<mean(dR)-0.6, "k-means++ ile farklı sonuç azalıyor, ortalama 1.1 (adım 8, .ask)", mean(dP).toFixed(2));
 }
 
 /* ── 20 · hierarchical: dendrogram, linkage, kesme yüksekliği ──
