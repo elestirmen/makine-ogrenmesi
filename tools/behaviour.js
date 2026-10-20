@@ -606,6 +606,81 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   P(el,'lg-lin',false); pick(0);
 }
 
+/* ── 30 · Veri sızıntısı ve Pipeline (Hafta 4 Soru 4, Hafta 7) ──
+   Veri her « Yeni veri »de rastgele: iddialar 20 verinin ORTALAMASIYLA ve oranla sınanır
+   (tek veride CV dışında 0.75–0.90, Pipeline içinde 0.37–0.62 oynuyor). İki yolun sayıları
+   ve seçilen sütunlar tuvalin aria-label'ında; veri değişmeden iki yol da her seferinde
+   hesaplanıyor, mod düğmesi yalnız gösterilen yolu seçiyor. PK() aşağıda const (TDZ). */
+{
+  head("Modül 30 · veri sızıntısı ve Pipeline");
+  const {el,M,tick}=boot(F); const mod=M.find(x=>x.id==='m-leak'), pick=(j)=>mod.__pick(j);
+  const AR=()=>el('c-leak').getAttribute('aria-label')||'';
+  const yol=(ad)=>{const m=new RegExp(ad+': katlar [^,]*(?:, [^,]*){4}, ortalama ([\\d.]+) ± ([\\d.]+), beş katta ortak (\\d+) / (\\d+)').exec(AR());
+    return m?{m:+m[1],sd:+m[2],ort:+m[3],sec:+m[4]}:null;};
+  const iki=()=>({o:yol('CV dışında'),i:yol('Pipeline içinde')});
+  const N=20;
+  /* 20 veride iki yol; fn her veriden sonra ek ölçüm alabilir */
+  const tur=(fn)=>{const O=[],I=[],OC=[],IC=[],X=[];
+    for(let t=0;t<N;t++){ el('lk-new').click(); const r=iki(); O.push(r.o.m); I.push(r.i.m); OC.push(r.o.ort); IC.push(r.i.ort); if(fn) X.push(fn()); }
+    return {O,I,OC,IC,X,o:mean(O),i:mean(I)};};
+  /* aralıkların ölçülen kapsamı ~%90: 20 veride ≥ 14'ü (0.7) istenir, yoksa ~%1 yanlış alarm */
+  const pay=(a,lo,hi)=>a.filter(v=>v>=lo&&v<=hi).length/a.length;
+
+  /* .ask 1, adım 1 ve 3, not: "veri aynı, model aynı, CV doğruluğu 0.8 civarından 0.5 civarına";
+     sunum 0.82 ↔ 0.42, 120 veride 0.84 ↔ 0.51 ölçüldü (tek veride 0.75–0.90 ve 0.37–0.62) */
+  pick(0); P(el,'lk-out',true);
+  chk(T(el,'lk-po')==='2000'&&T(el,'lk-mo')==='10'&&el('lk-drop').hidden&&!el('lk-pc').hidden, "Yazı tura verisi sunumun ayarıyla açılıyor: 2000 sütun, 10 seçilen; « çıkar » gizli", `${T(el,'lk-po')} · ${T(el,'lk-mo')}`);
+  const A=tur();
+  console.log(`       2000 sütun, 10 seçilen, ${N} veri: CV dışında ort ${A.o.toFixed(3)} · Pipeline içinde ort ${A.i.toFixed(3)}`);
+  chk(A.o>=0.77&&A.o<=0.91, "CV dışında seçim 0.8 civarı (.ask, adım 1; sunum 0.82)", A.o.toFixed(3));
+  chk(A.i>=0.43&&A.i<=0.58, "Pipeline içinde 0.5 civarı: yazı tura (.ask, adım 3; sunum 0.42)", A.i.toFixed(3));
+  chk(A.O.filter((v,k)=>v-A.I[k]>0.1).length>=N-1, "fark her veride aynı yönde (adım 6: 'şans değil')", `${A.O.filter((v,k)=>v-A.I[k]>0.1).length}/${N} veride > 0.10`);
+  chk(pay(A.O,0.75,0.90)>=0.7&&pay(A.I,0.37,0.62)>=0.7, "tek veride 0.75–0.90 ve 0.37–0.62 arası (not)", `${pay(A.O,0.75,0.90)} · ${pay(A.I,0.37,0.62)}`);
+  /* "Beş katta ortak sütun": CV dışında hep 10 / 10, Pipeline'da çoğunlukla 0 ya da 1 (adım 4, ders notu) */
+  chk(A.OC.every(v=>v===10), "CV dışında beş katta da aynı 10 sütun (adım 4, ders notu · Göstergeler)", A.OC.join(','));
+  chk(pay(A.IC,0,1)>=0.75&&mean(A.IC)<2, "Pipeline her katta yeniden seçiyor: ortak sütun çoğunlukla 0 ya da 1 (adım 4)", A.IC.join(','));
+  /* mod düğmesi veriyi değiştirmez: gösterge ile « Öteki yolun notu » yer değiştirir */
+  { const vm=T(el,'lk-vm'), vo=T(el,'lk-vo'); P(el,'lk-in',true); const vm2=T(el,'lk-vm'), vo2=T(el,'lk-vo'); P(el,'lk-out',true);
+    chk(num(vm)===num(vo2)&&num(vo)===num(vm2), "iki yol aynı veride: mod değişince CV doğruluğu ile « Öteki yolun notu » yer değiştiriyor", `${vm} / ${vo} → ${vm2} / ${vo2}`); }
+  /* katlar tabakalı (ders notu · terimler: "her katta 6 + 6"): her kat 12 örnek */
+  { let on=0; for(let f=0;f<5;f++){ el('lk-run').click(); for(let s=0;s<f;s++) tick(1); if(/ \/ 12$/.test(T(el,'lk-vc'))&&T(el,'lk-vk')===`${f+1} / 5`) on++; el('lk-run').click(); }
+    chk(on===5, "« Katları gez » beş katı sırayla geziyor, her kat 12 örnek (tabakalı 6 + 6)", `${on}/5`); }
+
+  /* .ask 2 ve adım 5: "Sütun sayısı 10, seçilen 10: seçecek bir şey kalmadı, iki yol da 0.5 civarı" */
+  S(el,'lk-p',0);
+  const B=tur();
+  console.log(`       10 sütun: CV dışında ort ${B.o.toFixed(3)} · Pipeline içinde ort ${B.i.toFixed(3)}`);
+  chk(B.o>=0.43&&B.o<=0.58&&Math.abs(B.o-B.i)<0.04, "10 sütundan 10 seçince CV dışındaki not da 0.5 civarı, iki yol eşit (.ask 2, adım 5)", `${B.o.toFixed(3)} · ${B.i.toFixed(3)}`);
+  /* adım 5: "Sütun sayısını 2000'e doğru açtıkça CV dışındaki not yükseliyor" (10 → 100 → 2000:
+     0.51 → 0.70 → 0.84 ölçüldü) */
+  S(el,'lk-p',3); const C=tur(); S(el,'lk-p',7);
+  chk(B.o+0.08<C.o&&C.o+0.06<A.o, "sütun sayısı arttıkça CV dışındaki not yükseliyor: 10 → 100 → 2000 (adım 5)", `${B.o.toFixed(2)} → ${C.o.toFixed(2)} → ${A.o.toFixed(2)}`);
+
+  /* adım 7 ve not: gerçek sinyal — Pipeline 0.90, CV dışında 0.96 civarı, pay 0.06 (rastgele
+     veride 0.33); Pipeline her katta 10 genin ortalama 7–8'ini buluyor */
+  pick(1); P(el,'lk-in',true);
+  const G=tur(()=>+(/seçimin (\d+) \/ 10 sütunu gerçek/.exec(AR())||[0,NaN])[1]);
+  console.log(`       gerçek sinyal: CV dışında ort ${G.o.toFixed(3)} · Pipeline ort ${G.i.toFixed(3)} · bulunan gerçek gen ort ${mean(G.X).toFixed(2)}`);
+  chk(G.i>=0.85&&G.i<=0.95&&G.o>=0.92&&G.o<=0.99, "gerçek sinyalde iki yol da yüksek: Pipeline 0.90, CV dışında 0.96 civarı (adım 7, not)", `${G.o.toFixed(3)} · ${G.i.toFixed(3)}`);
+  chk(G.o-G.i<=0.12&&G.o-G.i<(A.o-A.i)/2, "sızıntının payı küçülüyor: 0.06 civarı, rastgele verinin yarısından az (adım 7, not)", `${(G.o-G.i).toFixed(3)} · rastgele ${(A.o-A.i).toFixed(3)}`);
+  chk(mean(G.X)>=6.5&&mean(G.X)<=8.8, "Pipeline her katta 10 gerçek genin ortalama 7–8'ini buluyor (not)", mean(G.X).toFixed(2));
+
+  /* adım 8, .ask 2 ve not: « Sızan sütun » — iptal_tarihi hep ilk sırada, iki yolda da 1.00'a
+     yakın (0.98–1.00); çıkarılınca dürüst not 0.74 civarı (0.63–0.85), « 0.7 civarına iniyor » */
+  pick(2); P(el,'lk-in',true);
+  chk(el('lk-pc').hidden&&!el('lk-drop').hidden&&T(el,'lk-mo')==='3', "Sızan sütun: sütun kaydırıcısı gizli, « iptal_tarihi'ni çıkar » görünür, 3 sütun seçili", T(el,'lk-mo'));
+  const L=tur(()=>/seçilen sütunlar iptal_tarihi,/.test(AR()));
+  console.log(`       sızan sütun: CV dışında ort ${L.o.toFixed(3)} · Pipeline ort ${L.i.toFixed(3)} · en düşük ${Math.min(...L.I).toFixed(2)}`);
+  chk(L.X.every(Boolean), "seçim iptal_tarihi'ni hep ilk sıraya koyuyor (adım 8, not)", `${L.X.filter(Boolean).length}/${N}`);
+  chk(L.i>=0.97&&L.o>=0.97&&Math.min(...L.I)>=0.93, "Pipeline içinde de CV doğruluğu 1.00'a yakın: Pipeline bu sızıntıyı yakalamaz (.ask 2, adım 8)", `${L.o.toFixed(3)} · ${L.i.toFixed(3)}`);
+  P(el,'lk-drop',true);
+  chk(T(el,'lk-mo')==='3'&&/× 5 sütun/.test(AR())&&!/iptal_tarihi/.test(AR().split('seçilen sütunlar')[1]||''), "« çıkar » sonrası beş sütun kalıyor, iptal_tarihi seçilmiyor", T(el,'lk-mo'));
+  const D=tur();
+  console.log(`       iptal_tarihi çıkarılınca: CV dışında ort ${D.o.toFixed(3)} · Pipeline ort ${D.i.toFixed(3)}`);
+  chk(D.i>=0.66&&D.i<=0.82, "sütun çıkarılınca dürüst not 0.7 civarına iniyor (adım 9, not: 0.74)", D.i.toFixed(3));
+  P(el,'lk-drop',false); pick(0); P(el,'lk-out',true);
+}
+
 /* ── 06 · Karar ağacı: düğme kaydırıcının ulaşabildiği en iyi bölmeyi buluyor ──
    İki ölçütle de (Gini ve entropi): ağaç, eşik eğrisi ve göstergeler seçilen
    ölçütle kuruluyor, « En iyi bölmeyi bul » da onunla aramalı. */
