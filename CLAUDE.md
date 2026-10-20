@@ -493,6 +493,20 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    başlatır: `setPressed("#gd-run",true)`. Eskiden "Koştur'a basın" diyen adımlarda
    hoca ilerlerken ekranda hiçbir şey olmuyordu.
 
+   **Fare ipucu her modülde** (2026-10-20; hoca: "mouse ile üzerine gelince o anki noktanın
+   değerleri görünsün", kapsam sorulunca "hepsi olsun"). `const {ctx,fit,tip}=setupCanvas(cv)`;
+   `draw()` çizdiği her anlamlı öğeyi (nokta, merkez, çubuk, hücre, eğri, eşik / ortalama
+   çizgisi, nöron, panel grafikleri) çizdiği yerde, gerçek tuval pikseliyle kaydeder:
+   `tip({x,y,r}|{x,y,w,h}|{x0,x1,fy,d}|{all:true}, satırlar)`. `fit()` her çizimde listeyi
+   boşaltır; kutu HTML'dir (`.ptip`, tema token'ları), tuvale çizilmez, dokunmatikte dokununca
+   2.5 sn açılır. Satırlar dizi ya da `(mx,my)=>dizi`: ilk satır öğenin ne olduğu ("Öğrenci C",
+   "Merkez 2"), sonra değerler verinin biriminde ve modülün eksen adlarıyla (`S().x`), sonra o
+   görünümde anlamlı türetilmiş 1–2 sayı (ŷ ve artık, p̂, küme, katkı, payı); en çok ~4 satır,
+   modülün göstergeleriyle aynı ondalık. Izgarada (ısı haritası, piksel, nöron haritası) hücre
+   başına kayıt yok: tek dikdörtgen + `(mx,my)` fonksiyonu. Satır fonksiyonları saf ve hızlı.
+   `harness.js` her çizimden sonra kayıtlı satırları üretip undefined / NaN arar ve hiç
+   `tip()` kaydetmeyen modülü HATA sayar ("fare ipucu yok"). Örnek: Modül 02'nin beş görünümü.
+
    Tuvale nokta eklenen modüllerde `editable(cv,{pts,setPts,toPx,toData,add,draw,commit})`
    kullanılır — sürükleme, silme ve geri almayı tek yerden getirir. `commit` pahalı
    yeniden hesabı yapar (önbellek geçersiz kılma), `draw` sürükleme sırasındaki ucuz çizim.
