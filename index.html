@@ -4425,7 +4425,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 1 · KNN ═════════════ */
 (function(){
-  const cv=$("#c-knn"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-knn"), {ctx,fit,tip}=setupCanvas(cv);
   /* qry: sorgu noktası. İmleç onu taşır; fare tuvalden çıkınca YERİNDE KALIR (m-cn
      kuralı) — hoca anlatmaya başlayınca komşular ve oy ekrandan silinmesin. Sabit
      veri kümeleri (« Altı daire », « İki eczane ») kendi sorgusuyla açılır. */
@@ -4548,6 +4548,32 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   }
   const unit=()=>fixed()?S().span:1;
   const fd=(d)=>(d*unit()).toFixed(fixed()?(S().dd||2):3);
+  /* fare ipucu: konum verinin biriminde. Rastgele kümelerde gerçek birim yok (eksenler
+     0–1 ölçekli, uzaklık da), birimi eksen adından düşer; sabit kümelerde ham değer,
+     « Altı daire »de yanında z. Haritada imleç sorgunun kendisi: zemin ipucu orada
+     KNN'in ne dediğini yazar (sorgu okuması göstergelerde de kalır). */
+  const axS=(s)=>s.replace(/\s*\([^)]*\)\s*$/,"");
+  const mn=(x,d=2)=>(x<0&&+Math.abs(x).toFixed(d)!==0?"−":"")+Math.abs(x).toFixed(d);
+  const zStat=()=>{ const R=S().raw; return [1,2].map(j=>{ const m=R.reduce((t,r)=>t+r[j],0)/R.length;
+    return [m,Math.sqrt(R.reduce((t,r)=>t+(r[j]-m)**2,0)/R.length)]; }); };
+  function where(u,v,raw){
+    const s=S(), a=axS(s.x), b=axS(s.y);
+    if(!fixed()){ const t=`${a} ${u.toFixed(2)} · ${b} ${v.toFixed(2)}`;   /* kutu ~50 karakter */
+      return t.length<=36?t+" (0–1 ölçekli)":t.length<=44?t+" (0–1)":t; }
+    const z=[u*s.span+s.lo, v*s.span+s.lo];
+    if(s.z){ const M=zStat(), r=raw||[M[0][0]+z[0]*M[0][1], M[1][0]+z[1]*M[1][1]];
+      return `${a} ${Math.round(r[0])} (z ${mn(z[0])}) · ${b} ${Math.round(r[1])} (z ${mn(z[1])})`; }
+    const r=raw||z, f=(x)=>raw?String(x):mn(x,1);
+    return `${a} ${f(r[0])} · ${b} ${f(r[1])} ${s.unit}`;
+  }
+  const oyTxt=(r)=>{ const nm=S().cls, U=unit();
+    return wtd?`Σw: ${nm[0]} ${(r.wa/U).toFixed(2)} · ${nm[1]} ${(r.wb/U).toFixed(2)}`:`oy: ${nm[0]} ${r.a} · ${nm[1]} ${r.b}`; };
+  const pcK=(v)=>v===null||v===undefined?"—":"%"+Math.round(v*100);
+  const ptName=(p)=>{ const c=S().cls[p.c]; return !p.nm?"Eğitim noktası · "+c:c.startsWith(p.nm+" ")?c:p.nm+" · "+c; };
+  const vtip=(x,y0,y1,rows)=>tip({x:x-5,y:Math.min(y0,y1),w:10,h:Math.abs(y1-y0)},rows);
+  /* kesik doğrunun mx'teki yüksekliği (xs artan, ys piksel; boş değer olmamalı) */
+  const polyAt=(xs,ys,mx)=>{ if(xs.length<2) return ys[0]; let i=0; while(i<xs.length-2&&mx>xs[i+1]) i++;
+    const t=xs[i+1]>xs[i]?clamp((mx-xs[i])/(xs[i+1]-xs[i]),0,1):0; return ys[i]+(ys[i+1]-ys[i])*t; };
   /* komşuluk sınırı: k'ncı komşunun uzaklığında çember / elmas / kare */
   function hood(g,u,v,r){
     const cx=g.x(u), cy=g.y(v), rx=r*g.w, ry=r*g.h;
@@ -4586,6 +4612,24 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const tr=at(C,C.tr), te=at(C,C.te);
     if(te!==null) disc(ctx,EX(k),EY(te),5,css("--bad"),css("--surface"));
     if(tr!==null) disc(ctx,EX(k),EY(tr),5,css("--a"),css("--surface"));
+    /* fare ipucu: çizim alanında en yakın k'nın iki hatası; üstte şerit, √n, seçili k, eğriler, noktalar */
+    const near=(mx)=>clamp(2*Math.round((mx-q0)/qw*(KMAX-1)/2)+1,1,KMAX);
+    const kRows=(kq,head)=>{ const i=(kq-1)/2, sel=kq===k;
+      return [head||[sel?`Seçili k = ${kq}`:`k = ${kq}`,sel?"--accent":"--ink"],`eğitim hatası ${pcK(C.tr[i])}`,
+        C.te[i]!==null?`test hatası ${pcK(C.te[i])}`:"test noktası yok",
+        bk&&kq===bk.k?["en düşük test hatası","--good"]:head&&sel?["seçili k","--accent"]:null]; };
+    tip({x:q0,y:qy,w:qw,h:qh},(mx)=>kRows(near(mx)));
+    if(bk) tip({x:EX(bk.k)-7,y:qy,w:14,h:qh},[[`En düşük test hatası · k = ${bk.k}`,"--good"],`test hatası ${pcK(bk.e)}`,
+      "gerçekte k test noktasıyla değil, CV ile seçilir"]);
+    if(sq<=KMAX) vtip(EX(sq),qy,qy+qh,[[`√n ≈ ${sq.toFixed(1)}`],`n = ${n} eğitim noktası`,"k için kaba bir başlangıç kuralı"]);
+    vtip(EX(k),qy,qy+qh,kRows(k));
+    const kx=C.ks.map(EX);
+    [[C.tr,"Eğitim hatası","--a"],[C.te,"Test hatası","--bad"]].forEach(([arr,nm,tok])=>{
+      if(arr.some(v=>v===null)) return;
+      const ys=arr.map(EY);
+      tip({x0:q0,x1:q0+qw,fy:(mx)=>polyAt(kx,ys,mx),d:6},(mx)=>{ const kq=near(mx); return kRows(kq,[`${nm} · k = ${kq}`,tok]); }); });
+    if(te!==null) tip({x:EX(k),y:EY(te),r:5},kRows(k));
+    if(tr!==null) tip({x:EX(k),y:EY(tr),r:5},kRows(k));
     /* lejant çizim alanının ÜSTÜNDE: eğriler iki uçta da tavana yaklaşıyor */
     legendRow(ctx,q0,qy-12,[["eğitim hatası","--a"],te!==null?["test hatası","--bad"]:["test noktası yok","--ink-soft"],
       bk&&[`en düşük test: k = ${bk.k}`,"--good"]],10.5,qw);
@@ -4618,8 +4662,14 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(j===kk-1){ ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=1.3;ctx.setLineDash([5,4]);
         ctx.beginPath();ctx.moveTo(q0+8,y+rh/2);ctx.lineTo(q0+qw-8,y+rh/2);ctx.stroke();ctx.restore();
         label(ctx,`k = ${k}`,q0+qw-8,y+rh/2+9,css("--accent"),"right",10); }
+      const p=pts[r.i], d=r.D[met]*U;
+      tip({x:q0+4,y:y-rh/2,w:qw-8,h:rh},[[ptName(p)],where(p.u,p.v,p.raw),
+        MET.map((m,mi)=>`${m} ${(r.D[mi]*U).toFixed(dd)}`).join(" · "),
+        j<kk?[`${j+1}. komşu (${MET[met]}): oy veriyor`+(wtd?` · w = ${d<1e-12?"∞":(1/d).toFixed(2)}`:""),"--accent"]
+            :[`${j+1}. sırada: k = ${k} dışında, oy vermiyor`,"--ink-soft"]]);
     });
     const r=vote(qry.u,qry.v);
+    if(r) tip({x:q0+4,y:qy+qh-42,w:qw-8,h:38},[[`Sorgu · tahmin ${S().cls[r.c]}`,"--accent"],where(qry.u,qry.v),oyTxt(r),`P = ${r.P.toFixed(2)}`]);
     if(r){
       const nm=S().cls, f2=(x)=>x.toFixed(2);
       const l1=wtd?`Σw: ${nm[0]} ${f2(r.wa/U)} · ${nm[1]} ${f2(r.wb/U)}`:`oy: ${nm[0]} ${r.a} · ${nm[1]} ${r.b}`;
@@ -4644,12 +4694,22 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(g.x0,g.y0,g.w,g.h);ctx.restore();
 
     const C=curves();
+    /* fare ipucu · zemin: imleç sorgu noktası, KNN'in orada ne dediği (noktalar bunun üstünde) */
+    if(pts.length) tip({x:g.x0,y:g.y0,w:g.w,h:g.h},(mx,my)=>{
+      const u=clamp(g.ix(mx),0,1), v=clamp(g.iy(my),0,1), r=vote(u,v,true); if(!r) return null;
+      const nb=r.nb, far=nb[nb.length-1].d;
+      return [[`Sorgu noktası · tahmin ${S().cls[r.c]}`,"--accent"],where(u,v),`${oyTxt(r)} · P = ${r.P.toFixed(2)}`,
+        fixed()?"komşular "+nb.map(o=>`${pts[o.i].nm||"·"} ${fd(o.d)}`).join(", ")
+               :`${nb.length}. komşu ${fd(far)} uzakta (kesikli sınır)`]; });
     /* test noktaları: soluk halka; şu anki k'da YANLIŞ bilinenler koyu halka */
     const kk=Math.min(k,pts.length);
     tst.forEach((q,i)=>{
-      const L=C.LS[i], wrong=!!(L&&kk&&tally(kk,L.D,L.C).c!==q.c);
+      const L=C.LS[i], pr=L&&kk?tally(kk,L.D,L.C).c:null, wrong=pr!==null&&pr!==q.c;
       ctx.save();ctx.beginPath();ctx.arc(g.x(q.u),g.y(q.v),wrong?5:4,0,7);
       ctx.strokeStyle=hexA(CL[q.c],wrong?.95:.45);ctx.lineWidth=wrong?2:1.4;ctx.stroke();ctx.restore();
+      tip({x:g.x(q.u),y:g.y(q.v),r:wrong?5:4},[[`Test noktası · ${S().cls[q.c]}`],where(q.u,q.v),
+        pr===null?"model yok":`k = ${kk} tahmini: ${S().cls[pr]}`,
+        pr===null?null:wrong?["yanlış biliniyor (koyu halka)","--bad"]:["doğru biliniyor","--good"]]);
     });
 
     let qr=null;
@@ -4675,7 +4735,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ctx.setLineDash([3,5]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.2;
       hood(g,qry.u,qry.v,far);ctx.stroke();ctx.restore();
     }
-    pts.forEach(p=>disc(ctx,g.x(p.u),g.y(p.v),7,css(CL[p.c]),css("--surface")));
+    pts.forEach(p=>{ disc(ctx,g.x(p.u),g.y(p.v),7,css(CL[p.c]),css("--surface"));
+      /* eğitim noktası kendi komşuluğunda (k = 1'de eğitim hatası %0 olmasının sebebi) */
+      tip({x:g.x(p.u),y:g.y(p.v),r:7},()=>{ const r=vote(p.u,p.v);
+        return [[ptName(p)],where(p.u,p.v,p.raw),
+          wtd?"ağırlıklı oy: d = 0, yalnız kendisi oy verir":`kendisi dahil k = ${Math.min(k,pts.length)} · oy ${r.a} – ${r.b}`,
+          r.c===p.c?["eğitimde doğru biliniyor","--good"]:["eğitimde yanlış biliniyor","--bad"]]; }); });
     if(fixed()) pts.forEach(p=>{ if(p.nm) label(ctx,p.nm+(S().xy&&p.raw?` (${p.raw[0]}, ${p.raw[1]})`:""),g.x(p.u)+10,g.y(p.v)-11,css("--ink"),"left",13); });
     if(qr){
       const qx=g.x(qry.u), qy=g.y(qry.v);
@@ -6268,7 +6333,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 6 · Karar ağacı ═════════════ */
 (function(){
-  const cv=$("#c-dt"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-dt"), {ctx,fit,tip}=setupCanvas(cv);
   /* view: sağ panel — "thr" eşik eğrisi · "tree" kurallar ağacı · "depth" derinlik eğrisi
      crit: 0 Gini, 1 entropi. tst: gizli test noktaları (aynı üreteçten ayrı çekim). */
   let pts=[], tst=[], axis="u", thr=.5, depth=1, view="thr", crit=0, ver=0;
@@ -6284,6 +6349,20 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const fv=(ax,t)=>{const r=rng(ax), d=ax==="u"?S().xd:S().yd;
     return (r[0]+t*(r[1]-r[0])).toFixed(d===undefined?2:d);};
   const nm=(ax)=>ax==="u"?(S().xs||"x"):(S().ys||"y");
+  /* fare ipucu: eşik ve aralıklar verinin biriminde (eksi "−"); bir kutunun kuralı
+     kenarlarından okunur (0 / 1 kenarı serbest, her eksende en çok iki eşik) */
+  const fvm=(ax,t)=>fv(ax,t).replace("-","−");
+  function rule(b){
+    const one=(ax,a,z)=>a>1e-9&&z<1-1e-9?`${fvm(ax,a)} ≤ ${nm(ax)} < ${fvm(ax,z)}`:a>1e-9?`${nm(ax)} ≥ ${fvm(ax,a)}`:z<1-1e-9?`${nm(ax)} < ${fvm(ax,z)}`:null;
+    const s=[one("u",b.u0,b.u1),one("v",b.v0,b.v1)].filter(Boolean);
+    return s.length?s.join(" VE "):"her yer (henüz soru yok)";
+  }
+  const inBox=(p,b)=>p.u>=b.u0&&(p.u<b.u1||b.u1>=1)&&p.v>=b.v0&&(p.v<b.v1||b.v1>=1);
+  const pcD=(x)=>x===null||x===undefined?"—":"%"+Math.round(x*100);
+  const vtip=(x,y0,y1,rows)=>tip({x:x-5,y:Math.min(y0,y1),w:10,h:Math.abs(y1-y0)},rows);
+  const htip=(y,x0,x1,rows)=>tip({x:Math.min(x0,x1),y:y-5,w:Math.abs(x1-x0),h:10},rows);
+  const polyAt=(xs,ys,mx)=>{ if(xs.length<2) return ys[0]; let i=0; while(i<xs.length-2&&mx>xs[i+1]) i++;
+    const t=xs[i+1]>xs[i]?clamp((mx-xs[i])/(xs[i+1]-xs[i]),0,1):0; return ys[i]+(ys[i+1]-ys[i])*t; };
 
   /* Safsızlık (impurity): Gini = 1 − (p₁² + p₂²), entropi = −(p₁·log₂p₁ + p₂·log₂p₂).
      Kazanç = ebeveyn − çocukların ağırlıklı ortalaması; Gini ile « Gini kazancı »,
@@ -6393,10 +6472,24 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
        (derinlik 8'de 30+ yaprak) sorular hiç yazılmaz, ağacın İSKELETİ çizilir:
        okunmayan bir ağaç, ezberin kendisi. */
     const deep=dmax>=5||rowH<30, tiny=colW<22;
+    /* fare ipucu: her düğümün kutusu (kökten gelen eşikler), sınıf sayısı ve kazancı */
+    const box=new Map();
+    (function bw(nd,b){ box.set(nd,b); if(nd.leaf) return; const l={...b}, r={...b};
+      if(nd.ax==="u"){l.u1=nd.t;r.u0=nd.t;} else {l.v1=nd.t;r.v0=nd.t;} bw(nd.L,l); bw(nd.R,r); })(T,{u0:0,u1:1,v0:0,v1:1});
+    const n0Of=(nd)=>nd.leaf?(nd.c===0?Math.round(nd.pur*nd.n):nd.n-Math.round(nd.pur*nd.n)):n0Of(nd.L)+n0Of(nd.R);
+    const cls=S().cls;
+    const nodeRows=(nd)=>()=>{
+      if(nd.leaf){ const maj=Math.round(nd.pur*nd.n);
+        return [[`Yaprak → ${cls[nd.c]}`],`kural: ${rule(box.get(nd))}`,`${maj}/${nd.n} nokta ${cls[nd.c]} · saflık %${Math.round(nd.pur*100)}`]; }
+      const g0=fI(n0Of(nd),nd.n), g1=(nd.L.n*fI(n0Of(nd.L),nd.L.n)+nd.R.n*fI(n0Of(nd.R),nd.R.n))/nd.n;
+      return [[`${nd.root?"Kök sorusu":"Soru"}: ${nm(nd.ax)} < ${fvm(nd.ax,nd.t)}?`,nd.root?"--accent":"--ink"],
+        `${nd.n} nokta geliyor · evet ${nd.L.n} · hayır ${nd.R.n}`,`${CRIT[crit]} ${fmt(g0)} → ${fmt(g1)}`,
+        [`${crit?"information gain":"Gini kazancı"} ${fmt(g0-g1)}`,"--good"]]; };
     if(tiny){
       lay.forEach(nd=>{ const x=PX(nd), y=PY(nd);
         if(nd.leaf) disc(ctx,x,y,3.2,css(nd.c===0?"--a":"--b"));
-        else disc(ctx,x,y,nd.root?5:3.5,css(nd.root?"--accent":"--ink-soft")); });
+        else disc(ctx,x,y,nd.root?5:3.5,css(nd.root?"--accent":"--ink-soft"));
+        tip({x,y,r:nd.leaf?3.2:nd.root?5:3.5},nodeRows(nd)); });
       label(ctx,"kurallar ağacı · "+nl+" yaprak",x0+8,y0+14,css("--accent"),"left",11);
       label(ctx,"sorular sığmıyor: ağaç nokta ezberliyor",x0+8,y0+h-10,css("--ink-soft"),"left",10);
       return;
@@ -6407,6 +6500,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         const col=nd.c===0?"--a":"--b", maj=Math.round((nd.pur||1)*nd.n);
         disc(ctx,x,y,deep?5.5:7.5,hexA(col,.35+.6*(((nd.pur||.5)-.5)*2)),css(col));
         if(!deep) label(ctx,maj+"/"+nd.n,x,y+17,css("--ink-soft"),"center",fs);
+        tip({x,y,r:deep?5.5:7.5},nodeRows(nd));
         return;
       }
       const t=`${deep&&colW<56?nm(nd.ax).slice(0,1):nm(nd.ax)} < ${fv(nd.ax,nd.t)}`;
@@ -6417,6 +6511,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(ctx.roundRect) ctx.roundRect(x-tw/2,y-9,tw,18,5); else ctx.rect(x-tw/2,y-9,tw,18);
       ctx.fill();ctx.stroke();ctx.restore();
       label(ctx,t,x,y+.5,nd.root?css("--accent"):css("--ink"),"center",fs);
+      tip({x:x-tw/2,y:y-9,w:tw,h:18},nodeRows(nd));
     });
     label(ctx,"kurallar ağacı · "+nl+" yaprak",x0+8,y0+14,css("--accent"),"left",11);
     label(ctx,"sol dal: evet · sağ dal: hayır",x0+8,y0+h-10,css("--ink-soft"),"left",10);
@@ -6441,6 +6536,18 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.beginPath();ctx.moveTo(CX(bm.t),qy);ctx.lineTo(CX(bm.t),qy+qh);ctx.stroke();ctx.restore();
     disc(ctx,CX(bm.t),CY(bm.g),5,css("--good"),css("--surface"));
     disc(ctx,CX(thr),CY(wImp(pts,axis,thr)),6,css("--accent"),css("--surface"));
+    /* fare ipucu: imlecin eşiğinde bölme sonrası safsızlık; kesikli taban, en iyi eşik, seçili eşik */
+    const tAt=(mx)=>clamp((mx-q0)/qw,0,1);
+    const thrRows=(t,head)=>{ const g=wImp(pts,axis,t), nl=pts.filter(q=>q[axis]<t).length;
+      return [head||[`Eşik: ${nm(axis)} < ${fvm(axis,t)}`],`ağırlıklı ${CRIT[crit]} ${fmt(g)} (önce ${fmt(g0)})`,
+        `${crit?"information gain":"Gini kazancı"} ${fmt(g0-g)}`,`evet ${nl} · hayır ${pts.length-nl} nokta`]; };
+    tip({x:q0,y:qy,w:qw,h:qh},(mx)=>thrRows(tAt(mx)));
+    htip(CY(g0),q0,q0+qw,[[`Bölmeden önce: ${CRIT[crit]} ${fmt(g0)}`],`${pts.length} noktanın hepsi tek kutuda`,"eğri bunun altına indikçe bölme işe yarıyor"]);
+    vtip(CX(bm.t),qy,qy+qh,thrRows(bm.t,[`En iyi eşik: ${nm(axis)} < ${fvm(axis,bm.t)}`,"--good"]));
+    const cxs=curve.map(c=>CX(c.t)), cys=curve.map(c=>CY(c.g));
+    tip({x0:q0,x1:q0+qw,fy:(mx)=>polyAt(cxs,cys,mx)},(mx)=>thrRows(tAt(mx)));
+    tip({x:CX(bm.t),y:CY(bm.g),r:5},thrRows(bm.t,[`En iyi eşik: ${nm(axis)} < ${fvm(axis,bm.t)}`,"--good"]));
+    tip({x:CX(thr),y:CY(wImp(pts,axis,thr)),r:6},thrRows(thr,[`Seçili kök eşiği: ${nm(axis)} < ${fvm(axis,thr)}`,"--accent"]));
     legend(ctx,q0+8,qy+qh-46,[["ağırlıklı "+CRIT[crit],"--accent"],["bölmeden önce (kesikli)","--ink-soft"],["en iyi eşik","--good"]],{size:12,lh:17});
     label(ctx,`eşik (${nm(axis)}) →`,q0+qw/2,qy+qh+16,css("--ink-soft"),"center",11);
   }
@@ -6469,6 +6576,21 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     const tr=D.tr[depth-1], te=D.te[depth-1];
     if(te!==null) disc(ctx,EX(depth),EY(te),5.5,css("--bad"),css("--surface"));
     if(tr!==null) disc(ctx,EX(depth),EY(tr),5.5,css("--a"),css("--surface"));
+    /* fare ipucu: en yakın derinliğin iki doğruluğu ve yaprak sayısı; şerit, seçili derinlik, eğriler, noktalar */
+    const dAt=(mx)=>clamp(Math.round(1+(mx-q0-14)/(qw-28)*(DMAX-1)),1,DMAX);
+    const dRows=(d,head)=>{ const i=d-1, sel=d===depth;
+      return [head||[sel?`Seçili derinlik ${d}`:`Derinlik ${d}`,sel?"--accent":"--ink"],
+        `eğitim ${pcD(D.tr[i])} · test ${D.te[i]===null?"yok":pcD(D.te[i])}`,`${D.lf[i]} yaprak`,
+        bd&&d===bd.d?["en iyi test derinliği","--good"]:head&&sel?["seçili derinlik","--accent"]:null]; };
+    tip({x:q0,y:qy,w:qw,h:qh},(mx)=>dRows(dAt(mx)));
+    if(bd) tip({x:EX(bd.d)-8,y:qy,w:16,h:qh},dRows(bd.d,[`En iyi test derinliği · ${bd.d}`,"--good"]));
+    vtip(EX(depth),qy,qy+qh,dRows(depth));
+    const dx=D.tr.map((_,i)=>EX(i+1));
+    [[D.tr,"Eğitim doğruluğu","--a"],[D.te,"Test doğruluğu","--bad"]].forEach(([arr,nmS,tok])=>{
+      if(arr.some(v=>v===null)) return;
+      const ys=arr.map(EY);
+      tip({x0:EX(1),x1:EX(DMAX),fy:(mx)=>polyAt(dx,ys,mx),d:6},(mx)=>{ const d=dAt(mx); return dRows(d,[`${nmS} · derinlik ${d}: ${pcD(arr[d-1])}`,tok]); });
+      arr.forEach((v,i)=>tip({x:EX(i+1),y:EY(v),r:i+1===depth?5.5:2.6},dRows(i+1,[`${nmS} · derinlik ${i+1}: ${pcD(v)}`,tok]))); });
     legendRow(ctx,q0,qy-12,[["eğitim doğruluğu","--a"],te!==null?["test doğruluğu","--bad"]:["test noktası yok","--ink-soft"],
       bd&&[`en iyi test: ${bd.d}`,"--good"]],10.5,qw);
     for(let d=1;d<=DMAX;d++) label(ctx,String(d),EX(d),qy+qh+14,css(d===depth?"--accent":"--ink-soft"),"center",10.5);
@@ -6484,10 +6606,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
     const D=depths(), T=D.T[depth-1], outs=[], lines=[];
     if(T) leaves(T,{u0:0,u1:1,v0:0,v1:1},outs,lines,0);
+    const cls=S().cls;
     outs.forEach(o=>{
       const col=o.node.c===0?"--a":"--b";
       ctx.fillStyle=hexA(col,0.08+0.26*((o.node.pur||.5)-.5)*2);
       ctx.fillRect(X(o.rect.u0),Y(o.rect.v1),(o.rect.u1-o.rect.u0)*mw,(o.rect.v1-o.rect.v0)*mh);
+      /* fare ipucu · yaprağın kutusu: kuralı, eğitimdeki çoğunluğu, içine düşen test noktaları */
+      tip({x:X(o.rect.u0),y:Y(o.rect.v1),w:(o.rect.u1-o.rect.u0)*mw,h:(o.rect.v1-o.rect.v0)*mh},()=>{
+        const nd=o.node, maj=Math.round(nd.pur*nd.n), ts=tst.filter(q=>inBox(q,o.rect)), ok=ts.filter(q=>q.c===nd.c).length;
+        return [[`Yaprak → ${cls[nd.c]}`],`kural: ${rule(o.rect)}`,`eğitim: ${maj}/${nd.n} nokta ${cls[nd.c]} · saflık %${Math.round(nd.pur*100)}`,
+          ts.length?`test: ${ok}/${ts.length} doğru`:null]; });
     });
     ctx.save();ctx.strokeStyle=css("--grid");ctx.lineWidth=1;
     for(let i=0;i<=10;i++){
@@ -6505,12 +6633,25 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(l.ax==="u"){ctx.moveTo(X(l.t),Y(l.rect.v0));ctx.lineTo(X(l.t),Y(l.rect.v1));}
       else{ctx.moveTo(X(l.rect.u0),Y(l.t));ctx.lineTo(X(l.rect.u1),Y(l.t));}
       ctx.stroke();ctx.restore();
+      /* fare ipucu · bölme çizgisi: kutusundaki noktalar, safsızlık önce → sonra, kazanç */
+      const sh=l.ax==="u"?{x:X(l.t)-5,y:Y(l.rect.v1),w:10,h:(l.rect.v1-l.rect.v0)*mh}:{x:X(l.rect.u0),y:Y(l.t)-5,w:(l.rect.u1-l.rect.u0)*mw,h:10};
+      tip(sh,()=>{ const sub=pts.filter(q=>inBox(q,l.rect)), nl=sub.filter(q=>q[l.ax]<l.t).length, g0=imp(sub), g1=wImp(sub,l.ax,l.t);
+        return [[`${l.lvl===0?"Kök sorusu":(l.lvl+1)+". seviye sorusu"}: ${nm(l.ax)} < ${fvm(l.ax,l.t)}?`,l.lvl===0?"--accent":"--ink"],
+          `kutusunda ${sub.length} nokta · evet ${nl} · hayır ${sub.length-nl}`,`${CRIT[crit]} ${fmt(g0)} → ${fmt(g1)}`,
+          [`${crit?"information gain":"Gini kazancı"} ${fmt(g0-g1)}`,"--good"]]; });
     });
     /* test noktaları: soluk halka; şu anki ağacın YANLIŞ bildiği koyu halka */
+    const at=(q)=>`${nm("u")} ${fvm("u",q.u)} · ${nm("v")} ${fvm("v",q.v)}`;
     tst.forEach(q=>{ const wrong=T&&predict(T,q)!==q.c, col=q.c===0?"--a":"--b";
       ctx.save();ctx.beginPath();ctx.arc(X(q.u),Y(q.v),wrong?5:4,0,7);
-      ctx.strokeStyle=hexA(col,wrong?.95:.45);ctx.lineWidth=wrong?2:1.4;ctx.stroke();ctx.restore(); });
-    pts.forEach(q=>disc(ctx,X(q.u),Y(q.v),6.5,css(q.c===0?"--a":"--b"),css("--surface")));
+      ctx.strokeStyle=hexA(col,wrong?.95:.45);ctx.lineWidth=wrong?2:1.4;ctx.stroke();ctx.restore();
+      tip({x:X(q.u),y:Y(q.v),r:wrong?5:4},()=>{ const pr=T?predict(T,q):null;
+        return [[`Test noktası · ${cls[q.c]}`],at(q),pr===null?null:pr===q.c?[`ağaç: ${cls[pr]} → doğru`,"--good"]:[`ağaç: ${cls[pr]} → yanlış (koyu halka)`,"--bad"]]; }); });
+    pts.forEach(q=>{ disc(ctx,X(q.u),Y(q.v),6.5,css(q.c===0?"--a":"--b"),css("--surface"));
+      tip({x:X(q.u),y:Y(q.v),r:6.5},()=>{ const pr=T?predict(T,q):null;
+        return [[`${q.nm?"No "+q.nm:"Eğitim noktası"} · ${cls[q.c]}`],at(q),
+          pts.length>1?`kök: ${nm(axis)} < ${fvm(axis,thr)}? ${q[axis]<thr?"evet":"hayır"}`:null,
+          pr===null?null:pr===q.c?[`ağaç: ${cls[pr]} → doğru`,"--good"]:[`ağaç: ${cls[pr]} → yanlış`,"--bad"]]; }); });
     if(S().gen==="fixed") pts.forEach(q=>{ if(q.nm) label(ctx,q.nm,X(q.u)+9,Y(q.v)-10,css("--ink"),"left",11.5); });
     /* kök eşiği haritada, veri biriminde */
     if(pts.length>1){
@@ -10030,7 +10171,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 15 · Torbalama ve rastgele orman ═════════════ */
 (function(){
-  const cv=$("#c-ens"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-ens"), {ctx,fit,tip}=setupCanvas(cv);
   const MAXT=40;                                  /* orman hep 40 ağaç kurar, k yalnız kaçının oy verdiğini seçer */
   let pts=[], k=24, depth=4, mtry=1, shape="diag", seed=7, timer=0, bag=false;
   /* soft: yumuşak oylama (yapraktaki oranların ortalaması, scikit-learn'ün yaptığı);
@@ -10304,6 +10445,17 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     return {p,split,W,H,wide,mw:split-2*p,mh:H-2*p};};
   const FN=()=>useId?["x₁","x₂","kimlik"]:["x₁","x₂"];
   const pc=(x)=>x===null||x===undefined?"—":(x*100).toFixed(1)+"%";
+  /* fare ipucu: eksenler 0–1 ölçekli (gerçek birim yok), birimi eksen adından düşer */
+  const axS=(s)=>s.replace(/\s*\([^)]*\)\s*$/,"");
+  const at=(u,v)=>{ const t=`${axS(S().x)} ${u.toFixed(2)} · ${axS(S().y)} ${v.toFixed(2)}`;   /* kutu ~50 karakter */
+    return t.length<=36?t+" (0–1 ölçekli)":t.length<=44?t+" (0–1)":t; };
+  const n1=(x)=>Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):x.toFixed(1);
+  const vtip=(x,y0,y1,rows)=>tip({x:x-5,y:Math.min(y0,y1),w:10,h:Math.abs(y1-y0)},rows);
+  const htip=(y,x0,x1,rows)=>tip({x:Math.min(x0,x1),y:y-5,w:Math.abs(x1-x0),h:10},rows);
+  const polyAt=(xs,ys,mx)=>{ if(xs.length<2) return ys[0]; let i=0; while(i<xs.length-2&&mx>xs[i+1]) i++;
+    const t=xs[i+1]>xs[i]?clamp((mx-xs[i])/(xs[i+1]-xs[i]),0,1):0; return ys[i]+(ys[i+1]-ys[i])*t; };
+  /* oylamaya giren ilk k ağaçtan kökte f özniteliğini soran */
+  const rootN=(f)=>{ let c=0; for(let t=0;t<Math.min(k,trees.length);t++){ const r=trees[t].root; if(!r.leaf&&r.f===f) c++; } return c; };
 
   function draw(){
     if(!fit()) return;
@@ -10336,9 +10488,27 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     /* soft voting seçiliyken hard voting'in sınırı ince çizgiyle: fark ekranda görünsün */
     if(L&&soft&&!bagT) contour(L.P2,L.cols,L.rows,rx,ry,rw/(L.cols-1),rh/(L.rows-1),css("--ink-soft"),1.6);
     if(L) contour(L.P,L.cols,L.rows,rx,ry,rw/(L.cols-1),rh/(L.rows-1));
+    /* fare ipucu · zemin: o hücrede topluluğun kararı, iki oylamanın değeri, torbada k. ağacınki */
+    if(L) tip({x:rx,y:ry,w:rw,h:rh},(mx,my)=>{
+      const u=clamp((mx-rx)/rw,0,1), v=clamp((ry+rh-my)/rh,0,1), cls=S().cls;
+      const id=Math.round((1-v)*(L.rows-1))*L.cols+Math.round(u*(L.cols-1)), pv=L.P[id];
+      const hv=soft?L.P2[id]:pv, sv=soft?pv:L.P2[id];
+      const hard=`hard: ${cls[1]} diyen ${n1(hv*k)} / ${k} ağaç`, sft=`soft: ortalama p̂(${cls[1]}) = ${sv.toFixed(2)}`;
+      return [[`Topluluk kararı · ${cls[pv>=.5?1:0]}`],at(u,v),soft?sft:hard,
+        bagT?[`${k}. ağaç burada: ${cls[gc.hc[id*MAXT+k-1]>=.5?1:0]}`,"--ink"]
+          :Math.abs(pv-.5)<.08?["sınırda: oylar başa baş","--accent"]:[soft?hard:sft,"--ink-soft"]]; });
 
     pts.forEach((q,i)=>{
       const col=css(q.c?"--b":"--a"), x=X(q.u), y=Y(q.v);
+      /* fare ipucu · nokta: onu torbasında hiç görmeyen ağaçların oyu (OOB), torba görünümünde kaç kez girdiği */
+      tip({x,y,r:4.6},()=>{ const cls=S().cls; let a=0,b=0,m=0,ps=0;
+        for(let t=0;t<Math.min(k,trees.length);t++){ const tr=trees[t]; if(tr.cnt[i]) continue;
+          const Lf=leafOf(tr.root,q); m++; if(Lf.c) b++; else a++; ps+=Lf.p; }
+        const ok=m?(((soft?ps/m:b/m)>=.5?1:0)===q.c):null;
+        return [[`Nokta · ${cls[q.c]}`],at(q.u,q.v),
+          bagT?(bagT.cnt[i]?`${k}. ağacın torbasında ${bagT.cnt[i]} kez`:[`${k}. ağaç bu noktayı hiç görmedi (OOB)`,"--accent"]):null,
+          m?[`OOB (${m} ağaç): `+(soft?`p̂ = ${(ps/m).toFixed(2)}`:`${cls[0]} ${a} · ${cls[1]} ${b}`)+` → ${ok?"doğru":"yanlış"}`,ok?"--good":"--bad"]
+           :trees.length?"her ağacın torbasında: OOB oyu yok":null]; });
       if(bagT&&!bagT.cnt[i]){
         ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.beginPath();ctx.arc(x,y,4.2,0,7);ctx.stroke();ctx.restore();
         return;
@@ -10388,6 +10558,18 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         ctx.beginPath(); ctx.moveTo(CX(k),qy); ctx.lineTo(CX(k),qy+qh); ctx.stroke(); ctx.restore();
         const cur=C.oob[k-1];
         if(cur!==null&&cur!==undefined) disc(ctx,CX(k),CY(cur),5.5,css("--accent"),css("--surface"));
+        /* fare ipucu: en yakın ağaç sayısında üç doğruluk; tek ağaç çizgisi, seçili k, eğriler */
+        const tAt=(mx)=>clamp(Math.round(1+(mx-q0)/qw*(MAXT-1)),1,MAXT);
+        const oRows=(t,head)=>[head||[t===k?`Seçili: ${t} ağaç`:`${t} ağaç`,t===k?"--accent":"--ink"],
+          [`orman OOB ${pc(C.oob[t-1])}`,"--good"],`eğitim doğruluğu ${pc(C.tr[t-1])}`,`tek ağaç OOB ${pc(singleOOB)}`];
+        tip({x:q0,y:qy,w:qw,h:qh},(mx)=>oRows(tAt(mx)));
+        if(singleOOB!==null) htip(CY(singleOOB),q0,q0+qw,[["Tek ağaç · OOB doğruluğu"],pc(singleOOB),"her ağacın kendi OOB noktalarında ortalaması"]);
+        vtip(CX(k),qy,qy+qh,oRows(k));
+        const tx=C.oob.map((_,i)=>CX(i+1));
+        [[C.oob,"Orman · OOB","--good"],[C.tr,"Eğitim doğruluğu","--bad"]].forEach(([arr,nmS,tok])=>{
+          if(arr.some(a=>a===null)) return; const ys=arr.map(CY);
+          tip({x0:q0,x1:q0+qw,fy:(mx)=>polyAt(tx,ys,mx),d:6},(mx)=>{ const t=tAt(mx); return oRows(t,[`${nmS} · ${t} ağaç: ${pc(arr[t-1])}`,tok]); }); });
+        if(cur!==null&&cur!==undefined) tip({x:CX(k),y:CY(cur),r:5.5},oRows(k));
       }
       legend(ctx,q0+8,qy+qh-(qh<90?30:46),qh<90?[["orman · OOB","--good"],["tek ağaç · OOB","--warn"]]
         :[["orman · OOB","--good"],["tek ağaç · OOB","--warn"],["eğitim doğruluğu","--bad"]],{size:10.5,lh:16});
@@ -10413,6 +10595,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
           ctx.restore();
           label(ctx,st.gi[f].toFixed(2),W-42,ym,css("--c"),"right",10);
           label(ctx,st.pi[f].toFixed(2),W-6,ym,css("--good"),"right",10);
+          /* fare ipucu · öznitelik satırı: iki önem ve kökte soran ağaç sayısı */
+          tip({x:q0,y:y0-2,w:W-4-q0,h:rh2},()=>{ const d=st.pi[f]*100, a=Math.abs(st.pi[f]).toFixed(2);
+            return [[f<2?`${nm} · ${axS(f?S().y:S().x)}`:"kimlik · sonuçla ilgisiz numara"],
+              [`Gini önemi ${st.gi[f].toFixed(2)}: bölmelerdeki payı`,"--c"],
+              [`permütasyon ${d<0&&+a!==0?"−":""}${a}: karıştırınca OOB ${Math.abs(d).toFixed(1)} puan ${d>=0?"düşer":"artar"}`,"--good"],
+              `kökte soran ağaç ${rootN(f)} / ${k}`]; });
         });
       }
     }
@@ -10501,7 +10689,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 31 · Boosting (AdaBoost, karar kütükleri) ═════════════ */
 (function(){
-  const cv=$("#c-boost"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-boost"), {ctx,fit,tip}=setupCanvas(cv);
   /* Bütün turlar (TMAX) veri ya da learning rate değişince BİR KEZ hesaplanır; « Tur »
      kaydırıcısı yalnız kaçıncı turun gösterileceğini seçer (m-ens'in ağaç sayısı gibi).
      « Sonraki tur » ve « Koştur » da yalnız kaydırıcıyı sürer: durum hep tutarlı,
@@ -10656,6 +10844,14 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const unit=(f,x)=>{const r=(f?S().yr:S().xr)||[0,1]; const val=r[0]+x*(r[1]-r[0]);
     return Math.abs(r[1]-r[0])>=100?Math.round(val).toString():val.toFixed(1);};
   const say=(s)=>s?`${FN(s.f)} < ${unit(s.f,s.thr)} → ${S().cls[s.pol===1?0:1]}`:"";
+  /* fare ipucu: konum verinin biriminde; F = ilk k kütüğün oy toplamı Σαh (+ = 2. sınıf) */
+  const at=(u,v)=>`${S().x} ${unit(0,u)} · ${S().y} ${unit(1,v)}`;
+  const sg=(x,d)=>{ const a=Math.abs(x).toFixed(d); return (+a===0?"":x<0?"−":"+")+a; };
+  const Fk=(k,u,v)=>{ let F=0,sa=0; for(let j=0;j<k;j++){ const s=B.st[j]; sa+=s.alpha; F+=s.alpha*hs(s,s.f?v:u); } return [F,sa]; };
+  const vtip=(x,y0,y1,rows)=>tip({x:x-5,y:Math.min(y0,y1),w:10,h:Math.abs(y1-y0)},rows);
+  const htip=(y,x0,x1,rows)=>tip({x:Math.min(x0,x1),y:y-5,w:Math.abs(x1-x0),h:10},rows);
+  const polyAt=(xs,ys,mx)=>{ if(xs.length<2) return ys[0]; let i=0; while(i<xs.length-2&&mx>xs[i+1]) i++;
+    const t=xs[i+1]>xs[i]?clamp((mx-xs[i])/(xs[i+1]-xs[i]),0,1):0; return ys[i]+(ys[i+1]-ys[i])*t; };
 
   /* ── zemin: oy toplamı F = Σ αₖhₖ. Kütükler eksene dik olduğu için F(u, v) = g₁(u) + g₂(v):
        her sütun ve satır için bir kez toplanır. Hücre başına BİR piksel, yumuşatılarak büyütülür. ── */
@@ -10703,10 +10899,18 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     if(P){ ctx.save(); ctx.beginPath();
       isoline(ctx,P,cols,rows,rx,ry,rw/(cols-1),rh/(rows-1),1e-9);
       ctx.strokeStyle=css("--accent"); ctx.lineWidth=3.2; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.stroke(); ctx.restore(); }
+    /* fare ipucu · zemin: o noktada topluluğun oy toplamı (sınır F = 0) */
+    if(k) tip({x:rx,y:ry,w:rw,h:rh},(mx,my)=>{
+      const u=clamp((mx-rx)/rw,0,1), v=clamp((ry+rh-my)/rh,0,1), [F,sa]=Fk(k,u,v), Fn=sa>0?F/sa:0;
+      return [[`Topluluk kararı · ${cls[F>1e-9?1:0]}`],at(u,v),`oy toplamı F = Σα·h = ${sg(F,3)} (${k} kütük)`,
+        Math.abs(Fn)<.05?["sınırda: oylar başa baş","--accent"]:`${cls[1]} diyen oyların payı %${Math.round((1+Fn)/2*100)}`]; });
     /* son kütük: kesikli çizgi */
     if(st.s){ const s=st.s; ctx.save(); ctx.strokeStyle=css("--ink"); ctx.lineWidth=2; ctx.setLineDash([7,5]); ctx.beginPath();
       if(!s.f){ctx.moveTo(X(s.thr),Y(0));ctx.lineTo(X(s.thr),Y(1));} else {ctx.moveTo(X(0),Y(s.thr));ctx.lineTo(X(1),Y(s.thr));}
-      ctx.stroke(); ctx.restore(); }
+      ctx.stroke(); ctx.restore();
+      const rows=[[`${k}. kütük: ${say(s)}`],`ağırlıklı hata ε ${s.eps.toFixed(3)} → oy α ${s.alpha.toFixed(3)}`,
+        `yanıldığı noktaların yeni ağırlık payı ${st.share.toFixed(3)}`];
+      if(!s.f) vtip(X(s.thr),Y(0),Y(1),rows); else tip({x:X(0),y:Y(s.thr)-5,w:rw,h:10},rows); }
 
     /* noktalar: renk gerçek sınıf, boy ağırlık (eşit ağırlıkta 4.6 px, ortalamanın 10 katında 11). Büyükler önce çizilir,
        küçükler üstte kalsın; büyük daire yarı saydam, altındaki nokta görünsün. */
@@ -10717,6 +10921,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(r>7){ ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fillStyle=hexA(tok,.42); ctx.fill();
         ctx.lineWidth=1.8; ctx.strokeStyle=css(tok); ctx.stroke(); ctx.restore(); }
       else disc(ctx,x,y,r,css(tok),hexA("--surface",.85));
+      /* fare ipucu · nokta: ağırlığı (boyu) ve ilk k kütüğün ona kararı */
+      tip({x,y,r},()=>{ const wi=w?w[i]:1/n, pr=k?(Fk(k,q.u,q.v)[0]>0?1:0):null;
+        return [[`Nokta · ${cls[q.c]}`+(q.fl?" (ters etiket)":"")],at(q.u,q.v),`ağırlık ${wi.toFixed(4)} · ortalamanın ${(wi*n).toFixed(1)} katı`,
+          pr===null?"henüz kütük yok":pr===q.c?[`topluluk: ${cls[pr]} → doğru`,"--good"]:[`topluluk: ${cls[pr]} → yanlış`,"--bad"]]; });
     });
 
     /* lejant: veri noktası en az olan köşeye (köşe verisinde kayıp bölgesi sol üstte) */
@@ -10760,6 +10968,20 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         ctx.beginPath(); ctx.moveTo(CX(k),qy); ctx.lineTo(CX(k),qy+qh); ctx.stroke(); ctx.restore();
         disc(ctx,CX(k),CY(st.tr),4.5,css("--a"),css("--surface"));
         if(st.te!==null) disc(ctx,CX(k),CY(st.te),5,css("--bad"),css("--surface")); }
+      /* fare ipucu: çizilen turlarda en yakın turun iki hatası; kıyas çizgileri, seçili tur, eğriler */
+      const rAt=(mx)=>clamp(Math.round(Math.exp((mx-q0)/qw*Math.log(TMAX))),1,TMAX);
+      const eRows=(r,head)=>[head||[r===k?`Seçili tur ${r}`:`Tur ${r}`,r===k?"--accent":"--ink"],
+        `eğitim hatası ${pc(B.trE[r-1])}`,`test hatası ${pc(B.teE[r-1])}`,st.tmin===r-1?["en düşük test hatası","--good"]:null];
+      if(k) tip({x:q0,y:qy,w:CX(k)-q0+3,h:qh},(mx)=>eRows(Math.min(rAt(mx),k)));
+      if(rfE!==null) htip(CY(rfE),q0,q0+qw,[["Random forest · test hatası","--good"],pc(rfE),`aynı eğitim verisinde ${NRF} ağaç`]);
+      if(oneE!==null) htip(CY(oneE),q0,q0+qw,[["Tek ağaç · test hatası"],pc(oneE),"derinliği sınırsız tek ağaç"]);
+      if(k){ vtip(CX(k),qy,qy+qh,eRows(k));
+        const ex=B.trE.slice(0,k).map((_,i)=>CX(i+1));
+        [[B.trE,"Eğitim hatası","--a"],[B.teE,"Test hatası","--bad"]].forEach(([arr,nmS,tok])=>{
+          const a=arr.slice(0,k); if(a.some(e=>e===null)) return; const ys=a.map(CY);
+          tip({x0:q0,x1:CX(k),fy:(mx)=>polyAt(ex,ys,mx),d:6},(mx)=>{ const r=Math.min(rAt(mx),k); return eRows(r,[`${nmS} · tur ${r}: ${pc(arr[r-1])}`,tok]); }); });
+        tip({x:CX(k),y:CY(st.tr),r:4.5},eRows(k));
+        if(st.te!==null) tip({x:CX(k),y:CY(st.te),r:5},eRows(k)); }
       legend(ctx,q0+qw-8,qy+14,[["eğitim hatası","--a"],["test hatası","--bad"],
         rfE!==null&&["random forest · test","--good"],oneE!==null&&["tek ağaç · test","--warn"]],{size:10.5,lh:15,align:"right"});
 
@@ -10771,6 +10993,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(q0,by+bh); ctx.lineTo(q0+qw,by+bh); ctx.stroke(); ctx.restore();
         for(let r=1;r<=k;r++){ const a=B.st[r-1].alpha, x=CX(r), hgt=Math.max(1,bh*a/am);
           ctx.fillStyle=css(r===k?"--accent":"--c"); ctx.fillRect(x-(r===k?1.5:1),by+bh-hgt,r===k?3:2,hgt); }
+        /* fare ipucu · α çubukları: imlece en yakın kütük (çubuklar log eksende sık, tek dikdörtgen) */
+        if(k) tip({x:q0-3,y:by,w:CX(k)-q0+6,h:bh},(mx)=>{ const r=Math.min(rAt(mx),k), s=B.st[r-1];
+          return [[`${r}. kütük: ${say(s)}`,r===k?"--accent":"--ink"],`ε ${s.eps.toFixed(3)} → α ${s.alpha.toFixed(3)}`,
+            `en büyük α'ya oranı ${(s.alpha/am).toFixed(2)}`]; });
       }
     }
 
@@ -14687,7 +14913,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 16 · En geniş yol (SVM) ═════════════ */
 (function(){
-  const cv=$("#c-svm"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-svm"), {ctx,fit,tip}=setupCanvas(cv);
   const DS=SETS("m-svm"); let dsi=0; const S=()=>DS[dsi];
   /* pts: eğitim noktaları (sürüklenir, tıklanınca eklenir); tst: aynı üreteçten ayrı
      çekilmiş test noktaları — modele hiç girmez, yalnız "Test doğruluğu"nu ölçer.
@@ -14837,6 +15063,11 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const mTxt=()=>!model?"—":kern!=="lin"?"eğri sınır":flat()?"∞ (w ≈ 0)":fmt(model.marg,2);
   const axName=(nm,x)=>nm===x?x:x+": "+nm;
   const pc=(v)=>v===null||v===undefined?"—":"%"+(v*100).toFixed(0);
+  /* fare ipucu: konum verinin biriminde (iki eksen aynı aralıkta); y·f noktanın yoldaki yeri */
+  const at=(u,v)=>`${S().x} ${nf2(DX(u))} · ${S().y} ${nf2(DX(v))}`;
+  const yf=(m)=>m<0?[`y·f = ${nf2(m)} · yanlış tarafta`,"--bad"]:m<1-1e-3?[`y·f = ${nf2(m)} · yolun içinde (taşan)`,"--bad"]
+    :m<1+1e-3?`y·f = ${nf2(m)} · tam kaldırımda`:`y·f = ${nf2(m)} · yolun dışında`;
+  const htip=(y,x0,x1,rows)=>tip({x:Math.min(x0,x1),y:y-5,w:Math.abs(x1-x0),h:10},rows);
 
   function draw(){
     if(!fit()) return;
@@ -14903,19 +15134,44 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ctx.strokeStyle=css("--accent");ctx.lineWidth=2;ctx.setLineDash([7,5]);
       ctx.beginPath();ctx.ellipse(XD(0),YD(0),Math.abs(XD(r)-XD(0)),Math.abs(YD(r)-YD(0)),0,0,7);ctx.stroke();ctx.restore();
     }
+    /* fare ipucu · harita: imlecin 6 px yakınında kalın sınır (f = 0), kaldırım (f = ±1) ya da
+       z çemberi varsa o; yoksa o noktada f ve tarafı. Yakınlık f'nin piksel başına değişiminden. */
+    tip({x:g.x0,y:g.y0,w:g.x1-g.x0,h:g.y1-g.y0},(mx,my)=>{
+      const pw=g.x1-g.x0, ph=g.y1-g.y0, u=clamp((mx-g.x0)/pw,0,1), v=clamp((g.y1-my)/ph,0,1), pos=at(u,v), cls=S().cls;
+      if(zv&&zi&&zi.t>0){ const rr=Math.sqrt(zi.t), ex=Math.abs(XD(rr)-XD(0)), ey=Math.abs(YD(rr)-YD(0));
+        if(Math.abs(Math.hypot((mx-XD(0))/ex,(my-YD(0))/ey)-1)*Math.min(ex,ey)<=6)
+          return [["z eşiğinin izi (kesikli çember)","--accent"],`x₁² + x₂² = ${zi.t.toFixed(1)} · yarıçap ${rr.toFixed(2)}`,"yandan bakıştaki düz eşik burada daire"]; }
+      if(!model) return null;
+      const f=model.f({u,v}), side=cls[f>=0?0:1];
+      if(flat()) return [[`Her yerde: ${side}`],pos,"w ≈ 0: doğrusal model yön bulamadı"];
+      const gr=Math.hypot(model.f({u:u+1/pw,v})-f,model.f({u,v:v+1/ph})-f);
+      if(gr>1e-12&&Math.abs(f)/gr<=6) return [["Karar sınırı · f = 0"],pos,kern==="lin"?eqTxt(model.w,model.b):`RBF · gamma ${fmtC(gam)} · C ${fmtC(Cv)}`];
+      if(gr>1e-12&&Math.abs(Math.abs(f)-1)/gr<=5) return [[`Kaldırım · f = ${f>0?"+1":"−1"} (${side} yanı)`],pos,
+        kern==="lin"?`margin (yolun genişliği) ${mTxt()}`:"margin'in kenarı","kaldırımdaki noktalar support vector"];
+      return [[`Bölge · ${side}`],pos,`f = ${nf2(f)}`,Math.abs(f)<1?["yolun içinde (|f| < 1)","--accent"]:"yolun dışında (|f| ≥ 1)"]; });
     /* test noktaları: içi boş, modele girmiyor */
     tst.forEach(q=>{
       ctx.save();ctx.strokeStyle=css(q.c?"--b":"--a");ctx.lineWidth=1.8;
       ctx.beginPath();ctx.arc(X(q.u),Y(q.v),4.4,0,7);ctx.stroke();ctx.restore();
+      tip({x:X(q.u),y:Y(q.v),r:4.4},()=>{ const cls=S().cls, h=[`Test noktası · ${cls[q.c]}`];
+        if(!model) return [h,at(q.u,q.v)];
+        const f=model.f(q), ok=yOf(q)*f>0;
+        return [h,at(q.u,q.v),`f = ${nf2(f)} → ${cls[f>=0?0:1]}`,ok?["doğru biliniyor","--good"]:["yanlış biliniyor","--bad"]]; });
     });
     /* eğitim noktaları: support vector'ler halkalı */
     pts.forEach((q,i)=>{
       const col=q.c?css("--b"):css("--a");
       disc(ctx,X(q.u),Y(q.v),6,col,css("--surface"));
-      if(model&&model.a[i]>model.thr){
+      const sv=!!(model&&model.a[i]>model.thr);
+      if(sv){
         ctx.save();ctx.strokeStyle=css("--bad");ctx.lineWidth=2;
         ctx.beginPath();ctx.arc(X(q.u),Y(q.v),11,0,7);ctx.stroke();ctx.restore();
       }
+      tip({x:X(q.u),y:Y(q.v),r:sv?11:6},()=>{ const h=[`Eğitim noktası · ${S().cls[q.c]}`];
+        if(!model) return [h,at(q.u,q.v)];
+        /* çözücünün ikili katsayısı yazılmıyor: Hafta 12'de α, Ridge cezası (C ≈ 1/α) */
+        return [h,at(q.u,q.v),yf(yOf(q)*model.f(q)),
+          sv?["support vector (halkalı): sınırı belirler","--bad"]:"support vector değil: sınırı etkilemez"]; });
     });
     label(ctx,axName(S().x,"x₁")+" →",g.x1,g.y1+26,css("--ink-soft"),"right",11);
     ylabel(ctx,axName(S().y,"x₂")+" →",g.x0-32,g.y0,g.y1,css("--ink-soft"),11);
@@ -14950,6 +15206,20 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         ctx.beginPath(); ctx.arc(PX(DX(q.u)),PY(DX(q.u)**2+DX(q.v)**2),3.6,0,7); ctx.stroke(); });
       pts.forEach(q=>disc(ctx,PX(DX(q.u)),PY(DX(q.u)**2+DX(q.v)**2),4.6,css(q.c?"--b":"--a"),css("--surface")));
       ctx.restore();
+      /* fare ipucu · yandan bakış: imlecin (x₁, z)'si, boşluk, düz eşik, vadi, noktaların z'si */
+      const cls=S().cls, zOf=(q)=>DX(q.u)**2+DX(q.v)**2;
+      const zSide=(z,c)=>{ if(!zi) return null; const lo3=z<zi.t, ok=c===undefined||lo3===(c===zi.inner);
+        return [`eşiğin ${lo3?"altında":"üstünde"} → ${cls[lo3?zi.inner:1-zi.inner]}`+(c===undefined?"":ok?" · doğru":" · yanlış"),c===undefined?"--ink-soft":ok?"--good":"--bad"]; };
+      tip({x:sx0,y:sy0,w:sx1-sx0,h:sy1-sy0},(mx,my)=>{ const x=l[0]+(mx-sx0)/(sx1-sx0)*span, z=(sy1-my)/(sy1-sy0)*zmax;
+        return [["Yandan bakış"],`x₁ ${nf2(x)} · z ${z.toFixed(1)}`,zSide(z)]; });
+      if(zi){ const lo2=zi.t-zi.gap/2, hi2=zi.t+zi.gap/2;
+        tip({x:sx0,y:PY(hi2),w:sx1-sx0,h:Math.max(1,PY(lo2)-PY(hi2))},[["Eşiğin boşluğu","--accent"],`z ${lo2.toFixed(1)} – ${hi2.toFixed(1)}`,"iki yanındaki en yakın noktaların arası"]);
+        htip(PY(zi.t),sx0,sx1,[[`Düz eşik z = ${zi.t.toFixed(1)}`,"--accent"],`haritada yarıçapı ${Math.sqrt(zi.t).toFixed(2)} olan çember`,`doğruluk %${(zi.acc*100).toFixed(0)}`]); }
+      tip({x0:sx0,x1:sx1,fy:(mx)=>{ const x=l[0]+(mx-sx0)/(sx1-sx0)*span; return PY(x*x); }},(mx)=>{
+        const x=l[0]+(mx-sx0)/(sx1-sx0)*span; if(PY(x*x)<sy0) return null;
+        return [["Vadi: z = x₁²"],`x₁ ${nf2(x)} → z ${(x*x).toFixed(1)}`,"x₂ = 0 olanlar burada, her nokta üstünde"]; });
+      tst.forEach(q=>tip({x:PX(DX(q.u)),y:PY(zOf(q)),r:3.6},[[`Test noktası · ${cls[q.c]}`],at(q.u,q.v),`z = x₁² + x₂² = ${zOf(q).toFixed(1)}`,zSide(zOf(q),q.c)]));
+      pts.forEach(q=>tip({x:PX(DX(q.u)),y:PY(zOf(q)),r:4.6},[[`Eğitim noktası · ${cls[q.c]}`],at(q.u,q.v),`z = x₁² + x₂² = ${zOf(q).toFixed(1)}`,zSide(zOf(q),q.c)]));
       label(ctx,"x₁ →",sx1,sy1+11,css("--ink-soft"),"right",10);
       ylabel(ctx,"z →",sx0-12,sy0,sy1,css("--ink-soft"),11);
       /* parabolün altı hep boş (z ≥ x₁²): vadi etiketi sağ alt köşeye */
