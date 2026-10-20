@@ -1657,6 +1657,102 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
       `+${mean(gap).toFixed(1)} bin ₺`);
 }
 
+/* ── 28 · Korelasyon: sunumun sayıları, aykırı nokta, Anscombe, kemer, ortak sebep ──
+   Göstergeler "−" (U+2212) yazıyor; num() eksiyi okumuyor, burada ayrı ayrıştırılır.
+   Tuval metni aria-label'da (r üç ondalık, toplamlar, katkılar, sıcaklık satırı). */
+{
+  head("Modül 28 · Birlikte artıyorlar mı (korelasyon)");
+  const {el,M}=boot(F);
+  const mod=M.find(x=>x.id==='m-corr');
+  const sn=(s)=>{const m=/(−|-)?(\d+(?:\.\d+)?)/.exec(String(s)); return m?(m[1]?-1:1)*parseFloat(m[2]):NaN;};
+  const AR=()=>el('c-corr').getAttribute('aria-label');
+  const R=()=>sn((/ r = (−?[\d.]+), r² =/.exec(AR())||[])[1]);
+  const RS=()=>T(el,'corr-r');
+  const ML=()=>{const m=/x̄ = ([^,]+), ȳ = (.+?)\. Σ/.exec(AR())||[]; return [m[1],m[2]];};
+  const SUMS=()=>{const m=/Σ\(x−x̄\)\(y−ȳ\) = ([^,]+), Σ\(x−x̄\)² = ([^,]+), Σ\(y−ȳ\)² = (.+?)\. r =/.exec(AR())||[]; return [m[1],m[2],m[3]];};
+  const LINE=()=>(/En iyi doğru: (ŷ = .+?x)\./.exec(AR())||[])[1];
+  const KAT=()=>{const m=/Artı katkı (\d+) nokta \(([^)]+)\), eksi katkı (\d+) nokta \(([^)]+)\), sıfır (\d+)/.exec(AR())||[];
+    return {np:+m[1],pos:sn(m[2]),nn:+m[3],neg:sn(m[4]),nz:+m[5]};};
+  const TS=()=>{const m=/Sıcaklık–dondurma r = (−?[\d.]+), sıcaklık–boğulma r = (−?[\d.]+), sıcaklık sabitken r = (−?[\d.]+)/.exec(AR())||[];
+    return {rt1:sn(m[1]),rt2:sn(m[2]),part:sn(m[3])};};
+  const OUTP=()=>sn((/çarpımı (−?[\d.]+)/.exec(AR())||[])[1]);
+  /* adımı kabuk gibi uygula: önce veri kümesi (set), sonra run() */
+  const step=(i)=>{const s=mod.steps[i]; if(s.set!==undefined) mod.__pick(s.set); s.run(); return s;};
+
+  /* adım 1–4, ders notu ex, figür, « Beş öğrenci » notu: Hafta 2 · sl. 35 */
+  step(0);
+  const [mx,my]=ML(), [sxy,sxx,syy]=SUMS();
+  console.log(`       beş öğrenci: x̄ ${mx} ȳ ${my} · Σ ${sxy} / ${sxx} / ${syy} · r ${RS()} r² ${T(el,'corr-r2')} kov ${T(el,'corr-cov')} · ${T(el,'corr-st')}`);
+  chk(mx==="3"&&my==="65", "x̄ = 3 saat, ȳ = 65 puan (adım 1, ex)", `${mx} · ${my}`);
+  chk(sxy==="80"&&sxx==="10"&&syy==="750", "üç toplam 80, 10, 750 (adım 3, ex, figür)", `${sxy} · ${sxx} · ${syy}`);
+  chk(RS()==="0.92"&&T(el,'corr-r2')==="0.85", "r = 0.92, r² = 0.85 (adım 3, ex, not)", `${RS()} · ${T(el,'corr-r2')}`);
+  chk(T(el,'corr-cov')==="20", "kovaryans 80 / 4 = 20 saat·puan (adım 4, ex)", T(el,'corr-cov'));
+  chk(T(el,'corr-st')==="güçlü pozitif", "Yorum: güçlü pozitif (sunum: 'güçlü, pozitif, doğrusal')", T(el,'corr-st'));
+  { const k=KAT(); chk(k.np===3&&k.nn===0&&k.nz===2, "A, B, E artı; C ve D sıfır; kırmızı bölgede nokta yok (adım 2, figür, not)", JSON.stringify(k)); }
+  chk(LINE()==="ŷ = 41 + 8x", "beş öğrencinin doğrusu ŷ = 41 + 8x", LINE());
+
+  /* .ask 1, adım 5, not: 7 saatlik aykırı öğrenci notu 0 → −0.43, 40 → −0.02, 100 → 0.97 */
+  step(4);
+  const r0=RS(), st0=T(el,'corr-st'), op=OUTP(), k0=KAT();
+  S(el,'corr-oy',40); const r40=RS(), st40=T(el,'corr-st');
+  S(el,'corr-oy',100); const r100=RS();
+  console.log(`       aykırı (7 saat): not 0 → r ${r0} (${st0}), 40 → ${r40} (${st40}), 100 → ${r100} · aykırının çarpımı ${op}, öteki artılar ${k0.pos}`);
+  chk(T(el,'corr-n')==="6" && /Aykırı nokta \(7, 100\)/.test(AR()), "aykırı nokta 7 saatte, altıncı öğrenci (.ask, adım 5)", T(el,'corr-n'));
+  chk(r0==="−0.43"&&r100==="0.97", "aykırı not 0'da r −0.43, 100'de 0.97 (.ask, adım 5, not)", `${r0} · ${r100}`);
+  chk(r40==="−0.02", "aykırı not 40'ta r −0.02 (not)", r40);
+  chk(st0==="orta negatif", "not 0'da işaret dönüyor: Yorum 'orta negatif' (adım 5)", st0);
+  chk(op<0&&Math.abs(op)>k0.pos, "aykırının çarpımı en büyüğü: öteki artıların toplamından büyük (.ask ipucu, adım 5)", `${op} vs +${k0.pos}`);
+  P(el,'corr-out',false); el('corr-new').click();
+  chk(RS()==="0.92"&&T(el,'corr-n')==="5", "« Yeni veri » aynı beş öğrenciyi geri getiriyor (not)", `${T(el,'corr-n')} nokta · r ${RS()}`);
+
+  /* adım 6–9, not, ders notu: Anscombe — dördünde x̄ 9, ȳ 7.50, r 0.82, ŷ = 3.00 + 0.500x */
+  const an=[];
+  for(const i of [5,6,7,8]){ step(i); an.push({r:RS(),m:ML().join('/'),l:LINE(),h:el('corr-aset').hidden,ln:el('corr-line').getAttribute('aria-pressed')}); }
+  console.log(`       Anscombe: ${an.map((a,i)=>['I','II','III','IV'][i]+' r '+a.r+' '+a.m+' '+a.l).join(' · ')}`);
+  chk(an.every(a=>a.r==="0.82"), "dört Anscombe verisinde r = 0.82 (adım 6–9, not)", an.map(a=>a.r).join(' '));
+  chk(an.every(a=>a.m==="9/7.50"), "dördünde x̄ = 9, ȳ = 7.50 (adım 6, not)", an.map(a=>a.m).join(' '));
+  chk(an.every(a=>a.l==="ŷ = 3.00 + 0.500x"), "dördünde aynı doğru ŷ = 3.00 + 0.500x (adım 6, not)", an.map(a=>a.l).join(' '));
+  chk(an.every(a=>!a.h&&a.ln==="true"), "Anscombe seçicisi görünüyor, « Doğru » açık", JSON.stringify(an.map(a=>a.h)));
+  /* "sağ üstteki noktayı sil → r tanımsız" (adım 9) ve "III'ün aykırısı doğruya konunca r ≈ 1"
+     sağ tık / sürükleme ister; sahte DOM'da işaretçi olayı yok, gerçek tarayıcıda denendi
+     (faz4 ekran görüntüsü betiği: IV'te sağ tık → 10 nokta, r —, Yorum 'tanımsız'). */
+  chk(el('corr-temp').hidden, "Anscombe'da « Sıcaklık rengi » gizli");
+
+  /* adım 10, .ask 2, Soru 4, not: kahve r −0.02, doğru yatay, katkılar birbirini götürüyor */
+  step(9);
+  const kk=KAT(), kl=LINE(), b1=sn((/([−+-]) ([\d.]+)x$/.exec(kl)||[])[0]?.replace(/ /g,''));
+  console.log(`       kahve: r ${RS()} · ${T(el,'corr-st')} · ${kl} · artı ${kk.pos} (${kk.np}) eksi ${kk.neg} (${kk.nn})`);
+  chk(RS()==="−0.02", "kahve ve not: açılışta r = −0.02 (adım 10, not, Soru 4)", RS());
+  chk(T(el,'corr-st')==="doğrusal yok", "Yorum 'doğrusal yok' (.ask 2, read)", T(el,'corr-st'));
+  chk(Math.abs(b1)*6<2, "doğru neredeyse yatay: 6 fincanda 2 puandan az değişiyor (adım 10)", kl);
+  chk(Math.abs(kk.pos+kk.neg)<0.1*kk.pos&&kk.np>=8&&kk.nn>=8, "artı ve eksi katkılar birbirini götürüyor (adım 10, idea)", `${kk.pos} ${kk.neg}`);
+  const kr=[]; for(let t=0;t<20;t++){ el('corr-new').click(); kr.push(Math.abs(R())); }
+  console.log(`       kahve 20 yeni örneklem: |r| ort ${mean(kr).toFixed(3)}, en büyük ${Math.max(...kr).toFixed(3)}`);
+  /* 100 000 örneklem: ort |r| 0.052, %99'u 0.167, %99.9'u 0.211 altında, en uç 0.36 */
+  chk(kr.filter(v=>v<=0.17).length>=18&&Math.max(...kr)<=0.3&&mean(kr)<0.1, "« Yeni veri »de de r sıfıra yakın: %99'unda |r| < 0.17, ortalama 0.05 (not)", `ort ${mean(kr).toFixed(3)} · en ${Math.max(...kr).toFixed(3)}`);
+
+  /* adım 11–12, .ask 2, not: dondurma r 0.89; sıcaklıkla 0.96 / 0.92; sıcaklık sabitken −0.01 */
+  step(10);
+  chk(RS()==="0.89"&&T(el,'corr-st')==="güçlü pozitif", "dondurma–boğulma r = 0.89, güçlü pozitif (adım 11, .ask: 0.8'in üstünde)", RS());
+  chk(!el('corr-temp').hidden&&el('corr-aset').hidden, "dondurmada « Sıcaklık rengi » görünüyor, Anscombe seçicisi gizli");
+  chk(!/Sıcaklık–dondurma/.test(AR()), "sıcaklık satırı yalnız « Sıcaklık rengi » açıkken");
+  step(11);
+  const t0=TS();
+  console.log(`       sıcaklık: dondurma ${t0.rt1} · boğulma ${t0.rt2} · sabitken ${t0.part}`);
+  chk(Math.abs(t0.rt1-0.964)<0.0015&&Math.abs(t0.rt2-0.922)<0.0015, "sıcaklıkla dondurma 0.96, sıcaklıkla boğulma 0.92 (adım 12)", `${t0.rt1} · ${t0.rt2}`);
+  chk(Math.abs(t0.part)<0.015, "sıcaklığın payı çıkarılınca r −0.01 (adım 12, not)", String(t0.part));
+  const dr=[], d1=[], d2=[], dp=[];
+  for(let t=0;t<40;t++){ el('corr-new').click(); const q=TS(); dr.push(R()); d1.push(q.rt1); d2.push(q.rt2); dp.push(q.part); }
+  console.log(`       dondurma 40 yeni örneklem: r ort ${mean(dr).toFixed(3)} [${Math.min(...dr).toFixed(3)}, ${Math.max(...dr).toFixed(3)}] · sıcaklıkla ${mean(d1).toFixed(3)} / ${mean(d2).toFixed(3)} · sabitken |ort| ${mean(dp.map(Math.abs)).toFixed(3)}, ±0.3 içinde ${dp.filter(v=>Math.abs(v)<=0.3).length}/40`);
+  /* 4000 tohum: r %5–95 aralığı 0.844–0.934, sıcaklık sabitken ±0.288 (ölçüm notları index.html'de) */
+  const inR=dr.filter(v=>v>=0.84&&v<=0.93).length;
+  chk(dr.filter(v=>v>=0.8).length>=36&&mean(dr)>0.85&&mean(dr)<0.93, "dondurma r 0.8'in üstünde (.ask 2)", `ort ${mean(dr).toFixed(3)} · en küçük ${Math.min(...dr).toFixed(3)}`);
+  chk(inR>=29, "yeni örneklemlerin %90'ında r 0.84–0.93 (not)", `${inR}/40`);
+  chk(Math.abs(mean(d1)-0.96)<0.02&&Math.abs(mean(d2)-0.92)<0.025, "sıcaklıkla r ≈ 0.96 ve ≈ 0.92 (not)", `${mean(d1).toFixed(3)} · ${mean(d2).toFixed(3)}`);
+  chk(dp.filter(v=>Math.abs(v)<=0.3).length>=31&&mean(dp.map(Math.abs))<0.2, "sıcaklık sabitken r sıfıra yakın, %90'ında ±0.3 içinde (not, idea)", `${dp.filter(v=>Math.abs(v)<=0.3).length}/40`);
+  P(el,'corr-temp',false);
+}
+
 /* ── 16 · SVM: C yolu daraltır, test doğruluğu ezberi gösterir, kernel halkayı çözer ──
    Çözücü b'yi cezalandırmıyor (SMO) ve deterministik; rastgelelik yalnız veride.
    C kaydırıcısı 0–40: C = 10^(v/10 − 2) → 0 = 0.01, 20 = 1, 40 = 100.
