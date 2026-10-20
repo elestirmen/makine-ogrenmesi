@@ -506,6 +506,9 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    başına kayıt yok: tek dikdörtgen + `(mx,my)` fonksiyonu. Satır fonksiyonları saf ve hızlı.
    `harness.js` her çizimden sonra kayıtlı satırları üretip undefined / NaN arar ve hiç
    `tip()` kaydetmeyen modülü HATA sayar ("fare ipucu yok"). Örnek: Modül 02'nin beş görünümü.
+   **İstisna: k-means (24) ve KNN (17) yalnız x ve y yazar**, tek satır (zemin, nokta, merkez;
+   k–hata panelinde "k · eğitim · test"); hoca: "nokta eklemeden koskoca kutu görünüyor,
+   diğerleri kalabalık oluyor". Bağlantı ve iz çizgilerinin kutusu yok.
 
    Tuvale nokta eklenen modüllerde `editable(cv,{pts,setPts,toPx,toData,add,draw,commit})`
    kullanılır — sürükleme, silme ve geri almayı tek yerden getirir. `commit` pahalı

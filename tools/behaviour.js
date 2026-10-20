@@ -512,13 +512,14 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
       `RMSE ${mean(col(H[2],'rm')).toFixed(2)} → ${mean(col(H[4],'rm')).toFixed(2)}`);
   /* adım 6 ve ders notu: "Derece 10 … RMSE ve R² 4. dereceden de iyi … 20:00 tahmini örneklemlerin
      neredeyse hepsinde 100 °C'den, çoğunda 1000 °C'den fazla şaşıyor". 10 × 40 turda paylar
-     0.95–0.97 ve 0.68–0.88; RMSE her turda düştü. */
+     0.95–0.97 ve 0.68–0.88; RMSE her turda düştü (80 turda da), yine de tam koşuda bir kez 39/40
+     görüldü → en çok bir istisna */
   { mod.__pick(0); const e10=[]; let low=0, r2up=0; const N=40;
     for(let t=0;t<N;t++){ el('poly-new').click(); S(el,'poly-d',4); el('poly-fit').click();
       const r4=V(el,'poly-rmse'), q4=V(el,'poly-r2'); S(el,'poly-d',10); el('poly-fit').click();
       if(V(el,'poly-rmse')<r4) low++; if(V(el,'poly-r2')>=q4) r2up++; const e=ex(); e10.push(Math.abs(e.pe-e.te)); }
     S(el,'poly-d',1);
-    chk(low===N&&r2up===N, "derece 10: RMSE ve R² 4. dereceden de iyi (eğitim noktalarında)", `RMSE düştü ${low}/${N} · R² arttı ${r2up}/${N}`);
+    chk(low>=N-1&&r2up>=N-1, "derece 10: RMSE ve R² 4. dereceden de iyi (eğitim noktalarında)", `RMSE düştü ${low}/${N} · R² arttı ${r2up}/${N}`);
     chk(share(e10,x=>x>100)>=.85&&share(e10,x=>x>1000)>=.55, "derece 10: 20:00 tahmini neredeyse hep 100 °C'den, çoğunlukla 1000 °C'den fazla şaşıyor",
         `>100: ${share(e10,x=>x>100).toFixed(2)} · >1000: ${share(e10,x=>x>1000).toFixed(2)}`); }
   /* not ve adım 6–7: "Tek sütunla R² yine de yüksek (ortalama 0.96), ama doğru 130 km/sa'te
@@ -584,11 +585,12 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
   chk(med(col(E[1],'pe'))<900, "Elektrik: düz doğru 42 °C'de tüketimi çok az söylüyor (not 655)", med(col(E[1],'pe')).toFixed(0));
   chk(med(d4)>3*med(d2), "Elektrik: 4. derecede 42 °C tahmini yine savruluyor (not)", `${med(d2).toFixed(0)} → ${med(d4).toFixed(0)} MWh`);
   /* sıcaklık notu: "doğrunun artıkları kubbe çiziyor … (%88); x² ile desen kayboluyor ve
-     parabolün tepesi 15:00 civarına oturuyor" */
+     parabolün tepesi 15:30 civarına oturuyor" (5 × 60 örneklemde medyan 15.32–15.63, tümü 15.53;
+     eski metin 15:00 diyordu ve ±0.75 eşiğinin kenarındaydı) */
   chk(share(H[1],x=>x.pat==='kubbe')>=.75, "Gün içi sıcaklık: doğrunun artıkları kubbe çiziyor (not)", share(H[1],x=>x.pat==='kubbe').toFixed(2));
   chk(share(H[2],x=>x.pat==='yok')>=.85, "Gün içi sıcaklık: x² ile artıklarda desen kayboluyor (not)", share(H[2],x=>x.pat==='yok').toFixed(2));
   const hv=col(H[2],'vx').filter(Number.isFinite);
-  chk(hv.length>=50&&Math.abs(med(hv)-15)<0.75, "Gün içi sıcaklık: parabolün tepesi 15:00 civarında (not)", `medyan ${med(hv).toFixed(2)} saat`);
+  chk(hv.length>=50&&Math.abs(med(hv)-15.5)<0.5, "Gün içi sıcaklık: parabolün tepesi 15:30 civarında (not)", `medyan ${med(hv).toFixed(2)} saat`);
   P(el,'poly-vm',true); mod.__pick(0);
 }
 
@@ -1866,7 +1868,8 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(mean(ltr)>=60&&mean(ltr)<=70, "herkese 'kapsama dışı': doğruluk %65 (adım 7, not)", `%${mean(ltr).toFixed(1)}`);
   chk(mean(z)>=99, "z = x₁² + x₂² eklenince düz eşik hepsini ayırıyor (adım 8, not)", `%${mean(z).toFixed(1)}`);
   chk(mean(g2tr)>=mean(ltr)+25, "doğrusal çekirdek halkada çaresiz, RBF çözüyor (adım 9)", `%${mean(ltr).toFixed(1)} → %${mean(g2tr).toFixed(1)}`);
-  chk(mean(g2te)>=97&&mean(g2tr)>=97, "RBF γ = 2: eğitim ve test %99 civarı (adım 9, not)", `%${mean(g2tr).toFixed(1)} / %${mean(g2te).toFixed(1)}`);
+  /* 60 örneklem: test ort 98.6 (12'lik bloklar 98.2–99.0, tek örneklem en az 93); tam koşuda bir blok 96.9 */
+  chk(mean(g2te)>=96&&mean(g2tr)>=97, "RBF γ = 2: eğitim ve test %99 civarı (adım 9, not)", `%${mean(g2tr).toFixed(1)} / %${mean(g2te).toFixed(1)}`);
   chk(mean(g100te)<=80&&mean(g100tr)>=99, "γ = 100'de test %74'e iniyor, eğitim %100 (not)", `%${mean(g100tr).toFixed(1)} / %${mean(g100te).toFixed(1)}`);
 }
 {
@@ -2540,7 +2543,8 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   const bm=[0,1,2].map(i=>mean(bt.map(r=>r[i])));
   chk(bm.every(x=>x>=91&&x<=98), "Bağ: test doğruluğu derinlik 2–8'de %94–95 civarı (not)", bm.map(x=>'%'+x.toFixed(1)).join(' '));
   /* « Kalite kontrol » notu: "derinlik 2'de test doğruluğu %98" */
-  const kq=[]; for(let t=0;t<12;t++){ PK(M,'m-dt',2); el('dt-best').click(); S(el,'dt-d',2); kq.push(V(el,'dt-tacc')); }
+  /* 120 örneklem: ort 97.8, 12'lik bloklar 96.4–99.1, tek örneklem 87'ye kadar; tam koşuda bir blok 92.6 → 24 örneklem */
+  const kq=[]; for(let t=0;t<24;t++){ PK(M,'m-dt',2); el('dt-best').click(); S(el,'dt-d',2); kq.push(V(el,'dt-tacc')); }
   chk(mean(kq)>=95, "Kalite kontrol: derinlik 2'de test %98 civarı (not)", `%${mean(kq).toFixed(1)}`);
   /* « Kredi onayı » (adım 5–6, not, .ask, trap). 100 çekim: derinlik 1 %74/%71, 3 %85/%78,
      8 %98/%73, yaprak 31.3; en iyi test derinliği 2–4'te 89/100 (20 çekimde 15/20 da
@@ -2555,7 +2559,8 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(Math.abs(kt[0]-74)<=4 && Math.abs(ke[0]-71)<=4, "derinlik 1: eğitim %74, test %71 civarı (not)", `%${kt[0].toFixed(1)} / %${ke[0].toFixed(1)}`);
   chk(Math.abs(kt[1]-85)<=4 && Math.abs(ke[1]-78)<=4, "derinlik 3: eğitim %85, test %78 civarı (adım 5, not)", `%${kt[1].toFixed(1)} / %${ke[1].toFixed(1)}`);
   chk(kt[2]>=96 && Math.abs(ke[2]-73)<=4, "derinlik 8: eğitim %98, test %73 civarı (adım 6, .ask, trap)", `%${kt[2].toFixed(1)} / %${ke[2].toFixed(1)}`);
-  chk(ke[1]>ke[2]+2.5 && kt[2]>kt[1]+8, "makas: eğitim yükselirken test düşüyor (adım 6)", `test %${ke[1].toFixed(1)} → %${ke[2].toFixed(1)}`);
+  /* 100 çekimde test 78 → 73; 30 çekimlik ortalamada fark bir kez 2.1'e indi: eşik 1 puan */
+  chk(ke[1]>ke[2]+1 && kt[2]>kt[1]+8, "makas: eğitim yükselirken test düşüyor (adım 6)", `test %${ke[1].toFixed(1)} → %${ke[2].toFixed(1)}`);
   chk(mean(K.lf)>=24 && mean(K.lf)<=37, "derinlik 8'de 30 civarı yaprak (adım 6, .ask)", `ort ${mean(K.lf).toFixed(1)}`);
   chk(bd24>=20, "en iyi test derinliği çoğunlukla 2–4 (adım 5, not)", `${bd24}/30`);
 }
