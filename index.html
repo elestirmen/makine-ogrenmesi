@@ -6668,7 +6668,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 7 · Eşik, hata matrisi (confusion matrix), ROC / PR / maliyet ═════════════ */
 (function(){
-  const cv=$("#c-cm"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-cm"), {ctx,fit,tip}=setupCanvas(cv);
   let thr=.5, sep=.34, prate=.35, data=[], timer=0, pool=[], ver=0;
   /* sağ panel: ROC · PR · Maliyet (Hafta 7–8). Birim maliyetler Hafta 7'nin alıştırmasından:
      yanlış alarm 50 TL, kaçırma 800 TL. Senaryo bunları DEĞİŞTİRMEZ: kanser ve spam
@@ -6741,6 +6741,9 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     return {v,best};
   }
   const sp3=(x)=>String(Math.round(x)).replace(/\B(?=(\d{3})+(?!\d))/g," ");
+  /* fare ipucu: yüzde göstergelerle aynı biçimde; FP'nin --warn rengi açık temada okunmuyor, ipucunda --bad */
+  const pc=(v)=>Number.isFinite(v)?(v*100).toFixed(1)+"%":"—";
+  const TT=(t)=>t==="--warn"?"--bad":t;
   const tl=(x)=>x>=1e6?(x/1e6).toFixed(2)+" mn ₺":x>=1e4?Math.round(x/1000)+" bin ₺":sp3(x)+" ₺";
   /* uzun eğriyi çizimde seyrelt: 10 000 nokta yerine ~400 */
   const thin=(a)=>{ const k=Math.max(1,Math.floor(a.length/400)), o=[];
@@ -6803,6 +6806,18 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     });
     ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=3;
     ctx.beginPath();ctx.moveTo(tx,hy);ctx.lineTo(tx,hy+hH);ctx.stroke();ctx.restore();
+    /* fare ipucu: histogram aralığı (imleçten), iki sınıf eğrisi, eşik */
+    const binAt=(mx)=>clamp(Math.floor((mx-hx)/bw),0,B-1);
+    tip({x:hx,y:hy,w:hW,h:hH},(mx)=>{ const i=binAt(mx), a=i/B, b2=(i+1)/B, side=(a+b2)/2>=thr, cut=a<thr&&b2>thr;
+      return [`skor ${a.toFixed(2)}–${b2.toFixed(2)}`,[`gerçek pozitif: ${bins[1][i]} · ${side?"TP":"FN"}`,side?"--a":"--bad"],
+        [`gerçek negatif: ${bins[0][i]} · ${side?"FP":"TN"}`,side?"--bad":null],
+        cut?"eşik bu aralığın içinde: sayılar ikiye bölünür":side?"model burada pozitif dedi":"model burada negatif dedi"]; });
+    [0,1].forEach(k=>tip({x0:hx,x1:hx+hW,fy:(mx)=>hy+hH-BH(bins[k][binAt(mx)]),d:5},(mx)=>{ const i=binAt(mx), n=bins[k][i], side=(i+.5)/B>=thr;
+      return [[`gerçek ${k?"pozitif · "+S().pos:"negatif · "+S().neg}`,k?"--a":null],`skor ${(i/B).toFixed(2)}–${((i+1)/B).toFixed(2)}: ${n} örnek`,
+        `sınıfın %${(100*n/Math.max(1,k?Cv.P:Cv.N)).toFixed(1)}`,
+        k?(side?["TP: yakalandı","--good"]:["FN: kaçırıldı","--bad"]):(side?["FP: yanlış alarm","--bad"]:["TN: doğru negatif","--good"])]; }));
+    tip({x:tx-5,y:hy,w:10,h:hH,z:2.5},[[`eşik ${thr.toFixed(2)}`,"--accent"],`sağı pozitif dedi: ${c.TP+c.FP} örnek`,
+      `solu negatif dedi: ${c.TN+c.FN} örnek`,"tıkla → eşik oraya"]);
     /* dört sayı alanların üstünde: doğrular tepelerin üstünde, hatalar tabanda eşiğin iki yanında */
     const peak=(k)=>{ let bi=0; for(let i=1;i<B;i++) if(bins[k][i]>bins[k][bi]) bi=i;
       return {x:hx+(bi+.5)*bw, y:hy+hH-BH(bins[k][bi])}; };
@@ -6845,6 +6860,11 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
            Çevrilince piksel-özdeş kalıyor ve contrast.js'in taradığı çağrılara giriyor. */
         label(ctx,String(cl.v),x+cs/2-1,y+cs/2,css("--ink"),"center",Math.min(30,cs*0.34));
         label(ctx,cl.t,x+cs/2-1,y+cs-14,css("--ink-soft"),"center",cs<86?9.5:10.5);
+        const met=cl.k==="TN"?`specificity = TN / (TN + FP) = ${pc(spec)}`:cl.k==="TP"?`recall ${pc(rec)} · precision ${pc(pre)}`
+          :cl.k==="FN"?`recall = TP / (TP + FN) = ${pc(rec)}`:`precision = TP / (TP + FP) = ${pc(pre)}`;
+        const uc=cl.k==="FP"?cFP:cl.k==="FN"?cFN:0;
+        tip({x,y,w:cs-2,h:cs-2},[[`${cl.k} · ${cl.t}`,TT(cl.col)],`${cl.v} örnek · toplamın %${(100*cl.v/tot).toFixed(1)}`,
+          `gerçek ${cl.j?"pozitif":"negatif"}, model ${cl.i?"pozitif":"negatif"} dedi`,view==="cost"&&uc?`× ${uc} ₺ = ${tl(cl.v*uc)}`:met]);
       });
       /* başlıklar iki katlı: "model: pozitif" ile "model: negatif" hücre genişliğine
          sığmıyor, 930 px'te birbirine yapışıyordu ("model: pozitifmodel: negatif") */
@@ -6859,6 +6879,8 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       const lt=`hep '${lazy}' diyen model: ${(base*100).toFixed(1)}%`, ly=oy+cw+12;
       if(acc<=base+.005) label(ctx,lt,ox+cw/2,ly,css("--bad"),"center",10);
       else label(ctx,lt,ox+cw/2,ly,css("--ink-soft"),"center",10);
+      tip({x:ox,y:ly-8,w:cw,h:16},[`hep '${lazy}' diyen temel model`,`doğruluğu ${pc(base)}: hiçbir şey öğrenmeden`,
+        [`bu modelin doğruluğu ${pc(acc)}`,acc<=base+.005?"--bad":"--good"]]);
     }
 
     /* --- sağ panel: ROC · PR · Maliyet --- */
@@ -6881,6 +6903,17 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         ctx.lineTo(rx+rw,ry+rh);ctx.closePath();ctx.fillStyle=hexA("--accent",.12);ctx.fill();ctx.restore();
         disc(ctx,rx+(1-spec||0)*rw,ry+rh-(rec||0)*rh,6.5,css("--accent"),css("--surface"));
         label(ctx,"ROC · AUC "+Cv.auc.toFixed(3),rx+rw-8,ry+rh-14,css("--accent"),"right");
+        /* fare ipucu: FPR = k / N için eşik k'inci en büyük negatif skor; TPR o eşikten */
+        const rocAt=(mx)=>{ const N=Cv.N, P=Cv.P, k=Math.round(clamp((mx-rx)/rw,0,1)*N);
+          const t=!N?1:k<=0?Cv.neg[N-1]+1e-9:Cv.neg[N-k], FP=atLeast(Cv.neg,t), TP=atLeast(Cv.pos,t);
+          return {t:clamp(t,0,1),FP,TP,fpr:FP/Math.max(1,N),tpr:TP/Math.max(1,P)}; };
+        const rocY=(mx)=>ry+rh-rocAt(mx).tpr*rh;
+        tip({x:rx,y:ry,w:rw,h:rh},(mx,my)=>my<rocY(mx)?null:[`ROC-AUC ${Cv.auc.toFixed(3)}`,"eğrinin altındaki alan","rastgele 0.5 · kusursuz 1"]);
+        tip({x0:rx,x1:rx+rw,fy:(mx)=>ry+rh-(mx-rx)/rw*rh},(mx)=>["rastgele model (köşegen)",`FPR = TPR = ${pc(clamp((mx-rx)/rw,0,1))}`,"AUC 0.5"]);
+        tip({x0:rx,x1:rx+rw,fy:rocY},(mx)=>{ const o=rocAt(mx);
+          return [[`ROC eğrisi · eşik ≈ ${o.t.toFixed(2)}`,"--accent"],`FPR ${pc(o.fpr)} · TPR ${pc(o.tpr)}`,`FP ${o.FP} / ${Cv.N} · TP ${o.TP} / ${Cv.P}`]; });
+        tip({x:rx+(1-spec||0)*rw,y:ry+rh-(rec||0)*rh,r:6.5},[[`eşik ${thr.toFixed(2)}`,"--accent"],`FPR ${pc(1-spec)} = FP ${c.FP} / ${Cv.N}`,
+          `TPR (recall) ${pc(rec)} = TP ${c.TP} / ${Cv.P}`]);
         label(ctx,"ROC eğrisi",rx,ry-16,css("--ink-soft"),"left",10.5);
         label(ctx,"FPR = 1 − specificity →",rx+rw/2,ry+rh+16,css("--ink-soft"),"center",10.5);
         ylabel(ctx,"TPR · recall →",rx-12,ry,ry+rh,css("--ink-soft"),10.5);
@@ -6895,6 +6928,17 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         ctx.lineTo(rx+pts[pts.length-1].x*rw,ry+rh);ctx.lineTo(rx+pts[0].x*rw,ry+rh);ctx.closePath();
         ctx.fillStyle=hexA("--accent",.12);ctx.fill();ctx.restore();
         if(Number.isFinite(pre)) disc(ctx,rx+rec*rw,ry+rh-pre*rh,6.5,css("--accent"),css("--surface"));
+        /* fare ipucu: recall = k / P için eşik k'inci en büyük pozitif skor; precision o eşikten */
+        const prAt=(mx)=>{ const P=Cv.P; if(!P) return null; const k=Math.max(1,Math.round(clamp((mx-rx)/rw,0,1)*P));
+          const t=Cv.pos[P-k], TP=atLeast(Cv.pos,t), FP=atLeast(Cv.neg,t); return {t,TP,FP,rec:TP/P,prec:TP/(TP+FP)}; };
+        const prY=(mx)=>{ const o=prAt(mx); return o?ry+rh-o.prec*rh:NaN; };
+        const px0=rx+pts[0].x*rw, px1=rx+pts[pts.length-1].x*rw;
+        tip({x:px0,y:ry,w:Math.max(1,px1-px0),h:rh},(mx,my)=>!(my>=prY(mx))?null:[`PR-AUC ${Cv.ap.toFixed(3)}`,"average precision: eğrinin altındaki alan",`ROC-AUC ${Cv.auc.toFixed(3)} ile kıyasla`]);
+        tip({x:rx,y:by-4,w:rw,h:8,z:1.5},[`taban = pozitif oranı ${Cv.base.toFixed(2)}`,`${Cv.P} / ${Cv.P+Cv.N} örnek pozitif`,"rastgele sıralayan modelin precision'ı"]);
+        tip({x0:px0,x1:px1,fy:prY},(mx)=>{ const o=prAt(mx); if(!o) return null;
+          return [[`PR eğrisi · eşik ≈ ${o.t.toFixed(2)}`,"--accent"],`recall ${pc(o.rec)} · precision ${pc(o.prec)}`,`TP ${o.TP} · FP ${o.FP}`]; });
+        if(Number.isFinite(pre)) tip({x:rx+rec*rw,y:ry+rh-pre*rh,r:6.5},[[`eşik ${thr.toFixed(2)}`,"--accent"],`recall ${pc(rec)} = TP ${c.TP} / ${Cv.P}`,
+          `precision ${pc(pre)} = TP ${c.TP} / ${c.TP+c.FP}`]);
         legend(ctx,rx+6,clamp(by-12,ry+12,ry+rh-12),[["taban = "+Cv.base.toFixed(2),"--ink-soft"]],{size:10});
         legendRow(ctx,rx,ry-16,[["PR-AUC "+Cv.ap.toFixed(3),"--accent"],["ROC-AUC "+Cv.auc.toFixed(3),"--ink-soft"]],10.5,rw);
         label(ctx,"recall →",rx+rw/2,ry+rh+16,css("--ink-soft"),"center",10.5);
@@ -6912,6 +6956,17 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         ctx.beginPath();ctx.moveTo(X(thr),ry);ctx.lineTo(X(thr),ry+rh);ctx.stroke();ctx.restore();
         disc(ctx,X(tb),Y(cmin),6,css("--good"),css("--surface"));
         disc(ctx,X(thr),Y(cost),6.5,css("--accent"),css("--surface"));
+        /* fare ipucu: eğri kaydırıcının 0.01'lik ızgarasında; ara x'te iki komşu eşiğin arası */
+        const kAt=(mx)=>clamp((mx-rx)/rw*100,1,99);
+        const cAt=(kf)=>{ const k0=Math.floor(kf), k1=Math.min(99,k0+1), f=kf-k0; return CC.v[k0]*(1-f)+CC.v[k1]*f; };
+        tip({x0:X(.01),x1:X(.99),fy:(mx)=>Y(cAt(kAt(mx)))},(mx)=>{ const k=Math.round(kAt(mx)), cc=counts(k/100), v=CC.v[k];
+          return [[`eşik ${(k/100).toFixed(2)} · ${tl(v)}`,"--accent"],`FP ${cc.FP} × ${cFP} ₺ + FN ${cc.FN} × ${cFN} ₺`,
+            k===CC.best?["en ucuz eşik","--good"]:`en ucuzdan ${tl(v-cmin)} fazla`]; });
+        const cb=counts(tb), rb=[["en ucuz eşik "+tb.toFixed(2),"--good"],`toplam ${tl(cmin)}`,`FP ${cb.FP} × ${cFP} ₺ + FN ${cb.FN} × ${cFN} ₺`];
+        const rc=[[`eşik ${thr.toFixed(2)} · ${tl(cost)}`,"--accent"],`FP ${c.FP} × ${cFP} ₺ + FN ${c.FN} × ${cFN} ₺`,
+          cost<=cmin*1.02?["en ucuz eşiğe yakın","--good"]:[`en ucuzdan ${tl(cost-cmin)} pahalı`,"--bad"]];
+        tip({x:X(tb)-5,y:ry,w:10,h:rh},rb); tip({x:X(thr)-5,y:ry,w:10,h:rh},rc);
+        tip({x:X(tb),y:Y(cmin),r:6},rb); tip({x:X(thr),y:Y(cost),r:6.5},rc);
         legend(ctx,rx+rw-6,ry+12,[["en ucuz eşik "+tb.toFixed(2)+" · "+tl(cmin),"--good"]],{size:10,align:"right"});
         label(ctx,`FP × ${cFP} ₺ + FN × ${cFN} ₺`,rx,ry-16,css("--ink-soft"),"left",10.5);
         label(ctx,"eşik →",rx+rw/2,ry+rh+16,css("--ink-soft"),"center",10.5);
@@ -8293,7 +8348,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 05 · Polinom regresyon ═════════════ */
 (function(){
-  const cv=$("#c-poly"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-poly"), {ctx,fit,tip}=setupCanvas(cv);
   /* üç somut eğri: tepe (x² yeter), fizik yasası (x² dışarıda da tutar), S eğrisi (x³ gerek) */
   const DS=SETS("m-poly"); let dsi=0;
   const S=()=>DS[dsi];
@@ -8354,6 +8409,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     if(!short||W.length<=5) return `${s.y} = ${W[0].toFixed(1)}`+W.slice(1).map((c,j)=>t(c,j+1)).join("");
     return `${s.y} = ${W[0].toFixed(1)}${t(W[1],1)}${t(W[2],2)} …${t(W[W.length-1],W.length-1)}`;};
   const xdef=()=>{const s=S(), z=Zs(); return `x = (${s.x} − ${+z.mid.toFixed(2)}) / ${+z.half.toFixed(2)}`;};
+  /* fare ipucu: x ve y verinin biriminde ("saat 07:24", "sıcaklık 21.3 °C"), fark işaretli */
+  const sgn=(v,d)=>(v>0&&+v.toFixed(d)!==0?"+":"")+nf(v,d);
+  const xl=(x)=>`${S().x} ${fx(x)}${S().xu||""}`;
+  const yU=(v)=>`${nf(Yd(v),S().yd)} ${S().yu}`;
+  const SUB=["₀","₁","₂","₃","₄","₅","₆","₇","₈","₉","₁₀"];
+  const TT=(t)=>["--ink","--ink-soft","--accent","--a","--c","--good","--bad"].includes(t)?t:null;
 
   /* x üreteci: "mevsim" iki yılın rastgele bir gününün sıcaklığı (Hafta 5: 14 − 11·cos +
      N(0, 3.5)), ölçüm aralığına kırpılarak; öteki kümelerde ölçüm aralığında düzgün */
@@ -8458,36 +8519,60 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.fillRect(x0,y0,Math.max(0,X(ul)-x0),y1-y0); ctx.fillRect(X(uh),y0,Math.max(0,x1-X(uh)),y1-y0);
     ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.strokeRect(x0,y0,x1-x0,y1-y0);
     ctx.restore();
+    const iX=GM.iX, xAt=(u)=>z.mid+u*z.half;
+    [[x0,X(ul)],[X(uh),x1]].forEach(([a,b2])=>{ if(b2-a<2) return;
+      tip({x:a,y:y0,w:b2-a,h:y1-y0},(mx)=>{ const u=iX(mx);
+        return ["Veri yok · "+xl(xAt(u)),`ölçüm aralığı ${fx(xAt(ul))}–${fx(xAt(uh))}${s.xu||""}`,
+          w?`model ŷ ${yU(evw(w,u))} · gerçek ${yU(tv(u))}`:`gerçek ${s.y} ${yU(tv(u))}`,"burada tahmin = ekstrapolasyon"]; }); });
     if(s.ylo<0){ ctx.save(); ctx.strokeStyle=css("--ink-soft"); ctx.lineWidth=1; ctx.setLineDash([2,3]);
       ctx.beginPath(); ctx.moveTo(x0,Y(-s.ylo/z.ry)); ctx.lineTo(x1,Y(-s.ylo/z.ry)); ctx.stroke(); ctx.restore();
-      label(ctx,"0 "+s.yu,x1-4,Y(-s.ylo/z.ry)-8,css("--ink-soft"),"right",10.5); }
+      label(ctx,"0 "+s.yu,x1-4,Y(-s.ylo/z.ry)-8,css("--ink-soft"),"right",10.5);
+      tip({x:x0,y:Y(-s.ylo/z.ry)-4,w:x1-x0,h:8},[`sıfır çizgisi: ${s.y} 0 ${s.yu}`,`altındaki tahmin eksi ${s.y}`]); }
 
     ctx.save(); ctx.beginPath(); ctx.rect(x0,y0,x1-x0,y1-y0); ctx.clip(); ctx.lineJoin="round"; ctx.lineCap="round";
     /* gerçek ilişki yalnız gri bölgede: aralığın içinde veri konuşuyor, dışında "gerçekte ne oldu" */
     ctx.strokeStyle=css("--ink-soft"); ctx.lineWidth=1.8; ctx.setLineDash([6,5]);
     for(const [ua,ub] of [[z.zl,ul],[uh,z.zh]]){ if(ub-ua<1e-3) continue; ctx.beginPath();
-      for(let i=0;i<=40;i++){const u=ua+(ub-ua)*i/40; i?ctx.lineTo(X(u),Y(tv(u))):ctx.moveTo(X(u),Y(tv(u)));} ctx.stroke(); }
+      for(let i=0;i<=40;i++){const u=ua+(ub-ua)*i/40; i?ctx.lineTo(X(u),Y(tv(u))):ctx.moveTo(X(u),Y(tv(u)));} ctx.stroke();
+      tip({x0:X(ua),x1:X(ub),fy:(mx)=>Y(tv(iX(mx)))},(mx)=>{ const u=iX(mx);
+        return [["Gerçek ilişki · veri yok","--ink-soft"],xl(xAt(u)),`gerçek ${s.y} ${yU(tv(u))}`,
+          w?[`model ŷ ${yU(evw(w,u))} · hata ${sgn(Yd(evw(w,u))-Yd(tv(u)),s.yd)} ${s.yu}`,"--bad"]:null]; }); }
     ctx.setLineDash([]);
     /* çözümden önceki eğri, kesikli gri: "eğitim" neyi neye çevirdi */
     if(ghost&&w){ ctx.strokeStyle=hexA("--ink-soft",.85); ctx.lineWidth=2; ctx.setLineDash([7,6]); ctx.beginPath();
       for(let i=0;i<=160;i++){const u=z.zl+(z.zh-z.zl)*i/160, yy=Y(clamp(evw(ghost,u),-2,3)); i?ctx.lineTo(X(u),yy):ctx.moveTo(X(u),yy);}
-      ctx.stroke(); ctx.setLineDash([]); }
+      ctx.stroke(); ctx.setLineDash([]);
+      const gw=ghost;
+      tip({x0,x1,fy:(mx)=>Y(clamp(evw(gw,iX(mx)),-2,3)),z:1.8},(mx)=>{ const u=iX(mx);
+        return [["Önceki eğri (çözümden önce)","--ink-soft"],xl(xAt(u)),`ŷ ${yU(evw(gw,u))}`,`RMSE ${rmseD(gw).toFixed(s.rd)} ${s.yu}`]; }); }
     /* artıklar: her noktadan eğriye inen kırmızı çubuk (m-lin ile aynı dil) */
     if(showR&&w){ ctx.save(); ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
-      pts.forEach(q=>{ ctx.beginPath(); ctx.moveTo(X(q.u),Y(q.v)); ctx.lineTo(X(q.u),Y(clamp(evw(w,q.u),-2,3))); ctx.stroke(); });
+      pts.forEach(q=>{ ctx.beginPath(); ctx.moveTo(X(q.u),Y(q.v)); ctx.lineTo(X(q.u),Y(clamp(evw(w,q.u),-2,3))); ctx.stroke();
+        const ya=Y(q.v), yb=Y(clamp(evw(w,q.u),-2,3)), rr=(q.v-evw(w,q.u))*z.ry;
+        if(Math.abs(yb-ya)>18) tip({x:X(q.u)-4,y:Math.min(ya,yb),w:8,h:Math.abs(yb-ya)},[[`artık ${sgn(rr,s.yd)} ${s.yu}`,"--bad"],
+          `ölçülen ${yU(q.v)} − ŷ ${yU(evw(w,q.u))}`,xl(xAt(q.u))]); });
       ctx.restore(); }
     if(w){
       /* terimler: w₀ seviyesi ve ona eklenen tek tek terimler; kalın eğri hepsinin toplamı */
       if(showT){
         ctx.strokeStyle=hexA(TC[0],.9); ctx.lineWidth=1.6; ctx.setLineDash([3,4]);
         ctx.beginPath(); ctx.moveTo(x0,Y(w[0])); ctx.lineTo(x1,Y(w[0])); ctx.stroke(); ctx.setLineDash([]);
+        const Wv=Wd(w);
+        tip({x:x0,y:Y(w[0])-4,w:x1-x0,h:8,z:1.7},[[`β₀ terimi · ${TN[0]}`,"--ink-soft"],`β₀ = ${nf(Wv[0],1)} ${s.yu}`,"her x'te aynı"]);
         for(let j=1;j<w.length;j++){ ctx.strokeStyle=hexA(tcol(j),j<TC.length?.85:.6); ctx.lineWidth=j<TC.length?2:1.5; ctx.beginPath();
           for(let i=0;i<=120;i++){const u=z.zl+(z.zh-z.zl)*i/120, yy=Y(clamp(w[0]+w[j]*u**j,-2,3)); i?ctx.lineTo(X(u),yy):ctx.moveTo(X(u),yy);}
-          ctx.stroke(); }
+          ctx.stroke();
+          tip({x0,x1,fy:(mx)=>Y(clamp(w[0]+w[j]*iX(mx)**j,-2,3)),z:1.7},(mx)=>{ const u=iX(mx);
+            return [[`β${SUB[j]}·x${SUP[j]} terimi`+(TN[j]?" · "+TN[j]:""),TT(tcol(j))],xl(xAt(u)),
+              `terim ${sgn(Wv[j]*u**j,1)} ${s.yu} (β${SUB[j]} = ${nf(Wv[j],1)})`,`β₀ + terim = ${yU(w[0]+w[j]*u**j)}`]; }); }
       }
       ctx.strokeStyle=css("--accent"); ctx.lineWidth=3.2; ctx.beginPath();
       for(let i=0;i<=240;i++){const u=z.zl+(z.zh-z.zl)*i/240, yy=Y(clamp(evw(w,u),-2,3)); i?ctx.lineTo(X(u),yy):ctx.moveTo(X(u),yy);}
       ctx.stroke();
+      tip({x0,x1,fy:(mx)=>Y(clamp(evw(w,iX(mx)),-2,3))},(mx)=>{ const u=iX(mx), out=u<ul||u>uh;
+        return [["Model · "+xl(xAt(u)),"--accent"],`ŷ = ${yU(evw(w,u))}`,
+          out?[`veri yok · gerçek ${yU(tv(u))}`,"--bad"]:`derece ${deg} · ${deg+1} ağırlık`,
+          anim?"least squares çözümüne iniyor":best?"least squares çözümü":null]; });
     }
     ctx.restore();
     /* noktalar: tablodaki satırların noktası halkalı, seçili satır pembe halkalı */
@@ -8496,12 +8581,17 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(k>=0){ ctx.save(); ctx.beginPath(); ctx.arc(xx,yy,i===hr?10.5:9,0,7);
         ctx.lineWidth=i===hr?2.6:1.4; ctx.strokeStyle=i===hr?css("--accent"):hexA("--ink",.55); ctx.stroke(); ctx.restore(); }
       disc(ctx,xx,yy,6,css("--a"),css("--surface"));
+      tip({x:xx,y:yy,r:6},()=>{ const yh=w?evw(w,q.u):0;
+        return ["Ölçüm · "+xl(xAt(q.u))+(k>=0&&wide&&view==="m"?" · tabloda":""),`${s.y} ${yU(q.v)}`,
+          w?`model ŷ ${yU(yh)}`:null,w?[`artık ${sgn((q.v-yh)*z.ry,s.yd)} ${s.yu}`,"--bad"]:null]; });
     });
     /* parabolün dibi / tepesi (Hafta 5: −β₁ / 2β₂): yalnız anlamı olan kümede (vx) ve ölçüm
        aralığının içindeyse — elektrikte şehrin "konfor sıcaklığı", gün içinde en sıcak saat */
     const vt=vertex(w);
     if(vt&&s.vx){ const xv=X(vt.u), yv=Y(clamp(evw(w,vt.u),-2,3));
       disc(ctx,xv,yv,5.5,css("--surface"),css("--accent"));
+      tip({x:xv,y:yv,r:5.5},[[`${s.vx}: ${fx(vt.x)}${s.xu||""}`,"--accent"],`${s.y} ${yU(evw(w,vt.u))}`,
+        `parabolün ${vt.min?"dibi":"tepesi"}: x = −β₁ / 2β₂`]);
       legend(ctx,xv,clamp(yv+(vt.min?20:-20),y0+10,y1-10),[[`${s.vx}: ${fx(vt.x)}${s.xu}`,"--accent"]],{size:11.5,align:"center"}); }
     /* "veri yok" yazısı tahmin etiketlerinden ÖNCE: ikisi aynı köşeye düşünce (elektrikte
        42 °C tahmini alt kenarda) zeminli etiket yazının üstünü örtsün, iç içe okunmasın */
@@ -8517,6 +8607,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ctx.beginPath(); ctx.arc(ex,yt,6.5,0,7); ctx.fillStyle=css("--surface"); ctx.fill(); ctx.strokeStyle=css("--ink-soft"); ctx.stroke();
       ctx.beginPath(); ctx.arc(ex,yp,7.5,0,7); ctx.fill(); ctx.strokeStyle=css("--accent"); ctx.stroke(); ctx.restore();
       if(pe<-.02||pe>1.02) label(ctx,pe<0?"▼":"▲",ex,pe<0?y1-6:y0+6,css("--accent"),"center",11);
+      { const er=Yd(pe)-Yd(te);
+        tip({x:ex-4,y:Math.min(yp,yt),w:8,h:Math.abs(yt-yp)},[[`model − gerçek = ${sgn(er,s.yd)} ${s.yu}`,"--bad"],`${s.exk}: ekstrapolasyon hatası`]);
+        tip({x:ex,y:yt,r:6.5},[["Gerçek değer · "+xl(s.ex),"--ink-soft"],`${s.y} ${yU(te)}`,"ölçüm aralığının dışında",`model ${yU(pe)}`]);
+        tip({x:ex,y:yp,r:7.5},[["Model tahmini · "+xl(s.ex),"--accent"],`ŷ = ${yU(pe)}`,`gerçek ${yU(te)}`,[`hata ${sgn(er,s.yd)} ${s.yu}`,"--bad"]]); }
       const yu=s.yu, up=yp<yt;
       /* zeminli etiket: kenardaki noktaların üstüne biniyordu */
       /* tahmin tuvalin dışına taştıysa (yüksek derece) etiket okun iç tarafına: üst kenarda
@@ -8564,6 +8658,15 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       const cx=(k)=>q0+cw*(k+.5);
       const head=[s.x,...VC.map(j=>j<0?"…":j?"x"+SUP[j]:"1"),"ŷ"];
       head.forEach((h,k)=>label(ctx,h,cx(k),yy,css(k===0?"--ink-soft":k===nc-1?"--accent":"--ink"),"center",fz));
+      /* fare ipucu: satır başına tek dikdörtgen, sütun imleçten */
+      const colAt=(mx)=>clamp(Math.floor((mx-q0)/cw),0,nc-1), Wt=w?Wd(w):null;
+      const hid=()=>[`${deg-4} sütun gizli: x⁴ … x${SUP[deg-1]}`,"tabloda yer yok, modelde var"];
+      tip({x:q0,y:yy-rh/2,w:qw,h:rh},(mx)=>{ const k=colAt(mx);
+        if(k===0) return [`${s.x} sütunu: ham ölçüm`,xdef()];
+        if(k===nc-1) return [["ŷ sütunu: modelin tahmini","--accent"],"satırdaki sütun × β toplamı"];
+        const j=VC[k-1]; if(j<0) return hid();
+        return [j?`x${SUP[j]} sütunu`:"1 sütunu (sabit)",j===0?"her satırda 1: seviye":j===1?"ölçekli x":`ölçekli x'in ${j}. kuvveti`,
+          Wt?[`ağırlığı β${SUB[j]} = ${nf(Wt[j],1)}`,"--accent"]:null]; });
       ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1;
       ctx.beginPath(); ctx.moveTo(q0,yy+rh/2); ctx.lineTo(qx1,yy+rh/2); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(q0+cw,yy-rh/2); ctx.lineTo(q0+cw,yy+rh*(show.length+3.6)); ctx.stroke(); ctx.restore();
@@ -8574,14 +8677,28 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         cells.push(w?nf(Yd(evw(w,q.u)),s.yd):"—");
         if(i===hr){ ctx.fillStyle=hexA("--accent",.10); ctx.fillRect(q0,yy-rh/2,qw,rh); }
         cells.forEach((c,k)=>label(ctx,c,cx(k),yy,css(k===nc-1?"--accent":"--ink"),"center",fz));
+        tip({x:q0,y:yy-rh/2,w:qw,h:rh},(mx)=>{ const k=colAt(mx), xr=fx(xAt(q.u));
+          if(k===0) return ["Ölçüm · "+xl(xAt(q.u)),`ölçekli x = ${nf(q.u,2)}`,`ölçülen ${s.y} ${yU(q.v)}`];
+          if(k===nc-1){ if(!w) return null; const yh=evw(w,q.u);
+            return [[`ŷ = ${yU(yh)}`,"--accent"],`ölçülen ${yU(q.v)}`,[`artık ${sgn((q.v-yh)*z.ry,s.yd)} ${s.yu}`,"--bad"]]; }
+          const j=VC[k-1]; if(j<0) return hid();
+          const v=q.u**j;
+          return [`${xr} satırı · ${j?"x"+SUP[j]:"1"} sütunu`,j>1?`(${nf(q.u,2)})${SUP[j]} = ${nf(v,2)}`:j?`x = ${nf(q.u,2)}`:"sabit: 1",
+            Wt?`× β${SUB[j]} ${nf(Wt[j],1)} = ${sgn(Wt[j]*v,1)} ${s.yu}`:null]; });
         yy+=rh;
       });
       label(ctx,"⋮",cx(0),yy-rh*.2,css("--ink-soft"),"center",fz); yy+=rh*.7;
       ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(q0,yy-rh/2); ctx.lineTo(qx1,yy-rh/2); ctx.stroke(); ctx.restore();
       if(w){
-        const Wv=Wd(w);
+        const Wv=Wd(w), Wo=wo?Wd(wo):null;
         label(ctx,"β",cx(0),yy,css("--accent"),"center",fz);
         VC.forEach((j,k)=>label(ctx,j<0?"…":(Wv[j]<0?"−":"")+Math.abs(Wv[j]).toFixed(1),cx(k+1),yy,css("--accent"),"center",fz));
+        tip({x:q0,y:yy-rh/2,w:qw,h:rh},(mx)=>{ const k=colAt(mx);
+          if(k===0) return [["β satırı: ağırlıklar","--accent"],anim?"least squares çözümüne iniyor":best?"least squares çözümü":"ekrandaki model, henüz en iyisi değil"];
+          if(k===nc-1) return null;
+          const j=VC[k-1]; if(j<0) return hid();
+          return [[`β${SUB[j]} = ${nf(Wv[j],1)}`,"--accent"],j?`x${SUP[j]} sütununun ağırlığı`:"sabit sütunun ağırlığı: seviye",
+            Wo&&!best?`least squares: ${nf(Wo[j],1)}`:null]; });
         yy+=rh;
         if(hr>=0){
           const q=pts[hr], pr=Wv.map((c,j)=>c*q.u**j);
@@ -8589,6 +8706,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
           VC.forEach((j,k)=>label(ctx,j<0?"…":(pr[j]<0?"−":"")+Math.abs(pr[j]).toFixed(1),cx(k+1),yy,css("--ink-soft"),"center",fz));
           const sum=pr.reduce((a2,b2)=>a2+b2,0);
           label(ctx,"Σ "+nf(sum,s.yd),cx(nc-1),yy,css("--accent"),"center",fz);
+          tip({x:q0,y:yy-rh/2,w:qw,h:rh},(mx)=>{ const k=colAt(mx), xr=fx(xAt(q.u));
+            if(k===0) return [`${xr} satırı · β × satır`,"her sütun kendi ağırlığıyla çarpılır"];
+            if(k===nc-1) return [[`Σ = ŷ = ${nf(sum,s.yd)} ${s.yu}`,"--accent"],`ölçülen ${yU(q.v)}`,[`artık ${sgn(Yd(q.v)-sum,s.yd)} ${s.yu}`,"--bad"]];
+            const j=VC[k-1];
+            if(j<0) return [`gizli terimler x⁴ … x${SUP[deg-1]}`,`toplamları ${sgn(pr.slice(4,deg).reduce((a2,b2)=>a2+b2,0),1)} ${s.yu}`];
+            return [`${j?"x"+SUP[j]:"1"} × β${SUB[j]}`,`${nf(j?q.u**j:1,2)} × ${nf(Wv[j],1)} = ${sgn(pr[j],1)} ${s.yu}`,`ŷ = ${nf(sum,s.yd)} ${s.yu} toplamının parçası`]; });
           yy+=rh+6;
           if(note) legend(ctx,q0+2,yy,[[`${fx(z.mid+q.u*z.half)} için ŷ = ${nf(sum,s.yd)} ${s.yu} · ölçülen y = ${nf(Yd(q.v),s.yd)} ${s.yu}`,"--ink"],
             [`sütun eklemek = modele bir ağırlık daha`,"--ink-soft"]],{size:Math.min(11.5,fz+.5),lh:16});
@@ -8618,18 +8741,28 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         label(ctx,"+"+nf(am,s.yd),xr0-4,RY(am),css("--ink-soft"),"right",10.5);
         label(ctx,"0",xr0-4,RY(0),css("--ink-soft"),"right",10.5);
         label(ctx,nf(-am,s.yd),xr0-4,RY(-am),css("--ink-soft"),"right",10.5);
+        tip({x:xr0,y:RY(0)-4,w:xr1-xr0,h:8},["sıfır çizgisi: artık 0 = tam isabet","üstü: model az tahmin etti","altı: model fazla tahmin etti"]);
         ctx.save(); ctx.beginPath(); ctx.rect(xr0,yr0,xr1-xr0,yr1-yr0); ctx.clip();
         /* artıkların yerel ortalaması: Gauss çekirdekli ağırlıklı ortalama */
         const bw=RS.bw;
+        { const uOf=(mx)=>ua-pad+(mx-xr0)/(xr1-xr0)*(ub-ua+2*pad);
+          const loc=(u)=>{ let sw=0, sr=0; RS.o.forEach(q=>{const k=Math.exp(-(((q.u-u)/bw)**2)/2); sw+=k; sr+=k*q.r;}); return sw>1e-300?sr/sw:0; };
+          tip({x0:RX(ua),x1:RX(ub),fy:(mx)=>RY(loc(uOf(mx)))},(mx)=>{ const u=uOf(mx);
+            return [["artıkların gidişi (yerel ortalama)","--c"],xl(xAt(u)),`yerel ortalama ${sgn(loc(u),s.yd)} ${s.yu}`,
+              RF.pat?[`desen var: ${RF.shape}`,"--bad"]:"belirgin desen yok"]; }); }
         ctx.strokeStyle=css("--c"); ctx.lineWidth=2.2; ctx.setLineDash([7,5]); ctx.beginPath();
         for(let i=0;i<=60;i++){ const u=ua+(ub-ua)*i/60; let sw=0, sr=0;
           RS.o.forEach(q=>{const k=Math.exp(-(((q.u-u)/bw)**2)/2); sw+=k; sr+=k*q.r;});
           const yy=RY(sr/sw); i?ctx.lineTo(RX(u),yy):ctx.moveTo(RX(u),yy); }
         ctx.stroke(); ctx.setLineDash([]);
         ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
-        RS.o.forEach(q=>{ ctx.beginPath(); ctx.moveTo(RX(q.u),RY(0)); ctx.lineTo(RX(q.u),RY(q.r)); ctx.stroke(); });
+        RS.o.forEach(q=>{ ctx.beginPath(); ctx.moveTo(RX(q.u),RY(0)); ctx.lineTo(RX(q.u),RY(q.r)); ctx.stroke();
+          if(Math.abs(RY(q.r)-RY(0))>9) tip({x:RX(q.u)-4,y:Math.min(RY(0),RY(q.r)),w:8,h:Math.abs(RY(q.r)-RY(0))},[[`artık ${sgn(q.r,s.yd)} ${s.yu}`,"--bad"],xl(xAt(q.u))]); });
         ctx.restore();
-        RS.o.forEach(q=>disc(ctx,RX(q.u),RY(q.r),5,css("--a"),css("--surface")));
+        RS.o.forEach(q=>{ disc(ctx,RX(q.u),RY(q.r),5,css("--a"),css("--surface"));
+          const yh=Yd(evw(w,q.u));
+          tip({x:RX(q.u),y:RY(q.r),r:5},["Ölçüm · "+xl(xAt(q.u)),[`artık ${sgn(q.r,s.yd)} ${s.yu}`,"--bad"],
+            `ölçülen ${nf(yh+q.r,s.yd)} · ŷ ${nf(yh,s.yd)} ${s.yu}`]); });
         if(hr>=0){ const q=pts[hr], rr=(q.v-evw(w,q.u))*z.ry; ctx.save(); ctx.beginPath(); ctx.arc(RX(q.u),RY(rr),9.5,0,7);
           ctx.lineWidth=2.4; ctx.strokeStyle=css("--accent"); ctx.stroke(); ctx.restore(); }
         label(ctx,s.x+" →",(xr0+xr1)/2,yr1+14,css("--ink-soft"),"center",11);
@@ -9260,7 +9393,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 11 · Lojistik regresyon ═════════════ */
 (function(){
-  const cv=$("#c-log"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-log"), {ctx,fit,tip}=setupCanvas(cv);
   /* xs: « Seçili x » (0..1). showLin: « Doğru uydur » — aynı veriye least squares doğrusu */
   let data=[], w=4, b=-2, it=0, timer=0, hard=false, xs=.6, showLin=false;
   /* üç somut veri: tümör çapı, çalışma saati, rüzgâr hızı — matematik aynı, hikâye farklı;
@@ -9338,6 +9471,8 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       /* olasılığın giremeyeceği bantlar: p < 0 ve p > 1 */
       ctx.fillStyle=hexA("--bad",.06);
       ctx.fillRect(X(0),Y(v1),X(1)-X(0),Y(1)-Y(v1)); ctx.fillRect(X(0),Y(0),X(1)-X(0),Y(v0)-Y(0));
+      tip({x:X(0),y:Y(v1),w:X(1)-X(0),h:Y(1)-Y(v1)},[["p > 1 bölgesi","--bad"],"olasılık 1'i geçemez","sigmoid buraya hiç girmez"]);
+      tip({x:X(0),y:Y(0),w:X(1)-X(0),h:Y(v0)-Y(0)},[["p < 0 bölgesi","--bad"],"olasılık 0'ın altına inemez","sigmoid buraya hiç girmez"]);
       ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.2;
       [0,1].forEach(v=>{ctx.beginPath();ctx.moveTo(X(0),Y(v));ctx.lineTo(X(1),Y(v));ctx.stroke();});
     }
@@ -9353,6 +9488,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.4;
     ctx.beginPath();ctx.moveTo(X(0),Y(.5));ctx.lineTo(X(1),Y(.5));ctx.stroke();ctx.restore();
     const xb=-b/(w||1e-9), inB=xb>=0&&xb<=1;
+    /* fare ipucu: x verinin biriminde; p̂ = P(pn | x), sınıf adları S().cls */
+    const uOf=(mx)=>clamp((mx-p)/(W-2*p),0,1), cls=S().cls;
+    tip({x:X(0),y:Y(.5)-4,w:X(1)-X(0),h:8},["p̂ = 0.5 çizgisi",`üstünde model « ${cls[1]} » der`,`altında « ${cls[0]} »`,
+      inB?`sigmoid'le kesişim: ${fx(xb)}`:"sigmoid bu aralıkta kesmiyor"]);
+    if(inB) tip({x:X(xb)-5,y:p,w:10,h:H-2*p},[[`decision boundary · ${fx(xb)}`,"--accent"],"z = β₀ + β₁x = 0 → p̂ = 0.5",
+      `sağında « ${w>0?cls[1]:cls[0]} », solunda « ${w>0?cls[0]:cls[1]} »`,`x = −β₀ / β₁ = ${xv(xb)} ${q.xu}`]);
     if(inB){
       ctx.save();ctx.strokeStyle=css("--accent");ctx.lineWidth=2;ctx.setLineDash([3,4]);
       ctx.beginPath();ctx.moveTo(X(xb),p);ctx.lineTo(X(xb),H-p);ctx.stroke();ctx.restore();
@@ -9376,12 +9517,23 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       if(ls12){ctx.lineWidth=2.2;ctx.setLineDash([8,6]);seg(ls12);ctx.setLineDash([]);vb(lb(ls12));}
       if(ls){ctx.lineWidth=2.8;seg(ls);vb(lb(ls));}
       ctx.restore();
+      const lsTip=(l,nm)=>{ const u0=lb(l);
+        tip({x0:X(0),x1:X(1),fy:(mx)=>Y(l.c0+l.c1*uOf(mx)),z:1.9},(mx)=>{ const u=uOf(mx), v=l.c0+l.c1*u;
+          return [[nm,"--c"],`x = ${fx(u)} → ${sg(v,2)}`,v<0||v>1?["olasılık olamaz: 0–1 dışında","--bad"]:"0–1 arasında",
+            u0!==null&&u0>=0&&u0<=1?`0.5 çizgisiyle kesişim: ${fx(u0)}`:"0.5'i bu aralıkta kesmiyor"]; });
+        if(u0!==null&&u0>=0&&u0<=1) tip({x:X(u0)-5,y:Y(.5),w:10,h:Y(v0)-Y(.5)},[[`doğrunun sınırı · ${fx(u0)}`,"--c"],`least squares doğrusu burada 0.5`,
+          inB?`sigmoid'in sınırı ${fx(xb)}`:"sigmoid'in sınırı aralık dışı"]); };
+      if(ls12) lsTip(ls12,`least squares · ${data.length-1} öğrenci`);
+      if(ls) lsTip(ls,hasFar?`least squares · hepsi (${data.length})`:"least squares doğrusu");
     }
     /* sigmoid */
     ctx.save();ctx.beginPath();ctx.rect(p,p,W-2*p,H-2*p);ctx.clip();
     ctx.beginPath();ctx.strokeStyle=css("--accent");ctx.lineWidth=3.2;ctx.lineJoin="round";
     for(let i=0;i<=300;i++){const x=i/300;i?ctx.lineTo(X(x),Y(P(x))):ctx.moveTo(X(x),Y(P(x)));}
     ctx.stroke();ctx.restore();
+    tip({x0:X(0),x1:X(1),fy:(mx)=>Y(P(uOf(mx)))},(mx)=>{ const u=uOf(mx), z=w*u+b, pp=P(u);
+      return [[`sigmoid · x = ${fx(u)}`,"--accent"],`z = ${sg(z,2)} → p̂ = σ(z) = ${pp.toFixed(3)}`,
+        `odds = ${f3(Math.exp(z))}`,`tahmin: ${pp>=.5?cls[1]:cls[0]}`]; });
     /* noktalar + kayıp çubukları */
     data.forEach(d=>{
       const pr=clamp(P(d.x),1e-9,1-1e-9), tgt=d.y?1:0;
@@ -9389,6 +9541,12 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ctx.beginPath();ctx.moveTo(X(d.x),Y(tgt));ctx.lineTo(X(d.x),Y(pr));ctx.stroke();ctx.restore();
       disc(ctx,X(d.x),Y(tgt),6,css(d.y?"--a":"--b"),css("--surface"));
       disc(ctx,X(d.x),Y(pr),3,hexA("--accent",.8));
+      const pt=d.y?pr:1-pr, ok=(pr>=.5?1:0)===d.y, nm=d.far?"Uzak öğrenci":cls[d.y];
+      if(Math.abs(Y(pr)-Y(tgt))>20) tip({x:X(d.x)-4,y:Math.min(Y(tgt),Y(pr)),w:8,h:Math.abs(Y(pr)-Y(tgt))},[[`kayıp · ${nm} · ${fx(d.x)}`,"--bad"],
+        `hedef ${tgt} · p̂ ${pr.toFixed(3)}`,`log-loss payı −ln(${pt.toFixed(3)}) = ${(-Math.log(pt)).toFixed(3)}`]);
+      tip({x:X(d.x),y:Y(pr),r:3},[["p̂ = "+pr.toFixed(3),"--accent"],`x = ${fx(d.x)} · hedef ${tgt}`,`tahmin: ${pr>=.5?cls[1]:cls[0]}`]);
+      tip({x:X(d.x),y:Y(tgt),r:6},[[`${nm} · ${fx(d.x)}`,d.y?"--a":null],`etiket y = ${tgt} (${cls[d.y]})`,
+        `p̂ = ${pr.toFixed(3)} · log-loss ${(-Math.log(pt)).toFixed(3)}`,[`tahmin: ${pr>=.5?cls[1]:cls[0]}`+(ok?" · doğru":" · yanlış"),ok?"--good":"--bad"]]);
     });
     const fd=data.find(d=>d.far);
     if(fd){ ctx.save();ctx.strokeStyle=css("--ink");ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(X(fd.x),Y(1),11,0,7);ctx.stroke();ctx.restore();
@@ -9399,6 +9557,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.save();ctx.strokeStyle=css("--ink");ctx.lineWidth=1.4;ctx.setLineDash([2,3]);
     ctx.beginPath();ctx.moveTo(X(xs),Y(v0));ctx.lineTo(X(xs),Y(pp));ctx.lineTo(X(0),Y(pp));ctx.stroke();ctx.restore();
     disc(ctx,X(xs),Y(pp),6.5,css("--surface"),css("--ink"));
+    { const sr=[`Seçili x = ${fx(xs)}`,`z = ${sg(pz,2)} → p̂ = ${pp.toFixed(3)}`,`odds = ${f3(od)} · logit = ${sg(pz,2)}`,`+1 ${q.xu} → odds × ${f3(orr)}`];
+      tip({x:X(xs)-5,y:Math.min(Y(pp),Y(v0)),w:10,h:Math.abs(Y(v0)-Y(pp)),z:1.5},sr);
+      tip({x:X(0),y:Y(pp)-4,w:Math.max(1,X(xs)-X(0)),h:8,z:1.5},sr);
+      tip({x:X(xs),y:Y(pp),r:6.5},sr); }
 
     legend(ctx,p+8,(showLin?Y(1)+20:p+14),[["P("+S().pn+" | x)","--accent"],[S().cls[1]+" (üst sıra)","--a"],[S().cls[0]+" (alt sıra)","--b"]],{size:12,lh:17});
     yl.forEach(v=>label(ctx,String(v).replace("-","−"),X(0)-8,Y(v),css("--ink-soft"),"right",10.5));
@@ -9506,7 +9668,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 30 · Veri sızıntısı ve Pipeline ═════════════ */
 (function(){
-  const cv=$("#c-leak"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-leak"), {ctx,fit,tip}=setupCanvas(cv);
   /* Hafta 4 · Soru 4 (sl. 42–43): 60 örnek × 2000 rastgele öznitelik, etiket de rastgele
      (yarısı 0, yarısı 1). En uyumlu 10 öznitelik bütün veriyle seçilip 5 katlı CV yapılınca
      0.82; seçim Pipeline'ın içinde, her katta yalnız eğitim katlarıyla yapılınca 0.42.
@@ -9526,6 +9688,13 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const NS=()=>S().gen==="signal"?S().ns:0;          // gerçek sinyal taşıyan ilk NS sütun
   const shuffle=(a)=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
   const f2=(v)=>Number.isFinite(v)?v.toFixed(2):"—";
+  /* fare ipucu: işaretli sayı (eksi U+2212), hücrenin ham değeri, sütunun |t|'si (prep'in formülü, saf) */
+  const sg2=(v)=>{const t=Math.abs(v).toFixed(2); return (+t===0?"":v<0?"−":"+")+t;};
+  const rawV=(j,v)=>!churn()?(v<0&&+Math.abs(v).toFixed(2)!==0?"−":"")+Math.abs(v).toFixed(2):names[j]==="iptal_tarihi"?(v?"dolu":"boş"):String(Math.round(v));
+  const tAbs=(j,R)=>{ const c=cols[j]; let s0=0,s1=0,q0=0,q1=0,n0=0,n1=0;
+    for(const i of R){ const v=c[i]; if(y[i]){s1+=v;q1+=v*v;n1++;} else {s0+=v;q0+=v*v;n0++;} }
+    const m0=s0/n0, m1=s1/n1, sp=((q0-s0*m0)+(q1-s1*m1))/Math.max(1,n0+n1-2);
+    return Math.abs(m1-m0)/Math.sqrt(Math.max(sp,1e-12)*(1/n0+1/n1)); };
 
   function sample(){
     ver++; cur=0;
@@ -9666,6 +9835,13 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     label(ctx,`doğrulama katı ${cur+1}`,xvE,hy-20,css("--ink"),"right",10.5);
     /* sınıf şeridi */
     for(let i=0;i<N;i++){ ctx.fillStyle=css(y[i]?"--a":"--b"); ctx.fillRect(xs[i],hy-11,Math.max(1,cw-.6),7); }
+    /* fare ipucu: imlecin altındaki örnek (sütun) */
+    const idAt=(mx)=>{ if(mx>=xv){ const k=Math.floor((mx-xv)/cw); return k>=0&&k<va.length?va[k]:-1; }
+      const k=Math.floor((mx-xa)/cw); return k>=0&&k<tr.length?tr[k]:-1; };
+    const role=(i)=>fold[i]===cur?`doğrulama katı ${cur+1}`:`eğitim · kat ${fold[i]+1}`;
+    tip({x:xa,y:hy-12,w:xvE-xa,h:10},(mx)=>{ const i=idAt(mx); if(i<0) return null;
+      return [`Örnek ${i+1} · ${cls[y[i]]}`,role(i),
+        fold[i]===cur?[`tahmin ${cls[Q.pred[i]]} · ${Q.pred[i]===y[i]?"doğru":"yanlış"}`,Q.pred[i]===y[i]?"--good":"--bad"]:"KNN'in komşu havuzunda"]; });
     /* hücre: işareti uyum yönüne çevrilmiş z — artı "cls[1] yönünde" (camgöbeği), eksi turuncu */
     const avg=new Float64Array(N);                       // örneğin seçili sütunlardaki ortalama uyumu
     for(let k=0;k<h.sel.length;k++){
@@ -9677,6 +9853,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       }
     }
     const hb=hy+h.sel.length*rh;
+    const rowAt=(my)=>{ const k=Math.floor((my-hy)/rh); return k>=0&&k<h.sel.length?k:-1; };
+    tip({x:xa,y:hy,w:xvE-xa,h:hb-hy},(mx,my)=>{ const i=idAt(mx), k=rowAt(my); if(i<0||k<0) return null;
+      const j=h.sel[k], zs=(cols[j][i]-h.mu[k])/h.sd[k], z=h.sg[k]*zs;
+      return [`${names[j]} · örnek ${i+1}`,`değer ${rawV(j,cols[j][i])} → ölçekli ${sg2(zs)}`,
+        [`${z>=0?cls[1]:cls[0]} yönünde ${Math.abs(z).toFixed(2)}`,z>=0?"--a":null],`etiket ${cls[y[i]]} · ${role(i)}`]; });
+    tip({x:p,y:hy,w:xa-p-2,h:hb-hy},(mx,my)=>{ const k=rowAt(my); if(k<0) return null;
+      const j=h.sel[k], t=tAbs(j,mode==="out"?[...Array(N).keys()]:tr);
+      return [names[j],`seçimde ${k+1}. sıra · |t| ${t>999?"> 999":"= "+t.toFixed(2)}`,
+        mode==="out"?["60 örneğin hepsine bakılarak seçildi","--bad"]:[`yalnız ${tr.length} eğitim örneğiyle seçildi`,"--a"],
+        NS()?(j<NS()?["gerçek sinyal (★)","--good"]:"rastgele sütun: uyum tesadüf"):null]; });
     ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1;
     ctx.strokeRect(xa-.5,hy-.5,tr.length*cw+.5,hb-hy+1);
     ctx.strokeStyle=css("--ink"); ctx.lineWidth=1.8; ctx.strokeRect(xv-2.5,hy-13.5,va.length*cw+4,hb-hy+16.5); ctx.restore();
@@ -9693,10 +9879,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     for(let i=0;i<N;i++){ const v=clamp(avg[i]/1.2,-1,1);
       ctx.fillStyle=css(v>=0?"--a":"--b"); ctx.fillRect(xs[i],v>=0?ay-v*ah:ay,Math.max(1,cw-.6),Math.max(1,Math.abs(v)*ah)); }
     label(ctx,"ortalama",xa-6,ay,css("--ink"),"right",10.5);
+    tip({x:p,y:ay-ah,w:xa-p-2,h:2*ah},["ortalama şeridi",`her örneğin seçili ${mm} sütundaki ortalama uyumu`,"KNN'in uzaklığı da bu sütunlardan"]);
+    tip({x:xa,y:ay-ah,w:xvE-xa,h:2*ah},(mx)=>{ const i=idAt(mx); if(i<0) return null;
+      return [`Örnek ${i+1} · ortalama uyum`,[`${sg2(avg[i])} → ${avg[i]>=0?cls[1]:cls[0]} yönünde`,avg[i]>=0?"--a":null],
+        `${mm} seçili sütunun ortalaması`,`etiket ${cls[y[i]]} · ${role(i)}`]; });
     /* doğrulama satırlarının tahmini: dolu = tahmin edilen sınıf, kırmızı halka = yanlış */
     let ok=0;
     va.forEach(i=>{ const pr=Q.pred[i], good=pr===y[i]; if(good) ok++;
-      disc(ctx,xs[i]+cw/2,ay+ah+11,Math.max(1.5,Math.min(3.4,cw/2-.4)),css(pr?"--a":"--b"),good?null:css("--bad")); });
+      disc(ctx,xs[i]+cw/2,ay+ah+11,Math.max(1.5,Math.min(3.4,cw/2-.4)),css(pr?"--a":"--b"),good?null:css("--bad"));
+      tip({x:xs[i]+cw/2,y:ay+ah+11,r:Math.max(1.5,Math.min(3.4,cw/2-.4))},[`Doğrulama örneği ${i+1}`,`gerçek ${cls[y[i]]}`,
+        [`tahmin ${cls[pr]} · ${good?"doğru":"yanlış"}`,good?"--good":"--bad"],`KNN (5 komşu) · ${MN(mode)}`]); });
     label(ctx,`tahmin: ${ok} / ${va.length} doğru`,xvE,ay+ah+26,css("--ink"),"right",10.5);
     legendRow(ctx,xa,ay+ah+11,[[`■ ${cls[1]} yönünde`,"--a"],[`■ ${cls[0]} yönünde`,"--b"]],10.5,Math.max(60,xv-xa-16));
 
@@ -9712,12 +9904,16 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       [0,.5,1].forEach(v=>label(ctx,String(v),q0-5,EY(v),css("--ink-soft"),"right",10));
       const yb=EY(Q.mean+Q.sd), yt=EY(Math.max(0,Q.mean-Q.sd));
       ctx.fillStyle=hexA("--ink",.08); ctx.fillRect(q0+1,yb,qw-2,Math.max(1.5,yt-yb));
+      tip({x:q0+1,y:yb,w:qw-2,h:Math.max(1.5,yt-yb)},["ortalama ± std bandı",`${f2(Q.mean-Q.sd)} – ${f2(Q.mean+Q.sd)}`,"katlar arası std, n − 1 ile"]);
       const bw=qw/K;
       for(let f=0;f<K;f++){
         const a=Q.acc[f], x=q0+f*bw+bw*.2, bd=bw*.6, yy=EY(a);
         ctx.fillStyle=hexA(MC(mode),f===cur?.85:.38); ctx.fillRect(x,yy,bd,qy+qh-yy);
         ctx.strokeStyle=f===cur?css("--ink"):css("--line"); ctx.lineWidth=f===cur?1.6:1; ctx.strokeRect(x,yy,bd,qy+qh-yy);
         label(ctx,String(f+1),x+bd/2,qy+qh+10,f===cur?css("--ink"):css("--ink-soft"),"center",10);
+        const nV=fold.filter(v=>v===f).length, hh=Math.max(6,qy+qh-yy);
+        tip({x,y:qy+qh-hh,w:bd,h:hh},[`Kat ${f+1}`+(f===cur?" · doğrulamada":" · tıkla → doğrulamaya al"),
+          [`doğruluk ${f2(a)} · ${Math.round(a*nV)} / ${nV}`,MC(mode)],MN(mode),`öteki yolda ${f2(O.acc[f])}`]);
       }
       ctx.save();
       ctx.setLineDash([2,4]); ctx.strokeStyle=css("--ink-soft"); ctx.lineWidth=1.6;
@@ -9727,6 +9923,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       ctx.setLineDash([]); ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.6;
       ctx.beginPath(); ctx.moveTo(q0,EY(Q.mean)); ctx.lineTo(q0+qw,EY(Q.mean)); ctx.stroke();
       ctx.restore();
+      { const om=mode==="out"?"in":"out";
+        tip({x:q0,y:EY(.5)-4,w:qw,h:8,z:2},["yazı tura 0.50","rastgele tahminin doğruluğu"]);
+        tip({x:q0,y:EY(O.mean)-4,w:qw,h:8,z:2},[[`${MN(om)} ${f2(O.mean)} ± ${f2(O.sd)}`,MC(om)],"öteki yolun 5 kat ortalaması",`bu yolla fark ${sg2(Q.mean-O.mean)}`]);
+        tip({x:q0,y:EY(Q.mean)-4,w:qw,h:8,z:2},[[`ortalama ${f2(Q.mean)} ± ${f2(Q.sd)}`,"--accent"],`${MN(mode)} · 5 katın ortalaması`,`katlar ${Q.acc.map(f2).join(" · ")}`]); }
       /* çubuk değerleri çizgilerin ÜSTÜNDE ve zeminli: ortalama çizgisi "0.67"yi kesiyordu */
       for(let f=0;f<K;f++){ const x=q0+f*bw+bw/2, yy=Math.max(qy+9,EY(Q.acc[f])-9);
         legend(ctx,x,yy,[[f2(Q.acc[f]),f===cur?"--ink":"--ink-soft"]],{size:10,align:"center"}); }
@@ -9734,9 +9934,14 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
       /* geçmiş: her « Yeni veri »nin iki ortalaması; sol sütun CV dışında, sağ Pipeline */
       const hx=q0+qw+6;
       ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1; ctx.strokeRect(hx,qy,hw,qh); ctx.restore();
+      { const av=(f)=>hist.reduce((s2,e)=>s2+f(e),0)/Math.max(1,hist.length);
+        tip({x:hx,y:qy,w:hw,h:qh},[`geçmiş · ${hist.length} veri`,[`CV dışında ortalama ${f2(av(e=>e.o))}`,"--bad"],
+          [`Pipeline içinde ortalama ${f2(av(e=>e.i))}`,"--a"],"her « Yeni veri » iki nokta ekler"]); }
       hist.forEach((e,k)=>{ const last=k===hist.length-1, jx=last?0:((k%3)-1)*3.5;   // üst üste binmesin
         disc(ctx,hx+hw*.3+jx,EY(e.o),last?4:3,hexA("--bad",last?.95:.45));
-        disc(ctx,hx+hw*.7+jx,EY(e.i),last?4:3,hexA("--a",last?.95:.45)); });
+        disc(ctx,hx+hw*.7+jx,EY(e.i),last?4:3,hexA("--a",last?.95:.45));
+        const hr=[`Veri ${k+1} / ${hist.length}`+(last?" · şimdiki":""),[`CV dışında ${f2(e.o)}`,"--bad"],[`Pipeline içinde ${f2(e.i)}`,"--a"],`fark ${sg2(e.o-e.i)}`];
+        tip({x:hx+hw*.3+jx,y:EY(e.o),r:last?4:3},hr); tip({x:hx+hw*.7+jx,y:EY(e.i),r:last?4:3},hr); });
       label(ctx,"geçmiş",hx+hw/2,qy+qh+10,css("--ink-soft"),"center",10);
       label(ctx,`${hist.length} veri`,hx+hw/2,qy+qh+21,css("--ink-soft"),"center",10);
     } else {
@@ -10647,7 +10852,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
 
 /* ═════════════ 12 · Düzenlileştirme ═════════════ */
 (function(){
-  const cv=$("#c-reg"), {ctx,fit}=setupCanvas(cv);
+  const cv=$("#c-reg"), {ctx,fit,tip}=setupCanvas(cv);
   /* "Ezberleyen Model Sınıfta Kalır" (m-fit) ile aynı üç eğriyi ve aynı örneklem boyunu
      paylaşıyor — orada sorunu görüyoruz, burada çözümünü. 14 nokta / 12 kuvvet:
      parametre sayısı veri sayısına yaklaştığı için ceza olmadan model gürültüyü ezberliyor. */
@@ -10660,6 +10865,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   const MODE_TXT={l2:"L2", en:"Elastic Net ρ=0.5", l1:"L1"};
   let deg=12, noise=.12, li=12, mode="l2", tr=[], te=[], ver=0, sweepT=0, hoverJ=-1, LAY=null, showR=false;
 
+  /* fare ipucu: CURVES birimsiz (x −1…1, eksende sayı yok), bu yüzden değerler x / y diye yazılır;
+     sayılar modülün kendi biçiminde (fmt, β ve RMSE gibi) */
+  const sgr=(v)=>(v>0&&+v.toFixed(3)!==0?"+":"")+fmt(v,3);
+  const SUPD="⁰¹²³⁴⁵⁶⁷⁸⁹", sup=(n)=>n===1?"":String(n).split("").map(d=>SUPD[d]).join("");
   function lamTxt(v){
     if(v>=10) return v.toFixed(0);
     if(v>=1) return v.toFixed(2);
@@ -10816,25 +11025,45 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     for(let i=0;i<=6;i++){const gy=p+i*ph/6;ctx.beginPath();ctx.moveTo(p,gy);ctx.lineTo(p+pw,gy);ctx.stroke();}
     ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.strokeRect(p,p,pw,ph);ctx.restore();
 
+    const xOf=(mx)=>clamp((mx-p)/pw*2-1,-1,1);
     ctx.save();ctx.beginPath();ctx.rect(p,p,pw,ph);ctx.clip();
     ctx.beginPath();ctx.setLineDash([6,5]);ctx.strokeStyle=css("--ink-soft");ctx.lineWidth=1.6;
     for(let i=0;i<=200;i++){const x=-1+2*i/200;i?ctx.lineTo(X(x),Y(truth(x))):ctx.moveTo(X(x),Y(truth(x)));}
     ctx.stroke();ctx.setLineDash([]);
+    tip({x0:p,x1:p+pw,fy:(mx)=>Y(truth(xOf(mx))),z:1.8},(mx)=>{ const x=xOf(mx), t=truth(x), m=predict(D,F,x);
+      return [["gerçek ilişki","--ink-soft"],`x = ${fmt(x,2)} → y = ${fmt(t,3)}`,`model ŷ ${fmt(m,3)} · fark ${sgr(m-t)}`]; });
     const showRef=li>4;
     if(showRef){                                            // en küçük α'daki uyum, karşılaştırma için
       ctx.beginPath();ctx.setLineDash([3,4]);ctx.strokeStyle=hexA("--bad",.55);ctx.lineWidth=1.8;
       for(let i=0;i<=400;i++){const x=-1+2*i/400,yy=Y(predict(D,PA.W[0],x));i?ctx.lineTo(X(x),yy):ctx.moveTo(X(x),yy);}
       ctx.stroke();ctx.setLineDash([]);
+      tip({x0:p,x1:p+pw,fy:(mx)=>Y(predict(D,PA.W[0],xOf(mx))),z:1.9},(mx)=>{ const x=xOf(mx);
+        return [[`α en küçükken (${lamTxt(lamAt(0))})`,"--bad"],`x = ${fmt(x,2)} → ŷ ${fmt(predict(D,PA.W[0],x),3)}`,
+          `test RMSE ${fmt(PA.te[0],3)} · şimdi ${fmt(PA.te[li],3)}`]; });
     }
     ctx.beginPath();ctx.strokeStyle=css("--accent");ctx.lineWidth=3.2;ctx.lineJoin="round";
     for(let i=0;i<=400;i++){const x=-1+2*i/400,yy=Y(predict(D,F,x));i?ctx.lineTo(X(x),yy):ctx.moveTo(X(x),yy);}
     ctx.stroke();
+    tip({x0:p,x1:p+pw,fy:(mx)=>Y(predict(D,F,xOf(mx)))},(mx)=>{ const x=xOf(mx), m=predict(D,F,x), t=truth(x);
+      return [[`model · α = ${lamTxt(lam)}`,"--accent"],`x = ${fmt(x,2)} → ŷ ${fmt(m,3)}`,`gerçek ${fmt(t,3)} · fark ${sgr(m-t)}`,
+        `${deg}. derece · ${MODE_TXT[mode]}`]; });
     /* artıklar (eğitim): kesikli kırmızı referans eğrisiyle karışmasın diye kapalı başlar */
     if(showR){ ctx.save(); ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
-      tr.forEach(q=>{ ctx.beginPath(); ctx.moveTo(X(q.x),Y(q.y)); ctx.lineTo(X(q.x),Y(clamp(predict(D,F,q.x),-3,3))); ctx.stroke(); });
+      tr.forEach(q=>{ ctx.beginPath(); ctx.moveTo(X(q.x),Y(q.y)); ctx.lineTo(X(q.x),Y(clamp(predict(D,F,q.x),-3,3))); ctx.stroke();
+        const m=predict(D,F,q.x), ya=Y(q.y), yb=Y(clamp(m,-3,3));
+        if(Math.abs(yb-ya)>18) tip({x:X(q.x)-4,y:Math.min(ya,yb),w:8,h:Math.abs(yb-ya),z:1.95},[[`artık ${sgr(q.y-m)}`,"--bad"],`ölçülen ${fmt(q.y,3)} − ŷ ${fmt(m,3)}`]); });
       ctx.restore(); }
+    /* test noktaları küçük ve sık (60 nokta, ~7 px arayla): tek tek daire olsa birbirini ve
+       eğrileri örterdi. Tek dikdörtgen (z 1.5, eğrilerin altında) imlece 9 px içindeki en yakın
+       test noktasını bulur; yakında nokta yoksa kutu açılmaz. */
     te.forEach(q=>disc(ctx,X(q.x),Y(q.y),2.6,hexA("--ink-soft",.45)));
-    tr.forEach(q=>disc(ctx,X(q.x),Y(q.y),6,css("--a"),css("--surface")));
+    tip({x:p,y:p,w:pw,h:ph,z:1.5},(mx,my)=>{ let b=null, bd=81;
+      te.forEach(q=>{ const d=(X(q.x)-mx)**2+(Y(q.y)-my)**2; if(d<bd){ bd=d; b=q; } });
+      if(!b) return null; const m=predict(D,F,b.x);
+      return [["Test noktası","--ink-soft"],`x = ${fmt(b.x,2)} · y = ${fmt(b.y,2)}`,`ŷ ${fmt(m,3)} · hata ${sgr(m-b.y)}`,"model bu noktayı görmedi"]; });
+    tr.forEach(q=>{ disc(ctx,X(q.x),Y(q.y),6,css("--a"),css("--surface"));
+      tip({x:X(q.x),y:Y(q.y),r:6},()=>{ const m=predict(D,F,q.x);
+        return [["Eğitim noktası","--a"],`x = ${fmt(q.x,2)} · y = ${fmt(q.y,2)}`,`ŷ ${fmt(m,3)} (α = ${lamTxt(lam)})`,[`artık ${sgr(q.y-m)}`,"--bad"]]; }); });
     ctx.restore();
     legend(ctx,p+8,p+14,[["eğitim noktası","--a"],["gerçek ilişki","--ink-soft"],
       [`${deg}. derece · ${MODE_TXT[mode]} · α=${lamTxt(lam)}`,"--accent"],showRef&&["kesikli kırmızı: α en küçükken","--bad"],showR&&["artık (eğitim)","--bad"]],{size:12,lh:17});
@@ -10889,6 +11118,10 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
         label(ctx,"0",cx,barsY1-21,css("--ink-soft"),"center",10);
       }
       label(ctx,String(j+1),cx,barsY1+13,v>ZTOL?css("--ink-soft"):hexA("--ink-soft",.45),"center",deg>10?9:10.5);
+      const r0=Math.abs(REF[j]);
+      tip({x:bx0+slot*j,y:barsY0-14,w:slot,h:barsY1-barsY0+30},[[`β${j+1} · x${sup(j+1)} sütununun katsayısı`,"--accent"],
+        `β${j+1} = ${fmt(F.w[j],3)} (α = ${lamTxt(lam)})`,`α en küçükken ${fmt(REF[j],3)}`+(v>ZTOL&&r0>ZTOL?` · kalan %${(100*v/r0).toFixed(0)}`:""),
+        v<=ZTOL?["tam olarak sıfır: model bu kuvveti attı","--good"]:v>axisMax?"çubuk eksene sığmıyor (▲)":null]);
     }
     ctx.save();ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;
     ctx.beginPath();ctx.moveTo(bx0,barsY1);ctx.lineTo(bx0+bxw,barsY1);ctx.stroke();ctx.restore();
@@ -10903,6 +11136,21 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.strokeStyle=css("--line");ctx.strokeRect(sx0,sy0,sxw,sy1-sy0);ctx.restore();
     ctx.fillStyle=hexA("--good",.14);
     ctx.fillRect(SX(PA.best)-6,sy0,12,sy1-sy0);
+    /* fare ipucu: şeridin her yerinde o α'nın üç hatası; çizgiler ve eğriler üstte */
+    const iOf=(mx)=>clamp((mx-sx0)/sxw*(LN-1),0,LN-1);
+    const atI=(arr,fi)=>{ const i0=Math.floor(fi), i1=Math.min(LN-1,i0+1), f=fi-i0; return arr[i0]*(1-f)+arr[i1]*f; };
+    tip({x:sx0,y:sy0,w:sxw,h:sy1-sy0,z:.5},(mx)=>{ const i=Math.round(iOf(mx));
+      return [`α = ${lamTxt(lamAt(i))} · tıkla → seç`,[`eğitim RMSE ${fmt(PA.tr[i],3)}`,"--a"],[`test RMSE ${fmt(PA.te[i],3)}`,"--bad"],
+        [`CV RMSE ${fmt(PA.cv[i],3)}`+(i===PA.best?" · en iyi":""),"--good"]]; });
+    tip({x:SX(PA.best)-6,y:sy0,w:12,h:sy1-sy0},[[`en iyi α (CV) = ${lamTxt(lamAt(PA.best))}`,"--good"],`CV RMSE ${fmt(PA.cv[PA.best],3)}`,
+      `test RMSE ${fmt(PA.te[PA.best],3)} · testin dibi ${fmt(PA.te[PA.tbest],3)}`,"seçim test noktalarına bakmadı"]);
+    tip({x:SX(li)-5,y:sy0,w:10,h:sy1-sy0},[[`seçili α = ${lamTxt(lam)}`,"--accent"],`eğitim ${fmt(PA.tr[li],3)} · test ${fmt(PA.te[li],3)}`,`CV ${fmt(PA.cv[li],3)}`]);
+    /* eğitim ve CV eğrileri çoğu α'da üst üste: hangisi yakalanırsa yakalansın kutu üç hatayı da söyler */
+    [[PA.tr,"eğitim RMSE","--a","eğitim noktalarında"],[PA.te,"test RMSE","--bad","yalnız sonucu görmek için"],[PA.cv,"CV RMSE (5 kat)","--good","eğitim noktalarında, test görmeden"]]
+      .forEach(([arr,nmS,tok,note])=>tip({x0:sx0,x1:sx0+sxw,fy:(mx)=>SY(atI(arr,iOf(mx)))},(mx)=>{ const i=Math.round(iOf(mx));
+        return [[`${nmS} ${fmt(arr[i],3)}`,tok],`α = ${lamTxt(lamAt(i))} · ${note}`,
+          `eğitim ${fmt(PA.tr[i],3)} · CV ${fmt(PA.cv[i],3)} · test ${fmt(PA.te[i],3)}`,
+          i===PA.best?["en iyi α (CV)","--good"]:i===PA.tbest?["testin dibi","--bad"]:null]; }));
     const curve=(arr,color)=>{
       ctx.save();ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2.2;ctx.lineJoin="round";
       ctx.rect(sx0,sy0,sxw,sy1-sy0);ctx.clip();ctx.beginPath();
@@ -10915,6 +11163,8 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ctx.beginPath();ctx.moveTo(SX(li),sy0);ctx.lineTo(SX(li),sy1);ctx.stroke();ctx.restore();
     disc(ctx,SX(li),SY(PA.te[li]),5,css("--bad"),css("--surface"));
     disc(ctx,SX(li),SY(PA.tr[li]),5,css("--a"),css("--surface"));
+    tip({x:SX(li),y:SY(PA.te[li]),r:5},[[`test RMSE ${fmt(PA.te[li],3)}`,"--bad"],`α = ${lamTxt(lam)}`,`testin dibi ${fmt(PA.te[PA.tbest],3)}`]);
+    tip({x:SX(li),y:SY(PA.tr[li]),r:5},[[`eğitim RMSE ${fmt(PA.tr[li],3)}`,"--a"],`α = ${lamTxt(lam)}`,`CV ${fmt(PA.cv[li],3)}`]);
     label(ctx,"test",sx0+6,sy0+11,css("--bad"),"left",9.5);
     label(ctx,"eğitim",sx0+6,sy0+24,css("--a"),"left",9.5);
     label(ctx,"CV",sx0+6,sy0+37,css("--good"),"left",9.5);
