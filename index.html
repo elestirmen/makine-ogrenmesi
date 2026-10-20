@@ -1688,6 +1688,42 @@ input[type=range]{min-height:28px;margin:0}
       </div>
     </section>
 
+    <!-- ══════════ Kaç bileşen? (scree, eşik, Kaiser, yükler, CV) ══════════ -->
+    <section id="m-scree" hidden>
+      <div class="head">
+        <div class="eyebrow"><span>Modül 32 · Hafta 13</span><span class="chip">BİLEŞEN SAYISI</span></div>
+        <h2>Kaç Bileşen Yeter?</h2>
+        <p>Kaç bileşen tutmalı? <b>Scree plot</b> (scree grafiği) ve dört kural bakar: <b>elbow</b> (dirsek), %90–95 eşiği, Kaiser ölçütü ve <b>cross-validation</b> (çapraz doğrulama). Bir çubuğa tıkla: <b>loading</b>'ler (yükler) o bileşenin hangi sütunlardan yapıldığını gösterir.</p>
+      </div>
+      <div class="stage">
+        <canvas id="c-scree" aria-label="Scree grafiği, kümülatif oran, yükler ve CV eğrisi"></canvas>
+        <div class="bar">
+          <label class="ctl"><span class="lab">Eşik</span><input type="range" id="scr-t" min="80" max="99" step="1" value="90"><output id="scr-to">%90</output></label>
+          <label class="ctl"><span class="lab">Bileşen</span><input type="range" id="scr-j" min="1" max="10" step="1" value="1"><output id="scr-jo">PC1</output></label>
+          <button class="btn" id="scr-std" aria-pressed="true">Standartlaştır</button>
+          <div class="seg" role="group" aria-label="Sağ panel">
+            <button id="scr-vl" aria-pressed="true">Yükler</button>
+            <button id="scr-vc" aria-pressed="false">CV</button>
+          </div>
+          <span class="hint">Çubuğa tıkla → o bileşenin yükleri · eşiği sürükle → kaç bileşen gerekir</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k">PC1 payı</span><span class="v" id="scr-pc1">—</span></div>
+          <div class="stat"><span class="k" id="scr-tk">Eşik %90</span><span class="v" id="scr-thr">—</span></div>
+          <div class="stat"><span class="k">Dirsek</span><span class="v" id="scr-elb">—</span></div>
+          <div class="stat"><span class="k"><span lang="en">Kaiser</span> · <span class="sym">λ</span> &gt; 1</span><span class="v" id="scr-kai">—</span></div>
+          <div class="stat"><span class="k">CV · 5 kat</span><span class="v" id="scr-cv">—</span></div>
+        </div>
+      </div>
+      <div class="ask">
+        <span class="tag">Dene ve düşün</span>
+        <div>
+          <p>« Öğrenci anketi »nde eşiği %80'den %95'e sürükle: eşik kuralının sayısı 5'ten 9'a çıkıyor, dirsek ve Kaiser 2'de kalıyor. Hangisi haklı? Neden eşik bu veride bu kadar çok bileşen istiyor? (İpucu: on sorunun her birinin kendi gürültüsü de varyans sayılır.)</p>
+          <p>« Tıbbi ölçümler »de « Standartlaştır »ı kapat: PC1'in payı %44.3'ten %98.2'ye fırlıyor. PC1'in yüklerine bak: hangi iki sütun? Bu %98.2 hastalar hakkında mı, birim seçimi hakkında mı bir şey söylüyor? Kaiser göstergesi neden 'uygulanamaz' diyor, CV paneli ne diyor?</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ══════════ 01 · Ortalama mı, medyan mı ══════════ -->
     <section id="m-stat" hidden>
       <div class="head">
@@ -3239,6 +3275,60 @@ const CONTENT={
     next:"Modül 18 · Etiketsiz gruplama — bu kez sütunları değil, satırları grupluyoruz."
   }},
 
+/* ══ 32 · Kaç bileşen? ══ */
+"m-scree":{ pick:"Veri seti",
+  sets:[
+    {name:"Öğrenci anketi", gen:"anket", y:"bölümü yeniden seçer mi",
+     cols:["hoca","içerik","ödev","sınav","kaynak","yemek","kulüp","yurt","ulaşım","spor"],
+     note:"Hafta 13'ün anketi, sunumun koduyla birebir (tohum 4): 300 öğrenci, 10 soru, 1–5 puan. Standart veride PC1 %35.9, PC2 %29.1, ilk ikisi %64.9; λ 3.59 ve 2.91, üçüncüsü 0.60: Kaiser 2, dirsek 2. Eşik %80'de 5, %90'da 7, %95'te 9 bileşen istiyor. Yükler: ders soruları PC1'de 0.43–0.45, kampüs soruları PC2'de 0.41–0.47. 5 katlı CV (hedef 'bölümü yeniden seçer mi'): PCA(2) %82.0, 10 sorunun hepsi %81.3, slayttaki 0.820 ve 0.813; PC1 tek başına da %82.0, CV 1 diyor."},
+    {name:"Kapadokya kasabaları", gen:"kasaba",
+     cols:["otel","yatak","restoran","ziyaretçi","balon","müze","nüfus","tarım alanı"],
+     note:"Hafta 13'ün tablosu, sunumun koduyla (tohum 13): 10 kasaba, 8 gösterge; adlar gerçek, sayılar temsilî. Standart veride PC1 %67.5 (otel, restoran, ziyaretçi, müze 0.41–0.42: turizm yoğunluğu), PC2 %26.8 (nüfus 0.65, tarım alanı 0.67: kasaba büyüklüğü); Kaiser, dirsek ve %90 eşiği 2. Ölçeksiz PC1 %75.6 ve neredeyse yalnız tarım alanı (0.96; hektarla ölçülüyor, λ₁ 3.6 milyon), PC2 %24.1 yatak (0.93). Tahmin edilecek hedef yok, CV yok."},
+    {name:"Tıbbi ölçümler", gen:"tibbi", y:"kötü huylu mu",
+     meas:["yarıçap","doku","çevre","alan","pürüzsüzlük","kompaktlık","içbükeylik","içbükey nokta","simetri","fraktal boyut"],
+     sub:["ortalama","hata","en kötü"],
+     note:"569 hasta, 30 ölçüm: 10 özellik (yarıçap, alan, içbükeylik…) × ortalama, hata, en kötü değer. Sayılar üretildi; korelasyon yapısı meme kanseri verisininkine oturtuldu ve sunumun oranları çıkıyor: %44.3, %19.0, %9.4, %6.6, %5.5. Dirsek 3, Kaiser 6 (λ₆ = 1.21, λ₇ = 0.68), %90 eşiği 7, %95 eşiği 10. 213 kötü huylu; 5 katlı CV PCA(1) %90.3, PCA(5) %96.0, PCA'sız %96.8, CV 5 diyor. Ölçeksiz PC1 %98.2: en kötü alan 0.85, ortalama alan 0.52; ölçeksiz hat CV'de 12 bileşenle ancak %92.6."}
+  ],
+  lesson:{
+    q:"PCA'dan kaç bileşen tutmalıyım?",
+    short:"Tek bir doğru sayı yok. Dört kural bakar: çubukların düzleştiği yer (dirsek), kümülatif payın %90–95'e ulaştığı yer (eşik), özdeğeri 1'den büyük bileşenler (Kaiser, yalnız standartlaştırılmış veride) ve modelin doğrulama skoru (CV). Amacın çizmekse 2–3, sıkıştırmaksa eşik, model kurmaksa CV.",
+    idea:["Modül 17'de iki sütunu bire indirdin ve karar kolaydı: PC1 varyansın %99.52'sini taşıyordu. Gerçek tablolarda 10, 30, 500 sütun olur ve PCA o kadar bileşen çıkarır. Her bileşenin payı (açıklanan varyans oranı) büyükten küçüğe dizilir. Bu payları çubuk çubuk çizersen <b>scree plot</b> (scree grafiği) çıkar. Scree, dağ yamacının dibine yığılan moloz demek: ilk birkaç çubuk dağın kendisi, arkadan gelen alçak ve düz kuyruk moloz. Çubukların üstüne bir de kümülatif çizgi çizilir; 'ilk k bileşen birlikte ne kadar taşıyor?' sorusunu o cevaplar.",
+          "Kaç bileşen tutacağını dört kural söyler ve çoğu zaman dördü dört ayrı sayı verir. <b>Elbow</b> (dirsek): çubukların hızla düşmeyi bırakıp düzleştiği yere kadar al; kolunu büktüğünde dirseğin yaptığı köşeyi ara. Eşik: kümülatif çizgi %90'a ya da %95'e ulaşana kadar al; scikit-learn'de PCA(n_components=0.95) tam olarak bunu yapar. Kaiser ölçütü: standartlaştırılmış veride özdeğeri 1'den büyük bileşenleri al. Orada her sütunun varyansı 1, yani λ > 1 'bu bileşen ortalama bir sütundan çok bilgi taşıyor' demek; ondan azını tutmak, bir sütunu atıp yerine daha zayıfını koymak olur. En sağlamı <b>cross-validation</b> (çapraz doğrulama): bileşen sayısını bir hiperparametre say, her k için modeli kur ve doğrulama skoruna bak (Modül 05).",
+          "Bileşene adını yükler verir. PC1 bir ağırlıklı toplamdır: ankette PC1 ≈ 0.43·hoca + 0.43·içerik + 0.44·ödev + 0.45·sınav + 0.45·kaynak, kampüs sorularının payı ise sıfıra yakın. Bu ağırlıklara <b>loading</b> (yük) denir. Beş ders sorusu büyük ve aynı işaretli, kampüs soruları küçük: PC1'in adı 'ders kalitesi'. Yükün büyüklüğüne mutlak değerle bak; −0.71 de +0.71 kadar güçlüdür. İşaretin kendisi keyfîdir: bütün yükleri −1 ile çarparsan aynı doğruyu ters yönden tarif etmiş olursun. Anlamlı olan aynı bileşenin içindeki işaret farkı: aynı işaretli sütunlar birlikte artar, zıt işaretlilerden biri artarken öbürü azalır.",
+          "Son uyarı birimle ilgili. Tıbbi ölçümlerde alan yüzlerle, pürüzsüzlük binde birlerle ölçülüyor. Ölçeklemeden PCA yaparsan alanın varyansı (yüz binler) ötekileri ezer ve PC1 varyansın %98.2'sini 'açıklar'. Bu bir başarı değil: PC1 yalnız iki alan sütununun kopyası. Modül 17'deki jüri gibi: 1000 üzerinden puan veren jüri sıralamayı tek başına belirliyor. Standartlaştırınca her sütun eşit söz hakkı alır ve PC1 %44.3'e iner. Kaiser de bu yüzden yalnız standart veride geçerli: ölçeksiz veride özdeğerler birimin karesiyle büyür ve '1'den büyük' sayısı birim seçimine bağlı kalır."],
+    read:[["Sol panel · scree","Her çubuk bir bileşenin tek başına açıkladığı pay, turuncu çizgi kümülatif toplam. Kesikli gri çizgi eşik: turuncu çizginin onu ilk geçtiği bileşen işaretli, o bileşene kadarki çubuklar dolu, sonrakiler soluk. Mor kesikli çizgi Kaiser: standart veride λ = 1, yani 1/p payı (on sütunda %10); üstünde kalan çubuklar Kaiser'in seçtikleri. Siyah halka dirsek: ilk ve son çubuğun tepesini birleştiren doğrudan en aşağıda kalan çubuk, yani eğrinin büküldüğü yer; seçilen sayı ondan önceki çubuklar (ankette halka 3. çubukta, seçim 2). İmleç bir çubuğun üstünde durursa λ ve pay yazılır."],
+          ["Sağ panel · yükler","Seçili bileşenin her sütundaki yükü: sıfırın sağı artı (camgöbeği), solu eksi (turuncu), sayılar sağda; büyük yüklü sütunun adı koyu. Tıbbi ölçümlerde satır başına üç ince çubuk var: aynı özelliğin ortalaması, hatası (standart hata) ve en kötü değeri. Bileşeni çubuğa tıklayarak ya da « Bileşen » kaydırıcısıyla seç."],
+          ["Sağ panel · CV","5 katlı cross-validation: her k için 'ölçekle → PCA(k) → logistic regression' hattının doğruluğu. Ölçekleme ve PCA yalnız eğitim katında kurulur, test katı hiç karışmaz. Yeşil bant en iyi skorun 1 puan yakını, yeşil halka o bantta kalan en az bileşen, kesikli çizgi PCA'sız model (bütün sütunlar). Kasabaların tahmin edilecek bir hedefi yok; orada CV düğmesi soluk."],
+          ["Göstergeler","PC1'in payı ve dört kuralın önerdiği bileşen sayısı: eşik, dirsek, Kaiser, CV. Dört sayı çoğu zaman farklıdır. Ölçeksiz veride Kaiser 'uygulanamaz' der. Dar ekranda paneller alt alta, çok kısa ekranda yalnız scree çizilir; göstergeler hep aynı."],
+          ["« Standartlaştır »","Açıkken PCA her sütunu z-skoruna çevirip kurulur (korelasyon matrisi), kapalıyken ham kovaryanstan. Kapatınca en büyük birimli sütun PC1'i ele geçirir; yüklerde tek bir uzun çubuk kalır."]],
+    terms:[["scree plot","scree grafiği","bileşenlerin tek tek açıkladığı varyans paylarının çubuk grafiği; adı yamaç dibindeki molozdan gelir"],
+           ["elbow","dirsek","çubukların hızla düşmeyi bırakıp düzleştiği yer; ondan önceki bileşenler tutulur"],
+           ["cumulative explained variance","kümülatif açıklanan varyans","ilk k bileşenin paylarının toplamı; eşik kuralı buna bakar"],
+           ["Kaiser criterion","Kaiser ölçütü","standartlaştırılmış veride özdeğeri 1'den büyük bileşenleri tutmak"],
+           ["loading","yük","bir sütunun bir bileşendeki ağırlığı; büyüklüğü mutlak değerle okunur, işareti keyfî"],
+           ["cross-validation","çapraz doğrulama","bileşen sayısını hiperparametre sayıp doğrulama skoruyla seçmek"],
+           ["n_components","—","scikit-learn'de tam sayı verirsen bileşen sayısı, 0 ile 1 arası verirsen korunacak varyans payı (0.95 → %95 eşiği)"]],
+    life:["Anket analizi: 40 soruluk bir memnuniyet anketi çoğu zaman üç dört özet boyuta iner (fiyat, hizmet…). Scree kaç boyut olduğunu, yükler adlarını söyler.",
+          "Uydu görüntüsü: Landsat'ın 36 sütununun %95'i 6 bileşende (Hafta 13); ilk ikisi genel parlaklık ve bitki örtüsü.",
+          "Model hattı: Pipeline içinde PCA(n_components=0.95) eşik kuralını kendisi uygular; meme kanseri verisinde 10 bileşen seçer."],
+    trap:"'%95 varyans korundu, demek ki model %95 başarılı' sanmak. Açıklanan varyans verinin ne kadarını sakladığını söyler, modelin doğruluğunu değil: varyansın %95'i korunup test skoru 0.60 da çıkabilir, 0.99 da. Hedefle ilgili bilgi küçük varyanslı, atılan bir bileşende de durabilir. Model kuruyorsan bileşen sayısını CV ile seç ve PCA'sız modelle karşılaştır.",
+    fig:{at:1, cap:"Hafta 13'ün alıştırması: özdeğerler 12.4, 5.1, 2.3, 0.8, 0.4, toplam 21. Çubuklar tek tek paylar, turuncu çizgi kümülatif: %90'ı ilk geçen 3. bileşen (%94.3). Sağda kuralların cevabı: %90 → 3, %95 → 4. Kaiser için toplamın sütun sayısına (5) eşit olması, yani verinin standartlaştırılmış olması gerekirdi."},
+    ex:{t:"Beş özdeğerle bileşen sayısı (Hafta 13, alıştırma 2)",
+      s:["Özdeğerler 12.4, 5.1, 2.3, 0.8 ve 0.4. Toplam varyans özdeğerlerin toplamıdır: 12.4 + 5.1 + 2.3 + 0.8 + 0.4 = <b>21.0</b>.",
+         "Her bileşenin payı = özdeğer / toplam: 12.4 / 21 = <b>%59.0</b>, 5.1 / 21 = <b>%24.3</b>, 2.3 / 21 = <b>%11.0</b>, 0.8 / 21 = <b>%3.8</b>, 0.4 / 21 = <b>%1.9</b>.",
+         "Kümülatif pay, payları sırayla topla: %59.0, %83.3, <b>%94.3</b>, %98.1, %100.",
+         "Eşik kuralı: %90'ı ilk geçen 3. bileşen (%94.3), yani <b>3 bileşen</b>. %95 isteseydin 4 gerekirdi (%98.1).",
+         "Kaiser? 'λ > 1' diye saysan 3 çıkar (12.4, 5.1, 2.3). Ama standartlaştırılmış veride her sütunun varyansı 1'dir, beş sütunda toplam <b>5</b> olurdu. Burada toplam 21: veri ölçeklenmemiş, özdeğerler birime bağlı. Kaiser'den önce standartlaştır."],
+      end:"%90 için 3 bileşen: beş sütunun bilgisinin %94.3'ü üç sayıda. Özdeğerlerin toplamı sütun sayısına eşit değilse Kaiser'e güvenme."},
+    check:[["« Öğrenci anketi »nde dirsek ve Kaiser 2 diyor, %90 eşiği 7. Hangisi yanlış?",
+            "Hiçbiri; farklı soruları cevaplıyorlar. Dirsek ve Kaiser 'kaç ortak boyut var?' diye sorar: ders kalitesi ve kampüs yaşamı, 2. Eşik kuralı 'bilginin %90'ını taşımak için kaç sayı lazım?' diye sorar. Her sorunun kendine ait gürültüsü de varyans sayılır ve bu gürültü sekiz küçük bileşene yayılmış (her biri %3–6); onları da taşımak 7 bileşen istiyor. Çizmek ya da özetlemek için 2, sıkıştırmak için eşik, model kurmak için CV."],
+           ["Ölçeksiz tıbbi ölçümlerde 'λ > 1' diye sayarsan yine bir sayı çıkar. Neden ona güvenmezsin?",
+            "Çünkü özdeğerler birimin karesiyle büyür. Alan sütununu 100 kat büyük sayılarla yazsan (başka bir birimle) onun varyansı 100² = 10 000 kat artar, PC1'in λ'sı da onunla; '1'in üstünde kaç bileşen var' sorusunun cevabı birim seçimine bağlı kalır. Standartlaştırılmış veride her sütunun varyansı 1'dir ve λ'ların toplamı sütun sayısına eşittir; λ > 1 ancak orada 'ortalama bir sütundan çok varyans taşıyor' anlamına gelir. Ekran bu yüzden ölçeksiz veride 'uygulanamaz' yazıyor."],
+           ["Kapadokya kasabalarında PC2'nin yükleri sende nüfus +0.65, tarım alanı +0.67; arkadaşının bilgisayarında −0.65 ve −0.67. Kim haklı?",
+            "İkiniz de. Özvektörün işareti keyfîdir: v ile −v aynı doğru, açıklanan varyans da aynı (%26.8). Değişen yalnız skorların işareti: büyük kasabalar sende PC2'nin artı ucunda, onda eksi ucunda. Anlamlı olan aynı bileşenin içindeki işaret farkı: otel −0.15 ile nüfus +0.65 zıt işaretli, yani bu eksende biri artarken öbürü azalıyor."]],
+    next:"Modül 18 · Etiketsiz gruplama — bu kez sütunları değil, satırları grupluyoruz."
+  }},
+
 /* ══ 21 ══ */
 "m-neu":{ pick:"Veri seti",
   sets:[
@@ -3790,6 +3880,7 @@ const FIGS={
 "m-mlp":`<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="İki gizli nöronun XOR sınıfını çizgiler arasındaki bölgede ayırmasını gösteren şema."><text x="154" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">ağ</text><text x="463" y="24" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">düzlemde</text><path d="M312 12V284" stroke="var(--line)" stroke-width="1.5"/><g fill="none" stroke="var(--ink-soft)" stroke-width="1.8"><path d="M59.9 97.2L136.1 89.8"/><path d="M54.8 185.4L141.2 100.6"/><path d="M55 111.5L141 194.5"/><path d="M59.9 199.4L136.1 205.6"/><path d="M170.1 96.2L253.9 138.9"/><path d="M170 198.7L254 155.3"/></g><g fill="var(--surface-2)" stroke="var(--ink)" stroke-width="1.8"><circle cx="42" cy="99" r="18"/><circle cx="42" cy="198" r="18"/><circle cx="154" cy="88" r="18"/><circle cx="154" cy="207" r="18"/><circle cx="270" cy="147" r="18"/></g><g fill="var(--ink)" text-anchor="middle" font-size="14"><text x="42" y="104">x₁</text><text x="42" y="203">x₂</text><text x="154" y="93">h₁</text><text x="154" y="212">h₂</text><text x="270" y="152">ŷ</text></g><g fill="var(--ink-soft)" text-anchor="middle" font-size="13"><text x="154" y="57">≈ OR</text><text x="154" y="181">≈ AND</text><text x="154" y="120" font-family="IBM Plex Mono, ui-monospace, monospace">−0.5</text><text x="154" y="242" font-family="IBM Plex Mono, ui-monospace, monospace">−1.5</text><text x="270" y="184" font-family="IBM Plex Mono, ui-monospace, monospace">−0.5</text><text x="113" y="86" font-family="IBM Plex Mono, ui-monospace, monospace">1</text><text x="115" y="119" font-family="IBM Plex Mono, ui-monospace, monospace">1</text><text x="115" y="164" font-family="IBM Plex Mono, ui-monospace, monospace">1</text><text x="113" y="198" font-family="IBM Plex Mono, ui-monospace, monospace">1</text><text x="210" y="105" font-family="IBM Plex Mono, ui-monospace, monospace">1</text><text x="216" y="193" font-family="IBM Plex Mono, ui-monospace, monospace">−2</text></g><polygon points="348,126.5 348,64 410.5,64 548,201.5 548,264 485.5,264" fill="var(--a)" fill-opacity="0.15" stroke="none"/><rect x="385.5" y="101.5" width="125" height="125" fill="none" stroke="var(--line)" stroke-width="1.5"/><g fill="none" stroke="var(--ink-soft)" stroke-width="1.5"><path d="M348 264H542"/><path d="M348 258V70"/><path d="M385.5 260V268M510.5 260V268M344 226.5H352M344 101.5H352"/></g><polygon points="548,264 540,260 540,268" fill="var(--ink-soft)"/><polygon points="348,64 344,72 352,72" fill="var(--ink-soft)"/><path d="M348 126.5L485.5 264" fill="none" stroke="var(--c)" stroke-width="2"/><path d="M410.5 64L548 201.5" fill="none" stroke="var(--c)" stroke-width="2" stroke-dasharray="6 4"/><g fill="var(--ink-soft)" font-size="13"><text x="348" y="47" text-anchor="middle">x₂</text><text x="559" y="273">x₁</text><text x="385.5" y="286" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace">0</text><text x="510.5" y="286" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace">1</text><text x="336" y="106" text-anchor="end" font-family="IBM Plex Mono, ui-monospace, monospace">1</text><text x="336" y="231" text-anchor="end" font-family="IBM Plex Mono, ui-monospace, monospace">0</text><text x="420" y="67" fill="var(--ink)">h₂</text><text x="477" y="282" text-anchor="middle" fill="var(--ink)">h₁</text></g><text x="448" y="170" text-anchor="middle" font-size="14" fill="var(--ink)">ŷ = 1</text><g fill="var(--a)"><circle cx="385.5" cy="101.5" r="6"/><circle cx="510.5" cy="226.5" r="6"/></g><g fill="none" stroke="var(--b)" stroke-width="2"><rect x="379.5" y="220.5" width="12" height="12"/><rect x="504.5" y="95.5" width="12" height="12"/></g><circle cx="566" cy="96" r="5" fill="var(--a)"/><text x="578" y="101" font-size="13" fill="var(--ink)">XOR = 1</text><rect x="561" y="120" width="10" height="10" fill="none" stroke="var(--b)" stroke-width="2"/><text x="578" y="130" font-size="13" fill="var(--ink)">XOR = 0</text></svg>`,
 "m-mlr":`<svg viewBox="0 0 640 306" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Şelale grafiği: kesme terimi 350, metrekare katkısı +1240, yaş katkısı −185, oda katkısı +285; 100 m², 10 yaşında, 3 odalı dairenin tahmini 1690 bin ₺."><text x="320" y="22" fill="var(--ink)" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="14" text-anchor="middle">fiyat = 350 + 12.4 · m² − 18.5 · yaş + 95 · oda</text><text x="320" y="42" fill="var(--ink-soft)" font-size="13" text-anchor="middle">bin ₺ · daire: 100 m², 10 yaşında, 3 oda</text><path d="M 60 202 H 612 M 60 152 H 612 M 60 102 H 612" fill="none" stroke="var(--grid)" stroke-width="1"/><path d="M 60 68 V 252 H 612" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13" text-anchor="end"><text x="54" y="256">0</text><text x="54" y="206">500</text><text x="54" y="156">1000</text><text x="54" y="106">1500</text></g><rect x="102" y="217" width="64" height="35" fill="var(--c)" fill-opacity="0.85"/><rect x="204" y="93" width="64" height="124" fill="var(--a)" fill-opacity="0.85"/><rect x="306" y="93" width="64" height="18.5" fill="var(--bad)" fill-opacity="0.85"/><rect x="408" y="83" width="64" height="28.5" fill="var(--a)" fill-opacity="0.85"/><rect x="524" y="83" width="64" height="169" fill="var(--accent)" fill-opacity="0.8"/><path d="M 166 217 H 204 M 268 93 H 306 M 370 111.5 H 408 M 472 83 H 524" fill="none" stroke="var(--ink-soft)" stroke-width="1.5" stroke-dasharray="4 3"/><g font-family="IBM Plex Mono, ui-monospace, monospace" font-size="14" font-weight="700" text-anchor="middle"><text x="134" y="210" fill="var(--ink)">350</text><text x="236" y="86" fill="var(--ink)">+1240</text><text x="338" y="128.5" fill="var(--bad)">−185</text><text x="440" y="76" fill="var(--ink)">+285</text><text x="556" y="76" fill="var(--ink)">1690</text></g><g fill="var(--ink)" font-size="14" text-anchor="middle"><text x="134" y="272">kesme terimi</text><text x="236" y="272">m²</text><text x="338" y="272">yaş</text><text x="440" y="272">oda</text><text x="556" y="272">tahmin</text></g><g fill="var(--ink-soft)" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="13" text-anchor="middle"><text x="134" y="292">β₀ = 350</text><text x="236" y="292">12.4 × 100</text><text x="338" y="292">−18.5 × 10</text><text x="440" y="292">95 × 3</text><text x="556" y="292">350+1240−185+285</text></g></svg>`,
 "m-pca":`<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beş öğrencinin ortalanmış matematik ve fizik notları 40 derecelik PC1 doğrusu boyunca diziliyor; doğru üstündeki gölgeleri −21.26, −8.45, 1.29, 8.45 ve 19.97, PC1 toplam varyans 250'nin 248.79'unu, yani yüzde 99.52'sini taşıyor."><text x="150" y="22" text-anchor="middle" fill="var(--ink)" font-size="15" font-weight="700">beş öğrenci, ortalanmış</text><path d="M30 40V280M30 280H270M90 40V280M30 220H270M210 40V280M30 100H270M270 40V280M30 40H270" fill="none" stroke="var(--grid)" stroke-width="1.5"/><path d="M30 160H270M150 40V280" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="30" y="296">−20</text><text x="270" y="296">20</text></g><text x="270" y="177" text-anchor="end" fill="var(--ink-soft)" font-size="13">matematik − 76</text><text x="156" y="52" fill="var(--ink-soft)" font-size="13">fizik − 72</text><path d="M39.9 252.8L264.7 63.4" fill="none" stroke="var(--accent)" stroke-width="2.5"/><path d="M270.8 58.2L267.9 67.2L261.5 59.5Z" fill="var(--accent)"/><text x="250.8" y="50.2" fill="var(--accent)" font-size="14" font-weight="700">PC1</text><path d="M178 160A28 28 0 0 0 171.4 142" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><text x="183" y="155" fill="var(--ink-soft)" font-size="13">40°</text><text x="158" y="262" fill="var(--ink)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace">v₁ = (0.765, 0.644)</text><path d="M57 247.5L48 236.8M115.7 198L106.7 187.3M160.4 160.4L151.4 149.7M193.3 132.7L184.3 122M246.1 88.2L237.1 77.5" fill="none" stroke="var(--accent)" stroke-width="2"/><g fill="var(--a)"><circle cx="54" cy="244" r="5"/><circle cx="114" cy="196" r="5"/><circle cx="150" cy="148" r="5"/><circle cx="186" cy="124" r="5"/><circle cx="246" cy="88" r="5"/></g><g fill="var(--ink)" font-size="14"><text x="42" y="248" text-anchor="end">A</text><text x="104" y="200" text-anchor="end">B</text><text x="142" y="142" text-anchor="end">C</text><text x="177" y="118" text-anchor="end">D</text><text x="256" y="93" text-anchor="start">E</text></g><path d="M322 16V290" fill="none" stroke="var(--line)" stroke-width="1.5"/><text x="482" y="22" text-anchor="middle" fill="var(--ink)" font-size="15" font-weight="700">PC1 skoru = gölgenin yeri</text><path d="M347 74H617" fill="none" stroke="var(--accent)" stroke-width="2"/><g fill="var(--a)"><circle cx="367.2" cy="74" r="5"/><circle cx="436.3" cy="74" r="5"/><circle cx="489" cy="74" r="5"/><circle cx="527.7" cy="74" r="5"/><circle cx="589.8" cy="74" r="5"/></g><g fill="var(--ink)" font-size="14" text-anchor="middle"><text x="367.2" y="62">A</text><text x="436.3" y="62">B</text><text x="489" y="62">C</text><text x="527.7" y="62">D</text><text x="589.8" y="62">E</text></g><g fill="var(--ink)" font-size="13" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="367.2" y="96">−21.26</text><text x="436.3" y="96">−8.45</text><text x="489" y="96">1.29</text><text x="527.7" y="96">8.45</text><text x="589.8" y="96">19.97</text></g><text x="482" y="124" text-anchor="middle" fill="var(--ink-soft)" font-size="13">skorların varyansı ≈ 248.8 = λ₁</text><text x="482" y="154" text-anchor="middle" fill="var(--ink)" font-size="15" font-weight="700">toplam varyans = 250</text><rect x="357" y="168" width="146" height="26" fill="var(--a)" fill-opacity="0.28"/><rect x="503" y="168" width="104" height="26" fill="var(--c)" fill-opacity="0.28"/><rect x="357" y="208" width="248.8" height="26" fill="var(--accent)" fill-opacity="0.28"/><rect x="605.8" y="208" width="1.2" height="26" fill="var(--ink-soft)"/><path d="M503 168v26M605.8 208v26" fill="none" stroke="var(--ink)" stroke-width="1.5"/><g fill="var(--ink)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="363" y="186">matematik 146</text><text x="509" y="186">fizik 104</text><text x="363" y="226">PC1 248.79 · %99.52</text></g><text x="607" y="254" text-anchor="end" fill="var(--ink-soft)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace">PC2 1.21 · %0.48</text></svg>`,
+"m-scree":`<svg viewBox="0 0 640 312" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beş özdeğerin (12.4, 5.1, 2.3, 0.8, 0.4; toplam 21) scree grafiği: paylar yüzde 59.0, 24.3, 11.0, 3.8 ve 1.9; kümülatif çizgi yüzde 90 eşiğini 3. bileşende, yüzde 94.3 ile geçiyor; yüzde 95 için 4 bileşen gerekir; toplam 5 olmadığı için Kaiser uygulanamaz."><text x="96" y="22" fill="var(--ink)" font-size="14" font-weight="700" font-family="IBM Plex Mono, ui-monospace, monospace">12.4 + 5.1 + 2.3 + 0.8 + 0.4 = 21</text><path d="M96 40H376M96 90H376M96 140H376M96 190H376" fill="none" stroke="var(--grid)" stroke-width="1.5"/><path d="M96 240H376" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13" text-anchor="end"><text x="88" y="44">%100</text><text x="88" y="144">%50</text><text x="88" y="244">%0</text></g><g fill="var(--a)"><rect x="107" y="121.9" width="34" height="118.1" fill-opacity="0.85"/><rect x="163" y="191.4" width="34" height="48.6" fill-opacity="0.85"/><rect x="219" y="218.1" width="34" height="21.9" fill-opacity="0.85"/><rect x="275" y="232.4" width="34" height="7.6" fill-opacity="0.35"/><rect x="331" y="236.2" width="34" height="3.8" fill-opacity="0.35"/></g><path d="M96 60H376" fill="none" stroke="var(--ink-soft)" stroke-width="1.5" stroke-dasharray="6 4"/><text x="382" y="64" fill="var(--ink-soft)" font-size="13">%90</text><path d="M124 121.9L180 73.3L236 51.4L292 43.8L348 40" fill="none" stroke="var(--b)" stroke-width="2.5"/><g fill="var(--b)"><circle cx="124" cy="121.9" r="5"/><circle cx="180" cy="73.3" r="5"/><circle cx="236" cy="51.4" r="5"/><circle cx="292" cy="43.8" r="5"/><circle cx="348" cy="40" r="5"/></g><circle cx="236" cy="51.4" r="10" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="318" y="92" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="700">3. bileşen %90'ı geçer</text><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="124" y="258">PC1</text><text x="180" y="258">PC2</text><text x="236" y="258">PC3</text><text x="292" y="258">PC4</text><text x="348" y="258">PC5</text></g><g fill="var(--ink-soft)" font-size="13" text-anchor="end"><text x="88" y="281">pay</text><text x="88" y="303">kümülatif</text></g><g fill="var(--ink)" font-size="13" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="124" y="281">%59.0</text><text x="180" y="281">%24.3</text><text x="236" y="281">%11.0</text><text x="292" y="281">%3.8</text><text x="348" y="281">%1.9</text><text x="124" y="303">%59.0</text><text x="180" y="303">%83.3</text><text x="292" y="303">%98.1</text><text x="348" y="303">%100</text></g><text x="236" y="303" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="700" font-family="IBM Plex Mono, ui-monospace, monospace">%94.3</text><path d="M410 16V300" fill="none" stroke="var(--line)" stroke-width="1.5"/><text x="525" y="22" text-anchor="middle" fill="var(--ink)" font-size="15" font-weight="700">kural → bileşen</text><g fill="var(--ink)" font-size="14"><text x="430" y="62">%90 eşiği → 3</text><text x="430" y="92">%95 eşiği → 4</text></g><text x="430" y="122" fill="var(--bad)" font-size="14">Kaiser λ &gt; 1 → ?</text><rect x="422" y="146" width="204" height="84" rx="6" fill="var(--surface-2)"/><text x="436" y="172" fill="var(--ink)" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace">toplam λ = 21</text><text x="436" y="196" fill="var(--ink-soft)" font-size="13">standart veride 5 olurdu</text><text x="436" y="218" fill="var(--bad)" font-size="13">→ önce standartlaştır</text></svg>`,
 "m-per":`<svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Perceptronun AND verisini tek bir doğruyla ayırabildiğini, XOR verisini ise ayıramadığını gösteren iki panelli şema."><g fill="var(--ink)"><text x="160" y="27" text-anchor="middle" font-size="15" font-weight="700">AND · doğrusal ayrılabilir</text><text x="480" y="27" text-anchor="middle" font-size="15" font-weight="700">XOR · ayrılamaz</text></g><path d="M320 12V308" stroke="var(--line)" stroke-width="1.5"/><g><rect x="50" y="35" width="220" height="220" fill="none" stroke="var(--line)" stroke-width="1.5"/><path d="M118.8 35H270V186.3Z" fill="var(--a)" fill-opacity="0.16"/><path d="M50 35V255H270" fill="none" stroke="var(--ink-soft)" stroke-width="2"/><path d="M91.3 252V258M228.8 252V258M48 76.3H52M48 213.8H52" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M118.8 35L270 186.3" stroke="var(--accent)" stroke-width="2.5"/><g fill="var(--ink-soft)" font-size="13"><text x="91.3" y="272" text-anchor="middle">0</text><text x="228.8" y="272" text-anchor="middle">1</text><text x="40" y="81" text-anchor="middle">1</text><text x="40" y="218" text-anchor="middle">0</text><text x="160" y="289" text-anchor="middle" font-size="14">x₁</text><text x="31" y="151" text-anchor="middle" font-size="14">x₂</text></g><path d="M84.3 206.8H98.3V220.8H84.3Z M84.3 69.3H98.3V83.3H84.3Z M221.8 206.8H235.8V220.8H221.8Z" fill="none" stroke="var(--b)" stroke-width="2.5"/><circle cx="228.8" cy="76.3" r="7" fill="var(--a)"/><text x="160" y="306" text-anchor="middle" fill="var(--ink)" font-size="14">tek çizgi yeter</text><path d="M225 300L230 305L240 293" fill="none" stroke="var(--good)" stroke-width="2.5"/></g><g transform="translate(320 0)"><rect x="50" y="35" width="220" height="220" fill="none" stroke="var(--line)" stroke-width="1.5"/><path d="M50 35V255H270" fill="none" stroke="var(--ink-soft)" stroke-width="2"/><path d="M91.3 252V258M228.8 252V258M48 76.3H52M48 213.8H52" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M50 145H270" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="5 4" stroke-opacity="0.85"/><path d="M50 103.8L201.3 255" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="7 3 2 3" stroke-opacity="0.85"/><text x="267" y="139" text-anchor="end" fill="var(--ink-soft)" font-size="13">deneme 1</text><text x="128" y="172" fill="var(--ink-soft)" font-size="13">deneme 2</text><circle cx="228.8" cy="76.3" r="10" fill="none" stroke="var(--bad)" stroke-width="1.5"/><circle cx="228.8" cy="213.8" r="10" fill="none" stroke="var(--bad)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13"><text x="91.3" y="272" text-anchor="middle">0</text><text x="228.8" y="272" text-anchor="middle">1</text><text x="40" y="81" text-anchor="middle">1</text><text x="40" y="218" text-anchor="middle">0</text><text x="160" y="289" text-anchor="middle" font-size="14">x₁</text><text x="31" y="151" text-anchor="middle" font-size="14">x₂</text></g><path d="M84.3 206.8H98.3V220.8H84.3Z M221.8 69.3H235.8V83.3H221.8Z" fill="none" stroke="var(--b)" stroke-width="2.5"/><circle cx="91.3" cy="76.3" r="7" fill="var(--a)"/><circle cx="228.8" cy="213.8" r="7" fill="var(--a)"/><text x="160" y="306" text-anchor="middle" fill="var(--ink)" font-size="14">hiçbir tek çizgi ayıramaz</text></g><circle cx="254" cy="319" r="5.5" fill="var(--a)"/><text x="267" y="323" fill="var(--ink)" font-size="14">sınıf 1</text><path d="M333 313H344V324H333Z" fill="none" stroke="var(--b)" stroke-width="2.5"/><text x="352" y="323" fill="var(--ink)" font-size="14">sınıf 0</text></svg>`,
 "m-neu":`<svg viewBox="0 0 640 296" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bir yapay nöronun hesabı: rüzgar ve görüş ölçeklenip girdi oluyor, ağırlıklarla çarpılıp bias ile toplanıyor, z = 1.0 sigmoid fonksiyonundan geçip 0.73 oluyor."><g fill="var(--ink-soft)" font-size="14" text-anchor="middle"><text x="62" y="22">ham değer</text><text x="170" y="22">girdi x</text><text x="250" y="22">ağırlık</text><text x="335" y="22">toplam</text><text x="445" y="22">aktivasyon</text><text x="562" y="22">çıktı</text></g><g fill="var(--ink-soft)" font-size="13" text-anchor="end"><text x="120" y="76">rüzgar</text><text x="120" y="161">görüş</text><text x="120" y="250">sabit</text></g><g fill="var(--ink)" font-size="14" text-anchor="end"><text x="120" y="96">12 km/sa</text><text x="120" y="181">7 km</text></g><g stroke="var(--ink-soft)" stroke-width="1.5"><path d="M126 86H141M126 171H141"/></g><g fill="var(--ink-soft)"><polygon points="148,86 140,82 140,90"/><polygon points="148,171 140,167 140,175"/></g><path d="M170 86L335 165" stroke="var(--b)" stroke-width="5" stroke-opacity="0.85"/><path d="M170 171L335 165" stroke="var(--a)" stroke-width="4" stroke-opacity="0.85"/><path d="M170 245L335 165" stroke="var(--a)" stroke-width="1.8" stroke-opacity="0.85"/><g fill="var(--surface-2)" stroke="var(--ink-soft)" stroke-width="1.5"><circle cx="170" cy="86" r="22"/><circle cx="170" cy="171" r="22"/><circle cx="170" cy="245" r="15"/></g><circle cx="335" cy="165" r="28" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="1.8"/><g fill="var(--ink)" font-size="14" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="170" y="91">0.40</text><text x="170" y="176">0.70</text><text x="170" y="250">1</text><text x="266" y="108">w₁ = −4</text><text x="250" y="157">w₂ = 3</text><text x="270" y="232">b = 0.5</text></g><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="170" y="56">x₁</text><text x="170" y="141">x₂</text></g><text x="335" y="173" text-anchor="middle" font-size="22" fill="var(--ink)">Σ</text><text x="335" y="216" text-anchor="middle" font-size="15" fill="var(--accent)" font-family="IBM Plex Mono, ui-monospace, monospace">z = 1.0</text><path d="M363 165H391M490 165H530" stroke="var(--ink-soft)" stroke-width="1.5"/><polygon points="398,165 390,161 390,169" fill="var(--ink-soft)"/><polygon points="537,165 529,161 529,169" fill="var(--ink-soft)"/><rect x="400" y="130" width="90" height="70" rx="6" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><path d="M445 134V196M404 192H486" stroke="var(--line)" stroke-width="1"/><path d="M408 191.6L415.4 191L422.8 189.5L430.2 185.6L433.9 182.2L437.6 177.5L441.3 171.6L445 165L448.7 158.4L452.4 152.5L456.1 147.8L459.8 144.4L467.2 140.5L474.6 139L482 138.4" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="452.4" cy="152.5" r="5" fill="var(--accent)"/><text x="445" y="222" text-anchor="middle" font-size="14" fill="var(--ink-soft)">sigmoid</text><circle cx="562" cy="165" r="24" fill="var(--a)" fill-opacity="0.25" stroke="var(--ink)" stroke-width="1.8"/><text x="562" y="170" text-anchor="middle" font-size="15" fill="var(--ink)" font-family="IBM Plex Mono, ui-monospace, monospace">0.73</text><text x="562" y="131" text-anchor="middle" font-size="14" fill="var(--ink-soft)">ŷ</text><text x="562" y="210" text-anchor="middle" font-size="14" fill="var(--ink)">uçar · %73</text><text x="320" y="282" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="IBM Plex Mono, ui-monospace, monospace">z = −4 · 0.40 + 3 · 0.70 + 0.5 = 1.0 → sigmoid(1.0) = 0.73</text></svg>`,
 "m-lay":`<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Üç gizli nöronlu ağ: her gizli nöron bir doğru çiziyor, çıkış üçünün de 1 olduğu üçgende içeride diyor; A noktası içeride, B noktası dışarıda."><g fill="var(--ink)" font-size="15" font-weight="700" text-anchor="middle"><text x="150" y="20">ağ: 2 → 3 → 1</text><text x="470" y="20">düzlemde</text></g><path d="M312 10V292" stroke="var(--line)" stroke-width="1.5"/><path d="M40 85L150 50" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4"/><g fill="none" stroke-opacity="0.85"><path d="M40 175L150 50" stroke="var(--a)" stroke-width="2"/><path d="M40 85L150 130" stroke="var(--a)" stroke-width="3.5"/><path d="M40 175L150 130" stroke="var(--b)" stroke-width="2"/><path d="M40 85L150 210" stroke="var(--b)" stroke-width="3.5"/><path d="M40 175L150 210" stroke="var(--b)" stroke-width="2"/><path d="M150 50L262 130M150 130L262 130M150 210L262 130" stroke="var(--a)" stroke-width="2"/></g><g fill="var(--surface-2)" stroke="var(--ink)" stroke-width="1.8"><circle cx="40" cy="85" r="18"/><circle cx="40" cy="175" r="18"/><circle cx="150" cy="50" r="18"/><circle cx="150" cy="130" r="18"/><circle cx="150" cy="210" r="18"/><circle cx="262" cy="130" r="20"/></g><g fill="var(--ink)" font-size="14" text-anchor="middle"><text x="40" y="90">x₁</text><text x="40" y="180">x₂</text><text x="150" y="55">h₁</text><text x="150" y="135">h₂</text><text x="150" y="215">h₃</text><text x="262" y="135">ŷ</text></g><text x="262" y="96" text-anchor="middle" font-size="13" fill="var(--ink-soft)">üçü de 1 mi?</text><g font-size="14" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><g fill="var(--ink-soft)"><text x="120" y="250">h₁</text><text x="150" y="250">h₂</text><text x="180" y="250">h₃</text><text x="240" y="250">ŷ</text></g><g fill="var(--ink)"><text x="70" y="272">A</text><text x="120" y="272">1</text><text x="150" y="272">1</text><text x="180" y="272">1</text><text x="210" y="272">→</text><text x="240" y="272">1</text><text x="70" y="294">B</text><text x="120" y="294">1</text><text x="150" y="294">1</text><text x="210" y="294">→</text></g><g fill="var(--accent)"><text x="180" y="294">0</text><text x="240" y="294">0</text></g></g><rect x="350" y="34" width="240" height="240" fill="none" stroke="var(--line)" stroke-width="1.5"/><polygon points="398,226 542,226 470,82" fill="var(--a)" fill-opacity="0.18"/><g stroke="var(--c)" stroke-width="2"><path d="M350 226H590"/><path d="M374 274L494 34"/><path d="M566 274L446 34"/></g><g fill="var(--c)" font-size="14"><text x="586" y="218" text-anchor="end">h₁</text><text x="500" y="52">h₂</text><text x="440" y="52" text-anchor="end">h₃</text></g><circle cx="470" cy="178" r="6.5" fill="var(--a)"/><circle cx="542" cy="130" r="6.5" fill="var(--b)"/><g fill="var(--ink)" font-size="14"><text x="481" y="183">A</text><text x="553" y="135">B</text></g><g fill="var(--ink-soft)" font-size="13"><text x="470" y="292" text-anchor="middle">x₁</text><text x="338" y="158" text-anchor="middle">x₂</text></g></svg>`,
@@ -12233,6 +12324,444 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
     ]});
 })();
 
+/* ═════════════ 32 · Kaç bileşen? Scree, eşik, Kaiser, yükler, CV ═════════════ */
+(function(){
+  const cv=$("#c-scree"), {ctx,fit}=setupCanvas(cv);
+  const DS=SETS("m-scree"); let dsi=0; const S=()=>DS[dsi];
+  /* thr: kümülatif eşik (%) · sel: yükleri gösterilen bileşen (0 tabanlı) · std: « Standartlaştır »
+     · view: sağ panel "load" (yükler) | "cv" · hov: imlecin üstündeki çubuk (−1 yok) */
+  let thr=90, sel=0, std=true, view="load", hov=-1;
+
+  /* ── üç tablo ──
+     Öğrenci anketi: Hafta 13 sl.48–49'un kodu birebir (numpy default_rng(4)), Python'da üretilip
+     gömüldü: 300 öğrenci × 10 soru (1–5 puan), satır satır; ANKET_Y "bölümü yeniden seçer mi".
+     Sunumun sayıları aynen çıkar: ilk iki bileşen %64.9, Kaiser 2, CV PCA(2) 0.820 · 10 soru 0.813.
+     Kapadokya kasabaları: sl.42'nin kodu (tohum 13), yuvarlanmış 10 × 8 tablo; yükler ve oranlar
+     (.67 / .27) slayttakinin aynısı. Tıbbi ölçümler: aşağıda tohumdan üretilir. */
+  const ANKET=("24423333443233322232455543432243425353431221344434233432223313122233234333333332121113333333233343344433232223555542212334344444554533231323111123333554554132231222232324445442213333324454341232222222"
+    +"21222443133333345454343341343232243442435344442245111123322343243354432213222231354445324421111332331333332313333334445421222333232443433433243343322244345231425355543324211223423332121444444233222132"
+    +"44334332335244334433222324534343212433432334244342322323444333333333432323333433535555443442233435552232323331434324545322222332223322243445342323343334353333231121132212454442231221231243443323354334"
+    +"44553323324333444245445442232343323334123443233232433231332123131455554554543433332313323221112444234555511111323333223333111232323553523323433323343433445222113332123333434224344321111221222212122322"
+    +"22121334233433423223454342213155555342442212133334345343132121321333331323332223213231111221112221112423233543132211433333423454543223211332555432232343434323433443322333445433343334433334231342232331"
+    +"33122211112443323443535455554443545443333434353555454442432233213342233545432223221213333443354232333333434343343234334333334233234423433434332332232354543525353343321232221332423433334223331211133445"
+    +"45555322211424542223333222232255555344345455413222423324223144443332324455424343554552333223334344433454254455444353232254333343443533455445455322432322311433343332322222111113343341332222434454434333"
+    +"12212233224355532132354342221143343223223333332241334332225222221222323332344242323333433443243223124443453324322333122444344221311221221222333223423333343233333432343244332332212354334333532233312322"
+    +"23132453343424333434544542212132433435324555554455344333243311111343334432334341544543244224242232223332332222233223343345444434443535523342324344335444334444434554534443534532333322132545545434334543"
+    +"44234113113244223222524332323332343434441111144344544453233244434224222333323443223322221344424433442222233433443433243443323443343223222312122314332321412233345545432444455532213352344353333334323322"
+    +"22212122224444522234544553322411112243334544544354112212444432333534444433324453231213334423211344353333333221344434333322222232115444544333322222223144545223433443354445443345554444453424433344334444"
+    +"54555332545554524332353454223332223323233212243322232233324422324344451333333132324323223222343344344344422332312123241232322221335454423343434444344332322333345544342224322322233223342344351211132213"
+    +"44545322333242323222434443223244344333433334343554224351111145444344343332311324332233333312333444443445432223345542333354555344343333233443544552142232221232444234432434344232212155455534543434444334"
+    +"22423212213523333322334555343433132435543222344423211221212255555323133434343434454543344422233434331212322323232324434431333432445333434433213233333444323325455445544243412123442354355312223113145434"
+    +"32533334353334333233545542121122221213323244433343445544444512321343353542244435232214444423313353343342323123344332233154555223125445522243544353343333233234543323322242132333442511111132124455444445");
+  const ANKET_Y="001100010111110101000000101010010101101011001101100101110110111101010001010001000011000000000011111000111101011111010000100110111001111000010110110010101011101001111000110011111101001001100101000011000110101100010101110111100010011001101100101110101011101010110110101110010101100010101100001011110001";
+  const MED_R=[3791,9792,9758,1749,6068,7105,8607,1418,-4093,7557,597,7561,7846,691,2054,1857,4306,519,518,9724,4139,9800,9692,1554,5596,6373,8607,1625,1794,
+    3762,3827,796,2018,2225,2956,539,-1167,2637,4251,2632,2815,227,281,221,1231,5,141,3851,9752,3791,3864,771,1834,1896,2956,528,769,9747,
+    1914,6336,7361,8784,1568,-4009,7508,631,7515,7784,744,2252,2037,4464,579,599,9669,4108,9792,9639,1699,5873,6651,8784,1797,2014,1650,5961,7028,
+    8529,1333,-4175,7615,580,7618,7927,656,1942,1757,4229,483,473,9693,4173,9758,9590,1468,5484,6204,8529,1529,1669,6630,4113,3552,6502,4874,1219,
+    923,1275,1022,4310,2926,2633,2786,2088,2373,1214,834,1749,1219,9105,6510,4171,3552,5928,6793,9085,8652,5160,1440,4009,1216,4081,3900,2794,5050,
+    4596,5683,1846,2684,5160,2199,6068,5157,6209,9666,8996,8652,5385,7284,9432,3612,-1596,4605,1011,4667,4589,1416,4933,4473,5862,1398,1769,6223,2452,
+    7105,6217,3629,8853,9482,9432,4144,5139,3079,-2614,6012,933,6058,6107,1258,4243,3846,5719,1179,1439,7960,3243,8607,7949,3140,8351,9036,9800,3530,
+    4277,2808,1387,936,1439,1154,3385,2773,2536,2595,4027,1724,930,570,1418,929,6353,5058,3684,3079,9165,4658,-2673,658,-2635,-3013,2875,727,758,
+    -466,862,3468,-4314,-1327,-4093,-4319,4954,2037,-1200,-2614,2277,7222,1078,9787,9397,1523,2269,2110,3955,1810,1888,7647,2916,7557,7677,1142,3651,3959,
+    6012,1449,1320,1286,265,3174,4147,3985,3716,3539,4236,485,4220,597,486,875,1241,1011,933,955,1253,9388,1786,2620,2443,4253,2100,2230,7640,
+    2911,7561,7668,1194,3725,4027,6058,1504,1388,467,913,826,2887,599,474,7975,3104,7846,7988,953,3514,3911,6107,1214,1048,5381,5148,4800,5095,
+    5835,517,245,691,513,4282,2772,1426,1258,3079,3404,7957,7644,6022,7185,1407,337,2054,1414,2635,5092,5034,4243,3067,3756,7205,5820,6667,1270,
+    272,1857,1274,2364,4646,4568,3846,2802,3506,5357,6077,3767,1371,4306,3773,2495,5597,5751,5719,2885,3551,5808,326,20,519,320,2042,1823,1439,
+    1179,3995,1605,258,150,518,246,2310,2903,1870,1439,1699,4142,4201,9724,9763,1083,4662,5431,7960,1067,1081,4139,4213,804,2002,2094,3243,564,
+    801,9692,1554,5596,6373,8607,1625,1794,1084,4656,5494,7949,1069,1079,6087,3676,3140,5782,6556,8861,8351,5302,7615,9036,4243,5249,3530,4277,4534];
+  const KASABA=[[153,2422,97,909,120,5,5,1105],[89,3913,100,681,62,4,21,5185],[79,2296,83,609,59,4,9,2461],
+    [75,3300,63,642,28,3,19,4858],[57,1978,43,521,28,2,3,1211],[38,1657,28,400,17,2,1,180],[39,1636,44,296,9,2,14,4299],
+    [25,1121,20,171,4,1,4,994],[13,528,36,54,1,0,13,4413],[15,429,20,99,1,1,9,2899]];
+  /* Tıbbi ölçümler: 10 özellik × (ortalama, hata, en kötü) = 30 sütun, meme kanseri verisinin
+     düzeninde. MED_R korelasyon matrisinin üst üçgeni × 10⁴: etkenli bir modelden (büyüklük,
+     şekil, doku, pürüzsüzlük, simetri, fraktal, hata) kuruldu ve özdeğerleri sklearn'ün
+     load_breast_cancer'ınkine oturtuldu (%44.3, %19.0, %9.4, %6.6, %5.5 …; alan ile en kötü alan
+     arası 0.959). Üretilen 569 satır bu matrise TAM uyar (beyazlatma), oranlar tohumdan
+     bağımsız. MED_M / MED_S sütunların gerçek veriye yakın ortalaması ve standart sapması:
+     ölçeksiz PCA'da alanın yüzlerle, pürüzsüzlüğün binde birlerle ölçülmesi buradan gelir. */
+  const MED_M=[14.13,19.29,91.97,654.9,.0964,.1043,.0888,.0489,.1812,.0628, .405,1.217,2.866,40.34,.00704,.0255,.0319,.0118,.0205,.00379,
+    16.27,25.68,107.26,880.6,.1324,.2543,.2722,.1146,.2901,.0839];
+  const MED_S=[3.52,4.30,24.30,351.9,.0141,.0528,.0797,.0388,.0274,.0071, .277,.552,2.022,45.49,.0030,.0179,.0302,.0062,.0083,.00265,
+    4.83,6.15,33.60,569.4,.0228,.1573,.2086,.0657,.0619,.0181];
+
+  /* mulberry32 + on iki düzgün sayının toplamı (− 6): yalnız tamsayı işlemi ve toplama, her
+     tarayıcıda bit bit aynı dizi (Math.log / cos kullanan gauss() motorlar arasında oynayabilir) */
+  const rng=(a)=>()=>{ a=(a+0x6D2B79F5)|0; let t=Math.imul(a^(a>>>15),1|a);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; };
+  function chol(A){ const p=A.length, L=A.map(()=>new Float64Array(p));
+    for(let i=0;i<p;i++) for(let j=0;j<=i;j++){ let s=A[i][j]; for(let k=0;k<j;k++) s-=L[i][k]*L[j][k];
+      L[i][j]= i===j ? Math.sqrt(Math.max(s,1e-300)) : s/L[j][j]; }
+    return L; }
+  function genMed(){
+    const n=569, p=30, r=rng(13), g=()=>{ let s=0; for(let i=0;i<12;i++) s+=r(); return s-6; };
+    const Z=[]; for(let i=0;i<n;i++){ const z=new Float64Array(p); for(let j=0;j<p;j++) z[j]=g(); Z.push(z); }
+    const e=[]; for(let i=0;i<n;i++) e.push(g());
+    /* ortala, örneklem kovaryansını tam birim matrise çevir (Z ← Z·C⁻ᵀ, C Cᵀ = ZᵀZ/(n−1)),
+       sonra MED_R'nin Cholesky çarpanıyla döndür: örneklem korelasyonu tam MED_R olur */
+    for(let j=0;j<p;j++){ let m=0; for(const z of Z) m+=z[j]; m/=n; for(const z of Z) z[j]-=m; }
+    const Sg=[...Array(p)].map(()=>new Float64Array(p));
+    for(const z of Z) for(let a=0;a<p;a++) for(let b=0;b<=a;b++) Sg[a][b]+=z[a]*z[b];
+    for(let a=0;a<p;a++) for(let b=0;b<=a;b++){ Sg[a][b]/=n-1; Sg[b][a]=Sg[a][b]; }
+    const C=chol(Sg);
+    const R=[...Array(p)].map((_,i)=>{ const q=new Float64Array(p); q[i]=1; return q; });
+    let t=0; for(let i=0;i<p;i++) for(let j=i+1;j<p;j++){ R[i][j]=R[j][i]=MED_R[t++]/1e4; }
+    const A=chol(R);
+    /* hedef (kötü huylu = 1): en kötü içbükey nokta, en kötü alan, en kötü doku ve içbükeylik
+       + küçük gürültü; 569 hastanın 213'ü kötü huylu (gerçek veride 212) */
+    const WL=[[6,.3],[21,.45],[23,.6],[27,1]];
+    const X=[], y=[];
+    Z.forEach((z,i)=>{
+      const w=new Float64Array(p);
+      for(let a=0;a<p;a++){ let s=z[a]; for(let k=0;k<a;k++) s-=C[a][k]*w[k]; w[a]=s/C[a][a]; }
+      const xs=new Float64Array(p);
+      for(let a=0;a<p;a++){ let s=0; for(let k=0;k<=a;k++) s+=A[a][k]*w[k]; xs[a]=s; }
+      let sc=0; WL.forEach(([k,v])=>{ sc+=v*xs[k]; }); sc+=.15*e[i];
+      y.push(sc>.57?1:0);
+      X.push(Float64Array.from(xs,(v,j)=>MED_M[j]+MED_S[j]*v));
+    });
+    return {X,y};
+  }
+  const GEN={
+    anket:()=>{ const X=[], y=[]; for(let i=0;i<300;i++){ X.push(Float64Array.from({length:10},(_,j)=>+ANKET[i*10+j])); y.push(+ANKET_Y[i]); } return {X,y}; },
+    kasaba:()=>({X:KASABA.map(r=>Float64Array.from(r)), y:null}),
+    tibbi:genMed
+  };
+  const DATA={}; const data=()=>DATA[S().gen]||(DATA[S().gen]=GEN[S().gen]());
+
+  /* simetrik matrisin özdeğer / özvektörleri: döngüsel Jacobi (p ≤ 30, kütüphane yok).
+     Büyükten küçüğe dizilir; işaret keyfî olduğu için her vektörde mutlak değerce en büyük
+     yük pozitif yapılır (scikit-learn'ün yeni sürümleri de böyle: slayttaki yüklerle aynı işaret) */
+  function eig(M){
+    const p=M.length, A=M.map(r=>Float64Array.from(r)), V=[...Array(p)].map((_,i)=>{ const q=new Float64Array(p); q[i]=1; return q; });
+    let tr=0; for(let i=0;i<p;i++) tr+=Math.abs(A[i][i]);
+    for(let sw=0;sw<80;sw++){
+      let off=0; for(let i=0;i<p;i++) for(let j=i+1;j<p;j++) off+=A[i][j]*A[i][j];
+      if(off<=1e-24*tr*tr) break;      // köşegen dışı ≤ 1e-12 · iz: makine duyarlığına inmeden durur
+      for(let i=0;i<p-1;i++) for(let j=i+1;j<p;j++){
+        const aij=A[i][j]; if(aij===0) continue;
+        const th=(A[j][j]-A[i][i])/(2*aij), t=(th>=0?1:-1)/(Math.abs(th)+Math.sqrt(th*th+1)), c=1/Math.sqrt(t*t+1), s=t*c;
+        for(let k=0;k<p;k++){ const a=A[k][i], b=A[k][j]; A[k][i]=c*a-s*b; A[k][j]=s*a+c*b; }
+        for(let k=0;k<p;k++){ const a=A[i][k], b=A[j][k]; A[i][k]=c*a-s*b; A[j][k]=s*a+c*b; }
+        for(let k=0;k<p;k++){ const a=V[k][i], b=V[k][j]; V[k][i]=c*a-s*b; V[k][j]=s*a+c*b; }
+      }
+    }
+    const ord=[...Array(p).keys()].sort((a,b)=>A[b][b]-A[a][a]);
+    return {lam:ord.map(i=>Math.max(A[i][i],0)),
+      vec:ord.map(i=>{ const v=V.map(r=>r[i]); let m=0; v.forEach((q,k)=>{ if(Math.abs(q)>Math.abs(v[m])) m=k; }); return v[m]<0?v.map(q=>-q):v; })};
+  }
+  /* kovaryans (payda n − 1); std açıkken korelasyon matrisi: izi tam p, Kaiser'in λ > 1'i
+     "ortalama bir sütundan çok varyans" demek (oran > 1/p) */
+  function covOf(X,stdOn){
+    const n=X.length, p=X[0].length, m=new Float64Array(p), C=[...Array(p)].map(()=>new Float64Array(p));
+    X.forEach(x=>{ for(let j=0;j<p;j++) m[j]+=x[j]; }); for(let j=0;j<p;j++) m[j]/=n;
+    X.forEach(x=>{ for(let a=0;a<p;a++){ const da=x[a]-m[a]; for(let b=0;b<=a;b++) C[a][b]+=da*(x[b]-m[b]); } });
+    for(let a=0;a<p;a++) for(let b=0;b<=a;b++){ C[a][b]/=n-1; C[b][a]=C[a][b]; }
+    if(stdOn){ const d=C.map((r,i)=>Math.sqrt(r[i])||1); for(let a=0;a<p;a++) for(let b=0;b<p;b++) C[a][b]/=d[a]*d[b]; }
+    return C;
+  }
+  /* veri kümesi × « Standartlaştır » başına bir kez hesaplanır (önbellek) */
+  const AN={};
+  function analyse(){
+    const key=S().gen+(std?"|z":"|h"); if(AN[key]) return AN[key];
+    const {X}=data(), p=X[0].length, {lam,vec}=eig(covOf(X,std));
+    const tot=lam.reduce((a,b)=>a+b,0), ratio=lam.map(l=>l/tot), cum=[];
+    ratio.reduce((a,r,i)=>(cum[i]=a+r),0);
+    /* dirsek: ilk ve son çubuğun tepesini birleştiren doğrunun en altında kalan çubuk, yani
+       eğrinin en keskin büküldüğü yer (halka orada). Ondan ÖNCEKİ çubuklar seçilir: ankette
+       halka 3. çubukta, seçim 2; tıbbi ölçümlerde halka 4.'de, seçim 3 (sunum: "yaklaşık 3") */
+    let knee=1, gb=-Infinity;
+    for(let i=1;i<p;i++){ const g=1+(ratio[p-1]/ratio[0]-1)*i/(p-1)-ratio[i]/ratio[0]; if(g>gb){ gb=g; knee=i; } }
+    return AN[key]={p,n:X.length,lam,vec,ratio,cum,knee,elb:knee,kai:std?lam.filter(l=>l>1).length:null,cvr:null};
+  }
+  const kOf=(A)=>{ const i=A.cum.findIndex(c=>c>=thr/100-1e-9); return i<0?A.p:i+1; };
+
+  /* ── CV: 5 katlı, scikit-learn'ün cross_val_score(Pipeline([ölçekle, PCA(k), LogisticRegression()]), cv=5)
+     karşılığı. StratifiedKFold karıştırmadan (aynı kat dağıtımı), ölçekleme ve PCA YALNIZ eğitim
+     katıyla kurulur (sızıntı yok), logistic regression L2 cezalı, C = 1, kesme terimi cezasız;
+     Newton adımıyla tam en iyiye iner. Ankette slaytın 0.820 / 0.813'ü birebir çıkar. ── */
+  function solveSPD(H,g,d){
+    const L=new Float64Array(d*d);
+    for(let i=0;i<d;i++) for(let j=0;j<=i;j++){ let s=H[i*d+j]; for(let k=0;k<j;k++) s-=L[i*d+k]*L[j*d+k];
+      L[i*d+j]= i===j ? Math.sqrt(Math.max(s,1e-300)) : s/L[j*d+j]; }
+    const z=new Float64Array(d), x=new Float64Array(d);
+    for(let i=0;i<d;i++){ let s=g[i]; for(let k=0;k<i;k++) s-=L[i*d+k]*z[k]; z[i]=s/L[i*d+i]; }
+    for(let i=d-1;i>=0;i--){ let s=z[i]; for(let k=i+1;k<d;k++) s-=L[k*d+i]*x[k]; x[i]=s/L[i*d+i]; }
+    return x;
+  }
+  /* Newton adımı: kayıp, gradyan ve Hessian bir geçişte; kayıp büyürse adım yarıya iner
+     (ölçeksiz veride bileşen skorları yüzlerle ölçülüyor). Sıcak başlangıç: bir önceki k'nın
+     ağırlıkları, yeni bileşenin ağırlığı 0 — çoğu k dört beş adımda oturur. Veri SÜTUN
+     dizileri (Pc[a][i]): iç döngüler bitişik bellekte. */
+  function logit(Pc,y,k,prev){
+    const n=y.length, d=k+1, w=new Float64Array(d), H=new Float64Array(d*d), g=new Float64Array(d);
+    const z=new Float64Array(n), r=new Float64Array(n), h=new Float64Array(n), hx=new Float64Array(n);
+    if(prev){ for(let a=0;a<k-1;a++) w[a]=prev[a]; w[k]=prev[k-1]; }
+    let fOld=Infinity, wOld=null, dw=null, st=1;
+    for(let it=0;it<80;it++){
+      z.fill(w[k]); for(let a=0;a<k;a++){ const c=Pc[a], wa=w[a]; for(let i=0;i<n;i++) z[i]+=wa*c[i]; }
+      let f=0; for(let a=0;a<k;a++) f+=w[a]*w[a]/2;
+      for(let i=0;i<n;i++){ const zi=z[i]; let q;
+        if(zi>0){ const e=Math.exp(-zi); f+=zi+Math.log1p(e); q=1/(1+e); } else { const e=Math.exp(zi); f+=Math.log1p(e); q=e/(1+e); }
+        f-=y[i]*zi; r[i]=q-y[i]; h[i]=q*(1-q); }
+      if(f>fOld+1e-12*Math.abs(fOld)&&st>1e-8){ st/=2; for(let a=0;a<d;a++) w[a]=wOld[a]-st*dw[a]; continue; }
+      let sh=0, sr=0; for(let i=0;i<n;i++){ sh+=h[i]; sr+=r[i]; }
+      H[k*d+k]=sh; g[k]=sr;
+      for(let a=0;a<k;a++){
+        const ca=Pc[a]; let ga=0, ha=0;
+        for(let i=0;i<n;i++){ const v=h[i]*ca[i]; hx[i]=v; ha+=v; ga+=r[i]*ca[i]; }
+        g[a]=ga+w[a]; H[k*d+a]=ha;
+        for(let b=0;b<=a;b++){ const cb=Pc[b]; let sab=0; for(let i=0;i<n;i++) sab+=hx[i]*cb[i]; H[a*d+b]=sab+(a===b?1:0); }
+      }
+      dw=solveSPD(H,g,d); wOld=w.slice(); fOld=f; st=1;
+      let mx=0, mw=1; for(let a=0;a<d;a++){ w[a]-=dw[a]; mx=Math.max(mx,Math.abs(dw[a])); mw=Math.max(mw,Math.abs(w[a])); }
+      if(mx<1e-9*mw) break;
+    }
+    return w;
+  }
+  function cvRun(A){
+    if(A.cvr) return A.cvr;
+    const {X,y}=data(); if(!y) return A.cvr={none:true};
+    const n=X.length, p=A.p, K=5;
+    /* StratifiedKFold(5), shuffle yok: sınıflar ilk görünüş sırasıyla kodlanır, sıralı etiket
+       dizisi beşerli atlanarak katlara paylaştırılır, her sınıf kendi sırasıyla doldurulur */
+    const enc=y.map(v=>v===y[0]?0:1), cnt=[0,0]; enc.forEach(v=>cnt[v]++);
+    const ord=enc.map((_,i)=>i<cnt[0]?0:1);
+    const fold=new Int32Array(n);
+    for(let c=0;c<2;c++){ const fl=[];
+      for(let f=0;f<K;f++){ let a=0; for(let i=f;i<n;i+=K) if(ord[i]===c) a++; for(let t=0;t<a;t++) fl.push(f); }
+      let q=0; enc.forEach((v,i)=>{ if(v===c) fold[i]=fl[q++]; }); }
+    const acc=new Float64Array(p);
+    for(let f=0;f<K;f++){
+      const tr=[], te=[]; for(let i=0;i<n;i++) (fold[i]===f?te:tr).push(i);
+      const m=new Float64Array(p), sd=new Float64Array(p).fill(1);
+      tr.forEach(i=>{ for(let j=0;j<p;j++) m[j]+=X[i][j]; }); for(let j=0;j<p;j++) m[j]/=tr.length;
+      if(std){ sd.fill(0); tr.forEach(i=>{ for(let j=0;j<p;j++) sd[j]+=(X[i][j]-m[j])**2; });
+        for(let j=0;j<p;j++) sd[j]=Math.sqrt(sd[j]/tr.length)||1; }     // StandardScaler: payda n
+      const zs=(i)=>{ const x=X[i], z=new Float64Array(p); for(let j=0;j<p;j++) z[j]=(x[j]-m[j])/sd[j]; return z; };
+      const Ztr=tr.map(zs), Zte=te.map(zs), {vec}=eig(covOf(Ztr,false));
+      const proj=(z)=>{ const o=new Float64Array(p); for(let c=0;c<p;c++){ const v=vec[c]; let s=0; for(let j=0;j<p;j++) s+=v[j]*z[j]; o[c]=s; } return o; };
+      const Ptr=Ztr.map(proj), Pte=Zte.map(proj), ytr=Float64Array.from(tr,i=>y[i]), yte=te.map(i=>y[i]);
+      const Pc=vec.map((_,c)=>Float64Array.from(Ptr,x=>x[c]));    // sütun dizileri
+      let w=null;
+      for(let k=1;k<=p;k++){
+        w=logit(Pc,ytr,k,w);
+        let ok=0; Pte.forEach((x,t)=>{ let z=w[k]; for(let a=0;a<k;a++) z+=w[a]*x[a]; if((z>0?1:0)===yte[t]) ok++; });
+        acc[k-1]+=ok/te.length/K;
+      }
+    }
+    /* seçim: en iyi skorun 1 puan yakınındaki EN AZ bileşen — eğri düzse az bileşen yeter */
+    const best=Math.max(...acc), k=acc.findIndex(a=>a>=best-.01)+1;
+    return A.cvr={acc:[...acc],full:acc[p-1],best,k};
+  }
+
+  /* ── çizim ── */
+  const pct=(v,d=1)=>"%"+(v*100).toFixed(d);
+  const big=(v)=>v>=1e4?String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g," "):v>=100?v.toFixed(0):v.toFixed(2);
+  const sgn=(v)=>(v<0?"−":"+")+Math.abs(v).toFixed(2);
+  /* yerleşim: geniş tuvalde scree solda, yükler / CV sağda; dar tuvalde alt alta; çok kısa
+     tuvalde yalnız scree. Eşik 680 (CLAUDE.md: ≤ 780, %110 zoom'da 815 px kalıyor) */
+  const geo=()=>{
+    const W=cv.__w, H=cv.__h;
+    if(W>=680){ const sw=Math.round(W*.57); return {W,H,A:{x:0,y:0,w:sw,h:H},B:{x:sw,y:0,w:W-sw,h:H},side:true}; }
+    if(H>=330){ const sh=Math.round(H*.54); return {W,H,A:{x:0,y:0,w:W,h:sh},B:{x:0,y:sh,w:W,h:H-sh},side:false}; }
+    return {W,H,A:{x:0,y:0,w:W,h:H},B:null};
+  };
+  const plotA=(B)=>({l:B.x+48, r:B.x+B.w-16, t:B.y+50, b:B.y+B.h-24});
+  /* sütun sırası tablonun sırası: önce on ortalama, sonra on hata, sonra on en kötü değer */
+  const names=()=>S().sub?S().sub.flatMap(s=>S().meas.map(m=>m+" "+s)):S().cols;
+  /* x ekseni numaraları: önemli olanlar (seçili, eşik, dirsek) önce; ötekiler sığarsa */
+  function ticks(X,p,slot,y0,marks){
+    const used=[], put=(k,col)=>{ if(used.some(u=>Math.abs(u-k)*slot<(k>9||used.some(v=>v>9)?20:13))) return;
+      used.push(k); label(ctx,String(k),X(k-1),y0,col,"center",10); };
+    marks.forEach(([k,col])=>put(k,col));
+    const step=p<=12?1:5;
+    for(let k=1;k<=p;k++) if(k===1||k%step===0) put(k,css("--ink-soft"));
+  }
+
+  function scree(B,A){
+    const {l,r,t,b}=plotA(B), p=A.p, slot=(r-l)/p, bw=Math.max(2,Math.min(30,slot*.66));
+    const X=(i)=>l+slot*(i+.5), Y=(v)=>b-v*(b-t), kT=kOf(A);
+    label(ctx,"scree grafiği · bileşen başına açıklanan varyans",B.x+12,B.y+14,css("--accent"),"left",11);
+    legendRow(ctx,B.x+12,B.y+31,[["▮ tek tek","--a"],["● kümülatif","--b"],std?["┄ Kaiser: λ = 1","--c"]:null,["◯ dirsek","--ink"]],10.5,B.w-24);
+    ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    [0,.25,.5,.75,1].forEach(v=>{ ctx.beginPath(); ctx.moveTo(l,Y(v)); ctx.lineTo(r,Y(v)); ctx.stroke(); });
+    ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(l,b); ctx.lineTo(r,b); ctx.stroke(); ctx.restore();
+    [0,.5,1].forEach(v=>label(ctx,"%"+Math.round(v*100),l-6,Y(v),css("--ink-soft"),"right",10));
+    /* çubuklar: eşiğin seçtikleri dolu, ötekiler soluk; seçili bileşen pembe çerçeve */
+    for(let i=0;i<p;i++){
+      const top=Y(A.ratio[i]);
+      ctx.fillStyle=hexA("--a",i<kT?.85:.28); ctx.fillRect(X(i)-bw/2,top,bw,b-top);
+      if(i===sel||i===hov){ ctx.save(); ctx.strokeStyle=i===sel?css("--accent"):hexA("--ink-soft",.7);
+        ctx.lineWidth=i===sel?2.2:1.4; ctx.strokeRect(X(i)-bw/2-2.5,Math.min(top,b-3)-2.5,bw+5,b-Math.min(top,b-3)+2.5); ctx.restore(); }
+    }
+    /* Kaiser: standart veride λ = 1, yani oran = 1/p ("ortalama bir sütun") */
+    if(A.kai!=null){ const yk=Y(1/p);
+      ctx.save(); ctx.setLineDash([3,3]); ctx.strokeStyle=css("--c"); ctx.lineWidth=1.6;
+      ctx.beginPath(); ctx.moveTo(l,yk); ctx.lineTo(r,yk); ctx.stroke(); ctx.restore();
+      label(ctx,`λ = 1 · Kaiser → ${A.kai}`,r-2,yk-9,css("--c"),"right",10.5); }
+    /* kümülatif eğri ve eşik */
+    ctx.save(); ctx.strokeStyle=css("--b"); ctx.lineWidth=2.2; ctx.lineJoin="round"; ctx.beginPath();
+    A.cum.forEach((c,i)=>i?ctx.lineTo(X(i),Y(c)):ctx.moveTo(X(i),Y(c))); ctx.stroke(); ctx.restore();
+    A.cum.forEach((c,i)=>disc(ctx,X(i),Y(c),p>15?2.3:3.3,css("--b")));
+    const yt=Y(thr/100), xk=X(kT-1), yc=Y(A.cum[kT-1]);
+    ctx.save(); ctx.setLineDash([6,4]); ctx.strokeStyle=css("--ink-soft"); ctx.lineWidth=1.3;
+    ctx.beginPath(); ctx.moveTo(l,yt); ctx.lineTo(r,yt); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(xk,yc); ctx.lineTo(xk,b); ctx.stroke(); ctx.restore();
+    disc(ctx,xk,yc,5.5,css("--b"),css("--surface"));
+    /* etiket eşiğin altında, düşey çizginin SAĞINDA (orada kümülatif eğri çizginin üstünde,
+       yer boş); sığmazsa solunda — orada eğri geçiyor, lejantın zemini onu örter */
+    { const txt=`%${thr} eşiği → ${kT} bileşen`;
+      ctx.save(); ctx.font='600 11px "IBM Plex Mono", monospace'; const tw=ctx.measureText(txt).width; ctx.restore();
+      const right=xk+14+tw<=r+6;
+      legend(ctx,right?xk+12:xk-12,yt+15,[[txt,"--ink"]],{size:11,align:right?"left":"right"}); }
+    /* dirsek: eğrinin büküldüğü çubuk halkalı, seçilen sayı ondan önceki çubuklar */
+    { const xe=X(A.knee), ye=Y(A.ratio[A.knee]);
+      ctx.save(); ctx.strokeStyle=css("--ink"); ctx.lineWidth=2; ctx.beginPath(); ctx.arc(xe,ye-1,7,0,7); ctx.stroke(); ctx.restore();
+      legend(ctx,xe+12,ye-14,[[`dirsek → ${A.elb}`,"--ink"]],{size:10.5}); }
+    ticks(X,p,slot,b+12,[[sel+1,css("--accent")],[kT,css("--ink")]]);
+    if(hov>=0&&hov<p){ const right=X(hov)<l+(r-l)*.6;
+      legend(ctx,right?X(hov)+14:X(hov)-14,Math.max(t+10,Math.min(b-34,Y(A.ratio[hov])-30)),
+        [[`PC${hov+1} · λ ${big(A.lam[hov])}`,"--ink"],[`${pct(A.ratio[hov])} · kümülatif ${pct(A.cum[hov])}`,"--ink-soft"]],
+        {size:10.5,align:right?"left":"right"}); }
+  }
+
+  /* sağ panel · yükler: sıfırın sağı artı, solu eksi; sayılar sağ sütunda. Tıbbi ölçümlerde
+     satır = özellik, satırda üç ince çubuk (ortalama · hata · en kötü) */
+  function loads(B,A){
+    const s=S(), v=A.vec[sel], sub=s.sub, rows=sub?s.meas:s.cols, nr=rows.length, ns=sub?sub.length:1;
+    label(ctx,`PC${sel+1} yükleri · λ ${big(A.lam[sel])} · ${pct(A.ratio[sel])}`,B.x+12,B.y+14,css("--accent"),"left",11);
+    const lw=Math.min(112,B.w*.34), x0=B.x+lw+10, x1=B.x+B.w-(sub?16:52), cx=(x0+x1)/2, half=(x1-x0)/2;
+    const top=B.y+46, bot=B.y+B.h-(sub?26:10), rh=(bot-top)/nr;
+    let mx=0; v.forEach(q=>{ mx=Math.max(mx,Math.abs(q)); }); const sc=Math.max(.5,Math.ceil(mx*10-1e-9)/10);
+    ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    [-1,-.5,.5,1].forEach(f=>{ ctx.beginPath(); ctx.moveTo(cx+f*half,top-4); ctx.lineTo(cx+f*half,bot); ctx.stroke(); });
+    ctx.strokeStyle=css("--ink-soft"); ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(cx,top-6); ctx.lineTo(cx,bot); ctx.stroke(); ctx.restore();
+    label(ctx,"−"+sc.toFixed(1),x0,top-14,css("--ink-soft"),"center",10);
+    label(ctx,"0",cx,top-14,css("--ink-soft"),"center",10);
+    label(ctx,"+"+sc.toFixed(1),x1,top-14,css("--ink-soft"),"center",10);
+    rows.forEach((nm,ri)=>{
+      const y0=top+ri*rh;
+      let hi=0; for(let k=0;k<ns;k++) hi=Math.max(hi,Math.abs(v[k*nr+ri]));
+      label(ctx,nm,B.x+lw,y0+rh/2,hi>=.3?css("--ink"):css("--ink-soft"),"right",rh<15?9.5:10.5);
+      for(let k=0;k<ns;k++){
+        const q=v[k*nr+ri], th=sub?Math.max(2,Math.min(6,rh*.22)):Math.max(3,Math.min(14,rh*.56));
+        const yy=sub?y0+rh*(.2+.3*k):y0+(rh-th)/2, len=q/sc*half;
+        ctx.fillStyle=hexA(q>=0?"--a":"--b",.88); ctx.fillRect(Math.min(cx,cx+len),yy,Math.abs(len),th);
+      }
+      if(!sub) label(ctx,sgn(v[ri]),x1+8,y0+rh/2,css("--ink"),"left",10);
+    });
+    if(sub) label(ctx,"her satır ↓ "+sub.join(" · "),B.x+12,B.y+B.h-11,css("--ink-soft"),"left",10);
+  }
+
+  /* sağ panel · CV: x = tutulan bileşen sayısı, y = 5 katlı doğruluk; yeşil bant en iyinin
+     1 puan yakını, halka o bantta kalan en az bileşen; kesikli çizgi PCA'sız model (k = p) */
+  function cvPanel(B,A){
+    const R=cvRun(A), p=A.p;
+    label(ctx,"5 katlı CV · PCA(k) + logistic regression",B.x+12,B.y+14,css("--accent"),"left",11);
+    if(R.none){ legend(ctx,B.x+14,B.y+46,[["Bu tabloda tahmin edilecek bir","--ink-soft"],["hedef (etiket) yok: CV kurulamaz.","--ink-soft"]],{size:11}); return; }
+    legendRow(ctx,B.x+12,B.y+31,[[`CV → ${R.k} bileşen · ${pct(R.acc[R.k-1])}`,"--ink"],[`PCA'sız ${pct(R.full)}`,"--ink-soft"]],10.5,B.w-24);
+    const {l,r,t,b}=plotA(B), lo=Math.floor((Math.min(...R.acc)-.006)*100)/100, hi=Math.ceil((R.best+.004)*100)/100;
+    const X=(i)=>l+12+(r-l-24)*(p>1?i/(p-1):.5), Y=(a)=>b-(a-lo)/(hi-lo||1)*(b-t);   // uçlar eksen yazısına değmesin
+    const stp=hi-lo>.08?.05:hi-lo>.04?.02:.01;
+    ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    for(let a=Math.ceil(lo/stp-1e-9)*stp;a<=hi+1e-9;a+=stp){ ctx.beginPath(); ctx.moveTo(l,Y(a)); ctx.lineTo(r,Y(a)); ctx.stroke();
+      label(ctx,pct(a,0),l-6,Y(a),css("--ink-soft"),"right",10); }
+    ctx.fillStyle=hexA("--good",.14); ctx.fillRect(l,Y(R.best),r-l,Y(R.best-.01)-Y(R.best));
+    ctx.setLineDash([5,4]); ctx.strokeStyle=css("--ink-soft"); ctx.lineWidth=1.3;
+    ctx.beginPath(); ctx.moveTo(l,Y(R.full)); ctx.lineTo(r,Y(R.full)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle=css("--a"); ctx.lineWidth=2.2; ctx.lineJoin="round"; ctx.beginPath();
+    R.acc.forEach((a,i)=>i?ctx.lineTo(X(i),Y(a)):ctx.moveTo(X(i),Y(a))); ctx.stroke(); ctx.restore();
+    R.acc.forEach((a,i)=>disc(ctx,X(i),Y(a),p>15?2.3:3.2,css("--a")));
+    ctx.save(); ctx.strokeStyle=css("--good"); ctx.lineWidth=2.2; ctx.beginPath(); ctx.arc(X(R.k-1),Y(R.acc[R.k-1]),7,0,7); ctx.stroke(); ctx.restore();
+    disc(ctx,X(sel),Y(R.acc[sel]),5,css("--accent"),css("--surface"));
+    const slot=(r-l-24)/Math.max(1,p-1);
+    ticks((i)=>X(i),p,slot,b+12,[[sel+1,css("--accent")],[R.k,css("--ink")]]);
+  }
+
+  function draw(){
+    if(!fit()) return;
+    const G=geo(), A=analyse(), W=G.W, H=G.H;
+    if(sel>=A.p) sel=A.p-1;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,W,H);
+    scree(G.A,A);
+    if(G.B){
+      ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1; ctx.beginPath();
+      if(G.side){ ctx.moveTo(G.B.x+.5,12); ctx.lineTo(G.B.x+.5,H-12); } else { ctx.moveTo(12,G.B.y+.5); ctx.lineTo(W-12,G.B.y+.5); }
+      ctx.stroke(); ctx.restore();
+      if(view==="cv") cvPanel(G.B,A); else loads(G.B,A);
+    }
+    /* göstergeler çizimden bağımsız: dar ve kısa tuvalde de aynı değerler */
+    const kT=kOf(A), R=cvRun(A);
+    txt("#scr-pc1",pct(A.ratio[0])); $("#scr-pc1").className="v"+(std?"":" wr");
+    txt("#scr-tk",`Eşik %${thr}`); txt("#scr-thr",`${kT} bileşen`);
+    txt("#scr-elb",`${A.elb} bileşen`);
+    txt("#scr-kai",A.kai==null?"uygulanamaz":`${A.kai} bileşen`); $("#scr-kai").className="v"+(A.kai==null?" bd":"");
+    txt("#scr-cv",R.none?"etiket yok":`${R.k} bileşen`);      // doğruluğu CV panelinde ve aria-label'da
+    /* tuval metni sahte DOM'da okunmuyor: sınamalar (behaviour.js) buradan okur */
+    const L=Math.min(A.p,10), nm=names();
+    cv.setAttribute("aria-label",`Scree · ${S().name} · ${std?"standart":"ölçeksiz"} · oranlar ${A.ratio.slice(0,L).map(q=>pct(q)).join(", ")} · `+
+      `kümülatif ${A.cum.slice(0,L).map(q=>pct(q)).join(", ")} · λ ${A.lam.slice(0,L).map(big).join(", ")} · eşik %${thr} → ${kT} · `+
+      `dirsek ${A.elb} (halka ${A.knee+1}. çubukta) · Kaiser ${A.kai==null?"uygulanamaz":A.kai} · `+
+      `PC${sel+1} yükleri: ${A.vec[sel].map((q,i)=>nm[i]+" "+q.toFixed(2)).join(", ")} · `+
+      (R.none?"CV yok (etiket yok)":`hedef ${data().y.reduce((a,b)=>a+b,0)} / ${A.n} · CV: ${R.acc.map((a,i)=>"k="+(i+1)+" "+pct(a)).join(", ")} · PCA'sız ${pct(R.full)} · CV → ${R.k}`)+
+      ` · sağ panel ${view==="cv"?"CV":"yükler"}`);
+  }
+
+  /* imleç: çubuğun üstünde λ ve oran; tıklayınca o bileşenin yükleri (kaydırıcıyı sürer) */
+  const barAt=(px,py)=>{ const G=geo(), {l,r,t,b}=plotA(G.A), A=analyse();
+    if(px<l||px>r||py<t-12||py>b+18) return -1; return clamp(Math.floor((px-l)/((r-l)/A.p)),0,A.p-1); };
+  cv.addEventListener("pointermove",e=>{ const q=pointerPos(cv,e), i=barAt(q.x,q.y); if(i!==hov){ hov=i; draw(); } });
+  cv.addEventListener("pointerleave",()=>{ if(hov>=0){ hov=-1; draw(); } });
+  cv.addEventListener("pointerdown",e=>{ const q=pointerPos(cv,e), i=barAt(q.x,q.y); if(i>=0) setR("#scr-j",i+1); });
+
+  $("#scr-t").oninput=e=>{ thr=+e.target.value; txt("#scr-to","%"+thr); draw(); };
+  $("#scr-j").oninput=e=>{ sel=clamp(+e.target.value-1,0,analyse().p-1); txt("#scr-jo","PC"+(sel+1)); draw(); };
+  $("#scr-std").onclick=()=>{ std=!std; $("#scr-std").setAttribute("aria-pressed",String(std)); draw(); };
+  const setView=(v)=>{ view=v==="cv"&&S().y?"cv":"load";
+    $("#scr-vl").setAttribute("aria-pressed",String(view==="load")); $("#scr-vc").setAttribute("aria-pressed",String(view==="cv")); draw(); };
+  $("#scr-vl").onclick=()=>setView("load"); $("#scr-vc").onclick=()=>setView("cv");
+  /* veri kümesi değişince: bileşen kaydırıcısının ucu sütun sayısı, seçim PC1; etiketi olmayan
+     tabloda (kasabalar) CV düğmesi soluk ve sağ panel yüklere döner */
+  function useSet(i){
+    dsi=clamp(i,0,DS.length-1); hov=-1; sel=0;
+    const j=$("#scr-j"); j.max=String(analyse().p); j.value="1"; txt("#scr-jo","PC1");
+    $("#scr-vc").disabled=!S().y; $("#scr-std").setAttribute("aria-pressed",String(std));
+    setView(view);
+  }
+  reg({id:"m-scree",draw,init:()=>useSet(0),
+    space:()=>setR("#scr-j",sel+2>analyse().p?1:sel+2),
+    scenarioLabel:CONTENT["m-scree"].pick,
+    scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
+    steps:[
+      {t:"Scree grafiği",d:"Hafta 13'ün anketi: 300 öğrenci, 10 soru. Her çubuk bir bileşenin payı, turuncu çizgi kümülatif toplam. PC1 %35.9, PC2 %29.1: ilk ikisi birlikte %64.9. Üçüncüden sonraki sekiz çubuk %3–6 arasında, hepsi aynı alçak seviyede.",
+       set:0, hl:["#scr-pc1"], run(){setPressed("#scr-std",true);setR("#scr-t",90);setR("#scr-j",1);press("#scr-vl");}},
+      {t:"PC1 = ders kalitesi",d:"Sağda PC1'in yükleri: beş ders sorusu (hoca, içerik, ödev, sınav, kaynak) 0.43–0.45, kampüs soruları 0.02–0.13. PC1 bir ağırlıklı toplam; büyük yükler ona adını veriyor: ders kalitesi.",
+       hl:["#scr-j"], run(){setR("#scr-j",1);press("#scr-vl");}},
+      {t:"PC2 = kampüs yaşamı",d:"PC2'ye geç (çubuğa tıkla ya da « Bileşen » kaydırıcısı): bu kez beş kampüs sorusu 0.41–0.47, ders soruları sıfıra yakın ve eksi (−0.05 ile −0.10). İşaret keyfî; önemli olan hangi sütunların birlikte büyük olduğu.",
+       hl:["#scr-j"], run(){setR("#scr-j",2);press("#scr-vl");}},
+      {t:"Dirsek ve Kaiser",d:"Halka 3. çubukta: eğri orada bükülüyor, ondan önceki <b>2</b> bileşen tutulur. Mor kesikli çizgi Kaiser: standart veride λ = 1, on sütunda %10. Üstünde iki çubuk var (λ = 3.59 ve 2.91), üçüncünün λ'sı 0.60. İki kural aynı cevabı veriyor: 2.",
+       hl:["#scr-elb","#scr-kai"], run(){setR("#scr-j",1);}},
+      {t:"%90 eşiği 7 diyor",d:"Eşik kuralı başka bir şey soruyor: bilginin %90'ını taşımak için kaç bileşen lazım? Kümülatif çizgi %90'ı ancak 7. bileşende geçiyor (%90.1). Eşiği %80'e çek: 5; %95'e çek: 9. Her sorunun kendi gürültüsü de varyans ve onu taşımak çok bileşen istiyor.",
+       hl:["#scr-thr","#scr-t"], run(){setR("#scr-t",90);}},
+      {t:"CV: modele sor",d:"Sağ panel <b>CV</b>: her k için 'ölçekle → PCA(k) → logistic regression' hattının 5 katlı doğruluğu, hedef 'bölümü yeniden seçer mi'. PCA(2) %82.0, 10 sorunun hepsi %81.3, PC1 tek başına da %82.0. Eğri düz, CV en az bileşeni seçiyor: 1. Hedef çoğunlukla ders kalitesine bağlı.",
+       hl:["#scr-cv"], run(){press("#scr-vc");}},
+      {t:"Kapadokya kasabaları",d:"On kasaba, sekiz gösterge. PC1 %67.5: otel, restoran, ziyaretçi, müze 0.41–0.42, balon 0.39, yatak 0.37; nüfus 0.13, tarım alanı 0.06. Adı turizm yoğunluğu. Kaiser, dirsek ve %90 eşiği üçü de 2 diyor. Bu tabloda hedef yok, CV düğmesi soluk.",
+       set:1, hl:["#scr-pc1","#scr-kai"], run(){setPressed("#scr-std",true);setR("#scr-t",90);setR("#scr-j",1);press("#scr-vl");}},
+      {t:"PC2 = kasaba büyüklüğü",d:"PC2 %26.8: nüfus 0.65 ve tarım alanı 0.67, turizm göstergeleri −0.20 ile 0.19 arasında. İki bileşen birlikte %94.3: sekiz sütunun bilgisi iki eksende.",
+       hl:["#scr-j"], run(){setR("#scr-j",2);}},
+      {t:"Standartlaştırmayı kapat",d:"« Standartlaştır » kapalı: PC1 %75.6'ya çıktı ve neredeyse yalnız tarım alanı (yük 0.96): hektarla ölçülen sütun, λ₁ 3.6 milyon. PC2 %24.1 ve yatak (0.93). PCA artık kasabaları değil, birimleri özetliyor; Kaiser 'uygulanamaz'.",
+       hl:["#scr-pc1","#scr-std","#scr-kai"], run(){setR("#scr-j",1);setPressed("#scr-std",false);}},
+      {t:"Tıbbi ölçümler",d:"569 hasta, 30 ölçüm (10 özellik × ortalama, hata, en kötü). Standart veride PC1 %44.3, PC2 %19.0, PC3 %9.4. Dört kural dört cevap veriyor: dirsek 3, Kaiser 6, %90 eşiği 7, CV 5. Sunumdaki gibi tek bir doğru sayı yok; amacına göre seç.",
+       set:2, hl:["#scr-elb","#scr-kai","#scr-thr","#scr-cv"], run(){setPressed("#scr-std",true);setR("#scr-t",90);setR("#scr-j",1);press("#scr-vl");}},
+      {t:"%95 eşiği ve CV",d:"Eşik %95: 10 bileşen (kümülatif %95.2); Pipeline'daki PCA(n_components=0.95) tam bunu seçer. CV paneline bak: PCA(10) %96.5, PCA'sız %96.8. 30 sütun yerine 10 bileşen neredeyse aynı doğrulukta.",
+       hl:["#scr-thr","#scr-t"], run(){setR("#scr-t",95);press("#scr-vc");}},
+      {t:"Ölçeksiz: %98.2",d:"« Standartlaştır » kapalı: PC1'in payı %98.2. Yükler: en kötü alan 0.85, ortalama alan 0.52, öteki sütunlar 0.06'nın altında. PC1 iki alan sütununun kopyası; %98.2 hastalar hakkında değil, alanın büyük sayılarla ölçülmesi hakkında. Kaiser uygulanamaz.",
+       hl:["#scr-pc1","#scr-std","#scr-kai"], run(){setR("#scr-t",90);setR("#scr-j",1);press("#scr-vl");setPressed("#scr-std",false);}},
+      {t:"Ölçeksiz hat, kötü model",d:"CV paneli ölçeksiz hattı ölçüyor: en iyi doğruluk %92.6 ve buna ancak 12 bileşenle varıyor. Standart hatta 5 bileşen %96.0'a çıkıyordu. Ölçeklemeyi unutmak yalnız bileşenleri değil, modeli de bozuyor.",
+       hl:["#scr-cv"], run(){press("#scr-vc");}}
+    ]});
+})();
+
 /* ═════════════ 01 · Ortalama mı, medyan mı ═════════════ */
 (function(){
   const cv=$("#c-stat"), {ctx,fit}=setupCanvas(cv);
@@ -13799,6 +14328,7 @@ const META=[
   ["29","m-err",   "MAE, RMSE, R² ve temel model","Ne kadar yanıldık?","Hafta 3","hata ölçütü error metric kayıp fonksiyonu loss function maliyet fonksiyonu cost function j theta mae ortalama mutlak hata mean absolute error mse ortalama kare hata mean squared error rmse kök ortalama kare hata root mean squared error r2 r kare belirlilik katsayısı temel model baseline dummyregressor dummyclassifier en sık sınıf huber kaybı huber loss delta 0-1 kaybı büyük hata outlier aykırı değer beş ev ev fiyatı göreme ziyaretçi bayram müze hafta 3 doğruluk"],
   ["30","m-leak",  "data leakage ve Pipeline","Jürinin tabağından tatma","Hafta 7","veri sızıntısı data leakage leakage pipeline işlem hattı öznitelik seçimi feature selection selectkbest ölçekleme scaling standardscaler eksik değer doldurma imputation simpleimputer medyan median fit transform fit_transform cross-validation çapraz doğrulama cv tabakalı bölme stratified split stratify rastgele öznitelik yazı tura gen ifadesi müşteri kaybı churn iptal tarihi gelecekten gelen sütun restoran mutfağı jüri tarif kartı hafta 7 hafta 4"],
   ["31","m-boost", "boosting: AdaBoost ve decision stump","Bayrak yarışı","Hafta 11","boosting güçlendirme adaboost adaptive boosting karar kütüğü decision stump zayıf öğrenici weak learner ağırlık weight oy alfa α epsilon ε ağırlıklı hata learning rate öğrenme oranı tur n_estimators gradient boosting gradyan güçlendirme xgboost lightgbm catboost bagging torbalama random forest rastgele orman bayrak yarışı kalabalık bias varyans overfitting aşırı öğrenme gürültü ters etiket kayıt hatası abonelik deneme kullanıcısı müşteri kaybı churn sözleşme fatura hafta 11 topluluk ensemble"],
+  ["32","m-scree", "scree plot ve bileşen sayısı","Kaç bileşen yeter?","Hafta 13","scree grafiği scree plot kaç bileşen number of components bileşen sayısı dirsek elbow eşik threshold kümülatif cumulative explained variance açıklanan varyans oranı explained variance ratio kaiser ölçütü kaiser criterion özdeğer eigenvalue yük loading yükler loadings standartlaştırma standardization ölçekleme scaling çapraz doğrulama cross-validation cv n_components anket kasaba kapadokya tıbbi ölçüm meme kanseri breast cancer hafta 13 pca"],
 ];
 /* ders sırasına dizilmiş modüller — gezinme hep bunun üzerinden */
 const SEQ=META.map(r=>MODULES.find(m=>m.id===r[1])).filter(Boolean);
@@ -13957,6 +14487,14 @@ TH["m-pca"]=(c,w,h)=>{thumbBase(c,w,h);
   c.beginPath();c.moveTo(w*.12,h*(.5+.38));c.lineTo(w*.88,h*(.5-.38));c.stroke();
   c.strokeStyle=css("--ink-soft");c.lineWidth=1.8;
   c.beginPath();c.moveTo(w*.42,h*.34);c.lineTo(w*.58,h*.66);c.stroke();};
+TH["m-scree"]=(c,w,h)=>{thumbBase(c,w,h);
+  const r=[.36,.29,.06,.054,.052,.044,.042,.035,.034,.029], n=r.length, l=w*.08, rr=w*.94, b=h*.88, t=h*.1, sl=(rr-l)/n, Y=(v)=>b-v*(b-t);
+  r.forEach((v,i)=>{ c.fillStyle=hexA("--a",i<2?.85:.32); c.fillRect(l+sl*i+sl*.18,Y(v),sl*.64,b-Y(v)); });
+  c.save(); c.setLineDash([4,3]); c.strokeStyle=css("--c"); c.lineWidth=1.4; c.beginPath(); c.moveTo(l,Y(.1)); c.lineTo(rr,Y(.1)); c.stroke(); c.restore();
+  let q=0; c.strokeStyle=css("--b"); c.lineWidth=2.2; c.beginPath();
+  r.forEach((v,i)=>{ q+=v; const x=l+sl*(i+.5); i?c.lineTo(x,Y(q)):c.moveTo(x,Y(q)); }); c.stroke();
+  q=0; r.forEach((v,i)=>{ q+=v; tdot(c,l+sl*(i+.5),Y(q),2.6,css("--b")); });
+  c.save(); c.strokeStyle=css("--ink"); c.lineWidth=1.8; c.beginPath(); c.arc(l+sl*2.5,Y(.06)-1,5.5,0,7); c.stroke(); c.restore();};
 TH["m-lin"]=(c,w,h)=>{thumbBase(c,w,h);
   const A=.62,B=.18;
   for(let i=0;i<11;i++){const x=(i+.5)/11, y=A*x+B+ (i%3-1)*.09;

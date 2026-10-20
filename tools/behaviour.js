@@ -2193,6 +2193,102 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(T(el,'pca-lam')==='—', "rastgele (birimsiz) bulutta özdeğer yazılmıyor (ders notu: göstergeler)", T(el,'pca-lam'));
 }
 
+/* ── 32 · Kaç bileşen? scree, eşik, dirsek, Kaiser, yükler, CV (Hafta 13) ──
+   Üç tablo da sabit: anket ve kasabalar sunumun kodundan gömülü, tıbbi ölçümler tohumlu ve
+   korelasyonu tam olarak gömülü matris. Bu yüzden her sayı BİREBİR sınanır (ortalama gerekmez).
+   CV sayıları ayrıca numpy'la bağımsız bir uygulamayla doğrulandı (anket 0.820 / 0.813 = slayt). */
+{
+  head("Modül 32 · Kaç bileşen? (scree, eşik, dirsek, Kaiser, yükler, CV)");
+  const {el,M,CONTENT}=boot(F); const AR=()=>el('c-scree').getAttribute('aria-label')||'';
+  const esc=(s)=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const ld=(nm)=>num((new RegExp('[:,] '+esc(nm)+' (-?[\\d.]+)').exec(AR())||[])[1]);     // seçili bileşenin yükü
+  const lst=(nm)=>((new RegExp(nm+' ([^·]+)').exec(AR())||[])[1]||'').split(', ').map(x=>num(x.replace(/ /g,'')));
+  const cvk=(k)=>num((new RegExp('k='+k+' %([\\d.]+)').exec(AR())||[])[1]);
+  const full=()=>num((/PCA'sız %([\d.]+)/.exec(AR())||[])[1]);
+  const thrK=(t)=>{ S(el,'scr-t',t); return T(el,'scr-thr'); };
+  const between=(names,lo,hi)=>names.every(n=>{ const v=ld(n); return v>=lo-1e-9&&v<=hi+1e-9; });
+  P(el,'scr-std',true); S(el,'scr-t',90); S(el,'scr-j',1); el('scr-vl').click();
+
+  /* « Öğrenci anketi » (varsayılan) */
+  PK(M,'m-scree',0);
+  const ders=['hoca','içerik','ödev','sınav','kaynak'], kamp=['yemek','kulüp','yurt','ulaşım','spor'];
+  let r=lst('oranlar'), c=lst('kümülatif'), l=lst('λ');
+  console.log(`       anket: oranlar ${r.slice(0,4).join(' ')} … · kümülatif ${c.join(' ')}`);
+  chk(T(el,'scr-pc1')==='%35.9'&&r[1]===29.1&&c[1]===64.9, "anket: PC1 %35.9, PC2 %29.1, ilk ikisi %64.9 (adım 1, not, slayt 0.65)", `${T(el,'scr-pc1')} · ${r[1]} · ${c[1]}`);
+  chk(r.slice(2).every(v=>v>=2.5&&v<=6.0)&&r.length===10, "anket: üçüncüden sonraki sekiz çubuk %3–6 arasında (adım 1, kendini sına 1)", r.slice(2).join(' '));
+  chk(T(el,'scr-kai')==='2 bileşen'&&l[0]===3.59&&l[1]===2.91&&l[2]===0.6, "anket: Kaiser 2, λ = 3.59 ve 2.91, üçüncüsü 0.60 (adım 4, not)", `${T(el,'scr-kai')} · λ ${l.slice(0,3).join(' ')}`);
+  chk(T(el,'scr-elb')==='2 bileşen'&&/dirsek 2 \(halka 3\. çubukta\)/.test(AR()), "anket: dirsek halkası 3. çubukta, seçim 2 (adım 4, ders notu: okuma)", T(el,'scr-elb'));
+  chk(T(el,'scr-thr')==='7 bileşen'&&c[6]===90.1, "anket: %90 eşiği 7 bileşen, kümülatif %90.1 (adım 5, kendini sına 1)", `${T(el,'scr-thr')} · ${c[6]}`);
+  { const a=thrK(80), b=thrK(95); S(el,'scr-t',90);
+    chk(a==='5 bileşen'&&b==='9 bileşen'&&T(el,'scr-elb')==='2 bileşen'&&T(el,'scr-kai')==='2 bileşen',
+        "anket: eşik %80 → 5, %95 → 9; dirsek ve Kaiser 2'de kalıyor (.ask, adım 5, not)", `${a} · ${b}`); }
+  chk(between(ders,.43,.45)&&between(kamp,.02,.13), "anket PC1: ders soruları 0.43–0.45, kampüs soruları 0.02–0.13 (adım 2, ders notu)",
+      ders.concat(kamp).map(ld).join(' '));
+  chk(ld('hoca')===0.43&&ld('içerik')===0.43&&ld('ödev')===0.44&&ld('sınav')===0.45&&ld('kaynak')===0.45, "PC1 ≈ 0.43·hoca + 0.43·içerik + 0.44·ödev + 0.45·sınav + 0.45·kaynak (ders notu, slayt 49)");
+  S(el,'scr-j',2);
+  chk(/PC2 yükleri/.test(AR())&&between(kamp,.41,.47)&&between(ders,-.10,-.05), "anket PC2: kampüs soruları 0.41–0.47, ders soruları −0.05 ile −0.10 (adım 3, not)",
+      ders.concat(kamp).map(ld).join(' '));
+  S(el,'scr-j',1);
+  el('scr-vc').click();
+  console.log(`       anket CV: ${[1,2,3,4,5,6,7,8,9,10].map(cvk).join(' ')} · PCA'sız ${full()}`);
+  chk(/sağ panel CV/.test(AR())&&cvk(2)===82&&full()===81.3, "anket CV: PCA(2) %82.0, 10 soru %81.3 — slayttaki 0.820 / 0.813 (adım 6, not)", `${cvk(2)} · ${full()}`);
+  chk(cvk(1)===82&&T(el,'scr-cv')==='1 bileşen'&&/CV → 1/.test(AR()), "anket CV: PC1 tek başına da %82.0, CV en az bileşeni seçiyor: 1 (adım 6, not)", T(el,'scr-cv'));
+  { const a=[1,2,3,4,5,6,7,8,9,10].map(cvk), b=Math.max(...a);
+    chk(a.findIndex(v=>v>=b-1-1e-9)+1===1&&b-Math.min(...a)<1.5, "anket CV eğrisi düz: bütün k'lar 1.5 puan içinde (adım 6)", `${Math.min(...a)}–${b}`); }
+
+  /* « Kapadokya kasabaları » */
+  PK(M,'m-scree',1);
+  chk(el('scr-vc').disabled===true&&/sağ panel yükler/.test(AR())&&T(el,'scr-cv')==='etiket yok', "kasabalar: hedef yok, CV düğmesi soluk, sağ panel yüklere döndü (adım 7, ders notu)", T(el,'scr-cv'));
+  r=lst('oranlar'); c=lst('kümülatif');
+  chk(T(el,'scr-pc1')==='%67.5'&&r[1]===26.8&&c[1]===94.3, "kasabalar: PC1 %67.5, PC2 %26.8, ikisi %94.3 (adım 7–8, not, slayt .67 / .27)", `${r[0]} · ${r[1]} · ${c[1]}`);
+  chk(ld('otel')===0.41&&ld('restoran')===0.41&&ld('ziyaretçi')===0.42&&ld('müze')===0.42&&ld('balon')===0.39&&ld('yatak')===0.37&&ld('nüfus')===0.13&&ld('tarım alanı')===0.06,
+      "kasabalar PC1: otel, restoran 0.41, ziyaretçi, müze 0.42, balon 0.39, yatak 0.37, nüfus 0.13, tarım 0.06 — slayt 42 (adım 7, not)");
+  chk(T(el,'scr-kai')==='2 bileşen'&&T(el,'scr-elb')==='2 bileşen'&&T(el,'scr-thr')==='2 bileşen', "kasabalar: Kaiser, dirsek ve %90 eşiği üçü de 2 (adım 7, not)");
+  S(el,'scr-j',2);
+  { const tur=['otel','yatak','restoran','ziyaretçi','balon','müze'];
+    chk(ld('nüfus')===0.65&&ld('tarım alanı')===0.67&&ld('otel')===-0.15&&between(tur,-.20,.19), "kasabalar PC2: nüfus 0.65, tarım 0.67, otel −0.15, turizm −0.20…0.19 (adım 8, kendini sına 3)",
+        tur.map(ld).join(' ')); }
+  S(el,'scr-j',1); P(el,'scr-std',false);
+  l=lst('λ'); r=lst('oranlar');
+  chk(T(el,'scr-pc1')==='%75.6'&&ld('tarım alanı')===0.96&&Math.abs(l[0]/1e6-3.6)<0.05, "kasabalar ölçeksiz: PC1 %75.6, tarım alanı 0.96, λ₁ 3.6 milyon (adım 9, not)", `${T(el,'scr-pc1')} · ${ld('tarım alanı')} · ${l[0]}`);
+  S(el,'scr-j',2);
+  chk(r[1]===24.1&&ld('yatak')===0.93, "kasabalar ölçeksiz PC2: %24.1, yatak 0.93 (adım 9, not)", `${r[1]} · ${ld('yatak')}`);
+  chk(T(el,'scr-kai')==='uygulanamaz', "ölçeksiz veride Kaiser 'uygulanamaz' (adım 9, kendini sına 2)", T(el,'scr-kai'));
+  S(el,'scr-j',1); P(el,'scr-std',true);
+
+  /* « Tıbbi ölçümler » */
+  PK(M,'m-scree',2);
+  r=lst('oranlar'); c=lst('kümülatif'); l=lst('λ');
+  console.log(`       tıbbi: oranlar ${r.join(' ')} · kümülatif ${c.join(' ')}`);
+  chk(el('scr-j').max==='30', "tıbbi: « Bileşen » kaydırıcısı 30 bileşene uzuyor (ders notu: okuma)", el('scr-j').max);
+  chk(T(el,'scr-pc1')==='%44.3'&&r[1]===19&&r[2]===9.4&&r[3]===6.6&&r[4]===5.5, "tıbbi: %44.3, %19.0, %9.4, %6.6, %5.5 — sunumun oranları (adım 10, not, ders notu)", r.slice(0,5).join(' '));
+  chk(T(el,'scr-thr')==='7 bileşen'&&c[5]===88.8&&c[6]===91, "tıbbi: %90 eşiği 7 (kümülatif %88.8 → %91.0) (adım 10, not)", `${T(el,'scr-thr')} · ${c[5]} → ${c[6]}`);
+  chk(thrK(95)==='10 bileşen'&&c[9]===95.2, "tıbbi: %95 eşiği 10, kümülatif %95.2 (adım 11, not, slayt 34)", `${T(el,'scr-thr')} · ${c[9]}`);
+  S(el,'scr-t',90);
+  chk(T(el,'scr-kai')==='6 bileşen'&&l[5]===1.21&&l[6]===0.68, "tıbbi: Kaiser 6, λ₆ = 1.21, λ₇ = 0.68 (adım 10, not)", `${T(el,'scr-kai')} · ${l[5]} · ${l[6]}`);
+  chk(T(el,'scr-elb')==='3 bileşen'&&/halka 4\. çubukta/.test(AR()), "tıbbi: dirsek 3, halka 4. çubukta — sunumun 'yaklaşık 3'ü (adım 10, not)", T(el,'scr-elb'));
+  chk(/hedef 213 \/ 569/.test(AR()), "tıbbi: 569 hastanın 213'ü kötü huylu (not)", (/hedef [\d ]+\/ \d+/.exec(AR())||[''])[0]);
+  chk(T(el,'scr-cv')==='5 bileşen'&&cvk(1)===90.3&&cvk(5)===96&&full()===96.8, "tıbbi CV: PCA(1) %90.3, PCA(5) %96.0, PCA'sız %96.8, CV 5 (adım 10, not)", `${cvk(1)} · ${cvk(5)} · ${full()}`);
+  chk(cvk(10)===96.5, "tıbbi CV: PCA(10) %96.5, PCA'sız %96.8 (adım 11)", `${cvk(10)}`);
+  P(el,'scr-std',false);
+  { const nm=CONTENT['m-scree'].sets[2], all=nm.sub.flatMap(s=>nm.meas.map(m=>m+' '+s)), rest=all.filter(n=>n!=='alan en kötü'&&n!=='alan ortalama');
+    const mx=Math.max(...rest.map(n=>Math.abs(ld(n))));
+    chk(T(el,'scr-pc1')==='%98.2'&&ld('alan en kötü')===0.85&&ld('alan ortalama')===0.52&&mx<0.06,
+        "tıbbi ölçeksiz: PC1 %98.2 = en kötü alan 0.85 + ortalama alan 0.52, öteki sütunlar 0.06'nın altında (adım 12, .ask, ders notu)", `${T(el,'scr-pc1')} · öteki en büyük ${mx}`); }
+  chk(T(el,'scr-kai')==='uygulanamaz'&&T(el,'scr-thr')==='1 bileşen', "tıbbi ölçeksiz: Kaiser uygulanamaz, %90 eşiği 1 (adım 12)");
+  chk(T(el,'scr-cv')==='12 bileşen'&&full()===92.6&&cvk(12)===92.6&&cvk(11)<91.6, "ölçeksiz hat: en iyi %92.6, ancak 12 bileşenle (adım 13, not)", `${T(el,'scr-cv')} · ${full()}`);
+  P(el,'scr-std',true);
+  chk(T(el,'scr-pc1')==='%44.3'&&T(el,'scr-cv')==='5 bileşen', "« Standartlaştır » geri açılınca standart sayılar dönüyor (önbellek)");
+
+  /* ders notu · elle hesap: Hafta 13 alıştırma 2 (12.4, 5.1, 2.3, 0.8, 0.4) — metindeki her yüzde hesapla aynı mı */
+  { const L=CONTENT['m-scree'].lesson, ex=L.ex.s.join(' ')+' '+L.ex.end+' '+L.fig.cap;
+    const e=[12.4,5.1,2.3,0.8,0.4], tot=e.reduce((a,b)=>a+b,0); let cu=0;
+    const pc=e.map(v=>'%'+(v/tot*100).toFixed(1)), cm=e.map(v=>{ cu+=v; return '%'+(cu/tot*100).toFixed(1); });
+    const k90=cm.findIndex(v=>parseFloat(v.slice(1))>=90)+1, k95=cm.findIndex(v=>parseFloat(v.slice(1))>=95)+1;
+    chk(Math.abs(tot-21)<1e-9&&pc.every(x=>ex.includes(x))&&cm.slice(0,4).every(x=>ex.includes(x))&&k90===3&&k95===4&&e.filter(v=>v>1).length===3,
+        "elle hesap: toplam 21; paylar %59.0 %24.3 %11.0 %3.8 %1.9; kümülatif %83.3 %94.3 %98.1; %90 → 3, %95 → 4; λ > 1 sayısı 3 (ders notu)", pc.concat(cm).join(' ')); }
+}
+
 /* ── 18 · k-ortalamalar: altı nokta, iyi / kötü başlangıç, veri biriminde J ── */
 {
   head("Modül 18 · altı nokta: iyi ve kötü başlangıç (Hafta 14)");
