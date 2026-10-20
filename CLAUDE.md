@@ -58,8 +58,15 @@ gösterim uygulaması. Derste projeksiyona yansıtılıp kaydırıcılarla oynat
   | bias–variance decomposition · irreducible error | yanlılık–varyans ayrışması · indirgenemez hata |
   | multiple linear regression · confounding variable · multicollinearity | çoklu doğrusal regresyon · karıştırıcı değişken · çoklu doğrusal bağlantı |
   | polynomial regression · degree · design matrix · feature engineering · extrapolation | polinom regresyon · derece · tasarım matrisi · öznitelik türetme · ekstrapolasyon |
+  | model · parameter · hyperparameter · loss function · training | — · parametre · hiperparametre · kayıp fonksiyonu · eğitim |
+  | loss · cost · Huber loss | kayıp · maliyet · Huber kaybı |
+  | Pearson r · covariance · Anscombe's quartet | Pearson korelasyon katsayısı · kovaryans · Anscombe dörtlüsü |
+  | data leakage · Pipeline · fit / transform · SelectKBest | veri sızıntısı · işlem hattı · uydur / dönüştür · — |
+  | boosting · weak learner · decision stump · AdaBoost · gradient boosting | güçlendirme · zayıf öğrenici · karar kütüğü · — · gradyan güçlendirme |
+  | scree plot · cumulative explained variance · Kaiser criterion · loading | scree grafiği · kümülatif açıklanan varyans · Kaiser ölçütü · yük |
 
-  **Sunumun Türkçe önde yazdığı terimler** (`<b>Türkçe</b> (English)`): ortalama (mean),
+  **Sunumun Türkçe önde yazdığı terimler** (`<b>Türkçe</b> (English)`): genelleme
+  (generalization), korelasyon (correlation), ortalama (mean),
   medyan (median), standart sapma, dayanıklı (robust), standartlaştırma (z-skoru),
   normalizasyon (min-maks), kümeleme, k-ortalamalar (k-means; adımları **ata / güncelle**,
   tur **iterasyon**). SVM benzetmesi "iki köy arasındaki en geniş yol" (koridor değil).
@@ -101,7 +108,7 @@ deploy/nginx.conf.example    konteyner içi nginx — yalnız index.html'i yayı
 deploy/deploy.sh             rsync ile sunucuya yükleme
 tools/lint.py                bütünlük denetimi (id, sözleşme, META, renk)
 tools/harness.js             tarayıcısız çalıştırma (DOM/Canvas taklidi)
-tools/behaviour.js           26 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
+tools/behaviour.js           32 modülün pedagojik iddialarını sınar (metin ↔ gösterge)
 tools/contrast.js            tuval etiketlerinin ve figür yazılarının iki temada WCAG kontrastı
 tools/layout.js              (isteğe bağlı) gerçek Chromium'da projeksiyon yerleşimi + figür yazıları
 tools/figspec.md             ders notu figürlerinin kuralları (Codex'e verilen şartname)
@@ -194,46 +201,88 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
 - **3. aşama eklemeleri (2026-10-19, sunumdaki eksikler).** Ortak kalıplar: tuvale yazılan yeni
   sayılar `aria-label`'a da yazılır, `behaviour.js` oradan okur; sabit (sunumdan gelen) veri kümesinde
   işe yaramayan kontrol `hidden` ile gizlenir, çubuk uzamaz; `.seg button:disabled` soluk görünür.
-  - **03 m-fit** sağ panel « Dereceye göre | Örnek sayısına göre »: öğrenme eğrisi tohumlu, iç içe 200
+  - **06 m-fit** sağ panel « Dereceye göre | Örnek sayısına göre »: öğrenme eğrisi tohumlu, iç içe 200
     noktalık havuzdan 21 örneklemin medyanı (titremez), yalnız o görünümde hesaplanır. Temel model
     (eğitim ortalaması) kesikli çizgi; « Test R² » = 1 − test MSE / temel modelin test MSE'si; rozet
     R² < 0.2 iken de « Yetersiz ».
-  - **05 m-cv** « Karıştır | Zaman sırası » (TimeSeriesSplit: k + 1 dilim, eğitim hep önce); yalnız
+  - **08 m-cv** « Karıştır | Zaman sırası » (TimeSeriesSplit: k + 1 dilim, eğitim hep önce); yalnız
     `sets[].time` olan veride açık. « Kafe satışı »nda polinom geleceğe uzatılınca 3. dereceden sonra
     savruluyor; not bunu sunumun KNN'deki 2 katıyla birlikte söylüyor.
-  - **06 m-lin** « Beş öğrenci » sabit (`gen:"five"`, xr 12): cevap ŷ = 44 + 4x, SSE 6, R² 0.9907.
+  - **09 m-lin** « Beş öğrenci » sabit (`gen:"five"`, xr 12): cevap ŷ = 44 + 4x, SSE 6, R² 0.9907.
     « Temel model » ȳ doğrusu ve SST kareleri; SSE / RMSE verinin biriminde, R² dört ondalık.
-  - **08 m-gd** « Beş öğrenci · β₁ » yüzeyi: yüzey başına `lr:[min,max,başlangıç]` (0.001–0.030),
+  - **11 m-gd** « Beş öğrenci · β₁ » yüzeyi: yüzey başına `lr:[min,max,başlangıç]` (0.001–0.030),
     `grow` iz pencereyi genişletir, `sym` gösterge adını θ ↔ β₁ yapar; J artarken Sonuç « Yükseliyor ».
-  - **09 m-poly** sağ panel « Tasarım matrisi | Artık grafiği » (x'e göre; desen ölçüsü işaret
+  - **12 m-poly** sağ panel « Tasarım matrisi | Artık grafiği » (x'e göre; desen ölçüsü işaret
     değişimi + birini dışarıda bırakan düzleştirici, polinomun kendi sütunlarıyla ölçülmez: artıklar
     onlara dik). « Elektrik · sıcaklık » `gen:"mevsim"`: düz R² ~0.48, x² ile ~0.93, dip ~18 °C.
-  - **10 m-log** eksen, β₁, sınır ve odds ratio verinin biriminde (`sets[].eq`, β₁ = w / xr); « Seçili x »
+  - **13 m-log** eksen, β₁, sınır ve odds ratio verinin biriminde (`sets[].eq`, β₁ = w / xr); « Seçili x »
     kaydırıcısı p̂ / odds / logit yazar; « Doğru uydur » ekseni −0.5…1.5'e açar; « Uzak öğrenci » sabit
     (sınır 6.5 → 7.5 saat, logistic 6.4'te kalır; kıyas Newton ile, kaydırıcıdan bağımsız).
-  - **11 m-cm** sağ panel ROC | PR | Maliyet; 10 000 örnek (Hafta 8: %1 = 100 hasta), eğriler veri
+  - **15 m-cm** sağ panel ROC | PR | Maliyet; 10 000 örnek (Hafta 8: %1 = 100 hasta), eğriler veri
     değişince bir kez (`curves()`), eşik sayımı ikili arama; maliyet ızgarası kaydırıcınınkiyle aynı.
     Senaryolar birim bedelleri değiştirmez. « Müşteri kaybı » Hafta 7'yi verir (FN 660 = 0.40 · 2400 − 300).
     Specificity göstergesi; « hep negatif diyen model » satırı.
-  - **12 m-reg** Elastic Net, ρ = 0.5 sabit: (1/2n)‖·‖² + α[ρ‖w‖₁ + (1−ρ)/2‖w‖²]; L1 ve L2 uçları.
-  - **13 m-knn** Öklid | Manhattan | Chebyshev ve Eşit | Ağırlıklı oy (d = 0'da yalnız sıfır uzaklıklılar
+  - **16 m-reg** Elastic Net, ρ = 0.5 sabit: (1/2n)‖·‖² + α[ρ‖w‖₁ + (1−ρ)/2‖w‖²]; L1 ve L2 uçları.
+  - **17 m-knn** Öklid | Manhattan | Chebyshev ve Eşit | Ağırlıklı oy (d = 0'da yalnız sıfır uzaklıklılar
     oy verir, eğitim hatası %0); soluk test halkaları, sağda k–hata eğrisi (eşik 760), √n çizgisi;
     sorgu fare çıkınca kalır. Sabit kümeler `gen:"fixed"` (Altı daire, İki eczane). Ölçerken
     `knn-bnd` kapalı (yoksa koşu çok yavaş).
-  - **14 m-dt** Gini | Entropi; sağ panel Eşik eğrisi | Ağaç | Derinlik eğrisi; derinlik 1–8, eşikler veri
+  - **18 m-dt** Gini | Entropi; sağ panel Eşik eğrisi | Ağaç | Derinlik eğrisi; derinlik 1–8, eşikler veri
     biriminde. Durma kuralı tek nokta (scikit-learn varsayılanı); en iyi bölme eşit basamağın ortası.
-  - **15 m-ens** hard | soft voting (ağaç yaprağı `.c` ve `.p` taşır), « Kökte x₁ soran » sayacı
+  - **19 m-ens** hard | soft voting (ağaç yaprağı `.c` ve `.p` taşır), « Kökte x₁ soran » sayacı
     (bagging 40/40, RF ~20/40 = m/p), Gini ve OOB permütasyon önemi, « + kimlik sütunu ».
-  - **16 m-svm** çözücü SMO, b cezasız; veri iki eksene TEK ölçekle standartlaştırılır, C = 10^(v/10−2),
+  - **21 m-svm** çözücü SMO, b cezasız; veri iki eksene TEK ölçekle standartlaştırılır, C = 10^(v/10−2),
     γ = 10^(v/10−1); margin veri biriminde; test halkaları ve eğitim / test doğruluğu; « Dört ev »
     (margin 2.83), « Kızılırmak »; « + z = x₁² + x₂² » yandan bakış (eşik 760).
-  - **17 m-pca** « Beş öğrenci » ve « Not ve süre » sabit (`sets[].fix`, n − 1), saat | dakika | standart;
+  - **22 m-pca** « Beş öğrenci » ve « Not ve süre » sabit (`sets[].fix`, n − 1), saat | dakika | standart;
     kutular eşit ölçekli kare (perdedeki açı gerçek açı); sağda açıya göre varyans eğrisi; özdeğer
     yalnız sabit tabloda yazılır.
-  - **18 m-km** Rastgele | k-means++ (seçili düğmeye yeniden basmak yeni başlangıç), « 10 kez dene »
+  - **24 m-km** Rastgele | k-means++ (seçili düğmeye yeniden basmak yeni başlangıç), « 10 kez dene »
     (n_init), iterasyon = atama turu (n_iter_); « Altı nokta » iyi / kötü başlangıç, J veri biriminde.
-  - **20 m-dbs** hierarchical'da dendrogram + Single | Complete | Average | Ward (Lance–Williams,
+  - **26 m-dbs** hierarchical'da dendrogram + Single | Complete | Average | Ward (Lance–Williams,
     önbellekte; k yalnız keser); eps / min_samples bu modda gizli. Hilalde single ayırır, Ward ~%80.
+- **4. aşama: sunumda olup modülü olmayan konular (2026-10-20).** Altı yeni modül; ayrı
+  worktree'lerde yazılıp birleştirildi, `/var/tmp/ml-sunum/faz4/renumber.py` META'yı hafta
+  sırasına dizip metindeki bütün "Modül NN" atıflarını ekleriyle yeniden numaraladı.
+  - **01 m-intro** (Hafta 1) ayar düğmeli makine. Model hep iki düğmeli doğru: regresyonda
+    ŷ = β₀ + β₁x (MSE), sınıflandırmada x₂ = β₀ + β₁x₁ sınırı (log-loss, dik uzaklık / τ = 0.3;
+    dikey uzaklıkla sınır dikleşip duruyordu). Eğitim standart birimde, istatistikler yalnız
+    eğitim noktalarından. « On öğrenci » sunumun sl. 33'ü: θ₀ = (20, −6), α = 0.1 → MSE 2095 →
+    230 (5. tur) → 5.5 (60); üç test noktası sunumda yok. α değişince eğitim baştan; « Eğit »
+    60. tura kadar; açılışta zamanlayıcı yok. « Balon turu » sunumun kuralıyla JS'te rastgele
+    üretilir (sunumun tohum-8 sayılarını vermez). Denklem ve satır kutuları noktaları en az
+    örten köşeye geçer. Elle hesap Hafta 1 sl. 45–48'in elle KNN'i (YENİ (7, 5)).
+  - **03 m-corr** (Hafta 2) noktalar verinin biriminde (`u`, `v`), eksenler küme başına sabit.
+    « Beş öğrenci » sl. 35: Σ 80 / 10 / 750, r 0.92. Kahve (tohum 20) ve Dondurma (102) açılışta
+    sunumun sayılarını verir (r −0.02, 0.89); « Yeni veri » rastgele tohum çeker. « + Aykırı
+    nokta » `pts`'e girmeyen sanal nokta, kaydırıcı sürer. Sağ panel 300 px'ten kısaysa
+    ortalamalar ve kovaryans satırı düşer. "Sıcaklık sabitken r" kısmi korelasyon; sıcaklığı
+    olmayan nokta varsa hesaplanmaz. Yorum eşikleri (0.7 / 0.3 / 0.1) sunumda yok, "kaba kural".
+  - **05 m-err** (Hafta 3) sabit iki küme (Beş ev, Göreme haftası); yalnız tahminler (ŷ)
+    değişir, y ve ȳ sabit. `err-p` seçili örneğin ŷ'si. « Veriden çıkar » en az iki örnek
+    bırakır. Huber ½e² tanımıyla. R² hep gösterilen örneklerin ȳ'sine göre (r2_score gibi).
+  - **14 m-leak** (Hafta 7) iki yolu (CV dışında / Pipeline içinde) aynı veride hesaplar: ölçekle
+    → |t| ile m sütun seç (f_classif sıralaması) → KNN 5, 5 tabakalı kat. 2000 sütun bir kez
+    üretilir, « Sütun sayısı » ilk p tanesini kullanır. Yazı tura etikette 120 veride 0.84 ↔
+    0.505 (sunum 0.82 ↔ 0.42). iptal_tarihi modele "dolu mu" (0/1) girer (gün sayısıyla not
+    0.97'de kalıyordu); sızan sütun verisi bilerek dengeli (30/30). « ortalama » şeridi deseni
+    gösterir, tek hücreler gürültülü. İki panel eşiği 700. Geçmiş sütun / seçim / küme
+    değişince silinir.
+  - **20 m-boost** (Hafta 11) AdaBoost, karar kütükleriyle (α = lr · ½ ln((1 − ε)/ε), SAMME
+    ile eşdeğer). 200 tur veri ya da learning rate değişince bir kez hesaplanır; « Tur »,
+    « Sonraki tur », « Koştur » yalnız kaydırıcıyı sürer. Zemin F(u, v) = g₁(u) + g₂(v). Nokta
+    boyu ağırlık. Sağda log eksende hata; kesikli çizgiler aynı eğitim verisindeki 100 ağaçlık
+    random forest ve tek derin ağaç. Tohumlu üreteç, `Math.random` yok. « Kayıt hatası »nda
+    %12 ters etiket; `aria-label` en büyük 10 dairenin kaçının ters olduğunu yazar. Hafta 11'de
+    elle çözüm yok: elle hesap uygulamanın kendi örneği (on kullanıcı, ε 0.2 / 0.25).
+  - **23 m-scree** (Hafta 13) m-pca'nın çok sütunlu devamı: solda scree (pay çubukları,
+    kümülatif eğri, %80–99 eşiği, yalnız standartta Kaiser λ = 1, dirsek halkası), sağda
+    « Yükler | CV ». Anket (sl. 48–49, tohum 4) ve kasabalar (sl. 42, tohum 13) numpy'la
+    üretilip gömülü, sayılar slaytla birebir. Tıbbi ölçümler gömülü 30×30 korelasyon
+    matrisinden beyazlatmayla (oranlar tam). Kaiser korelasyon matrisiyle (iz = p). Dirsek:
+    ilk ve son çubuğu birleştiren doğrudan en aşağıdaki çubuk, seçim ondan öncekiler. CV:
+    StratifiedKFold birebir, ölçekleme ve PCA katın içinde, C = 1 logistic (Newton), seçim
+    "en iyinin 1 puan yakınındaki en az k". « Yeni veri » yok (veri sabit).
 - **Modül 27 (`m-neu`) nöronun içini açar:** ham değer → ölçekli girdi ([lo, hi] → [0, 1],
   Modül 04) → ağırlıklı bağlantılar → Σ ve z → aktivasyon kutusu (eğri ve z'nin düştüğü
   nokta) → ŷ; en altta hesabın kendisi. Aktivasyon (basamak / sigmoid / ReLU / yok) kararı
@@ -472,11 +521,12 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    Grup adı `GROUPS` dizisinde geçmeli, yoksa modül menüde görünmez. **Grup = dersin
    haftası** ("Hafta 9"; sunumu olmayan sinir ağı modülleri "Ek · Sinir ağları"):
    rail'de yalnız "HAFTA 9", giriş sayfasında `GTITLE`'daki sunum başlığıyla
-   ("Hafta 9 · K-Nearest Neighbors"). Sıra sunumun sırası: Hafta 2 istatistik ve
-   ölçekleme (01–02), 3 overfitting (03), 4 bias–variance ve CV (04–05), 5 linear
-   regression, düzlem, gradient descent, polinom (06–09), 6 logistic (10), 8 metrikler
-   ve regularization (11–12), 9 KNN (13), 10 ağaç (14), 11 orman (15), 12 SVM (16),
-   13 PCA (17), 14 kümeleme (18–20), Ek (21–26). Modül eklenip numaralar kayınca
+   ("Hafta 9 · K-Nearest Neighbors"). Sıra sunumun sırası: Hafta 1 giriş (01), 2
+   istatistik, korelasyon ve ölçekleme (02–04), 3 hata ölçütleri ve overfitting (05–06),
+   4 bias–variance ve CV (07–08), 5 linear regression, düzlem, gradient descent, polinom
+   (09–12), 6 logistic (13), 7 veri sızıntısı (14), 8 metrikler ve regularization (15–16),
+   9 KNN (17), 10 ağaç (18), 11 orman ve boosting (19–20), 12 SVM (21), 13 PCA ve scree
+   (22–23), 14 kümeleme (24–26), Ek (27–32). Modül eklenip numaralar kayınca
    metindeki "Modül NN'de" atıflarının ekleri de değişir (03'te → 09'da); bir atıf
    artık geriye bakıyorsa ("göreceğiz" → "gördün") cümle de değişir.
    Etiketler yalnız arama içindir, ekranda görünmez.
@@ -516,7 +566,7 @@ sed -n '/^<script>/,/^<\/script>/p' index.html | sed '1d;$d' > /tmp/check.js && 
 # tutarlılığı, canvas'ta sabit renk, setInterval↔stop eşleşmesi, önizleme kapsaması
 python3 tools/lint.py index.html
 
-# 26 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
+# 32 modülü tarayıcısız çalıştır: draw(), bütün adımlar ve senaryolar — null referans,
 # istisna, canvas'a giden NaN ve "draw() bu göstergeye hiç dokunmadı" durumu.
 # Ayrıca CONTENT kapsaması: eksik ders notu, figür, elle hesap, kendini sına, tek veri
 # kümesi, kutuda kalan "undefined".
@@ -524,10 +574,10 @@ python3 tools/lint.py index.html
 # gizleme eşiklerinin altındaki kod yolu hiç çalıştırılmamış olur.
 for w in 930 800 676 560; do ML_W=$w node tools/harness.js index.html || break; done
 
-# 26 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
+# 32 modülün pedagojik iddialarını sına — ".ask / adım / ders notu metni ne vaat ediyor,
 # gösterge ne diyor" karşılaştırması (h=1 XOR'u çözemez, L1 katsayıyı sıfırlar,
-# lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). oyun alanı canlı eğitim koştuğu için ~3 dk sürer.
-node tools/behaviour.js index.html   # ~420 denetim: 26 modül + alternatif veri kümeleri, ~6 dk
+# lr=0.60 gerçekten ıraksar, uzama=0'da PCA %60 der …). oyun alanı canlı eğitim koştuğu için uzun sürer.
+node tools/behaviour.js index.html   # ~600 denetim: 32 modül + alternatif veri kümeleri, ~8 dk
 
 # tuvale yazılan her etiket rengini ve ders notu figürlerinin (FIGS) yazı rengini
 # açık VE koyu temada zemine karşı ölç (label(...) / legend(...) çağrılarını ve
