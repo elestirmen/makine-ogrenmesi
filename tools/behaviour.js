@@ -1921,7 +1921,9 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
      MEDYANIYLA sınanır; eskiden tek koşunun %95'in altına düşmesi bütün denetimi düşürüyordu. */
   const d0=runs(8,0,0,4,'lay-relu',4,false,150);
   chk(mA(d0)>=40&&mA(d0)<=62, "daire, gizli katman yok: %50 civarında (adım 1, not)", d0.map(x=>x.acc).join(' '));
-  const d24=runs(5,0,2,4,'lay-relu',4,false,50);
+  /* 4. aşama ölçümü (30 koşu): 92–100, medyan 99; 4/30 koşu %95'in altında. 5 koşunun medyanı
+     ~%2.4 olasılıkla %95'in altına düşüyordu (tam koşuda bir kez 89) → 9 koşunun medyanı */
+  const d24=runs(9,0,2,4,'lay-relu',4,false,50);
   chk(med(d24.map(x=>x.acc))>=95&&d24[0].ep===100, "daire, 2×4 ReLU: 100 epoch'ta %95'in üstü (adım 3, not)", d24.map(x=>x.acc).join(' '));
   /* 16 koşuda 27–65, ortalama 48; koşuların ~%15'i 65'e değiyor. Eskiden üç koşunun HER
      BİRİ < 65 isteniyordu ve arada bir 68 gelip düşüyordu: 6 koşunun ortalamasına bakılır. */
