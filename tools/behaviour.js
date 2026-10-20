@@ -820,21 +820,22 @@ const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true'
 {
   head("Modül 06 · Ezber mi, öğrenme mi (overfitting)");
   const {el}=boot(F);
-  let bad4=0, ok14=0; const t14=[], t40=[];
-  for(let t=0;t<20;t++){
+  let bad4=0, ok14=0; const t14=[], t40=[]; const NB=40;
+  for(let t=0;t<NB;t++){
     S(el,'fit-m',14); el('fit-new').click();     // önceki turun 40'ı sızmasın
     S(el,'fit-d',4);  if(/Aşırı/.test(T(el,'fit-vs'))) bad4++;
     S(el,'fit-d',14); if(/Aşırı/.test(T(el,'fit-vs'))) ok14++;
     S(el,'fit-m',14); t14.push(V(el,'fit-vte'));
     S(el,'fit-m',40); t40.push(V(el,'fit-vte'));
   }
-  console.log(`       derece 4'te "Aşırı öğrenme": ${bad4}/20 · derece 14'te: ${ok14}/20`);
+  console.log(`       derece 4'te "Aşırı öğrenme": ${bad4}/${NB} · derece 14'te: ${ok14}/${NB}`);
   console.log(`       derece 14 test hatası: veri 14 → medyan ${med(t14).toFixed(2)} · veri 40 → medyan ${med(t40).toFixed(3)}`);
   /* 100 örneklemde en iyi derece %3 turda 1 çıkıyor (14 gürültülü noktaya bazen düz
      doğru en iyi uyuyor) ve rozet o turda "Aşırı öğrenme" diyor. Eşik 2 iken on
-     koşudan biri bu kuyruktan düşüyordu; kopma hâlinde sayı 15+/20 olur. */
-  chk(bad4<=4, "en iyiye yakın derecede yanlış uyarı yok (adım 2: 'dengede')", `${bad4}/20`);
-  chk(ok14>=18, "14. derecede uyarı korunuyor (adım 3: 'model gürültüyü ezberledi')", `${ok14}/20`);
+     koşudan biri bu kuyruktan düşüyordu; kopma hâlinde sayı 15+/20 olur. 2026-10-20: 150 turda
+     %3–4 ölçüldü, yine de tam koşuda bir kez 5/20 görüldü → 40 tur, en çok %20 */
+  chk(bad4<=NB*0.2, "en iyiye yakın derecede yanlış uyarı yok (adım 2: 'dengede')", `${bad4}/${NB}`);
+  chk(ok14>=NB*0.9, "14. derecede uyarı korunuyor (adım 3: 'model gürültüyü ezberledi')", `${ok14}/${NB}`);
   chk(med(t40)<med(t14)/3, "adım 4: aynı derece, daha çok veri → test hatası düşüyor",
       `medyan ${med(t14).toFixed(2)} → ${med(t40).toFixed(3)}`);
   /* B1: 15 katsayı / 14 nokta ile interpolasyon MÜMKÜN. Normal denklemler bunu
