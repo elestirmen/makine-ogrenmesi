@@ -644,6 +644,47 @@ input[type=range]{min-height:28px;margin:0}
       <div id="homelist"></div>
     </section>
 
+    <!-- ══════════ 27 · Makine öğrenmesine giriş ══════════ -->
+    <section id="m-intro" hidden>
+      <div class="head">
+        <div class="eyebrow"><span>Modül 27 · Hafta 1</span></div>
+        <h2>Ayar Düğmeli Makine</h2>
+        <p>Kuralı sen yazmazsın, veriden çıkar. Model bir makine: ŷ = f(x ; θ), θ onun düğmeleri. Eğitim düğmeleri çevirir: tahmin et, <b>loss function</b> (kayıp fonksiyonu) ile hatayı ölç, biraz düzelt, tekrarla. Asıl sınav hiç görmediği veride: <b>genelleme</b> (generalization).</p>
+      </div>
+      <div class="stage">
+        <canvas id="c-intro" aria-label="Makine öğrenmesine giriş: veri, model doğrusu ve kayıp eğrisi"></canvas>
+        <div class="bar">
+          <label class="ctl"><span class="lab">Kesme terimi <span class="sym">β₀</span></span><input type="range" id="intro-b0" min="-200" max="800" step="1" value="314"><output id="intro-b0o" style="min-width:5.5ch">31.4</output></label>
+          <label class="ctl"><span class="lab">Eğim <span class="sym">β₁</span></span><input type="range" id="intro-b1" min="-400" max="600" step="1" value="-118"><output id="intro-b1o" style="min-width:5.5ch">−1.18</output></label>
+          <button class="btn" id="intro-step">Bir tur eğit</button>
+          <button class="btn primary" id="intro-run" aria-pressed="false">Eğit</button>
+          <button class="btn" id="intro-reset">Sıfırla</button>
+          <div class="ctl"><span class="lab"><span lang="en">Learning rate</span> <span class="sym">α</span></span>
+            <div class="seg" role="group" aria-label="Learning rate α: düğmelerin her turda ne kadar çevrileceği (hiperparametre)">
+              <button id="intro-lr0" aria-pressed="false">0.02</button>
+              <button id="intro-lr1" aria-pressed="true">0.1</button>
+              <button id="intro-lr2" aria-pressed="false">1.05</button>
+            </div>
+          </div>
+          <button class="btn" id="intro-new" hidden>Yeni veri</button>
+          <span class="hint">Noktaya tıkla → o satırı modelin gözüyle oku. Kaydırıcıyı çevirirsen eğitim oradan başlar.</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k">Tur</span><span class="v" id="intro-t">0</span></div>
+          <div class="stat"><span class="k" id="intro-trk">Eğitim MSE</span><span class="v" id="intro-tr">—</span></div>
+          <div class="stat"><span class="k" id="intro-tek">Test MSE</span><span class="v" id="intro-te">—</span></div>
+          <div class="stat"><span class="k">Durum</span><span class="v" id="intro-st">—</span></div>
+        </div>
+      </div>
+      <div class="ask">
+        <span class="tag">Dene ve düşün</span>
+        <div>
+          <p>« On öğrenci »de « Bir tur eğit »e beş kez bas ve « Eğitim MSE »yi izle, sonra « Eğit » ile 60 tura çık. Hata neden sıfıra inmiyor? Düğmeleri elle çevirip daha küçük bir hata bulabilir misin? (İpucu: kırmızı çizgilere bak.)</p>
+          <p>Learning rate'i 0.02 yap ve yeniden eğit: 60 turda hata nerede kalıyor? 1.05'te ne oluyor? β₀ ile β₁'i kim seçiyor, α'yı kim? Sonra « Balon turu »nda eğit: eğitim ve test doğruluğu yakın mı? Eğitimde %99, testte %62 görseydin ne düşünürdün, neden?</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ══════════ 1 · KNN ══════════ -->
     <section id="m-knn">
       <div class="head">
@@ -2000,6 +2041,72 @@ const CURVES=[
 ];
 
 const CONTENT={
+
+/* ══ 27 · Makine öğrenmesine giriş (Hafta 1) ══
+   task: "reg" (doğru tahmindir: ŷ = β₀ + β₁x) ya da "cls" (doğru iki sınıfı ayıran sınırdır:
+   x₂ = β₀ + β₁x₁; pos "alt" ise y = 1 sınırın altında). Veri modülün içinde (TEN, SIX, balon
+   üreteci). th0: başlangıç düğmeleri STANDART birimde (eğitim noktalarının ortalaması ve
+   std'siyle, n ile): « On öğrenci »de (20, −6) sunumun başlangıç doğrusu, MSE 2095.
+   lr: α düğmeleri [küçük, olağan, büyük]; rng: kaydırıcı aralığı veri biriminde.
+   ax: eksen [alt, üst, işaret adımı]. */
+"m-intro":{ pick:"Veri seti",
+  sets:[
+    {name:"On öğrenci", task:"reg", gen:"ten", x:"çalışma saati", y:"not (puan)", xn:"saat", yn:"not", xu:"saat", yu:"puan",
+     th0:[20,-6], lr:[0.02,0.1,1.05], rng:{b0:[-20,80], b1:[-4,6]}, ax:{x:[0,20,5], y:[0,110,20]}, r:6.5,
+     note:"Sunumun doğru eğitimi (Hafta 1, sl. 33): on öğrencinin haftalık çalışma saati ve notu. Başlangıç doğrusu ters eğik, MSE 2095. α = 0.1 ile 5 turda 230'a, 60 turda 5.5'e iner (sunum 6'ya yuvarlıyor); doğru ŷ = 35.0 + 2.73x'e oturur. İçi boş üç halka sunumda yok, test için eklendi: model onları hiç görmez, 60 turda test MSE'si 11.1."},
+    {name:"Altı öğrenci", task:"cls", gen:"six", pos:"alt", x:"çalışma saati (x₁)", y:"devamsızlık, gün (x₂)", xn:"saat", yn:"devamsızlık", xu:"saat", yu:"gün",
+     cls:["Kaldı","Geçti"], side:"sınırın altı Geçti, üstü Kaldı",
+     th0:[1.5,-1], lr:[0.05,0.3,10], rng:{b0:[-15,25], b1:[-3,3]}, ax:{x:[0,20,5], y:[0,13,2]}, r:6.5,
+     note:"Sunumun tablosu (sl. 16 ve 45): çalışma saati ve devamsızlık öznitelik, sonuç etiket (1 = Geçti, 0 = Kaldı); önceki not bu modelde kullanılmıyor. Doğru bu kez bir sınır: altı Geçti, üstü Kaldı. Başlangıçta herkese Geçti diyor (doğruluk %50), 60 turda altısı da doğru tarafta. YENİ öğrenci (7, 5) sınırın neredeyse üstünde kalıyor: D ile E'nin tam ortası."},
+    {name:"Balon turu", task:"cls", gen:"balloon", pos:"üst", x:"rüzgâr (km/sa)", y:"görüş (km)", xn:"rüzgâr", yn:"görüş", xu:"km/sa", yu:"km",
+     cls:["uçmadı","uçtu"], side:"sınırın üstü uçar, altı uçmaz",
+     th0:[1.5,-1], lr:[0.05,0.3,10], rng:{b0:[-20,25], b1:[-3,3]}, ax:{x:[0,25,5], y:[0,13,2]}, r:4.5,
+     note:"Göreme'de 150 sabah (sl. 59–61; üretilmiş veri, sunumdaki kuralla: rüzgâr + esinti < 15 km/sa ve görüş > 3 km ise uçulur). 120 sabah eğitim, 30 sabah test (%80 / %20). 60 turda eğitim ve test doğruluğu ortalamada ikisi de %85 civarında, aradaki fark küçük: ezber yok. Test yalnız 30 sabah, bu yüzden tek bir çekilişte şansa göre %65 ile %95 arasında oynayabilir. Tek bir doğru 'rüzgâr az ve görüş iyi' köşesini çizemediği için %100'e de çıkmıyor. « Yeni veri » başka 150 sabah üretir."}
+  ],
+  lesson:{
+    q:"Bir bilgisayar örneklerden nasıl öğrenir?",
+    short:"Kuralı sen yazmazsın; bilgisayara örnekleri ve doğru cevapları verirsin. Model ayar düğmeli bir makine: tahmin eder, hatasını ölçer, düğmelerini hatayı azaltan yöne biraz çevirir ve bunu tekrarlar. İyi model, hiç görmediği örnekte de iyi tahmin edendir.",
+    idea:["Bir çocuğa kediyi kuralla anlatmayı dene: 'dört ayağı, kuyruğu, bıyığı var'. Köpeğin de var. Kural yazarak bu iş bitmez. Onun yerine çocuğa resim gösterirsin: 'bu kedi, bu değil'. Bir süre sonra hiç görmediği bir kediyi de tanır. Makine öğrenmesi tam bu. Klasik programlamada kuralı programcı yazar, bilgisayar veriye uygular. Makine öğrenmesinde veriyi ve doğru cevapları sen verirsin, kuralı bilgisayar çıkarır. KDV hesabının kuralı belli, öğrenmeye gerek yok. Yüz tanımanın kuralını kimse yazamaz, ama binlerce örnek gösterebilirsin.",
+          "Veri çoğu zaman bir tabloya benzer. Altı öğrencinin haftalık çalışma saati, devamsızlığı, önceki notu ve dersi geçip geçmediği yazıyor. Her satır bir <b>örnek</b> (sample). Modele girdi olan her sütun bir <b>öznitelik</b> (feature). Tahmin etmek istediğin son sütun <b>etiket</b> (label). Öznitelikler topluca X diye yazılır, büyük harfle, çünkü bir tablo. Etiket y, küçük harfle, çünkü tek sütun. Model bir satırı sayı listesi olarak görür: birinci öğrenci x = (12, 2, 68), y = Geçti. Bilgisayar için Geçti 1, Kaldı 0.",
+          "<b>Model</b> bir fonksiyon: ŷ = f(x ; θ). x girdi, ŷ ('y şapka') tahmin, θ (teta) modelin ayar düğmeleri. Radyonun istasyon düğmesini düşün: doğru yere gelene kadar çevirirsin. Burada düğmeleri sen değil, eğitim çevirir. Bu sayılara <b>parametre</b> denir; bir doğruda iki tane var, ŷ = β₀ + β₁x. Eğitimden önce senin seçtiğin ayarlar ise <b>hiperparametre</b>: düğmelerin her turda ne kadar çevrileceği (learning rate, α) ya da komşu yönteminde kaç komşuya bakılacağı (k). Sınava kaç saat çalışacağına sen karar verirsin, bu hiperparametre. Çalışırken zihninde oluşan bilgi ise parametreye benzer.",
+          "Eğitim bir arama işi ve döngü hep aynı. Düğmeler rastgele başlar. Model her eğitim örneği için bir tahmin yapar. Bir <b>loss function</b> (kayıp fonksiyonu) tahminlerin ne kadar yanlış olduğunu tek sayıya çevirir. Düğmeler hatayı azaltan yöne biraz çevrilir ve her şey tekrarlanır. Dart atmak gibi: ilk atış soldaysa ikincide biraz sağa nişan alırsın. Sunumun on öğrencisinde başlangıç doğrusu ters eğik ve hata 2095. Hata burada MSE: farkların karesinin ortalaması, 40 puanlık bir farkın karesi 1600 eder. Beş turda 230'a, 60 turda 6'ya iniyor. Sıfıra inmez, çünkü notu çalışma saatinden başka şeyler de etkiliyor; hiçbir doğru on noktadan birden geçemez.",
+          "Asıl amaç eğitim verisini iyi tahmin etmek değil, hiç görmediğin veriyi iyi tahmin etmek. Buna <b>genelleme</b> (generalization) denir. İki öğrenci aynı deneme sınavıyla çalışıyor: biri cevapları ezberliyor, öbürü konuyu anlıyor. Denemede ikisi de 100 alıyor, asıl sınavda sorular değişince ezberleyen çuvallıyor. Bu yüzden veriyi en baştan ikiye ayırırsın. Eğitim kümesi (%70–80) düğmeleri çevirmek için. Test kümesi (%20–30) modelin hiç görmediği sınav, en sonda bir kez kullanılır. Eğitimde parlayıp testte çuvallayan modele <b>overfitting</b> (aşırı öğrenme), veriyi kavrayamayacak kadar basit kalana <b>underfitting</b> (yetersiz öğrenme) denir.",
+          "Model her zaman bir formül olmak zorunda değil. 'Yeni öğrenci kime benziyorsa onun sonucunu tahmin et' de bir model: <b>KNN</b> (k en yakın komşu). 'Bana arkadaşını söyle, sana kim olduğunu söyleyeyim.' Benzerliği grafikteki uzaklıkla ölçersin, Pisagor'la: d = √((x₁ − a₁)² + (x₂ − a₂)²). En yakın k öğrenci oy verir, çoğunluk kazanır. Bu yöntemde düğme de eğitim de yok: model verinin kendisi, hesap tahmin anında yapılır. Böyle yöntemlere <b>lazy learner</b> (tembel öğrenen) denir; k ise bir hiperparametre. Aşağıdaki figür ve « Elle hesapla » sunumun ilk elle çözülen örneği."],
+    read:[["Sol panel","Her nokta bir örnek, yani tablonun bir satırı. « On öğrenci »de yatay eksen öznitelik (çalışma saati), dikey eksen etiket (not). Pembe doğru modelin tahmini, kırmızı dikey çizgiler eğitim örneklerinin hatası; kesikli gri çizgi tur 0'daki doğru. Sınıflandırma kümelerinde iki eksen de öznitelik, rengi etiket veriyor: doğru bu kez iki sınıfı ayıran sınır, yanlış taraftaki noktanın çevresinde kırmızı halka var. Dolu noktalar eğitim, içi boş halkalar test."],
+          ["Seçili satır","Bir noktaya tıkla: köşedeki kutuda o satırı modelin gözüyle okursun (kutu noktaları en az örten köşeye geçer). x öznitelikler, y gerçek etiket, ŷ modelin tahmini; regresyonda aradaki fark hata, sınıflandırmada sınıfın olasılığı yazar."],
+          ["Düğmeler ve döngü","β₀ ve β₁ kaydırıcıları modelin iki parametresi. Elle de çevirebilirsin; o zaman eğitim o noktadan, tur 0'dan başlar. « Bir tur eğit » döngüyü bir kez çalıştırır: tahmin et, hatayı ölç, düğmeleri biraz çevir. « Eğit » bunu 60 tura kadar tekrarlar, « Sıfırla » başlangıç düğmelerine döner."],
+          ["Learning rate","α düğmelerin her turda ne kadar çevrileceği. Hiperparametre: eğitim değil sen seçersin, değiştirince eğitim baştan başlar. Küçük α yavaş öğrenir, fazla büyük α hedefin üstünden atlar."],
+          ["Sağ panel","Her turun eğitim kaybı (düz çizgi) ve test kaybı (kesikli). Dikey eksen logaritmik: her ızgara çizgisi bir öncekinin 10 katı. Regresyonda kayıp MSE; sınıflandırmada log-loss, Modül 10'da açılıyor. Eğri başta hızlı, sonra yavaş iner; düzleşince Durum « Azalmıyor » der ve eğitimi orada durdururuz."],
+          ["Göstergeler","Tur, eğitim ve test başarısı, Durum. Regresyonda başarı hatayla ölçülür (ne kadar yanıldım?), sınıflandırmada doğrulukla (kaçını doğru bildim?). « Altı öğrenci »de test kümesi yok; onun yerine YENİ öğrencinin tahmini yazar."]],
+    terms:[["sample · feature · label","örnek · öznitelik · etiket","tablonun bir satırı · modele girdi olan bir sütun (X) · tahmin etmek istediğin sütun (y)"],
+           ["model","model","öznitelikleri alıp tahmin üreten fonksiyon, ŷ = f(x ; θ)"],
+           ["parameter · hyperparameter","parametre · hiperparametre","veriden öğrenilen sayı (β₀, β₁) · eğitimden önce senin seçtiğin ayar (α, k)"],
+           ["loss function","kayıp fonksiyonu","tahminlerin ne kadar yanlış olduğunu tek sayıya çeviren formül (MSE, log-loss)"],
+           ["learning rate","öğrenme oranı","düğmelerin her turda ne kadar çevrileceği; Modül 08'de ayrıntısıyla"],
+           ["generalization","genelleme","hiç görmediği veride de iyi tahmin yapabilmek"],
+           ["training set · test set","eğitim kümesi · test kümesi","parametrelerin öğrenildiği veri (%70–80) · en sonda bir kez kullanılan, modelin hiç görmediği veri (%20–30)"],
+           ["overfitting · underfitting","aşırı öğrenme · yetersiz öğrenme","eğitim verisini ezberleyip yeni veride çuvallamak · veriyi kavrayamayacak kadar basit kalmak"],
+           ["baseline","temel model","öteki modellerin kıyaslandığı basit model; ör. herkese 'Geçti' diyen"],
+           ["KNN · lazy learner","k en yakın komşu · tembel öğrenen","en yakın k örneğin oyuyla karar veren model; eğitimi yok, veriyi saklar"]],
+    life:["Telefonun yüzünle açılması, video önerileri, spam filtresi, haritadaki '22 dakika' varış tahmini, kartınla gece yarısı yapılan alışılmadık harcamada bankanın araması: hepsi geçmiş örneklerden öğrenmiş birer model.",
+          "Bir projenin yedi adımı var: problem tanımı, veri toplama, veri hazırlama, model seçimi, eğitim, değerlendirme, kullanım. Zamanın %60–80'i veriyle geçer; eğitim çoğu zaman birkaç satır kod. 'Çöp girerse çöp çıkar': kötü veriden iyi model çıkmaz."],
+    trap:"Eğitim verisindeki başarıyı modelin başarısı sanmak. 'Eğitimde %99' deneme sınavındaki not gibidir, tek başına hiçbir şey kanıtlamaz. Test kümesine bakarak model seçmek, hatta ölçekleme gibi bir hazırlıkta onu kullanmak da bir tür kopya; test verisi en sona kadar kapalı kalır. Bir de tek sayıya bakmak var: hastaların %8 olduğu bir taramada herkese 'sağlıklı' diyen model %92 doğruluk alır, ama hiçbir şey öğrenmemiştir.",
+    fig:{at:5, cap:"Sunumun altı öğrencisi, tablo ve grafik olarak. YENİ öğrenci (7, 5): en yakın iki komşu D (Kaldı) ve E (Geçti), ikisi de √8 ≈ 2.83 uzaklıkta, yani k = 1 karar veremiyor. k = 3'te üçüncü komşu B (Kaldı, √32 ≈ 5.66) da oya katılıyor: Kaldı 2–1."},
+    ex:{t:"Altı öğrenci, YENİ öğrenci (7, 5)",
+      s:["YENİ öğrenci 7 saat çalışmış, 5 gün devamsız: x = (7, 5). Her öğrenciyle Öklid uzaklığı d = √((7 − a₁)² + (5 − a₂)²). D (5, 7) için farklar 2 ve −2, kareleri 4 ve 4, toplam 8: d = √8 ≈ <b>2.83</b>.",
+         "Altısı: A (12, 2) √(25 + 9) = √34 ≈ 5.83 · B (3, 9) √(16 + 16) = √32 ≈ 5.66 · C (18, 0) √(121 + 25) = √146 ≈ 12.08 · D √8 ≈ 2.83 · E (9, 3) √(4 + 4) = √8 ≈ 2.83 · F (2, 11) √(25 + 36) = √61 ≈ 7.81. Eksi farkın karesi artıdır: (7 − 12)² = 25.",
+         "Sırala: D 2.83 · E 2.83 · B 5.66 · A 5.83 · F 7.81 · C 12.08. <b>k = 1</b>: D (Kaldı) ile E (Geçti) tam olarak eşit uzaklıkta, tek komşuya bakarak karar verilemiyor. scikit-learn verideki sıraya bakıp D'yi seçer, ama bu keyfî bir karar.",
+         "<b>k = 3</b>: D Kaldı, E Geçti, B Kaldı. Oylama Kaldı 2, Geçti 1: tahmin <b>Kaldı</b>, olasılığı 2 / 3 ≈ 0.67 (predict_proba [0.67, 0.33]).",
+         "<b>k = 5</b>: D, E, B, A, F; Kaldı 3 (D, B, F), Geçti 2 (E, A), yine Kaldı. Altı öğrencilik veride k = 5 neredeyse bütün sınıfa bakmak; bu kadar küçük veriyle hiçbir tahmine fazla güvenme."],
+      end:"Bütün hesap altı uzaklık ve bir oylama. Modelin öğrendiği bir düğme yok: KNN verinin kendisini saklar, k'yı sen seçersin."},
+    check:[["Bir banka, hangilerinin dolandırıcılık olduğu bilinen geçmiş işlemlerden yola çıkarak yeni bir işlemin dolandırıcılık olup olmadığını tahmin etmek istiyor. Denetimli mi, denetimsiz mi? Sınıflandırma mı, regresyon mu?",
+            "Denetimli sınıflandırma. Ayrımın tek ölçütü tabloda bir y sütunu olup olmaması: 'hangilerinin dolandırıcılık olduğu bilinen' etiketin var olduğunu söylüyor, yani denetimli. 'Olup olmadığı' iki kategoriden biri, yani sınıflandırma. Regresyon olsaydı bankanın kaç lira zarar edeceğini tahmin ederdik. Hiç etiket olmasaydı alışılmadık işlemleri denetimsiz yöntemlerle (ör. kümeleme) arardık."],
+           ["not = 2.4 × saat + 11.2 modelindeki 2.4 parametre mi, hiperparametre mi? Bu ekrandaki α ve KNN'deki k ne?",
+            "2.4 ve 11.2 parametre: kimse elle yazmadı, eğitim veriden buldu, tıpkı ekrandaki β₀ ve β₁ gibi. α ve k hiperparametre: eğitimden önce sen seçersin, veri söylemez; farklı değerler deneyerek en iyisini ararsın. Kısaca: parametreyi model öğrenir, hiperparametreyi sen seçersin."],
+           ["Bir model eğitim verisinde %99, test verisinde %62 doğruluk alıyor. En olası açıklama ne: model mükemmel mi, ezberlemiş mi, çok mu basit kalmış, yoksa test kümesi mi büyük?",
+            "Ezberlemiş, yani overfitting. Eğitim ile test arasındaki büyük fark ezberin işareti: model gördüğü örnekleri biliyor ama yenilere genelleyemiyor. Çok basit kalsaydı (underfitting) eğitimde de düşük alırdı. Test kümesinin büyüklüğü sonucu biraz oynatır ama bu kadar büyük bir farkı açıklamaz. « Balon turu »nda eğitim ve test doğruluğu ortalamada birbirine yakın: orada ezber yok."]],
+    next:"Modül 01 · Ortalama mı, medyan mı — model kurmadan önce veriyi tanımak: merkez, yayılım ve aykırı değer."
+  }},
 
 /* ══ 01 ══ */
 "m-lin":{ pick:"Veri seti",
@@ -3383,6 +3490,7 @@ const CONTENT={
    kurallar tools/lint.py'de, metin rengi tools/contrast.js'te, yazı çakışması
    tools/layout.js'te denetleniyor. */
 const FIGS={
+"m-intro":`<svg viewBox="0 0 640 304" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Altı öğrencinin tablosu ve grafiği: X iki öznitelik (çalışma saati, devamsızlık), y sonuç. YENİ öğrenci (7, 5) için uzaklıklar √34, √32, √146, √8, √8, √61; en yakın D ve E eşit uzaklıkta (√8 ≈ 2.83), k = 3'te D, E, B oy veriyor ve sonuç Kaldı 2–1."><g fill="var(--accent)" fill-opacity="0.12"><rect x="8" y="85" width="292" height="24" rx="3"/><rect x="8" y="137" width="292" height="24" rx="3"/><rect x="8" y="163" width="292" height="24" rx="3"/></g><path d="M50 26H136M144 26H202M214 26H298" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M50 26v5M136 26v5M144 26v5M202 26v5M214 26v5M298 26v5" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g fill="var(--ink)" font-size="14" font-weight="700" text-anchor="middle"><text x="93" y="18">X</text><text x="173" y="18">y</text></g><text x="256" y="18" fill="var(--ink-soft)" font-size="13" text-anchor="middle">uzaklık</text><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="70" y="48">saat</text><text x="116" y="48">gün</text><text x="173" y="48">sonuç</text><text x="232" y="48">d²</text><text x="278" y="48">d</text></g><path d="M8 56H300" stroke="var(--line)" stroke-width="1.5"/><g fill="var(--ink)" font-size="14" font-weight="700" text-anchor="middle"><text x="24" y="76">A</text><text x="24" y="102">B</text><text x="24" y="128">C</text><text x="24" y="154">D</text><text x="24" y="180">E</text><text x="24" y="206">F</text><text x="26" y="236">YENİ</text></g><g fill="var(--ink)" font-size="14" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="70" y="76">12</text><text x="116" y="76">2</text><text x="70" y="102">3</text><text x="116" y="102">9</text><text x="70" y="128">18</text><text x="116" y="128">0</text><text x="70" y="154">5</text><text x="116" y="154">7</text><text x="70" y="180">9</text><text x="116" y="180">3</text><text x="70" y="206">2</text><text x="116" y="206">11</text><text x="70" y="236">7</text><text x="116" y="236">5</text><text x="232" y="76">34</text><text x="232" y="102">32</text><text x="232" y="128">146</text><text x="232" y="154">8</text><text x="232" y="180">8</text><text x="232" y="206">61</text><text x="278" y="76">5.83</text><text x="278" y="128">12.08</text><text x="278" y="206">7.81</text></g><g fill="var(--accent)" font-size="14" font-weight="700" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="278" y="102">5.66</text><text x="278" y="154">2.83</text><text x="278" y="180">2.83</text></g><g fill="var(--a)"><circle cx="152" cy="71" r="5"/><circle cx="152" cy="123" r="5"/><circle cx="152" cy="175" r="5"/></g><g fill="var(--b)"><rect x="147" y="92" width="10" height="10"/><rect x="147" y="144" width="10" height="10"/><rect x="147" y="196" width="10" height="10"/></g><g fill="var(--ink)" font-size="14"><text x="162" y="76">Geçti</text><text x="162" y="102">Kaldı</text><text x="162" y="128">Geçti</text><text x="162" y="154">Kaldı</text><text x="162" y="180">Geçti</text><text x="162" y="206">Kaldı</text><text x="166" y="236" font-weight="700">?</text></g><path d="M8 216H300" stroke="var(--line)" stroke-width="1.5"/><g fill="var(--ink)" font-size="14"><text x="8" y="270"><tspan font-weight="700">k = 1:</tspan> D ile E eşit uzaklıkta (√8), karar yok</text><text x="8" y="294"><tspan font-weight="700">k = 3:</tspan> D Kaldı · E Geçti · B Kaldı → <tspan fill="var(--accent)" font-weight="700">Kaldı 2–1</tspan></text></g><path d="M330 62V236H620" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M330 178H620M330 120H620M330 62H620M402.5 62V236M475 62V236M547.5 62V236M620 62V236" fill="none" stroke="var(--grid)" stroke-width="1.5"/><g fill="var(--ink-soft)" font-size="13" text-anchor="middle"><text x="330" y="253">0</text><text x="402.5" y="253">5</text><text x="475" y="253">10</text><text x="547.5" y="253">15</text><text x="620" y="253">20</text></g><g fill="var(--ink-soft)" font-size="13" text-anchor="end"><text x="323" y="182">4</text><text x="323" y="124">8</text><text x="323" y="66">12</text></g><text x="620" y="270" fill="var(--ink-soft)" font-size="13" text-anchor="end">çalışma saati (x₁) →</text><text x="336" y="50" fill="var(--ink-soft)" font-size="13">devamsızlık, gün (x₂)</text><path d="M431.5 163.5L402.5 134.5M431.5 163.5L460.5 192.5" fill="none" stroke="var(--accent)" stroke-width="2.5"/><path d="M402.5 134.5L373.5 105.5" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4"/><g fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="402.5" cy="134.5" r="11"/><circle cx="460.5" cy="192.5" r="11"/><circle cx="373.5" cy="105.5" r="11"/></g><g fill="var(--a)"><circle cx="504" cy="207" r="6"/><circle cx="591" cy="236" r="6"/><circle cx="460.5" cy="192.5" r="6"/></g><g fill="var(--b)"><rect x="367.5" y="99.5" width="12" height="12"/><rect x="396.5" y="128.5" width="12" height="12"/><rect x="353" y="70.5" width="12" height="12"/></g><path d="M431.5 152.5L434.1 160L442 160.1L435.6 164.8L438 172.3L431.5 167.8L425 172.3L427.4 164.8L421 160.1L428.9 160Z" fill="var(--ink)"/><g fill="var(--ink)" font-size="14" font-weight="700"><text x="516" y="204">A</text><text x="358" y="101" text-anchor="end">B</text><text x="591" y="222" text-anchor="middle">C</text><text x="393" y="156" text-anchor="end">D</text><text x="476" y="200">E</text><text x="371" y="81">F</text><text x="445" y="160">YENİ (7, 5)</text></g><g fill="var(--accent)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="422" y="141">√8</text><text x="440" y="194" text-anchor="end">√8</text><text x="390" y="99">√32</text></g><g fill="var(--ink)" font-size="14" text-anchor="end"><text x="620" y="82" font-weight="700">k = 3: D, E, B</text><text x="620" y="102">Kaldı 2 · Geçti 1</text></g><circle cx="514" cy="125" r="5" fill="var(--a)"/><text x="524" y="130" fill="var(--ink)" font-size="13">Geçti</text><rect x="569" y="120" width="10" height="10" fill="var(--b)"/><text x="584" y="130" fill="var(--ink)" font-size="13">Kaldı</text></svg>`,
 "m-bv":`<svg viewBox="0 0 640 298" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gerçek değeri 10 olan bir noktada iki modelin beşer tahmini: basit model 12 ile 13 arasında toplanıyor, ortalaması 12.6, bias 2.6, varyans 0.24, toplam 8.00; karmaşık model 5 ile 15 arasına saçılıyor, ortalaması 10, bias 0, varyans 12.8, toplam 13.80."><text x="12" y="22" font-size="15" font-weight="700" fill="var(--ink)">basit model: 12, 13, 12, 13, 13</text><text x="632" y="22" text-anchor="end" font-size="14" fill="var(--ink)">bias² 6.76 + varyans 0.24 + σ² 1 = <tspan font-weight="700">8.00</tspan></text><line x1="330" y1="40" x2="330" y2="228" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4"/><path d="M414 49v-5h57v5" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><text x="480" y="50" font-size="14" fill="var(--ink)">varyans 0.24</text><g fill="var(--a)"><circle cx="420" cy="85" r="6"/><circle cx="420" cy="72" r="6"/><circle cx="465" cy="85" r="6"/><circle cx="465" cy="72" r="6"/><circle cx="465" cy="59" r="6"/></g><line x1="60" y1="92" x2="600" y2="92" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M60 92v5M105 92v5M150 92v5M195 92v5M240 92v5M285 92v5M330 92v5M375 92v5M420 92v5M465 92v5M510 92v5M555 92v5M600 92v5" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M441 86l12 12M453 86l-12 12" stroke="var(--ink)" stroke-width="2.5"/><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)" text-anchor="middle"><text x="60" y="112">4</text><text x="105" y="112">5</text><text x="150" y="112">6</text><text x="195" y="112">7</text><text x="240" y="112">8</text><text x="285" y="112">9</text><text x="330" y="112">10</text><text x="375" y="112">11</text><text x="420" y="112">12</text><text x="465" y="112">13</text><text x="510" y="112">14</text><text x="555" y="112">15</text><text x="600" y="112">16</text></g><line x1="330" y1="127" x2="439" y2="127" stroke="var(--accent)" stroke-width="2.5"/><polygon points="447,127 437,122 437,132" fill="var(--accent)"/><text x="322" y="132" text-anchor="end" font-size="14" fill="var(--ink)">gerçek değer 10</text><text x="456" y="132" font-size="14" fill="var(--accent)">bias = 12.6 − 10 = 2.6</text><text x="12" y="166" font-size="15" font-weight="700" fill="var(--ink)">karmaşık model: 5, 15, 8, 13, 9</text><text x="632" y="166" text-anchor="end" font-size="14" fill="var(--ink)">bias² 0 + varyans 12.8 + σ² 1 = <tspan font-weight="700">13.80</tspan></text><path d="M99 203v-5h462v5" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><text x="210" y="192" text-anchor="middle" font-size="14" fill="var(--ink)">varyans 12.8</text><g fill="var(--a)"><circle cx="105" cy="215" r="6"/><circle cx="240" cy="215" r="6"/><circle cx="285" cy="215" r="6"/><circle cx="465" cy="215" r="6"/><circle cx="555" cy="215" r="6"/></g><line x1="60" y1="222" x2="600" y2="222" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M60 222v5M105 222v5M150 222v5M195 222v5M240 222v5M285 222v5M330 222v5M375 222v5M420 222v5M465 222v5M510 222v5M555 222v5M600 222v5" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M324 216l12 12M336 216l-12 12" stroke="var(--ink)" stroke-width="2.5"/><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)" text-anchor="middle"><text x="60" y="242">4</text><text x="105" y="242">5</text><text x="150" y="242">6</text><text x="195" y="242">7</text><text x="240" y="242">8</text><text x="285" y="242">9</text><text x="330" y="242">10</text><text x="375" y="242">11</text><text x="420" y="242">12</text><text x="465" y="242">13</text><text x="510" y="242">14</text><text x="555" y="242">15</text><text x="600" y="242">16</text></g><text x="330" y="264" text-anchor="middle" font-size="14" fill="var(--ink)">ortalama 10 = gerçek değer, bias 0</text><circle cx="18" cy="285" r="6" fill="var(--a)"/><text x="30" y="290" font-size="13" fill="var(--ink-soft)">her nokta: başka bir eğitim kümesiyle eğitilen modelin tahmini</text><path d="M478 279l12 12M490 279l-12 12" stroke="var(--ink)" stroke-width="2.5"/><text x="498" y="290" font-size="13" fill="var(--ink-soft)">ortalama tahmin</text></svg>`,
 "m-cm":`<svg viewBox="0 0 640 296" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="20 kişilik taramanın hata matrisi, scikit-learn düzeninde: satırlar gerçek, sütunlar tahmin; TN 14, FP 2, FN 1, TP 3. Precision 'hasta' sütunundan 3 / 5 = 0.60, recall gerçek hastaların satırından 3 / 4 = 0.75 okunuyor."><rect x="122" y="80" width="140" height="73" fill="var(--good)" fill-opacity="0.18"/><rect x="262" y="80" width="140" height="73" fill="var(--bad)" fill-opacity="0.15"/><rect x="122" y="153" width="140" height="73" fill="var(--bad)" fill-opacity="0.15"/><rect x="262" y="153" width="140" height="73" fill="var(--good)" fill-opacity="0.18"/><rect x="122" y="80" width="280" height="146" fill="none" stroke="var(--line)" stroke-width="1.8"/><path d="M262 80V226 M122 153H402" fill="none" stroke="var(--line)" stroke-width="1.8"/><rect x="116" y="147" width="292" height="85" rx="11" fill="none" stroke="var(--a)" stroke-width="2.5" stroke-dasharray="7 5"/><rect x="256" y="74" width="152" height="158" rx="11" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="7 5"/><rect x="420" y="28" width="212" height="94" rx="12" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><rect x="420" y="140" width="212" height="94" rx="12" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><g font-size="13" fill="var(--ink)" text-anchor="middle"><text x="122" y="64" text-anchor="end" fill="var(--ink-soft)">20 kişi</text><text x="192" y="64">tahmin: sağlıklı</text><text x="332" y="64">tahmin: hasta</text><text x="102" y="111" text-anchor="end">gerçek</text><text x="102" y="128" text-anchor="end">sağlıklı</text><text x="102" y="184" text-anchor="end">gerçek</text><text x="102" y="201" text-anchor="end">hasta</text></g><g font-size="24" font-weight="700" fill="var(--ink)" text-anchor="middle"><text x="192" y="112">14</text><text x="332" y="112">2</text><text x="192" y="185">1</text><text x="332" y="185">3</text></g><g font-size="13" fill="var(--ink-soft)" text-anchor="middle"><text x="192" y="139">TN · doğru negatif</text><text x="332" y="139">FP · yanlış alarm</text><text x="192" y="212">FN · kaçırılan</text><text x="332" y="212">TP · doğru pozitif</text><text x="526" y="108">hasta dediklerimin kaçı hasta?</text><text x="526" y="220">hastaların kaçını yakaladım?</text></g><g font-size="13" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="526" y="54" fill="var(--accent)">precision = TP / (TP + FP)</text><text x="526" y="76" fill="var(--ink)">= 3 / 5 = 0.60</text><text x="526" y="166" fill="var(--a)">recall = TP / (TP + FN)</text><text x="526" y="188" fill="var(--ink)">= 3 / 4 = 0.75</text></g><g font-size="13" fill="var(--ink)" text-anchor="middle"><text x="320" y="262">doğruluk = (3 + 14) / 20 = 0.85 · herkese 'sağlıklı' diyen model: 16 / 20 = 0.80</text><text x="320" y="284">specificity = TN / (TN + FP) = 14 / 16 = 0.875 · FPR = 2 / 16 = 0.125</text></g></svg>`,
 "m-cn":`<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3×3 çekirdeğin 5×5 girdide kayarak her konumda dokuz çarpımı toplayıp 3×3 feature map üretmesini gösteren şema."><g fill="var(--ink)" font-size="14"><text x="133" y="40" text-anchor="middle">girdi 5×5</text><text x="336" y="40" text-anchor="middle">çekirdek 3×3</text><text x="536" y="40" text-anchor="middle">feature map 3×3</text></g><g stroke="var(--line)" stroke-width="1.5"><rect x="58" y="57" width="30" height="30" fill="var(--surface)"/><rect x="88" y="57" width="30" height="30" fill="var(--surface)"/><rect x="118" y="57" width="30" height="30" fill="var(--surface)"/><rect x="148" y="57" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="178" y="57" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="58" y="87" width="30" height="30" fill="var(--surface)"/><rect x="88" y="87" width="30" height="30" fill="var(--surface)"/><rect x="118" y="87" width="30" height="30" fill="var(--surface)"/><rect x="148" y="87" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="178" y="87" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="58" y="117" width="30" height="30" fill="var(--surface)"/><rect x="88" y="117" width="30" height="30" fill="var(--surface)"/><rect x="118" y="117" width="30" height="30" fill="var(--surface)"/><rect x="148" y="117" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="178" y="117" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="58" y="147" width="30" height="30" fill="var(--surface)"/><rect x="88" y="147" width="30" height="30" fill="var(--surface)"/><rect x="118" y="147" width="30" height="30" fill="var(--surface)"/><rect x="148" y="147" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="178" y="147" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="58" y="177" width="30" height="30" fill="var(--surface)"/><rect x="88" y="177" width="30" height="30" fill="var(--surface)"/><rect x="118" y="177" width="30" height="30" fill="var(--surface)"/><rect x="148" y="177" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="178" y="177" width="30" height="30" fill="var(--ink-soft)" fill-opacity="0.35"/><rect x="291" y="57" width="30" height="30" fill="var(--surface-2)"/><rect x="321" y="57" width="30" height="30" fill="var(--surface-2)"/><rect x="351" y="57" width="30" height="30" fill="var(--surface-2)"/><rect x="291" y="87" width="30" height="30" fill="var(--surface-2)"/><rect x="321" y="87" width="30" height="30" fill="var(--surface-2)"/><rect x="351" y="87" width="30" height="30" fill="var(--surface-2)"/><rect x="291" y="117" width="30" height="30" fill="var(--surface-2)"/><rect x="321" y="117" width="30" height="30" fill="var(--surface-2)"/><rect x="351" y="117" width="30" height="30" fill="var(--surface-2)"/><rect x="491" y="57" width="30" height="30" fill="var(--surface-2)"/><rect x="521" y="57" width="30" height="30" fill="var(--surface-2)"/><rect x="551" y="57" width="30" height="30" fill="var(--surface-2)"/><rect x="491" y="87" width="30" height="30" fill="var(--surface-2)"/><rect x="521" y="87" width="30" height="30" fill="var(--surface-2)"/><rect x="551" y="87" width="30" height="30" fill="var(--surface-2)"/><rect x="491" y="117" width="30" height="30" fill="var(--surface-2)"/><rect x="521" y="117" width="30" height="30" fill="var(--surface-2)"/><rect x="551" y="117" width="30" height="30" fill="var(--surface-2)"/></g><rect x="88" y="57" width="90" height="90" fill="none" stroke="var(--accent)" stroke-width="2.5"/><rect x="521" y="57" width="30" height="30" fill="none" stroke="var(--accent)" stroke-width="2.5"/><g fill="var(--ink)" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" text-anchor="middle"><text x="73" y="77.5">0</text><text x="103" y="77.5">0</text><text x="133" y="77.5">0</text><text x="163" y="77.5">9</text><text x="193" y="77.5">9</text><text x="73" y="107.5">0</text><text x="103" y="107.5">0</text><text x="133" y="107.5">0</text><text x="163" y="107.5">9</text><text x="193" y="107.5">9</text><text x="73" y="137.5">0</text><text x="103" y="137.5">0</text><text x="133" y="137.5">0</text><text x="163" y="137.5">9</text><text x="193" y="137.5">9</text><text x="73" y="167.5">0</text><text x="103" y="167.5">0</text><text x="133" y="167.5">0</text><text x="163" y="167.5">9</text><text x="193" y="167.5">9</text><text x="73" y="197.5">0</text><text x="103" y="197.5">0</text><text x="133" y="197.5">0</text><text x="163" y="197.5">9</text><text x="193" y="197.5">9</text><text x="306" y="77.5">−1</text><text x="506" y="77.5">0</text><text x="336" y="77.5">0</text><text x="536" y="77.5">27</text><text x="366" y="77.5">1</text><text x="566" y="77.5">27</text><text x="306" y="107.5">−1</text><text x="506" y="107.5">0</text><text x="336" y="107.5">0</text><text x="536" y="107.5">27</text><text x="366" y="107.5">1</text><text x="566" y="107.5">27</text><text x="306" y="137.5">−1</text><text x="506" y="137.5">0</text><text x="336" y="137.5">0</text><text x="536" y="137.5">27</text><text x="366" y="137.5">1</text><text x="566" y="137.5">27</text></g><g fill="var(--ink-soft)" font-size="22" text-anchor="middle"><text x="246" y="110">⊛</text><text x="436" y="110">=</text></g><g fill="var(--ink)" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" text-anchor="middle"><text x="320" y="247">(−1·0 + 0·0 + 1·9) × 3 satır = 27</text><text x="320" y="278">çıktı boyu = (5 − 3) / 1 + 1 = 3</text></g></svg>`,
@@ -3412,6 +3520,356 @@ const FIGS={
 "m-svm":`<svg viewBox="0 0 640 332" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dört noktalı SVM örneği: (3, 3) ve (4, 4) sınıf +1, (2, 0) ve (0, 2) sınıf −1; yolun orta çizgisi x₁ + x₂ = 4, kaldırımlar f = ±1, halkalı üç support vector ve 2.83 genişliğinde margin."><path d="M50 30V308.4M11.6 270H290M98 30V308.4M11.6 222H290M146 30V308.4M11.6 174H290M194 30V308.4M11.6 126H290M242 30V308.4M11.6 78H290M290 30V308.4M11.6 30H290" stroke="var(--grid)" stroke-width="1.5" fill="none"/><polygon points="11.6,135.6 184.4,308.4 290,308.4 290,222 98,30 11.6,30" fill="var(--ink-soft)" fill-opacity="0.13"/><path d="M11.6 135.6L184.4 308.4" stroke="var(--ink)" stroke-width="1.6" fill="none" stroke-dasharray="6 4"/><path d="M98 30L290 222" stroke="var(--ink)" stroke-width="1.6" fill="none" stroke-dasharray="6 4"/><path d="M11.6 39.6L280.4 308.4" stroke="var(--ink)" stroke-width="2.4" fill="none"/><g fill="var(--ink)" font-size="13" text-anchor="middle"><text x="184.4" y="324.4">f = −1</text><text x="280.4" y="324.4" font-weight="700">f = 0</text><text x="98" y="24">f = +1</text></g><path d="M105 215L187 133" stroke="var(--accent)" stroke-width="2.2"/><polygon points="194,126 190.5,136.6 183.4,129.5" fill="var(--accent)"/><polygon points="98,222 101.5,211.4 108.6,218.5" fill="var(--accent)"/><text x="95" y="246" text-anchor="end" fill="var(--accent)" font-size="13" font-weight="700">margin 2.83</text><circle cx="194" cy="126" r="11.5" fill="none" stroke="var(--bad)" stroke-width="2"/><circle cx="194" cy="126" r="6.5" fill="var(--a)"/><circle cx="242" cy="78" r="6.5" fill="var(--a)"/><circle cx="146" cy="270" r="11.5" fill="none" stroke="var(--bad)" stroke-width="2"/><rect x="140" y="264" width="12" height="12" fill="var(--b)"/><circle cx="50" cy="174" r="11.5" fill="none" stroke="var(--bad)" stroke-width="2"/><rect x="44" y="168" width="12" height="12" fill="var(--b)"/><g fill="var(--ink)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="209" y="131">(3, 3)</text><text x="230" y="83" text-anchor="end">(4, 4)</text><text x="161" y="262">(2, 0)</text><text x="65" y="166">(0, 2)</text></g><circle cx="215.6" cy="48.2" r="5.5" fill="var(--a)"/><rect x="257.6" y="42.7" width="11" height="11" fill="var(--b)"/><g fill="var(--ink)" font-size="13"><text x="224.6" y="53.2">+1</text><text x="273.6" y="53.2">−1</text></g><circle cx="146" cy="222" r="6" fill="none" stroke="var(--a)" stroke-width="2" stroke-dasharray="3 2"/><text x="148" y="245" text-anchor="middle" fill="var(--ink-soft)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace">(2, 1)</text><text x="287" y="264" text-anchor="end" fill="var(--ink-soft)" font-size="13">x₁ →</text><text x="55" y="45" fill="var(--ink-soft)" font-size="13">x₂ ↑</text><path d="M324 12V320" stroke="var(--line)" stroke-width="1.5"/><text x="340" y="28" fill="var(--ink)" font-size="15" font-weight="700" font-family="IBM Plex Mono, ui-monospace, monospace">f = 0.5x₁ + 0.5x₂ − 2</text><g fill="var(--ink-soft)" font-size="13"><text x="340" y="56">nokta</text><text x="422" y="56" text-anchor="end">y</text><text x="474" y="56" text-anchor="end">f</text><text x="524" y="56" text-anchor="end">y · f</text></g><g font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)"><text x="340" y="82">(3, 3)</text><text x="422" y="82" text-anchor="end">+1</text><text x="474" y="82" text-anchor="end">1</text><text x="524" y="82" text-anchor="end">1</text><text x="340" y="107">(2, 0)</text><text x="422" y="107" text-anchor="end">−1</text><text x="474" y="107" text-anchor="end">−1</text><text x="524" y="107" text-anchor="end">1</text><text x="340" y="132">(0, 2)</text><text x="422" y="132" text-anchor="end">−1</text><text x="474" y="132" text-anchor="end">−1</text><text x="524" y="132" text-anchor="end">1</text><text x="340" y="157">(4, 4)</text><text x="422" y="157" text-anchor="end">+1</text><text x="474" y="157" text-anchor="end">2</text><text x="524" y="157" text-anchor="end">2</text><text x="340" y="192">(2, 1)</text><text x="422" y="192" text-anchor="end">+1</text><text x="474" y="192" text-anchor="end">−0.5</text><text x="524" y="192" text-anchor="end">−0.5</text></g><g font-size="13"><text x="532" y="82" fill="var(--bad)">support vector</text><text x="532" y="107" fill="var(--bad)">support vector</text><text x="532" y="132" fill="var(--bad)">support vector</text><text x="532" y="157" fill="var(--ink-soft)">yolun dışında</text><text x="532" y="192" fill="var(--accent)">hinge 1.5</text></g><path d="M340 169H628" stroke="var(--line)" stroke-width="1.5"/><g fill="var(--ink)" font-size="14"><text x="340" y="231">‖w‖ = √(0.5² + 0.5²) ≈ 0.7071</text><text x="340" y="255">margin = 2 / ‖w‖ ≈ <tspan fill="var(--accent)" font-weight="700">2.83</tspan></text><text x="340" y="279" fill="var(--ink-soft)" font-size="13">kaldırımda y · f = 1, yolun dışında &gt; 1</text></g></svg>`
 };
 const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
+
+/* ═════════════ 27 · Makine öğrenmesine giriş ═════════════ */
+(function(){
+  const cv=$("#c-intro"), {ctx,fit}=setupCanvas(cv);
+  const DS=SETS("m-intro"); let dsi=0;
+  const S=()=>DS[dsi], REG=()=>S().task==="reg";
+  /* Hafta 1 sl. 33: on öğrenci [saat, not]. TEN_T sunumda YOK, test için eklendi
+     (eğitimde hiç kullanılmaz, standartlaştırmaya da girmez). */
+  const TEN=[[2,40],[4,44],[5,52],[7,50],[8,60],[10,62],[12,70],[14,71],[16,80],[18,83]];
+  const TEN_T=[[3,46],[11,61],[15,79]];
+  /* sl. 16 / 45: [ad, saat, devamsızlık, önceki not, sonuç (1 = Geçti)] ve YENİ öğrenci */
+  const SIX=[["A",12,2,68,1],["B",3,9,45,0],["C",18,0,82,1],["D",5,7,51,0],["E",9,3,60,1],["F",2,11,38,0]];
+  const NEW={x1:7,x2:5};
+  /* Model hep aynı iki düğmeli doğru; eğitim STANDART birimde yürür (x ve sınıflandırmada
+     x₂ eğitim noktalarının ortalama / std'siyle): u = (x − m)/s. Regresyonda ŷ = c₀ + c₁u,
+     kayıp MSE, adım θ ← θ − α · türev. Sunumun sayıları tam bu kuralla çıkıyor: θ₀ = (20, −6),
+     α = 0.1 → MSE 2095 → 230 (5 tur) → 5.5 (60 tur). Sınıflandırmada doğru bir sınır,
+     v = c₀ + c₁u; P(y = 1) = σ(± uzaklık / τ), uzaklık noktanın doğruya DİK uzaklığı:
+     eğim büyüdükçe kayıp sahte biçimde küçülmesin (dikey uzaklıkla sınır dikleşip
+     duruyordu). Kayıp log-loss. */
+  const TAU=.3, BLOW=1e6, RUNW=60;
+  let tr=[], te=[], st={m1:0,s1:1,m2:0,s2:1};
+  let c0=0, c1=0, h0=[0,0], hist=[], histT=[], tur=0, manual=false, diverged=false;
+  let lri=1, timer=0, target=0, sel={k:"tr",i:0}, geo=null;
+
+  const sig=(z)=>1/(1+Math.exp(-clamp(z,-60,60)));
+  const nrm=(c)=>Math.sqrt(1+c*c);
+  const dir=()=>S().pos==="alt"?1:-1;
+  const U=(p)=>(p.x1-st.m1)/st.s1, V=(p)=>(p.x2-st.m2)/st.s2;
+  /* regresyonda ŷ, sınıflandırmada P(y = 1) */
+  function pred(p,C0=c0,C1=c1){
+    if(REG()) return C0+C1*U(p);
+    return sig(dir()*(C0+C1*U(p)-V(p))/(TAU*nrm(C1)));
+  }
+  function loss(arr,C0=c0,C1=c1){
+    if(!arr.length) return NaN;
+    let s=0;
+    for(const p of arr){ const q=pred(p,C0,C1);
+      if(REG()) s+=(q-p.y)**2;
+      else { const r=clamp(q,1e-12,1-1e-12); s-=p.y?Math.log(r):Math.log(1-r); } }
+    return s/arr.length;
+  }
+  const right=(p)=>(pred(p)>=.5)===(p.y===1);
+  const nRight=(arr)=>arr.filter(right).length;
+  function grad(){
+    let g0=0,g1=0;
+    if(REG()) for(const p of tr){ const u=U(p), e=c0+c1*u-p.y; g0+=2*e; g1+=2*e*u; }
+    else { const n=nrm(c1), d=dir();
+      for(const p of tr){ const u=U(p), r=c0+c1*u-V(p), q=(sig(d*r/(TAU*n))-p.y)*d/TAU;
+        g0+=q/n; g1+=q*(u*n*n-r*c1)/(n*n*n); } }
+    return [g0/tr.length, g1/tr.length];
+  }
+  /* standart düğmeler ↔ verinin birimindeki doğru (β₀, β₁) */
+  function raw(C0=c0,C1=c1){
+    if(REG()) return {b0:C0-C1*st.m1/st.s1, b1:C1/st.s1};
+    return {b0:st.m2+st.s2*C0-st.s2*C1*st.m1/st.s1, b1:st.s2*C1/st.s1};
+  }
+  function toStd(b0,b1){
+    if(REG()) return [b0+b1*st.m1, b1*st.s1];
+    return [(b0+b1*st.m1-st.m2)/st.s2, b1*st.s1/st.s2];
+  }
+  const LR=()=>S().lr[lri];
+  function step1(){
+    if(diverged) return false;
+    const [g0,g1]=grad(); c0-=LR()*g0; c1-=LR()*g1; tur++; manual=false;
+    const L=loss(tr); hist.push(L); histT.push(loss(te));
+    if(!Number.isFinite(L)||L>BLOW) diverged=true;
+    return !diverged;
+  }
+  function startHist(isManual){
+    h0=[c0,c1]; tur=0; manual=isManual; diverged=false;
+    hist=[loss(tr)]; histT=[loss(te)];
+  }
+  /* biçim: eksi işareti U+2212; MSE 100'ün üstünde tamsayı (2095, 230), altında bir hane (5.5) */
+  const mn=(v,d)=>{const s=Math.abs(v).toFixed(d); return (v<0&&+s!==0?"−":"")+s;};
+  const pmn=(v,d)=>{const s=Math.abs(v).toFixed(d); return (v<0&&+s!==0?"− ":"+ ")+s;};
+  const fL=(L)=>!Number.isFinite(L)?"—":REG()?(L>=100?L.toFixed(0):L.toFixed(1)):L.toFixed(3);
+  const pc=(k,n)=>n?"%"+Math.round(100*k/n):"—";
+  function status(){
+    if(diverged) return ["Iraksadı","bd"];
+    if(tur===0) return manual?["Elle",""]:["Başlangıç",""];
+    const a=hist[hist.length-2], b=hist[hist.length-1];
+    if(b>a*(1+1e-9)) return ["Yükseliyor","bd"];
+    /* sunum (sl. 33): "bir noktadan sonra artık azalmıyor; orada eğitimi durdururuz" */
+    if((a-b)/a<5e-3) return ["Azalmıyor","ok"];
+    return ["İniyor",""];
+  }
+  const ptY=(p)=>REG()?p.y:p.x2;
+  const clsName=(y)=>S().cls[y];
+  function rowText(){
+    const q=S(); let p, kind, nm;
+    if(sel.k==="new"){ p=NEW; kind="etiketi yok"; nm="YENİ"; }
+    else{ const arr=sel.k==="te"?te:tr; p=arr[clamp(sel.i,0,arr.length-1)]; if(!p) return [];
+      kind=sel.k==="te"?"test":"eğitim"; nm=p.id; }
+    /* kısa satırlar (~190 px): kutu denklem kutusuyla aynı kenara sığsın, noktaları örtmesin */
+    if(REG()){ const yh=pred(p);
+      return [[`${nm} · ${kind}`,"--ink"],[`x = ${p.x1} ${q.xu} · y = ${p.y} ${q.yu}`,"--ink"],
+              [`ŷ = ${mn(yh,1)} · hata ${pmn(p.y-yh,1).replace(" ","")}`,"--accent"]]; }
+    const pp=pred(p), yh=pp>=.5?1:0;
+    return [[`${nm} · ${kind} · y = ${sel.k==="new"?"?":clsName(p.y)}`,"--ink"],
+            [`x = (${p.x1} ${q.xu}, ${p.x2} ${q.yu})`,"--ink"],
+            [`ŷ = ${clsName(yh)} · P(${clsName(1)}) ${pp.toFixed(2)}`,"--accent"],
+            [p.x3!==undefined?`önceki not ${p.x3}: modelde yok`:"","--ink-soft"]];
+  }
+  function draw(){
+    if(!fit()) return;
+    const W=cv.__w,H=cv.__h, q=S(), ax=q.ax;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,W,H);
+    /* sağ panel (kayıp eğrisi) 760 px altında gizli: 930'da ve %110 zoom'da (~815) görünür */
+    const wide=W>760, split=wide?Math.round(W*.6):W;
+    const L0=46, R0=split-14, T0=12, B0=H-34;
+    const X=(x)=>L0+(x-ax.x[0])/(ax.x[1]-ax.x[0])*(R0-L0);
+    const Y=(y)=>B0-(y-ax.y[0])/(ax.y[1]-ax.y[0])*(B0-T0);
+    geo={X,Y,R0};
+    const span=ax.y[1]-ax.y[0], yc=(y)=>clamp(y,ax.y[0]-8*span,ax.y[1]+8*span);
+    ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    for(let v=ax.x[0]; v<=ax.x[1]+1e-9; v+=ax.x[2]){ctx.beginPath();ctx.moveTo(X(v),T0);ctx.lineTo(X(v),B0);ctx.stroke();}
+    for(let v=ax.y[0]; v<=ax.y[1]+1e-9; v+=ax.y[2]){ctx.beginPath();ctx.moveTo(L0,Y(v));ctx.lineTo(R0,Y(v));ctx.stroke();}
+    ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.strokeRect(L0,T0,R0-L0,B0-T0); ctx.restore();
+    for(let v=ax.x[0]; v<=ax.x[1]+1e-9; v+=ax.x[2]) label(ctx,String(v),X(v),B0+11,css("--ink-soft"),"center",10.5);
+    for(let v=ax.y[0]; v<=ax.y[1]+1e-9; v+=ax.y[2]) label(ctx,String(v),L0-6,Y(v),css("--ink-soft"),"right",10.5);
+
+    const {b0,b1}=raw(), lineAt=(x)=>yc(b0+b1*x);
+    const x0=ax.x[0], x1=ax.x[1];
+    ctx.save(); ctx.beginPath(); ctx.rect(L0,T0,R0-L0,B0-T0); ctx.clip();
+    /* sınıflandırma: doğrunun iki yanı iki sınıfın soluk rengi */
+    if(!REG()){
+      const lo=q.pos==="alt"?"--a":"--b";
+      ctx.fillStyle=hexA(lo,.07); ctx.fillRect(L0,T0,R0-L0,B0-T0);
+      ctx.fillStyle=hexA(q.pos==="alt"?"--b":"--a",.10);
+      ctx.beginPath(); ctx.moveTo(X(x0),Y(lineAt(x0))); ctx.lineTo(X(x1),Y(lineAt(x1)));
+      ctx.lineTo(X(x1),Y(ax.y[1]+9*span)); ctx.lineTo(X(x0),Y(ax.y[1]+9*span)); ctx.closePath(); ctx.fill();
+    }
+    /* regresyon: eğitim noktalarının hatası (kırmızı dikey çizgi, sunumdaki gibi) */
+    if(REG()) tr.forEach(p=>{ ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(X(p.x1),Y(p.y)); ctx.lineTo(X(p.x1),Y(yc(pred(p)))); ctx.stroke(); });
+    /* tur 0'daki doğru (kesikli gri): düğmeler ne kadar döndü */
+    if(tur>0){ const r0=raw(h0[0],h0[1]);
+      ctx.strokeStyle=hexA("--ink-soft",.6); ctx.lineWidth=1.8; ctx.setLineDash([7,6]);
+      ctx.beginPath(); ctx.moveTo(X(x0),Y(yc(r0.b0+r0.b1*x0))); ctx.lineTo(X(x1),Y(yc(r0.b0+r0.b1*x1))); ctx.stroke();
+      ctx.setLineDash([]); }
+    ctx.strokeStyle=css("--accent"); ctx.lineWidth=3.2; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(X(x0),Y(lineAt(x0))); ctx.lineTo(X(x1),Y(lineAt(x1))); ctx.stroke();
+    ctx.restore();
+
+    /* noktalar: dolu = eğitim, içi boş = test; sınıf 1 daire (--a), sınıf 0 kare (--b) */
+    const R=q.r||6;
+    const mark=(p,hollow)=>{
+      const px=X(p.x1), py=Y(ptY(p)), one=REG()||p.y===1, col=css(one?"--a":"--b");
+      if(!REG()&&!right(p)){ ctx.save(); ctx.strokeStyle=css("--bad"); ctx.lineWidth=2;
+        ctx.beginPath(); ctx.arc(px,py,R+4.5,0,7); ctx.stroke(); ctx.restore(); }
+      if(one){ if(hollow) disc(ctx,px,py,R-.5,css("--surface"),col); else disc(ctx,px,py,R,col,css("--surface")); }
+      else{ ctx.save(); ctx.lineWidth=2; ctx.fillStyle=hollow?css("--surface"):col; ctx.strokeStyle=hollow?col:css("--surface");
+        ctx.beginPath(); ctx.rect(px-R+.5,py-R+.5,2*R-1,2*R-1); ctx.fill(); ctx.stroke(); ctx.restore(); }
+    };
+    tr.forEach(p=>mark(p,false)); te.forEach(p=>mark(p,true));
+    if(q.gen==="six"){
+      tr.forEach(p=>label(ctx,p.id,X(p.x1)+10,Y(p.x2)-11,css("--ink"),"left",12));
+      const sx=X(NEW.x1), sy=Y(NEW.x2);
+      ctx.save(); ctx.fillStyle=css("--ink"); ctx.beginPath();
+      for(let k=0;k<10;k++){ const r=k%2?4.6:11, a=-Math.PI/2+k*Math.PI/5; ctx.lineTo(sx+r*Math.cos(a),sy+r*Math.sin(a)); }
+      ctx.closePath(); ctx.fill(); ctx.restore();
+      label(ctx,"YENİ",sx+12,sy-13,css("--ink"),"left",12);
+    }
+    /* seçili satır */
+    { const p=sel.k==="new"?NEW:(sel.k==="te"?te:tr)[sel.i];
+      if(p){ ctx.save(); ctx.strokeStyle=css("--accent"); ctx.lineWidth=2.5;
+        ctx.beginPath(); ctx.arc(X(p.x1),Y(sel.k==="new"?NEW.x2:ptY(p)),R+8,0,7); ctx.stroke(); ctx.restore(); } }
+
+    /* iki kutu: modelin kendisi (denklem ya da sınır) ve seçili satır. Köşeleri noktaları
+       EN AZ örtecek biçimde seçilir (m-lin kuralı): sabit köşede « Altı öğrenci »de
+       denklem F'yi, satır kutusu seçili A'yı ve C'yi örtüyordu. Denklem kutusunun örttüğü
+       nokta iki, seçili nokta beş kat sayılır; iki kutu birbirine binemez. */
+    const nTr=tr.length, nTe=te.length;
+    const e1=REG()?`ŷ = ${mn(b0,1)} ${pmn(b1,2)}x`:`${q.yn} = ${mn(b0,1)} ${pmn(b1,2)} · ${q.xn}`;
+    const e2=REG()?`yani ${q.yn} = ${mn(b0,1)} ${pmn(b1,2)} · ${q.xn}`:q.side;
+    const e3="● eğitim"+(nTe?" · ○ test":"")+(q.gen==="six"?" · ★ YENİ":"")+(tur>0?" · - - tur 0":"");
+    const rows=rowText().filter(r=>r[0]);
+    const bsz=(list,size,lh)=>{ ctx.save(); ctx.font=`600 ${size}px "IBM Plex Mono", monospace`;
+      const w=Math.max(0,...list.map(r=>ctx.measureText(String(r[0])).width)); ctx.restore();
+      return {w:w+10, h:list.length*lh+6, n:list.length, lh}; };
+    const bE=bsz([[e1],[e2],[e3]],12.5,18), bR=bsz(rows,12,17);
+    /* köşe c: 0 sol üst · 1 sağ üst · 2 sol alt · 3 sağ alt → legend çapası ve kaplanan dikdörtgen */
+    const at=(c,b)=>{ const rt=c%2===1, bt=c>=2;
+      const ax0=rt?R0-9:L0+10, ay=bt?B0-12-b.lh*(b.n-1):T0+15;
+      const x0=rt?ax0-b.w+5:ax0-5, y0=ay-b.lh/2-3;
+      return {ax:ax0, ay, al:rt?"right":"left", x0, y0, x1:x0+b.w, y1:y0+b.h}; };
+    const dots=tr.concat(te).map(p=>[X(p.x1),Y(ptY(p))]);
+    if(q.gen==="six"){ dots.push([X(NEW.x1),Y(NEW.x2)],[X(NEW.x1)+24,Y(NEW.x2)-13]);
+      tr.forEach(p=>dots.push([X(p.x1)+13,Y(p.x2)-11])); }   // A–F ve YENİ etiketleri de örtülmesin
+    const sp=sel.k==="new"?NEW:(sel.k==="te"?te:tr)[sel.i], sd=sp?[X(sp.x1),Y(sel.k==="new"?NEW.x2:ptY(sp))]:null;
+    const cov=(r)=>{ const inside=([x,y])=>x>r.x0-9&&x<r.x1+9&&y>r.y0-9&&y<r.y1+9;
+      return dots.filter(inside).length+(sd&&inside(sd)?4:0); };
+    let best=null;
+    for(let ce=0;ce<4;ce++) for(let cr=0;cr<4;cr++){ if(ce===cr) continue;
+      const A=at(ce,bE), B=at(cr,bR);
+      if(rows.length&&A.x0<B.x1&&B.x0<A.x1&&A.y0<B.y1&&B.y0<A.y1) continue;
+      const cost=2*cov(A)+(rows.length?cov(B):0)+(ce===0?0:.1)+(cr===3?0:.05);
+      if(!best||cost<best.cost) best={cost,A,B}; }
+    if(!best) best={A:at(0,bE),B:at(3,bR)};
+    legend(ctx,best.A.ax,best.A.ay,[[e1,"--accent"],[e2,"--ink-soft"],[e3,"--ink-soft"]],{size:12.5,lh:18,align:best.A.al});
+    if(rows.length) legend(ctx,best.B.ax,best.B.ay,rows,{size:12,lh:17,align:best.B.al});
+    label(ctx,q.x+" →",R0,B0+24,css("--ink-soft"),"right",11);
+    ylabel(ctx,q.y+" →",13,T0,B0,css("--ink-soft"),11);
+
+    /* sağ: her turun kaybı, log ölçek (sunumdaki gibi): eğitim düz, test kesikli */
+    const Ltr=hist[hist.length-1], Lte=histT[histT.length-1];
+    if(wide){
+      const qx0=split+46, qx1=W-14, qy0=T0+6, qy1=B0;
+      const vals=hist.concat(histT).filter(v=>Number.isFinite(v)&&v>0);
+      let lo=Math.min(...vals), hi=Math.max(...vals);
+      lo*=.6; hi*=1.6; if(hi/lo<10){ const g=Math.sqrt(10/(hi/lo)); lo/=g; hi*=g; }
+      const lg=Math.log10, CY=(v)=>qy1-(lg(clamp(v,lo,hi))-lg(lo))/(lg(hi)-lg(lo))*(qy1-qy0);
+      const nT=Math.max(RUNW,hist.length-1), CX=(t)=>qx0+t/nT*(qx1-qx0);
+      const dec=lg(hi)-lg(lo), ms=dec>2.2?[1]:dec>1.2?[1,3]:[1,2,5];
+      ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+      const ticks=[];
+      for(let e=Math.floor(lg(lo)); e<=Math.ceil(lg(hi)); e++) for(const m of ms){ const v=m*10**e; if(v>=lo&&v<=hi) ticks.push(v); }
+      ticks.forEach(v=>{ctx.beginPath();ctx.moveTo(qx0,CY(v));ctx.lineTo(qx1,CY(v));ctx.stroke();});
+      const tstep=nT>120?60:nT>60?20:10;
+      for(let t=0;t<=nT;t+=tstep){ctx.beginPath();ctx.moveTo(CX(t),qy0);ctx.lineTo(CX(t),qy1);ctx.stroke();}
+      ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.strokeRect(qx0,qy0,qx1-qx0,qy1-qy0); ctx.restore();
+      ticks.forEach(v=>label(ctx,v>=1?String(v):String(+v.toPrecision(2)),qx0-5,CY(v),css("--ink-soft"),"right",10.5));
+      for(let t=0;t<=nT;t+=tstep) label(ctx,String(t),CX(t),qy1+11,css("--ink-soft"),"center",10.5);
+      const curve=(arr,tok,w,dash)=>{ ctx.save(); ctx.strokeStyle=css(tok); ctx.lineWidth=w; ctx.lineJoin="round";
+        if(dash) ctx.setLineDash(dash); ctx.beginPath(); let on=false;
+        arr.forEach((v,t)=>{ if(!Number.isFinite(v)) return; const px=CX(t), py=CY(v); on?ctx.lineTo(px,py):ctx.moveTo(px,py); on=true; });
+        ctx.stroke(); ctx.restore(); };
+      if(nTe) curve(histT,"--ink-soft",2,[6,5]);
+      curve(hist,"--accent",2.6,null);
+      if(Number.isFinite(Ltr)) disc(ctx,CX(hist.length-1),CY(Ltr),5.5,css("--accent"),css("--surface"));
+      const lname=REG()?"MSE":"log-loss";
+      legend(ctx,qx1-8,qy0+14,[[`kayıp (${lname}) · log ölçek`,"--ink-soft"],[`── eğitim ${fL(Ltr)}`,"--accent"],
+        [nTe?`- - test ${fL(Lte)}`:"","--ink-soft"]],{size:11.5,align:"right"});
+      label(ctx,"tur →",qx1,qy1+24,css("--ink-soft"),"right",11);
+    }
+
+    /* kaydırıcılar verinin biriminde; eğitim çevirdikçe onlar da döner */
+    $("#intro-b0").value=Math.round(clamp(b0,q.rng.b0[0],q.rng.b0[1])*10);
+    $("#intro-b1").value=Math.round(clamp(b1,q.rng.b1[0],q.rng.b1[1])*100);
+    txt("#intro-b0o",mn(b0,1)); txt("#intro-b1o",mn(b1,2));
+    /* göstergeler: regresyonda hata (MSE), sınıflandırmada doğruluk; "Altı öğrenci"de test
+       yok, onun yerine YENİ öğrencinin tahmini */
+    const [sv,sc]=status();
+    txt("#intro-t",String(tur));
+    let pN=null;
+    if(REG()){ txt("#intro-tr",fL(Ltr)); txt("#intro-te",fL(Lte)); }
+    else{
+      txt("#intro-tr",pc(nRight(tr),nTr));
+      if(q.gen==="six"){ pN=pred(NEW); txt("#intro-te",`${clsName(pN>=.5?1:0)} ${pN.toFixed(2)}`); }
+      else txt("#intro-te",pc(nRight(te),nTe));
+    }
+    const se=$("#intro-st"); se.textContent=sv; se.className="v"+(sc?" "+sc:"");
+    /* tuval metni sahte DOM'da okunmuyor: modelin durumu aria-label'da (behaviour.js oradan sınar) */
+    const head=`Makine öğrenmesine giriş · ${q.name} · ${REG()?"regresyon":"sınıflandırma"}. Tur ${tur}, α ${LR()}. `;
+    cv.setAttribute("aria-label",head+(REG()
+      ?`Model: ŷ = ${mn(b0,1)} ${pmn(b1,2)}x. Eğitim MSE ${fL(Ltr)}, test MSE ${fL(Lte)}.`
+      :`Sınır: ${q.yn} = ${mn(b0,1)} ${pmn(b1,2)} · ${q.xn}; ${q.side}. Eğitim log-loss ${fL(Ltr)}, eğitim doğruluğu ${pc(nRight(tr),nTr)} (${nRight(tr)}/${nTr}).`+
+       (nTe?` Test log-loss ${fL(Lte)}, test doğruluğu ${pc(nRight(te),nTe)} (${nRight(te)}/${nTe}).`:"")+
+       (pN!==null?` YENİ (7, 5): P(${clsName(1)}) ${pN.toFixed(3)} → ${clsName(pN>=.5?1:0)}.`:""))+` Durum ${sv}.`);
+  }
+
+  const stopRun=()=>{ if(timer){clearInterval(timer);timer=0;} runBtn("#intro-run",false,"Eğit"); };
+  function run(){
+    if(timer){ stopRun(); draw(); return; }
+    if(diverged) return;
+    /* « Eğit » 60. tura kadar (sunum: "60 tur sonra"); 60'ı geçtiyse 60 tur daha */
+    target=tur<RUNW?RUNW:tur+RUNW;
+    runBtn("#intro-run",true,"Durdur");
+    timer=setInterval(()=>{ const ok=step1(); if(!ok||tur>=target) stopRun(); draw(); },50);
+  }
+  function reset(){ stopRun(); [c0,c1]=S().th0; startHist(false); draw(); }
+  const LRB=["#intro-lr0","#intro-lr1","#intro-lr2"];
+  const paintLR=()=>LRB.forEach((s,j)=>{ const b=$(s); if(!b) return;
+    b.setAttribute("aria-pressed",String(j===lri)); b.textContent=String(S().lr[j]); });
+  /* α bir hiperparametre: eğitimden ÖNCE seçilir, değişince eğitim baştan başlar */
+  LRB.forEach((s,j)=>{ $(s).onclick=()=>{ lri=j; paintLR(); reset(); }; });
+  $("#intro-step").onclick=()=>{ stopRun(); step1(); draw(); };
+  $("#intro-run").onclick=run;
+  $("#intro-reset").onclick=reset;
+  /* düğmeyi elle çevirmek yeni bir başlangıç: tur 0, eğitim buradan devam eder */
+  const knob=()=>{ stopRun(); [c0,c1]=toStd(+$("#intro-b0").value/10, +$("#intro-b1").value/100); startHist(true); draw(); };
+  $("#intro-b0").oninput=knob; $("#intro-b1").oninput=knob;
+  cv.addEventListener("pointerdown",e=>{
+    if(!geo) return; const P=pointerPos(cv,e); let best=null, bd=18;
+    const near=(k,i,p,yv)=>{ const d=Math.hypot(geo.X(p.x1)-P.x,geo.Y(yv)-P.y); if(d<bd){bd=d;best={k,i};} };
+    tr.forEach((p,i)=>near("tr",i,p,ptY(p))); te.forEach((p,i)=>near("te",i,p,ptY(p)));
+    if(S().gen==="six") near("new",0,NEW,NEW.x2);
+    if(best){ sel=best; draw(); }
+  });
+  /* Balon (sl. 60): rüzgâr U(0, 25) km/sa, görüş U(1, 10) km, birer ondalık; esinti N(0, 2)
+     tabloya girmez. Kural: rüzgâr + esinti < 15 ve görüş > 3 → uçar. 120 eğitim, 30 test. */
+  function balloon(){
+    const all=[];
+    for(let i=0;i<150;i++){ const w=Math.round(rnd(0,25)*10)/10, g=Math.round(rnd(1,10)*10)/10;
+      all.push({id:`sabah ${i+1}`, x1:w, x2:g, y:(w+2*gauss()<15&&g>3)?1:0}); }
+    for(let i=all.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [all[i],all[j]]=[all[j],all[i]]; }
+    tr=all.slice(0,120); te=all.slice(120);
+  }
+  function build(){
+    const g=S().gen;
+    if(g==="ten"){ tr=TEN.map(([x,y],i)=>({id:`öğrenci ${i+1}`,x1:x,y})); te=TEN_T.map(([x,y],i)=>({id:`test ${i+1}`,x1:x,y})); }
+    else if(g==="six"){ tr=SIX.map(([id,a,b,c,y])=>({id,x1:a,x2:b,x3:c,y})); te=[]; }
+    else balloon();
+    /* standartlaştırma YALNIZ eğitim noktalarından (sunum: test verisi ölçeklemede bile kullanılmaz) */
+    const ms=(k)=>{ const m=tr.reduce((s,p)=>s+p[k],0)/tr.length;
+      return [m, Math.sqrt(tr.reduce((s,p)=>s+(p[k]-m)**2,0)/tr.length)||1]; };
+    const a=ms("x1"), b=REG()?[0,1]:ms("x2");
+    st={m1:a[0],s1:a[1],m2:b[0],s2:b[1]};
+    sel={k:"tr",i:0};
+  }
+  function useSet(i){
+    dsi=clamp(i,0,DS.length-1); const q=S();
+    lri=1; paintLR();
+    const e0=$("#intro-b0"), e1=$("#intro-b1");
+    e0.min=q.rng.b0[0]*10; e0.max=q.rng.b0[1]*10; e1.min=q.rng.b1[0]*100; e1.max=q.rng.b1[1]*100;
+    $("#intro-new").hidden=q.gen!=="balloon";
+    txt("#intro-trk",REG()?"Eğitim MSE":"Eğitim doğruluğu");
+    txt("#intro-tek",REG()?"Test MSE":q.gen==="six"?"YENİ (7, 5)":"Test doğruluğu");
+    build(); reset();
+  }
+  $("#intro-new").onclick=()=>{ if(S().gen!=="balloon") return; build(); reset(); };
+  reg({id:"m-intro",draw,space:run,init:()=>useSet(0),stop:stopRun,
+    scenarioLabel:CONTENT["m-intro"].pick,
+    scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
+    steps:[
+    {t:"Veri: satır, sütun, etiket",d:"On öğrencinin çalışma saati ve notu. Her nokta bir <b>örnek</b>, yani tablonun bir satırı: yatay eksen <b>öznitelik</b> x, dikey eksen <b>etiket</b> y. Bir noktaya tıklayın: köşedeki kutuda o satırı modelin gözüyle okuyorsunuz, x, y ve modelin tahmini ŷ.",
+     set:0, run(){press("#intro-lr1");}},
+    {t:"Makine ve düğmeleri",d:"Model bir doğru: ŷ = β₀ + β₁x. β₀ ve β₁ modelin iki düğmesi, <b>parametreleri</b> (θ). Başlangıçta rastgele: doğru ters eğik, herkese 30'un altında not biçiyor. Kırmızı çizgiler hatalar; karelerinin ortalaması <b>MSE 2095</b>.",
+     set:0, hl:["#intro-b0","#intro-b1","#intro-tr"], run(){press("#intro-lr1");}},
+    {t:"Bir tur",d:"« Bir tur eğit »: model on öğrenciyi tahmin etti, hatayı ölçtü ve iki düğmeyi hatayı azaltan yöne biraz çevirdi. MSE 2095'ten <b>1343</b>'e indi. Kesikli gri çizgi tur 0'daki doğru; sağdaki eğri her turun hatasını yazıyor.",
+     set:0, hl:["#intro-step","#intro-tr"], run(){press("#intro-lr1");press("#intro-step");}},
+    {t:"Beş tur",d:"Beş turda doğru dönmeye başladı: <b>MSE 230</b>. Sunumdaki ikinci resim tam bu an. Düğmeleri kimse elle çevirmedi; her turda eğitim çevirdi.",
+     set:0, hl:["#intro-t","#intro-tr"], run(){press("#intro-lr1");for(let i=0;i<5;i++) press("#intro-step");}},
+    {t:"60 tur",d:"« Eğit » 60. tura kadar sürüyor: doğru noktaların arasından geçiyor, <b>MSE 5.5</b> (sunum 6'ya yuvarlıyor). Sağdaki eğri log ölçekte: başta hızlı, sonra yavaş; bir yerden sonra Durum « Azalmıyor » diyor ve eğitimi orada durdururuz. Hata neden sıfır değil?",
+     set:0, hl:["#intro-tr","#intro-st"], run(){press("#intro-lr1");setPressed("#intro-run",true);}},
+    {t:"Hiperparametre: α",d:"Düğmelerin her turda ne kadar çevrileceğini <b>learning rate</b> α söylüyor. Onu eğitim değil siz seçiyorsunuz: bir <b>hiperparametre</b>. α = 0.02 ile aynı 60 tur: doğru hâlâ yolda, MSE <b>21</b>.",
+     set:0, hl:["#intro-lr0","#intro-tr"], run(){press("#intro-lr0");setPressed("#intro-run",true);}},
+    {t:"Çok büyük adım",d:"α = 1.05: her tur doğruyu hedefin öbür yanına fırlatıyor ve her seferinde biraz daha uzağa. MSE 2095'ten 2534'e, sonra daha da yukarı; Durum « Iraksadı » diyor. Eğitim düğmeleri çevirir, ama ne kadar çevireceğini siz seçersiniz.",
+     set:0, hl:["#intro-lr2","#intro-st"], run(){press("#intro-lr2");setPressed("#intro-run",true);}},
+    {t:"Test: hiç görmediği öğrenciler",d:"İçi boş üç halka <b>test</b> öğrencileri: model onlarla hiç eğitilmedi, kırmızı çizgileri de yok. 60 turda test MSE'si <b>11.1</b>, eğitiminki 5.5: biraz yüksek ama aynı boyda. Model ezberlemedi, öğrendi; buna <b>genelleme</b> denir.",
+     set:0, hl:["#intro-te","#intro-tr"], run(){press("#intro-lr1");setPressed("#intro-run",true);}},
+    {t:"Altı öğrenci: aynı makine, sınıflandırma",d:"Sunumun tablosu: saat ve devamsızlık öznitelik, sonuç etiket. Etiket bir sınıf olunca doğru bir <b>sınır</b>: altı Geçti, üstü Kaldı. Başlangıçta herkese Geçti diyor, doğruluk %50. Aynı iki düğme, aynı döngü; 60 turda altısı da doğru tarafta.",
+     set:1, hl:["#intro-tr"], run(){press("#intro-lr1");setPressed("#intro-run",true);}},
+    {t:"YENİ öğrenci (7, 5)",d:"Yıldız: 7 saat çalışmış, 5 gün devamsız, sonucu bilinmiyor. Eğitilmiş sınır onu neredeyse tam üstünde buluyor, P(Geçti) 0.5'e çok yakın: D ile E'nin tam ortasında. Ders notundaki elle KNN hesabında da D ile E eşit uzaklıkta çıkıyor.",
+     set:1, hl:["#intro-te"], run(){press("#intro-lr1");setPressed("#intro-run",true);}},
+    {t:"Balon turu: eğitim ve test",d:"Göreme'de 150 sabah: rüzgâr ve görüş. 120 sabahla eğitiyoruz, 30 sabah (içi boş) saklı. 60 turda eğitim ve test doğruluğu ortalamada birbirine yakın, ikisi de %85 civarında: ezber yok. Test yalnız 30 sabah, şansa göre birkaç puan oynar; « Yeni veri » ile deneyin. Tek bir doğru da 'rüzgâr az ve görüş iyi' köşesini çizemiyor.",
+     set:2, hl:["#intro-tr","#intro-te"], run(){press("#intro-lr1");setPressed("#intro-run",true);}}
+  ]});
+})();
 
 /* ═════════════ 1 · KNN ═════════════ */
 (function(){
@@ -11983,6 +12441,7 @@ const META=[
   ["24","m-lay",   "neural network playground: layer ve neuron","Katman ekle, nöron ekle","Ek · Sinir ağları","oyun alanı playground tensorflow playground katman layer gizli katman hidden layer nöron neuron derin deep ileri yayılım forward pass epoch eğitim training aktivasyon activation relu tanh sigmoid doğrusal linear learning rate öğrenme oranı öznitelik feature daire wi-fi xor ilaç etkileşimi iki öbek sarmal spiral test kaybı"],
   ["25","m-dig",   "MNIST: piksel girdisi ve softmax","Rakamı tanıyan ağ","Ek · Sinir ağları","rakam tanıma digit recognition mnist el yazısı handwriting piksel pixel resim image girdi input softmax çıkış katmanı output layer sınıflandırma classification çiz draw gizli katman hidden layer ağırlık resmi şablon template ortalama centering konum"],
   ["26","m-cn",    "convolution ve feature map","Filtre gezdirmek","Ek · Sinir ağları","konvolüsyon convolution çekirdek kernel filtre filter cnn öznitelik haritası feature map havuzlama pooling relu sobel hava fotoğrafı tarla parseli test deseni sobel"],
+  ["27","m-intro", "model, parameter ve generalization","Ayar düğmeli makine","Hafta 1","makine öğrenmesi machine learning giriş introduction model parametre parameter hiperparametre hyperparameter theta θ eğitim training eğitim döngüsü tur loss function kayıp fonksiyonu mse log-loss learning rate öğrenme oranı genelleme generalization eğitim kümesi test kümesi training set test set overfitting aşırı öğrenme underfitting yetersiz öğrenme ezber örnek sample öznitelik feature etiket label denetimli supervised denetimsiz unsupervised sınıflandırma classification regresyon regression knn k en yakın komşu lazy learner tembel öğrenen temel model baseline on öğrenci altı öğrenci yeni öğrenci balon turu göreme rüzgâr rüzgar görüş hafta 1"],
   ["29","m-err",   "MAE, RMSE, R² ve temel model","Ne kadar yanıldık?","Hafta 3","hata ölçütü error metric kayıp fonksiyonu loss function maliyet fonksiyonu cost function j theta mae ortalama mutlak hata mean absolute error mse ortalama kare hata mean squared error rmse kök ortalama kare hata root mean squared error r2 r kare belirlilik katsayısı temel model baseline dummyregressor dummyclassifier en sık sınıf huber kaybı huber loss delta 0-1 kaybı büyük hata outlier aykırı değer beş ev ev fiyatı göreme ziyaretçi bayram müze hafta 3 doğruluk"],
 ];
 /* ders sırasına dizilmiş modüller — gezinme hep bunun üzerinden */
@@ -12001,6 +12460,21 @@ const GTITLE={"Hafta 1":"Makine öğrenmesine giriş","Hafta 2":"Veri tanıma ve
 const TH={};
 const thumbBase=(ctx,w,h)=>{ctx.clearRect(0,0,w,h);ctx.fillStyle=css("--surface-2");ctx.fillRect(0,0,w,h);};
 const tdot=(ctx,x,y,r,c)=>{ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=c;ctx.fill();};
+/* giriş: noktalar, eğitilmiş doğru (pembe), tur 0'daki doğru (kesikli) ve düşen kayıp eğrisi */
+TH["m-intro"]=(c,w,h)=>{thumbBase(c,w,h);
+  const P=[[.08,.30],[.17,.34],[.22,.42],[.31,.40],[.36,.50],[.45,.52],[.55,.60],[.64,.61],[.74,.70],[.83,.73]];
+  const pw=w*.6, X=(u)=>8+u*(pw-12), Y=(v)=>h-10-v*(h-22);
+  c.strokeStyle=css("--ink-soft"); c.lineWidth=1.5; c.setLineDash([4,4]);
+  c.beginPath(); c.moveTo(X(0),Y(.28)); c.lineTo(X(1),Y(.07)); c.stroke(); c.setLineDash([]);
+  c.strokeStyle=css("--accent"); c.lineWidth=2.4;
+  c.beginPath(); c.moveTo(X(0),Y(.32)); c.lineTo(X(1),Y(.81)); c.stroke();
+  P.forEach(([u,v])=>tdot(c,X(u),Y(v),3.2,css("--a")));
+  const x0=pw+8, x1=w-8, y0=12, y1=h-12;
+  c.strokeStyle=css("--line"); c.lineWidth=1; c.strokeRect(x0,y0,x1-x0,y1-y0);
+  c.strokeStyle=css("--accent"); c.lineWidth=2; c.beginPath();
+  for(let i=0;i<=30;i++){ const t=i/30, v=Math.exp(-7*t); const px=x0+t*(x1-x0), py=y1-4-v*(y1-y0-10); i?c.lineTo(px,py):c.moveTo(px,py); }
+  c.stroke();
+};
 TH["m-knn"]=(c,w,h)=>{thumbBase(c,w,h);
   for(let i=0;i<9;i++)tdot(c,w*.18+((i*37)%1*0)+ (i%3)*13+6,h*.30+Math.floor(i/3)*13,4,css("--a"));
   for(let i=0;i<9;i++)tdot(c,w*.62+(i%3)*13,h*.44+Math.floor(i/3)*13,4,css("--b"));
