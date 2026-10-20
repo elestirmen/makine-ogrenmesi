@@ -1290,6 +1290,97 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(px>5*Math.max(Math.abs(pk),0.005), "permütasyon gerçek sütunu (x₁) yine görüyor", `${px.toFixed(3)} ≫ ${pk.toFixed(3)}`);
 }
 
+/* ── 31 · Boosting (AdaBoost, karar kütükleri): .ask, dokuz adım, üç veri notu, ders notu ──
+   Veri rastgele: her iddia 16 veri kümesinin ORTALAMASIYLA ya da "çoğunlukla" payıyla
+   sınanır. Ölçüm (20–30 veri, learning rate 1.0 ve 0.1):
+   Deneme   · ε₁ 0.13–0.23 · 2. turda eğitim hatası aynı %90, 3. turda düşüyor %95,
+              2. kütük öteki eksende %100 · t20 eğitim 7.1 test 14.9 · t200 eğitim 0 test 16.9 ·
+              lr 0.1 t200 eğitim 7.8 test 14.0 · random forest 15.6 · tek ağaç 18.8
+   Köşe     · test t1 19.9 · t3 10.8 · t5 7.5 · t20 6.3 · t200 6.75 · random forest 5.1 (64 veri)
+   Ters     · t200 eğitim 4.0 test 24.5 (t20 21.9) · random forest 20.3 · en büyük 10
+              dairenin 6.1–6.8'i ters etiketli · lr 0.1 t200 test 20.6–22.0 */
+{
+  head("Modül 31 · Bayrak yarışı (boosting, AdaBoost)");
+  const {el,M,tick}=boot(F);
+  const A=()=>el('c-boost').getAttribute('aria-label');
+  const rx=(re)=>{const m=re.exec(A()); return m?+m[1]:NaN;};
+  const at=(lr,t)=>{ S(el,'bst-lr',lr); S(el,'bst-t',t);
+    return {tr:V(el,'bst-tr'), te:V(el,'bst-te'), rf:V(el,'bst-rf'), one:V(el,'bst-one'),
+            eps:rx(/ε ([\d.]+), α/), alpha:rx(/α ([\d.]+);/), share:rx(/ağırlık payı (\d+\.\d+)/),
+            big:rx(/ters etiketli olan: (\d+)/), nt:rx(/tur \d+ \/ (\d+)/), ax:/ekseni: (\d), (\d)/.exec(A())}; };
+  const N=16, pay=(a)=>a.filter(Boolean).length/a.length;
+
+  /* ── Deneme kullanıcıları ── */
+  const D={e1:[],sh:[],same:[],drop:[],ax:[],a21:[],t20:[],t200:[],l200:[],rf:[],one:[],nt:[],t0:[]};
+  for(let r=0;r<20;r++){ PK(M,'m-boost',0); el('bst-reset').click(); S(el,'bst-lr',6);
+    D.t0.push(/Henüz kütük yok/.test(A())&&T(el,'bst-a')==='—'&&T(el,'bst-tr')==='—');
+    el('bst-step').click(); const a1=at(6,1);
+    el('bst-step').click(); const a2=at(6,2);
+    el('bst-step').click(); const a3=at(6,3);
+    D.e1.push(a1.eps); D.sh.push(a1.share); D.same.push(a2.tr===a1.tr); D.drop.push(a3.tr<a2.tr);
+    D.ax.push(a2.ax&&a2.ax[1]!==a2.ax[2]); D.a21.push(a2.alpha<a1.alpha);
+    D.t20.push(at(6,20)); D.t200.push(at(6,200)); D.l200.push(at(1,200));
+    D.rf.push(V(el,'bst-rf')); D.one.push(V(el,'bst-one')); D.nt.push(at(6,1).nt); }
+  const m=(a,k)=>mean(a.map(x=>x[k]));
+  console.log(`       ε₁ ort ${mean(D.e1).toFixed(3)} (${Math.min(...D.e1).toFixed(2)}–${Math.max(...D.e1).toFixed(2)}) · 2. tur aynı ${pay(D.same).toFixed(2)} · 3. tur düşüş ${pay(D.drop).toFixed(2)} · öteki eksen ${pay(D.ax).toFixed(2)}`);
+  console.log(`       lr 1.0: t20 eğitim %${m(D.t20,'tr').toFixed(1)} test %${m(D.t20,'te').toFixed(1)} · t200 eğitim %${m(D.t200,'tr').toFixed(1)} test %${m(D.t200,'te').toFixed(1)}`);
+  console.log(`       lr 0.1: t200 eğitim %${m(D.l200,'tr').toFixed(1)} test %${m(D.l200,'te').toFixed(1)} · random forest %${mean(D.rf).toFixed(1)} · tek ağaç %${mean(D.one).toFixed(1)}`);
+  chk(D.nt.every(x=>x===200), "AdaBoost 200 turun hepsini kuruyor (kaydırıcı 0–200)", D.nt.join(','));
+  chk(pay(D.t0)===1, "« Sıfırla »: henüz kütük yok, göstergeler boş (adım 1, .ask)", pay(D.t0).toFixed(2));
+  chk(mean(D.e1)>=.13&&mean(D.e1)<=.23&&pay(D.e1.map(e=>e>=.10&&e<=.26))>=.9, "ilk kütüğün ε'u çoğunlukla 0.13–0.23 (adım 2)", mean(D.e1).toFixed(3));
+  chk(D.sh.every(x=>Math.abs(x-.5)<.0015), "learning rate 1'de yanılınan noktaların ağırlık payı tam 0.5 (adım 2, ders notu)", D.sh.map(x=>x.toFixed(3)).slice(0,4).join(' '));
+  chk(pay(D.same)>=.6, "2. turda eğitim hatası çoğunlukla değişmiyor (.ask, adım 3)", pay(D.same).toFixed(2));
+  /* α₂ < α₁ ise iki kütüklü topluluk tam olarak 1. kütüktür: hata değişemez. (α₂ ≥ α₁ iken
+     hata rastlantıyla aynı çıkabiliyor, o yüzden ters yön sınanmaz.) */
+  chk(pay(D.a21)>=.6&&D.a21.every((x,i)=>!x||D.same[i]), "2. kütüğün α'sı çoğunlukla küçük ve küçükse hata hiç değişmiyor (adım 3)", `${pay(D.a21).toFixed(2)}`);
+  chk(pay(D.ax)>=.8, "2. kütük çoğunlukla öteki eksene geçiyor (adım 3)", pay(D.ax).toFixed(2));
+  chk(pay(D.drop)>=.7, "3. turda eğitim hatası çoğunlukla düşüyor (.ask, adım 4)", pay(D.drop).toFixed(2));
+  chk(m(D.t20,'tr')>=5&&m(D.t20,'tr')<=9.5, "20 turda eğitim hatası %7 civarı (adım 5)", m(D.t20,'tr').toFixed(1));
+  chk(m(D.t20,'te')>=13&&m(D.t20,'te')<=17, "20 turda test hatası %15 civarı (adım 5)", m(D.t20,'te').toFixed(1));
+  chk(mean(D.one)>=17&&mean(D.one)<=21&&m(D.t20,'te')<mean(D.one)-2, "tek ağaç %19 civarı, boosting çok altında (adım 5, not)", `${mean(D.one).toFixed(1)} vs ${m(D.t20,'te').toFixed(1)}`);
+  chk(Math.abs(m(D.t20,'te')-mean(D.rf))<=1.5, "20 turda random forest'la başa baş (adım 5)", `${m(D.t20,'te').toFixed(1)} vs ${mean(D.rf).toFixed(1)}`);
+  chk(m(D.t200,'tr')<=.6&&pay(D.t200.map(x=>x.tr===0))>=.75, "200 turda eğitim hatası %0 ya da çok yakını (adım 6)", `ort ${m(D.t200,'tr').toFixed(2)} · sıfır ${pay(D.t200.map(x=>x.tr===0)).toFixed(2)}`);
+  chk(m(D.t200,'te')-m(D.t20,'te')>=.6&&m(D.t200,'te')>=15&&m(D.t200,'te')<=19, "200 turda test hatası 20. turdakinden yüksek, %17 civarı (adım 6, not, ders notu)", `${m(D.t20,'te').toFixed(1)} → ${m(D.t200,'te').toFixed(1)}`);
+  chk(m(D.t200,'te')>mean(D.rf)+.3, "…ve random forest'ın gerisinde (adım 6, not)", `${m(D.t200,'te').toFixed(1)} vs ${mean(D.rf).toFixed(1)}`);
+  chk(m(D.l200,'tr')>=6&&m(D.l200,'tr')<=10, "learning rate 0.1'de 200 turda eğitim hatası %8 civarı (adım 7)", m(D.l200,'tr').toFixed(1));
+  chk(m(D.l200,'te')>=12.5&&m(D.l200,'te')<=15.5&&m(D.l200,'te')<m(D.t200,'te')-1, "…test hatası %14 civarı, lr 1.0'dan düşük (adım 7, not)", `${m(D.l200,'te').toFixed(1)} vs ${m(D.t200,'te').toFixed(1)}`);
+  chk(pay(D.l200.map((x,i)=>x.te<D.rf[i]))>=.55&&m(D.l200,'te')<mean(D.rf), "…ve çoğunlukla random forest'ı geçiyor (adım 7, not)", `${pay(D.l200.map((x,i)=>x.te<D.rf[i])).toFixed(2)} · ${m(D.l200,'te').toFixed(1)} vs ${mean(D.rf).toFixed(1)}`);
+  chk(mean(D.rf)>=14&&mean(D.rf)<=17&&mean(D.one)>mean(D.rf)&&mean(D.rf)>m(D.l200,'te'), "not: tek ağaç %19 > random forest %15.5 > boosting %14 (Hafta 11 sırası)", `${mean(D.one).toFixed(1)} > ${mean(D.rf).toFixed(1)} > ${m(D.l200,'te').toFixed(1)}`);
+
+  /* ── Müşteri kaybı · köşe ── */
+  const K={t1:[],t3:[],t5:[],t20:[],t200:[],rf:[]};
+  for(let r=0;r<N;r++){ PK(M,'m-boost',1);
+    K.t1.push(at(6,1).te); K.t3.push(at(6,3).te); K.t5.push(at(6,5).te); K.t20.push(at(6,20).te); K.t200.push(at(6,200).te); K.rf.push(V(el,'bst-rf')); }
+  console.log(`       köşe: test t1 %${mean(K.t1).toFixed(1)} · t3 %${mean(K.t3).toFixed(1)} · t5 %${mean(K.t5).toFixed(1)} · t200 %${mean(K.t200).toFixed(1)} · random forest %${mean(K.rf).toFixed(1)}`);
+  chk(mean(K.t1)>=17&&mean(K.t1)<=22, "köşe: tek kütükte test hatası %19 civarı (adım 9, not)", mean(K.t1).toFixed(1));
+  chk(mean(K.t3)>=9&&mean(K.t3)<=14, "köşe: üç kütükte %11 civarı (adım 9, not)", mean(K.t3).toFixed(1));
+  chk(mean(K.t5)>=6&&mean(K.t5)<=10, "köşe: beş kütükte %8 civarı (adım 9, not)", mean(K.t5).toFixed(1));
+  /* 64 veride t20 6.3, t200 6.75 (16'lık bloklar 6.4–7.4), random forest 5.1 */
+  chk(mean(K.t200)>=4.5&&mean(K.t200)<=8.5&&mean(K.t200)-mean(K.t20)<1.5&&mean(K.rf)>=3.5&&mean(K.rf)<=6.5, "köşe: 200 turda pek bozulmuyor (%6–7), random forest %5 (not)", `t20 ${mean(K.t20).toFixed(1)} → t200 ${mean(K.t200).toFixed(1)} · ${mean(K.rf).toFixed(1)}`);
+
+  /* ── Kayıt hatası · ters etiket (.ask 2. paragraf, adım 8, not, kendini sına 3) ── */
+  const R={t1:[],t20:[],t200:[],l200:[],rf:[],big:[],run:[]};
+  for(let r=0;r<N;r++){ PK(M,'m-boost',2);
+    R.t1.push(at(6,1)); R.t20.push(at(6,20)); const z=at(6,200); R.t200.push(z); R.big.push(z.big);
+    R.rf.push(V(el,'bst-rf')); R.l200.push(at(1,200));
+    if(r<3){ S(el,'bst-lr',6); S(el,'bst-t',0); el('bst-run').click(); tick(120);
+      R.run.push(T(el,'bst-to')==='200'&&T(el,'bst-run')==='Koştur'&&Math.abs(V(el,'bst-te')-z.te)<1e-9); } }
+  console.log(`       ters: eğitim %${m(R.t1,'tr').toFixed(1)} → %${m(R.t200,'tr').toFixed(1)} · test t20 %${m(R.t20,'te').toFixed(1)} → t200 %${m(R.t200,'te').toFixed(1)} · random forest %${mean(R.rf).toFixed(1)} · en büyük 10'da ters ${mean(R.big).toFixed(2)} · lr 0.1 t200 test %${m(R.l200,'te').toFixed(1)}`);
+  chk(R.run.every(Boolean), "« Koştur » 200. tura kadar gidip duruyor, göstergeler kaydırıcıyla aynı (.ask)", R.run.join(','));
+  chk(m(R.t1,'tr')>=17&&m(R.t200,'tr')<=7, "ters: eğitim hatası %20'den %4 civarına iniyor (.ask, not)", `${m(R.t1,'tr').toFixed(1)} → ${m(R.t200,'tr').toFixed(1)}`);
+  chk(m(R.t200,'te')-m(R.t20,'te')>=1.5, "ters: test hatası 20. turdan sonra yükseliyor (.ask)", `${m(R.t20,'te').toFixed(1)} → ${m(R.t200,'te').toFixed(1)}`);
+  chk(m(R.t200,'te')>=22.5&&m(R.t200,'te')<=27&&mean(R.rf)>=18&&mean(R.rf)<=22.5&&m(R.t200,'te')-mean(R.rf)>=2.5, "ters: test %25 civarı, random forest %20 civarı, çok gerisinde (.ask, adım 8, not)", `${m(R.t200,'te').toFixed(1)} vs ${mean(R.rf).toFixed(1)}`);
+  chk(mean(R.big)>=5.5&&mean(R.big)<=8.5, "ters: en büyük 10 dairenin çoğu (ort. 6–7) ters etiketli (.ask, adım 8, not, kendini sına)", mean(R.big).toFixed(2));
+  chk(Math.abs(m(R.l200,'te')-mean(R.rf))<=1.5&&m(R.l200,'te')<m(R.t200,'te')-2, "ters: learning rate 0.1'de test hatası ormanınkine iniyor (not)", `${m(R.l200,'te').toFixed(1)} vs ${mean(R.rf).toFixed(1)}`);
+
+  /* ── elle hesap ve kendini sına'daki sayılar formülden ── */
+  const al=(e)=>.5*Math.log((1-e)/e);
+  chk(Math.abs(al(.2)-.693)<5e-4&&Math.abs(al(.25)-.549)<5e-4&&Math.abs(-al(.2)+al(.25)+.144)<5e-4&&Math.abs(al(.1)-1.099)<5e-4,
+      "elle hesap: α₁ 0.693, α₂ 0.549, X'in toplamı −0.144; kendini sına: ε 0.1 → 1.099", `${al(.2).toFixed(4)} · ${al(.25).toFixed(4)} · ${(al(.25)-al(.2)).toFixed(4)}`);
+  const w=[.2,.2,...Array(8).fill(.05)], z=w.reduce((a,b)=>a+b,0);
+  chk(Math.abs(z-.8)<1e-12&&Math.abs(.2/z-.25)<1e-12&&Math.abs(.05/z-.0625)<1e-12, "elle hesap: toplam 0.8, yeni ağırlıklar 0.25 ve 0.0625", `${z} · ${.2/z} · ${.05/z}`);
+}
+
 /* ── 13 · Eşik · üç senaryo, üç ayrı maliyet ── */
 {
   head("Modül 11 · üç senaryo (İHA / kanser / spam)");
