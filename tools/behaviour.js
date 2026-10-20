@@ -1245,6 +1245,119 @@ const PK=(M,id,j)=>{const m=M.find(x=>x.id===id); if(!m||!m.__pick) throw new Er
   chk(/y(ı|i)ld(ı|i)z/i.test(names[1]), "otel verisinde gösterge 'yıldız puanı' diyor", names[1]);
 }
 
+/* ── 29 · Hata ölçütleri: beş ev (Hafta 3), D'nin payı, temel model ve R², Göreme ──
+   Veri sabit (sunumdan), rastgelelik yok: denetimler tek koşuda kesin sayıya bakar.
+   Paylar, kayıplar ve toplamlar tuvalin aria-label'ından okunur. Kaydırıcı err-p seçili
+   örneğin tahmini × 10 (beş ev, 0.1 adım) ya da ÷ 10 (Göreme, 10 kişi adım). */
+{
+  head("Modül 29 · Ne kadar yanıldık? (MAE, RMSE, R², temel model)");
+  const {el,M}=boot(F);
+  const mod=M.find(x=>x.id==='m-err');
+  const aria=()=>el('c-err').getAttribute('aria-label')||'';
+  const rd=()=>({mae:V(el,'err-mae'),rmse:V(el,'err-rmse'),ratio:V(el,'err-ratio'),r2:V(el,'err-r2'),tb:V(el,'err-tb')});
+  const share=()=>{const m=/payı mutlak hatada %(\d+), kare hatada %(\d+)/.exec(aria()); return m?[+m[1],+m[2]]:[NaN,NaN];};
+  const sums=()=>{const m=/Σ\(y − ŷ\)² ([\d. ]+), Σ\(y − ȳ\)² ([\d. ]+),/.exec(aria()); return m?[m[1].trim(),m[2].trim()]:['?','?'];};
+  const J=()=>{const m=/J ([\d.]+)\./.exec(aria()); return m?+m[1]:NaN;};
+  const all=()=>['err-mae','err-mse','err-rmse','err-ratio','err-r2','err-tb'].map(i=>T(el,i)).join(' | ');
+
+  PK(M,'m-err',0); el('err-reset').click(); P(el,'err-base',false); P(el,'err-sq',false); P(el,'err-vpay',true);
+  const a0=aria(), [pa,pk]=share();
+  console.log(`       beş ev: ${all()} · D payı %${pa} / %${pk}`);
+  chk(T(el,'err-mae')==="0.500"&&T(el,'err-mse')==="0.566"&&T(el,'err-rmse')==="0.752",
+      "beş ev: MAE 0.500, MSE 0.566, RMSE 0.752 (adım 2–4, not)", all());
+  chk(T(el,'err-ratio')==="1.50", "RMSE / MAE = 1.50 (adım 5, not)", T(el,'err-ratio'));
+  chk(pa===64&&pk===90, "D'nin payı mutlak hatada %64, kare hatada %90 (adım 5, ders notu, not)", `%${pa} · %${pk}`);
+  chk(/Hatalar y − ŷ: \+0\.4, −0\.3, −0\.1, \+1\.6, −0\.1; düz toplam \+1\.5/.test(a0),
+      "hatalar +0.4 … −0.1, düz toplamları +1.5 (adım 1)", (/düz toplam [^.]+\.\d/.exec(a0)||[''])[0]);
+  chk(T(el,'err-r2')==="0.696"&&T(el,'err-tb')==="1.364"&&/ȳ = 3\.8:/.test(a0)&&sums().join('/')==="2.83/9.30",
+      "temel model ȳ = 3.8: Σ 2.83 / 9.30, R² 0.696, temel RMSE 1.364 (adım 8, not)", `${sums().join(' / ')} · R² ${T(el,'err-r2')} · ${T(el,'err-tb')}`);
+  const azal=1-V(el,'err-rmse')/V(el,'err-tb');
+  chk(Math.abs(azal-0.45)<0.01, "RMSE temel modele göre yaklaşık %45 azaldı (adım 8)", `%${(100*azal).toFixed(1)}`);
+
+  /* adım 6 · not: D veriden çıkınca MAE 0.225 (%55), RMSE 0.260 (%65), oran 1.15 */
+  P(el,'err-out',true);
+  console.log(`       D'siz: ${all()}`);
+  chk(T(el,'err-mae')==="0.225"&&T(el,'err-mse')==="0.0675"&&T(el,'err-rmse')==="0.260"&&T(el,'err-ratio')==="1.15",
+      "D çıkınca MAE 0.225, MSE 0.0675, RMSE 0.260, oran 1.15 (adım 6, not)", all());
+  chk(Math.round(100*(1-0.225/0.5))===55 && Math.round(100*(1-V(el,'err-rmse')/0.752))===65,
+      "MAE %55, RMSE %65 düştü: büyük hata gidince RMSE daha çok düşüyor (adım 6)");
+  { el('err-reset').click(); for(let t=0;t<5;t++){ P(el,'err-out',true); mod.space(); }
+    const n=num((/: (\d+) ev ölçülüyor/.exec(aria())||[])[1]);
+    chk(n===2, "« Veriden çıkar » en az iki örnek bırakıyor (tek örnekte R²'nin paydası sıfır)", `${n} ev kaldı`); }
+
+  /* .ask 1: D'nin tahmini 2.8 → hatası iki katı (3.2); RMSE MAE'den daha çok büyür */
+  el('err-reset').click(); S(el,'err-p',28);
+  const r28=rd();
+  chk(/Seçili D: hata \+3\.2,/.test(aria()), "D'nin tahmini 2.8'e inince hatası +3.2: iki katı (.ask 1)", (/Seçili D: hata [^,]+/.exec(aria())||[''])[0]);
+  chk(r28.rmse/0.752>r28.mae/0.5+0.2, "hata iki katına çıkınca RMSE MAE'den daha çok büyüyor (.ask 1)",
+      `MAE ×${(r28.mae/0.5).toFixed(2)} · RMSE ×${(r28.rmse/0.752).toFixed(2)}`);
+  /* .ask 1 · adım 5: oran 1'in altına inmez; bütün hatalar aynı boydaysa tam 1 */
+  { el('err-reset').click(); let lo=Infinity, seed=7;
+    const rnd=()=>{seed=(seed*16807)%2147483647; return seed/2147483647;};
+    for(let t=0;t<300;t++){ for(let i=0;i<5;i++){ S(el,'err-p',Math.round(rnd()*80)); mod.space(); }
+      const r=V(el,'err-ratio'); if(Number.isFinite(r)) lo=Math.min(lo,r); }
+    chk(lo>=1, "300 rastgele tahmin kümesinde RMSE / MAE hiç 1'in altına inmedi (.ask 1, adım 5)", `en küçük ${lo.toFixed(2)}`);
+    /* her ev ±0.5 yanılsın: tahmin = y ± 0.5 (kaydırıcı ×10), seçim A'dan başlar */
+    el('err-reset').click(); const y=[30,45,20,60,35], sg=[1,-1,1,-1,1];
+    while(!/Seçili A:/.test(aria())) mod.space();
+    for(let i=0;i<5;i++){ S(el,'err-p',y[i]+5*sg[i]); mod.space(); }
+    chk(T(el,'err-ratio')==="1.00", "bütün hatalar aynı boyda (±0.5) olunca oran tam 1.00 (.ask 1)", T(el,'err-ratio')); }
+
+  /* .ask 2 · adım 9: D'yi aşağı indirirken R² sıfırdan geçtiği anda RMSE = temel model RMSE;
+     R² < 0 ⇔ RMSE > temel RMSE; 3.0'da R² ≈ 0, 2.0'da −0.75 (16.27 / 9.30, RMSE 1.80 · 1.36) */
+  el('err-reset').click(); P(el,'err-base',true);
+  { let ok=true, cross=null, prev=null;
+    for(let v=44;v>=0;v--){ S(el,'err-p',v); const r=rd();
+      if((r.r2<0)!==(r.rmse>r.tb+1e-9)) ok=false;
+      if(prev&&prev.r2>=0&&r.r2<0) cross={v,prev,r}; prev=r; }
+    chk(ok, "R² < 0 tam olarak RMSE > temel model RMSE olduğunda (.ask 2)");
+    chk(cross&&cross.v===29&&Math.abs(cross.prev.rmse-cross.prev.tb)<0.01,
+        "R² 3.0 ile 2.9 arasında sıfırdan geçiyor, orada RMSE ≈ temel model RMSE (.ask 2, adım 9)",
+        cross?`ŷ ${(cross.v+1)/10} → ${cross.v/10}; ${(cross.v+1)/10}'da RMSE ${cross.prev.rmse} ≈ ${cross.prev.tb}`:'geçiş yok'); }
+  S(el,'err-p',30); const r30=V(el,'err-r2');
+  chk(Math.abs(r30)<0.01, "tahmin 3.0'dayken R² neredeyse tam 0 (adım 9)", T(el,'err-r2'));
+  S(el,'err-p',20);
+  chk(T(el,'err-r2')==="-0.749"&&T(el,'err-rmse')==="1.804"&&sums()[0]==="16.27",
+      "D 2.0'da R² −0.75, RMSE 1.80, Σ(y − ŷ)² 16.27 > 9.30 (adım 9)", `${T(el,'err-r2')} · ${T(el,'err-rmse')} · ${sums().join(' / ')}`);
+
+  /* adım 2 ve 7: kayıp eğrisi, Huber. δ kaydırıcısı yalnız « Kayıp eğrisi »nde görünür;
+     δ = 0.5'te D'nin cezası 0.675; δ büyüyünce J → MSE / 2, küçülünce J → δ · MAE */
+  el('err-reset').click(); P(el,'err-vpay',true);
+  const hidPay=el('err-dc').hidden; P(el,'err-vloss',true); const hidLoss=el('err-dc').hidden;
+  chk(hidPay===true&&hidLoss===false, "δ kaydırıcısı yalnız « Kayıp eğrisi »nde görünüyor (adım 7)");
+  S(el,'err-d',5);
+  chk(/Huber 0\.675\./.test(aria()), "δ = 0.5'te D'nin Huber cezası 0.675, karede 2.56 (adım 7)", (/kare [\d.]+, mutlak [\d.]+, Huber [\d.]+/.exec(aria())||[''])[0]);
+  S(el,'err-d',30); const jBig=J();
+  S(el,'err-d',1);  const jSm=J();
+  chk(Math.abs(jBig-0.566/2)<1e-3, "δ büyükken Huber J = MSE'nin yarısı (adım 7)", `J ${jBig} · MSE/2 0.283`);
+  chk(Math.abs(jSm/0.1-0.5)/0.5<0.15, "δ küçükken Huber J ≈ δ · MAE (adım 7)", `J/δ ${(jSm/0.1).toFixed(3)} · MAE 0.500`);
+  S(el,'err-d',10);
+
+  /* adım 10–12 · not: Göreme haftası */
+  PK(M,'m-err',1); P(el,'err-base',true);
+  const g0=aria();
+  console.log(`       Göreme: ${all()}`);
+  chk(T(el,'err-u1')==="kişi"&&T(el,'err-u2')==="kişi²"&&T(el,'err-pl')==="Cum",
+      "Göreme'de gösterge birimleri kişi / kişi², seçili gün bayram cuması", `${T(el,'err-u1')} · ${T(el,'err-u2')} · ${T(el,'err-pl')}`);
+  chk(T(el,'err-mae')==="445"&&T(el,'err-rmse')==="530"&&T(el,'err-ratio')==="1.19"&&T(el,'err-r2')==="0.662",
+      "Göreme: MAE 445, RMSE 530, oran 1.19, R² 0.662 (adım 10–11, not)", all());
+  chk(/ȳ = 4770:/.test(g0)&&/Seçili Cum: hata −185,/.test(g0)&&/en büyük payı Cum %58/.test(g0),
+      "bayram cuması: ȳ 4770, modelin hatası −185, temel modelin kare hatasının %58'i (adım 11, not)",
+      (/en büyük payı [^.]+/.exec(g0)||[''])[0]);
+  P(el,'err-out',true);
+  console.log(`       Göreme, cuma yok: ${all()}`);
+  chk(T(el,'err-mae')==="489"&&T(el,'err-r2')==="-0.018"&&T(el,'err-tb')==="563"&&T(el,'err-rmse')==="568",
+      "cuma çıkınca MAE 489, R² −0.02, temel RMSE 563, RMSE 568 (adım 12, not)", all());
+  chk(V(el,'err-mae')/445<1.15 && V(el,'err-r2')<0, "modelin hatası pek değişmiyor ama R² sıfırın altına iniyor (.ask 2)");
+
+  /* « Sıfırla » ve veri kümesi dönüşü sunumdaki tabloya döner */
+  el('err-reset').click();
+  chk(T(el,'err-r2')==="0.662"&&!/çıkarıldı/.test(aria()), "« Sıfırla » çıkarılanı geri getiriyor");
+  PK(M,'m-err',0);
+  chk(T(el,'err-mae')==="0.500"&&T(el,'err-u1')==="milyon TL"&&T(el,'err-pl')==="D",
+      "beş eve dönünce birim milyon TL, seçili D, MAE 0.500", `${T(el,'err-u1')} · ${T(el,'err-pl')} · ${T(el,'err-mae')}`);
+}
+
 /* ══════════ Yeni modüller ══════════ */
 
 /* ── 01 · Ortalama / medyan: uç değer birini sürükler, diğerini sürüklemez ── */

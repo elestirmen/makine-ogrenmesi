@@ -1190,6 +1190,46 @@ input[type=range]{min-height:28px;margin:0}
       </div>
     </section>
 
+    <!-- ══════════ 29 · Hata ölçütleri ve temel model ══════════ -->
+    <section id="m-err" hidden>
+      <div class="head">
+        <div class="eyebrow"><span>Modül 29 · Hafta 3</span><span class="chip">HATA</span></div>
+        <h2>Ne Kadar Yanıldık?</h2>
+        <p>Bir tahminin hatası <b>loss</b> (kayıp), hepsinin ortalaması <b>cost</b> (maliyet). <b>MAE</b> (ortalama mutlak hata), <b>MSE</b> (ortalama kare hata) ve <b>RMSE</b> (kök ortalama kare hata) aynı hataları farklı tartar; <b>R²</b> (R kare) modeli <b>temel model</b>le (baseline) kıyaslar.</p>
+      </div>
+      <div class="stage">
+        <canvas id="c-err" aria-label="Gerçek değerler, tahminler, hatalar ve hata payları"></canvas>
+        <div class="bar">
+          <label class="ctl"><span class="lab">Tahmin <span class="sym">ŷ</span> · <span id="err-pl">D</span></span><input type="range" id="err-p" min="0" max="80" step="1" value="44" aria-label="Seçili örneğin tahmini"><output id="err-po">4.4</output></label>
+          <button class="btn" id="err-sq" aria-pressed="false">Kareler</button>
+          <button class="btn" id="err-base" aria-pressed="false">Temel model</button>
+          <button class="btn" id="err-out" aria-pressed="false">Veriden çıkar</button>
+          <button class="btn" id="err-reset">Sıfırla</button>
+          <div class="seg" role="group" aria-label="Sağ panel: hata payı ya da kayıp eğrisi">
+            <button id="err-vpay" aria-pressed="true">Hata payı</button>
+            <button id="err-vloss" aria-pressed="false">Kayıp eğrisi</button>
+          </div>
+          <label class="ctl" id="err-dc" hidden><span class="lab">Huber <span class="sym">δ</span></span><input type="range" id="err-d" min="1" max="30" step="1" value="10" aria-label="Huber kaybının bükülme noktası δ"><output id="err-do">1.0</output></label>
+          <span class="hint">Pembe karoyu sürükle → tahmin değişir · sütuna tıkla → seç · Boşluk → sonraki.</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k"><span lang="en">MAE</span> · <span id="err-u1">milyon TL</span></span><span class="v" id="err-mae">—</span></div>
+          <div class="stat"><span class="k"><span lang="en">MSE</span> · <span id="err-u2">milyon TL²</span></span><span class="v" id="err-mse">—</span></div>
+          <div class="stat"><span class="k"><span lang="en">RMSE</span> · <span id="err-u3">milyon TL</span></span><span class="v" id="err-rmse">—</span></div>
+          <div class="stat"><span class="k" lang="en">RMSE / MAE</span><span class="v" id="err-ratio">—</span></div>
+          <div class="stat"><span class="k">R²</span><span class="v" id="err-r2">—</span></div>
+          <div class="stat"><span class="k">Temel model <span lang="en">RMSE</span></span><span class="v" id="err-tb">—</span></div>
+        </div>
+      </div>
+      <div class="ask">
+        <span class="tag">Dene ve düşün</span>
+        <div>
+          <p>D'nin tahminini (pembe karo) sürükle ya da « Tahmin ŷ » kaydırıcısıyla 2.8'e indir: hatası iki katına çıkıyor. MAE mi daha çok büyüdü, RMSE mi? Sonra RMSE / MAE oranını 1'in altına indirmeyi dene. Neden olmuyor, oran hangi durumda tam 1 olur? (İpucu: sağdaki iki şeritte D'nin payına bak.)</p>
+          <p>« Temel model »i aç ve D'nin tahminini yavaş yavaş aşağı indir. R² sıfırdan geçerken RMSE ile Temel model RMSE göstergeleri ne durumda? Sonra Göreme haftasında bayram cumasını veriden çıkar: modelin hatası pek değişmiyor, ama R² sıfırın altına iniyor. Neden?</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ══════════ 11 · Lojistik regresyon ══════════ -->
     <section id="m-log" hidden>
       <div class="head">
@@ -2200,6 +2240,60 @@ const CONTENT={
            ["Min-maks ile ölçeklediğin bir öznitelikte test verisinde 1.3 gördün. Bu bir hata mı?",
             "Hata değil. Ölçekleyici en küçüğü ve en büyüğü yalnız eğitim verisinden öğrenir (fit), teste aynı dönüşümü uygular (transform). Testte eğitimdeki en büyükten daha büyük bir değer gelirse 1'i geçer. Sayıları test verisiyle yeniden hesaplamak data leakage olurdu; bu çok daha kötü."]],
     next:"Modül 03 · Ezber mi, öğrenme mi — veri hazır; şimdi bir modelin iyi olup olmadığını eğitim ve test hatasıyla ölçüyoruz."
+  }},
+
+/* ══ 29 · hata ölçütleri ve temel model ══
+   Sayılar modülün içinde (DATA, gen ile seçilir); burada adlar ve birimler. lu: sağdaki
+   kayıp eğrisinin birimi — Göreme'de kişi² ile kare kayıp mutlak kaybın yanında çizilemiyor. */
+"m-err":{ pick:"Veri seti",
+  sets:[
+    {name:"Beş ev", gen:"ev", item:"ev", pay:"her evin payı", y:"fiyat", yu:"milyon TL", ys:"milyon TL²", lu:"milyon TL",
+     lab:["A","B","C","D","E"], tag:{},
+     note:"Sunumun beş evi (milyon TL): gerçek fiyat 3.0, 4.5, 2.0, 6.0, 3.5; tahmin 2.6, 4.8, 2.1, 4.4, 3.6. MAE 0.500, MSE 0.566, RMSE 0.752 (RMSE / MAE 1.50), R² 0.696; temel model ȳ = 3.8, RMSE'si 1.364. D'nin payı mutlak hatada %64, kare hatada %90. D çıkınca MAE 0.225, RMSE 0.260, oran 1.15."},
+    {name:"Göreme · bir hafta", gen:"goreme", item:"gün", pay:"her günün payı", y:"ziyaretçi", yu:"kişi", ys:"kişi²", lu:"bin kişi",
+     lab:["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"], tag:{4:"bayram"},
+     note:"Sunumdaki üretilmiş Göreme verisinden (730 gün) bir haziran haftası; tahminler sunumdaki doğrusal modelden, 10 kişiye yuvarlı. MAE 445 kişi, RMSE 530 (oran 1.19: dev hata yok), R² 0.662. Bayram cuması tek başına temel modelin kare hatasının %58'i. O gün çıkınca modelin MAE'si yalnız 489'a çıkıyor, R² ise −0.02'ye iniyor."}
+  ],
+  lesson:{
+    q:"Bir modelin ne kadar yanıldığını tek bir sayıyla nasıl söyleriz?",
+    short:"Her örneğin hatası, yani gerçek eksi tahmin, bir kayıptır; bütün kayıpların ortalaması maliyettir. Mutlak hataların ortalaması MAE, kare hataların ortalaması MSE, onun karekökü RMSE. Çıkan sayının iyi mi kötü mü olduğunu ise herkese ortalamayı söyleyen temel modelle kıyaslayarak anlarsın; R² bu kıyasın kendisi.",
+    idea:["Hava durumu uygulaman yarın 20 derece dedi, hava 25 derece oldu. Uygulama ne kadar yanıldı? 5 derece. Tek bir tahminin hatası bu kadar basit: gerçek eksi tahmin, y − ŷ. Artıysa model az tahmin etmiş, eksiyse fazla. Bu tek örneğe kesilen cezanın adı <b>loss function</b> (kayıp fonksiyonu): sınavda tek bir sorudan kaybettiğin puan gibi. Bütün örneklerin kayıplarının ortalaması da <b>cost function</b> (maliyet fonksiyonu), J(θ): sınavın tamamından kaybettiğin puan. Eğitim, J'yi en küçük yapan θ'yı, yani modelin düğmelerinin en iyi ayarını arar.",
+          "Bin tahminin hatasını tek sayıya çevirirken hataları düz toplayamazsın, çünkü artılar eksileri götürür. Bir evi 2 milyon fazla, ötekini 2 milyon eksik tahmin eden modelin düz ortalaması sıfır çıkar; oysa iki tahmin de berbat. Çare işareti atmak. Mutlak hataların ortalaması <b>MAE</b> (ortalama mutlak hata): 'model ortalama ne kadar yanılıyor' sorusunun cevabı. Kare hataların ortalaması <b>MSE</b> (ortalama kare hata). MSE'nin birimi karedir (milyon TL²) ve kimseye bir şey anlatmaz; karekökünü alınca birim geri gelir: <b>RMSE</b> (kök ortalama kare hata).",
+          "Beş ok attın: dördü merkeze çok yakın, biri hedefin kenarında. Uzaklıkların ortalaması 'fena değil' der; karelerin ortalamasını ise o tek ıska ele geçirir. Kare, büyük hatayı büyütür: 1.6'lık hata mutlakta 1.6, karede 2.56. Beş evde D'nin payı mutlak hatada %64, kare hatada %90. Bu yüzden RMSE hep MAE'ye eşit ya da ondan büyüktür. İkisi eşitse bütün hatalar aynı boydadır, arası açıksa birkaç büyük hata vardır. Modül 01'deki tahterevalliyi hatırla: kare hata ortalama gibi uç değere hassas, mutlak hata medyan gibi dayanıklı. İkisinin ortası da var: <b>Huber loss</b> (Huber kaybı) küçük hatada kare, büyük hatada mutlak gibi davranır.",
+          "Modelin RMSE'si 752 bin TL çıktı. İyi mi, kötü mü? Kıyaslayacak bir çıpa olmadan söyleyemezsin. Dört şıklı bir testte hep aynı şıkkı işaretleyen arkadaşın hiç çalışmadan %25 alır; senin %30'un ancak onun yanında anlam kazanır. Modelin bu 'hiç çalışmayan arkadaşı' <b>temel model</b> (baseline): özniteliklere hiç bakmaz. Regresyonda herkese eğitim verisinin ortalamasını (ȳ) söyler, sınıflandırmada herkese en sık sınıfı. On kişilik bir taramada üç kişi hastaysa, herkese 'sağlıklı' diyen temel model 0.70 doğruluk alır. Üç hastanın ikisini yakalayan bir model de 0.70 alabilir: aynı doğruluk, bambaşka iş.",
+          "<b>R²</b> (R kare) bu kıyası tek sayıya çevirir: R² = 1 − Σ(y − ŷ)² / Σ(y − ȳ)². Pay senin modelinin hata kareleri toplamı, payda herkese ortalamayı söyleseydin yapacağın hata. Hatasız model 1 alır, temel modelle aynı hatayı yapan 0, ondan da kötüsü eksi; test verisinde bu olur. R² = 0.70 'vakaların %70'i doğru' demek değildir: modelin kare hatası, ortalamayı söylemenin %30'u kadar demektir. Payda verinin kendi yayılımı olduğu için R² yalnız modele değil veriye de bağlıdır; MAE ve RMSE ise doğrudan hatanın boyudur."],
+    read:[["Sol panel","Her sütun bir ev (ya da gün). Dolu daire gerçek değer y, pembe karo modelin tahmini ŷ, aradaki kırmızı çizgi hata, altında işaretiyle değeri. Karoyu yukarı aşağı sürükle ya da « Tahmin ŷ » kaydırıcısını kullan; kaydırıcı seçili sütunu oynatır (tıkla ya da Boşluk ile seç). « Kareler » her hatayı kenarı hata kadar olan bir kareye çevirir: MSE bu karelerin ortalama alanı. « Temel model » turuncu kesikli ȳ çizgisini ve onun hatalarını çizer."],
+          ["Sağ panel · Hata payı","Üstteki iki şerit her örneğin toplamdaki payı: önce mutlak hatada, sonra kare hatada. Seçili örnek pembe, payı yazılı. « Temel model » açıkken altta iki kare hata toplamı aynı ölçekte durur: modelin Σ(y − ŷ)²'si ve temel modelin Σ(y − ȳ)²'si. Oranları 1 − R²."],
+          ["Sağ panel · Kayıp eğrisi","Yatay eksen hata, dikey eksen ceza. Üç loss function yan yana: kare (camgöbeği), mutlak (mor), Huber (kırmızı kesikli; δ kaydırıcısıyla bükülme noktası kayar). Noktalar örneklerin kaybı, kesikli yatay çizgiler bunların ortalaması, yani cost J: karede MSE, mutlakta MAE. Göreme'de bu panelin birimi bin kişi."],
+          ["Göstergeler","MAE ve RMSE verinin biriminde, MSE birimin karesinde. RMSE / MAE hiçbir zaman 1'in altına inmez; 1'den ne kadar büyükse hatalar o kadar dengesiz. R² temel modele göre; Temel model RMSE herkese ȳ söyleyen modelin RMSE'si. « Veriden çıkar » seçili örneği bütün ölçütlerden çıkarır, ȳ de yeniden hesaplanır."]],
+    terms:[["loss function","kayıp fonksiyonu","tek bir örneğin cezası: (y − ŷ)² ya da |y − ŷ|"],
+           ["cost function","maliyet fonksiyonu","bütün örneklerin kayıplarının ortalaması, J(θ); eğitim bunu küçültür"],
+           ["MAE","ortalama mutlak hata","hataların mutlak değerlerinin ortalaması; 'ortalama ne kadar yanılıyorum'un cevabı"],
+           ["MSE","ortalama kare hata","hataların karelerinin ortalaması; birimi hedefin karesi, doğrudan yorumlanmaz"],
+           ["RMSE","kök ortalama kare hata","√MSE; hedefin biriminde, büyük hatalara ağırlık veren tipik hata büyüklüğü, hep ≥ MAE"],
+           ["Huber loss","Huber kaybı","|e| ≤ δ iken ½e², ötesinde δ(|e| − δ/2): küçük hatada kare, büyük hatada mutlak"],
+           ["baseline","temel model","hiçbir şey öğrenmeyen kıyas modeli: herkese ortalama ya da en sık sınıf"],
+           ["R²","R kare","1 − Σ(y − ŷ)² / Σ(y − ȳ)²; 1 kusursuz, 0 temel modelle aynı, eksi temel modelden kötü"],
+           ["0-1 loss","0-1 kaybı","sınıflandırmada doğruysa 0, yanlışsa 1; ortalaması hata oranı"]],
+    life:["İlaç dozu tahmininde tek bir büyük hata felakettir: MSE ya da RMSE seçilir. Kargo teslim süresinde bir günlük şaşma hoş görülür: MAE yeter. Hastane bekleme süresi için MAE ya da Huber, uçak motorunun arıza zamanı için MSE.",
+          "scikit-learn'de mean_absolute_error, mean_squared_error ve r2_score; RMSE için root_mean_squared_error. Temel model de hazır: DummyRegressor herkese ortalamayı, DummyClassifier en sık sınıfı söyler. Her projede önce onu kur.",
+          "Bazen en güçlü temel model alan bilgisinden gelir. Bir mağazanın gelecek ayki satışı için 'geçen yılın aynı ayı' demek zor geçilen bir çıtadır; karmaşık model onu geçemiyorsa işe yaramıyor demektir."],
+    trap:"RMSE'yi 'ortalama hata' sanmak. Ortalama hata MAE'dir; RMSE büyük hatalara ağırlık verir ve hep MAE'ye eşit ya da ondan büyüktür. İkinci tuzak R²'yi doğruluk yüzdesi sanmak: R² = 0.70 'vakaların %70'i doğru' değil, 'modelin kare hatası, herkese ortalamayı söylemenin %30'u kadar' demektir. Kötü tahmin edilen örneği veriden silmek de çözüm değildir: modeli iyileştirmez, yalnız raporu güzelleştirir.",
+    fig:{at:2, cap:"Sunumun alıştırması: gerçek değerler 10, 12, 15, 9, 14; tahminler 11, 11, 16, 12, 13. Dördüncü örneğin −3'lük hatası mutlak hataların %43'ü, kare alınca %69'u: MAE 1.4, RMSE ≈ 1.61. Turuncu kesikli çizgi herkese 12 diyen temel model; onun kare hatası 26, modelinki 13, R² = 0.50. 9 yerine 30 yazılınca tek uç değer MAE'yi 4.4'e, RMSE'yi 8.10'a çıkarıyor, R² −0.30'a düşüyor."},
+    ex:{t:"Alıştırma: beş tahmin, sonra bir outlier",
+      s:["Gerçek değerler y: 10, 12, 15, 9, 14. Tahminler ŷ: 11, 11, 16, 12, 13. Hatalar y − ŷ: −1, +1, −1, −3, +1. Düz toplamları −3; işaretler birbirini götürdüğü için bu sayı hatayı saklar.",
+         "Mutlak hatalar 1, 1, 1, 3, 1, toplamı 7: <b>MAE = 7 / 5 = 1.4</b>. Kareler 1, 1, 1, 9, 1, toplamı 13: <b>MSE = 13 / 5 = 2.6</b>, <b>RMSE = √2.6 ≈ 1.61</b>. Dördüncü örneğin payı mutlakta 3 / 7 ≈ %43, karede 9 / 13 ≈ %69.",
+         "Temel model herkese ȳ = 60 / 5 = 12 der. Onun hataları −2, 0, +3, −3, +2; kareleri 4, 0, 9, 9, 4, toplamı 26. <b>R² = 1 − 13 / 26 = 0.50</b>: modelin kare hatası, herkese 12 demenin yarısı.",
+         "Şimdi gerçek değerlerden 9'u 30 yap, yani veriye bir outlier ekle. Dördüncü hata 30 − 12 = 18 olur. Mutlak hatalar 1, 1, 1, 18, 1: <b>MAE = 22 / 5 = 4.4</b>, yaklaşık %214 arttı. Kareler 1, 1, 1, 324, 1: MSE = 328 / 5 = 65.6, <b>RMSE = √65.6 ≈ 8.10</b>, yaklaşık %402 arttı.",
+         "Temel model de değişir: yeni ȳ = 81 / 5 = 16.2, onun kare hataları toplamı 252.8. R² = 1 − 328 / 252.8 ≈ <b>−0.30</b>: tek bir uç değer, modeli herkese ortalamayı söylemekten kötü hâle getirdi."],
+      end:"Tek uç değer MAE'yi üç katına, RMSE'yi beş katına çıkardı: kare, büyük hatayı büyütür. Hangi ölçütü seçeceğin, 'büyük bir hata benim için ne kadar kötü?' sorusunun cevabına bağlı."},
+    check:[["Bir modelin test verisindeki R²'si −0.15 çıktı. 'Model örneklerin %15'ini yanlış tahmin ediyor' demek doğru mu? Bu sayı ne anlatıyor?",
+            "Doğru değil. R² = 1 − (modelin hatası / temel modelin hatası). R² = −0.15 ise bölüm 1.15: modelin hata kareleri toplamı, herkese ortalamayı söyleyen temel modelinkinden %15 fazla. Model temel modelden bile kötü, hiçbir şey öğrenmemiş. R² bir doğruluk yüzdesi değildir ve test verisinde eksiye düşebilir."],
+           ["Bir arkadaşın beş hata (+1, −1, +1, −1, +6) için 'MAE = 2.83, RMSE = 2.0' buldu. Hesap yapmadan neden yanlış olduğunu nasıl anlarsın?",
+            "RMSE hiçbir zaman MAE'den küçük olamaz; iki sayı yer değiştirmiş. Doğrusu MAE = (1 + 1 + 1 + 1 + 6) / 5 = 2.0 ve RMSE = √((1 + 1 + 1 + 1 + 36) / 5) = √8 ≈ 2.83. Tek büyük hata (6) RMSE'yi MAE'nin üstüne çekti."],
+           ["Bir sınıflandırma probleminde örneklerin %95'i 'negatif'. Senin modelin %94 doğruluk alıyor. Temel modelden iyi mi?",
+            "Hayır. Sınıflandırmada temel model herkese en sık sınıfı söyler: hep 'negatif' diyen model hiçbir şey öğrenmeden %95 alır, seninki onun 1 puan altında. Yine de pozitifleri yakalıyorsa işe yarayabilir; bunu doğruluk değil, Modül 11'deki precision ve recall söyler."]],
+    next:"Modül 03 · Ezber mi, öğrenme mi — hatayı ölçmeyi öğrendin; şimdi aynı ölçütü eğitim ve test verisinde ayrı ayrı okuyup modelin ezberleyip ezberlemediğini teşhis ediyoruz."
   }},
 
 /* ══ 03 ══ */
@@ -3313,6 +3407,7 @@ const FIGS={
 "m-poly":`<svg viewBox="0 0 640 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beş öğrencinin tasarım matrisi X (1 ve saat sütunları) β = (44, 4) ile çarpılıyor; her satır bir tahmin veriyor, ilk satır 1 · 44 + 2 · 4 = 52. Sağda normal denklemin iki parçası ve sonucu."><rect x="54" y="61" width="36" height="150" rx="5" fill="var(--b)" fill-opacity="0.18"/><rect x="46" y="62" width="124" height="28" rx="6" fill="none" stroke="var(--accent)" stroke-width="2.2"/><rect x="333" y="62" width="40" height="28" rx="6" fill="none" stroke="var(--accent)" stroke-width="2.2"/><path d="M48 58H42V214H48 M168 58H174V214H168 M222 106H216V166H222 M262 106H268V166H262 M332 58H326V214H332 M374 58H380V214H374" fill="none" stroke="var(--ink-soft)" stroke-width="1.8"/><rect x="440" y="40" width="192" height="174" rx="10" fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.5"/><path d="M512 84H508V120H512 M578 84H582V120H578" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><g font-size="14" fill="var(--ink)" text-anchor="middle"><text x="108" y="30" font-weight="700">X · tasarım matrisi</text><text x="242" y="96" font-weight="700">β</text><text x="353" y="30" font-weight="700">ŷ = Xβ</text><text x="72" y="50">1</text><text x="134" y="50">x (saat)</text><text x="353" y="50">tahmin</text><text x="196" y="142" font-size="20" fill="var(--ink-soft)">×</text><text x="303" y="142" font-size="20" fill="var(--ink-soft)">=</text></g><g font-size="15" fill="var(--ink)" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="72" y="81">1</text><text x="134" y="81">2</text><text x="72" y="111">1</text><text x="134" y="111">4</text><text x="72" y="141">1</text><text x="134" y="141">6</text><text x="72" y="171">1</text><text x="134" y="171">8</text><text x="72" y="201">1</text><text x="134" y="201">10</text><text x="242" y="128">44</text><text x="242" y="158">4</text><text x="353" y="81" font-weight="700" fill="var(--accent)">52</text><text x="353" y="111">60</text><text x="353" y="141">68</text><text x="353" y="171">76</text><text x="353" y="201">84</text></g><g font-size="13" fill="var(--ink-soft)"><text x="274" y="128">β₀</text><text x="274" y="158">β₁</text><text x="405" y="50" text-anchor="middle">gerçek</text></g><g font-size="15" fill="var(--ink-soft)" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="405" y="81">51</text><text x="405" y="111">60</text><text x="405" y="141">70</text><text x="405" y="171">76</text><text x="405" y="201">83</text></g><g font-size="13" fill="var(--ink)"><text x="536" y="64" text-anchor="middle" font-weight="700">normal denklem</text><text x="452" y="107">XᵀX =</text><text x="527" y="98" text-anchor="middle">5</text><text x="562" y="98" text-anchor="middle">30</text><text x="527" y="115" text-anchor="middle">30</text><text x="562" y="115" text-anchor="middle">220</text><text x="452" y="146">Xᵀy = (340, 2200)</text><text x="452" y="172">det = 1100 − 900 = 200</text><text x="452" y="199" font-weight="700">β = (44, 4)</text></g><text x="320" y="250" text-anchor="middle" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)">1. satır: 1 · 44 + 2 · 4 = 52   (gerçek 51, artık −1)</text><text x="320" y="276" text-anchor="middle" font-size="13" fill="var(--ink-soft)">derece 2: x² sütunu eklenir, satır [1, 2, 4] olur; hesap aynı</text></svg>`,
 "m-reg":`<svg viewBox="0 0 640 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Katsayı yolu: Σxy = 40, Σx² = 10 olan tek katsayılı modelde α büyüdükçe Ridge katsayısı 40 / (10 + α) sıfıra yaklaşıyor ama varmıyor (α 10 → 2.00, 30 → 1.00, 90 → 0.40); Lasso katsayısı düz bir çizgiyle iniyor (α 20 → 3.00, 40 → 2.00) ve α = 80'de tam sıfıra oturuyor."><path d="M70 194 H590 M70 148 H590 M70 102 H590 M70 56 H590" fill="none" stroke="var(--grid)" stroke-width="1.5"/><path d="M70 36V240H596" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M70 240V245 M122 240V245 M174 240V245 M226 240V245 M278 240V245 M330 240V245 M382 240V245 M434 240V245 M486 240V245 M538 240V245 M590 240V245" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M70 56 L75.2 72.7 L80.4 86.7 L85.6 98.5 L90.8 108.6 L96 117.3 L101.2 125 L111.6 137.8 L122 148 L132.4 156.4 L148 166.4 L163.6 174.3 L184.4 182.5 L205.2 188.9 L226 194 L252 199.1 L278 203.2 L309.2 207.1 L345.6 210.8 L382 213.7 L423.6 216.4 L465.2 218.6 L512 220.6 L548.4 222 L590 223.3" fill="none" stroke="var(--a)" stroke-width="2.5" stroke-linejoin="round"/><path d="M70 56 L486 240 L590 240" fill="none" stroke="var(--b)" stroke-width="2.5" stroke-linejoin="round"/><circle cx="70" cy="56" r="6" fill="var(--ink)"/><circle cx="122" cy="148" r="5.5" fill="var(--a)"/><circle cx="226" cy="194" r="5.5" fill="var(--a)"/><circle cx="538" cy="221.6" r="5.5" fill="var(--a)"/><circle cx="174" cy="102" r="5.5" fill="var(--b)"/><circle cx="278" cy="148" r="5.5" fill="var(--b)"/><circle cx="538" cy="240" r="5.5" fill="var(--b)"/><circle cx="486" cy="240" r="9" fill="none" stroke="var(--accent)" stroke-width="2.5"/><circle cx="486" cy="240" r="5.5" fill="var(--b)"/><path d="M330 40H356" fill="none" stroke="var(--a)" stroke-width="2.5"/><path d="M330 64H356" fill="none" stroke="var(--b)" stroke-width="2.5"/><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="364" y="45" fill="var(--a)">Ridge: β = 40 / (10 + α)</text><text x="364" y="69" fill="var(--ink)">Lasso: β = (40 − α/2) / 10</text></g><text x="364" y="92" font-size="13" fill="var(--ink-soft)">veri: Σxy = 40, Σx² = 10</text><g font-size="13" fill="var(--ink-soft)" text-anchor="middle"><text x="70" y="259">0</text><text x="122" y="259">10</text><text x="174" y="259">20</text><text x="226" y="259">30</text><text x="278" y="259">40</text><text x="330" y="259">50</text><text x="382" y="259">60</text><text x="434" y="259">70</text><text x="486" y="259">80</text><text x="538" y="259">90</text><text x="590" y="259">100</text></g><g font-size="13" fill="var(--ink-soft)" text-anchor="end"><text x="62" y="244">0</text><text x="62" y="198">1</text><text x="62" y="152">2</text><text x="62" y="106">3</text><text x="62" y="60">4</text><text x="62" y="30" font-size="14" fill="var(--ink)">β</text></g><text x="604" y="244" font-size="14" fill="var(--ink)">α</text><g font-size="13" fill="var(--ink)" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="84" y="50">4.00 · cezasız</text><text x="131" y="143">2.00</text><text x="216" y="212" text-anchor="end">1.00</text><text x="538" y="210" text-anchor="middle">0.40</text><text x="184" y="97">3.00</text><text x="289" y="140">2.00</text></g><text x="486" y="280" font-size="13" text-anchor="middle" fill="var(--accent)">↑ Lasso α = 80'de tam 0</text></svg>`,
 "m-scale":`<svg viewBox="0 0 640 292" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aynı üç banka müşterisi iki cetvelde: ham veride sorguya en yakın A (500.6 ile 12000), her fark kendi standart sapmasına bölününce en yakın B (2.08 ile 0.80)."><line x1="378" y1="8" x2="378" y2="284" stroke="var(--line)" stroke-width="1.5"/><text x="12" y="22" font-size="15" font-weight="700" fill="var(--ink)">ham veri</text><text x="12" y="40" font-size="13" fill="var(--ink-soft)">1 TL fark = 1 yıl fark sayılıyor</text><text x="12" y="62" font-size="14" font-weight="700" fill="var(--accent)">en yakın: A</text><polygon points="46,79 52,85 46,91 40,85" fill="var(--ink)"/><text x="60" y="90" font-size="14" fill="var(--ink)">sorgu: 50 bin TL, 30 yaş</text><circle cx="46" cy="107" r="5.5" fill="var(--a)"/><text x="60" y="112" font-size="14" fill="var(--a)">A: 50.5 bin TL, 55 yaş</text><circle cx="46" cy="129" r="5.5" fill="var(--b)"/><text x="60" y="134" font-size="14" fill="var(--ink)">B: 62 bin TL, 31 yaş</text><line x1="24" y1="262" x2="24" y2="160" stroke="var(--ink-soft)" stroke-width="1.5"/><text x="24" y="154" text-anchor="middle" font-size="13" fill="var(--ink-soft)">yaş</text><line x1="24" y1="262" x2="356" y2="262" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M40 262v6M140 262v6M240 262v6M340 262v6" stroke="var(--ink-soft)" stroke-width="1.5"/><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)" text-anchor="middle"><text x="40" y="284">50 bin</text><text x="140" y="284">54 bin</text><text x="240" y="284">58 bin</text><text x="340" y="284">62 bin</text></g><line x1="48" y1="240" x2="333" y2="240" stroke="var(--ink-soft)" stroke-width="1.5" stroke-dasharray="5 4"/><line x1="52.5" y1="232" x2="52.5" y2="182" stroke="var(--a)" stroke-width="1.5"/><text x="60" y="190" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--a)">d(A) ≈ 500.6</text><text x="60" y="208" font-size="13" fill="var(--ink-soft)">25 yıl yaş farkı ≈ 0.6 px</text><text x="230" y="230" text-anchor="middle" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)">d(B) ≈ 12 000</text><polygon points="40,233 47,240 40,247 33,240" fill="var(--ink)"/><circle cx="52.5" cy="239.4" r="5.5" fill="var(--a)"/><circle cx="340" cy="240" r="5.5" fill="var(--b)"/><text x="392" y="22" font-size="15" font-weight="700" fill="var(--ink)">standartlaştırınca</text><text x="392" y="40" font-size="13" fill="var(--ink-soft)">15 bin TL = 12 yıl = 1 s</text><text x="392" y="62" font-size="14" font-weight="700" fill="var(--accent)">en yakın: B</text><g stroke="var(--grid)" stroke-width="1.5"><line x1="440" y1="160" x2="620" y2="160"/><line x1="440" y1="80" x2="620" y2="80"/><line x1="530" y1="70" x2="530" y2="262"/></g><line x1="440" y1="262" x2="440" y2="70" stroke="var(--ink-soft)" stroke-width="1.5"/><line x1="440" y1="262" x2="624" y2="262" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M450 262v6M530 262v6M440 240h-6M440 160h-6M440 80h-6" stroke="var(--ink-soft)" stroke-width="1.5"/><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)"><text x="450" y="284" text-anchor="middle">50 bin</text><text x="530" y="284" text-anchor="middle">65 bin</text><text x="430" y="244" text-anchor="end">30</text><text x="430" y="164" text-anchor="end">42</text><text x="430" y="84" text-anchor="end">54</text></g><text x="398" y="124" text-anchor="middle" font-size="13" fill="var(--ink-soft)">yaş</text><line x1="450" y1="240" x2="452.7" y2="73.3" stroke="var(--a)" stroke-width="2"/><line x1="450" y1="240" x2="514" y2="233.3" stroke="var(--ink-soft)" stroke-width="2"/><text x="462" y="124" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--a)">d(A) ≈ 2.08</text><text x="526" y="222" font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)">d(B) ≈ 0.80</text><polygon points="450,233 457,240 450,247 443,240" fill="var(--ink)"/><circle cx="452.7" cy="73.3" r="5.5" fill="var(--a)"/><circle cx="514" cy="233.3" r="5.5" fill="var(--b)"/></svg>`,
+"m-err":`<svg viewBox="0 0 640 302" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Alıştırmanın beş tahmini: hatalar −1, +1, −1, −3, +1. Dördüncü hatanın payı mutlakta %43, karede %69; MAE 1.4, MSE 2.6, RMSE yaklaşık 1.61; temel model ȳ = 12 ile R² = 1 − 13/26 = 0.50; 9 yerine 30 yazılınca MAE 4.4, RMSE 8.10, R² −0.30."><text x="12" y="22" font-size="15" font-weight="700" fill="var(--ink)">beş tahmin</text><circle cx="18" cy="42" r="5" fill="var(--a)"/><text x="28" y="47" font-size="13" fill="var(--ink-soft)">gerçek y</text><polygon points="98,35 105,42 98,49 91,42" fill="var(--accent)"/><text x="111" y="47" font-size="13" fill="var(--ink-soft)">tahmin ŷ</text><line x1="180" y1="42" x2="200" y2="42" stroke="var(--b)" stroke-width="2.5" stroke-dasharray="5 3"/><text x="206" y="47" font-size="13" fill="var(--ink-soft)">temel ȳ = 12</text><line x1="40" y1="162" x2="292" y2="162" stroke="var(--b)" stroke-width="2.5" stroke-dasharray="7 4"/><g stroke="var(--bad)" stroke-width="3"><line x1="64" y1="184" x2="64" y2="206"/><line x1="114" y1="162" x2="114" y2="184"/><line x1="164" y1="74" x2="164" y2="96"/><line x1="214" y1="162" x2="214" y2="228"/><line x1="264" y1="118" x2="264" y2="140"/></g><g fill="var(--a)"><circle cx="64" cy="206" r="6"/><circle cx="114" cy="162" r="6"/><circle cx="164" cy="96" r="6"/><circle cx="214" cy="228" r="6"/><circle cx="264" cy="118" r="6"/></g><g fill="var(--accent)"><polygon points="64,177 71,184 64,191 57,184"/><polygon points="114,177 121,184 114,191 107,184"/><polygon points="164,67 171,74 164,81 157,74"/><polygon points="214,155 221,162 214,169 207,162"/><polygon points="264,133 271,140 264,147 257,140"/></g><g font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--bad)"><text x="72" y="200">−1</text><text x="122" y="178">+1</text><text x="172" y="90">−1</text><text x="222" y="200" font-weight="700">−3</text><text x="272" y="134">+1</text></g><text x="20" y="274" font-size="14" fill="var(--ink-soft)">y</text><g font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--a)" text-anchor="middle"><text x="64" y="274">10</text><text x="114" y="274">12</text><text x="164" y="274">15</text><text x="214" y="274">9</text><text x="264" y="274">14</text></g><text x="20" y="294" font-size="14" fill="var(--ink-soft)">ŷ</text><g font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--accent)" text-anchor="middle"><text x="64" y="294">11</text><text x="114" y="294">11</text><text x="164" y="294">16</text><text x="214" y="294">12</text><text x="264" y="294">13</text></g><line x1="312" y1="12" x2="312" y2="294" stroke="var(--line)" stroke-width="1.5"/><text x="328" y="22" font-size="15" font-weight="700" fill="var(--ink)">aynı hatalar, iki tartı</text><text x="328" y="46" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)">|y − ŷ|: 1+1+1+3+1 = 7</text><g stroke="var(--surface)" stroke-width="1.5"><rect x="328" y="54" width="24.3" height="22" fill="var(--a)" fill-opacity="0.3"/><rect x="352.3" y="54" width="24.3" height="22" fill="var(--a)" fill-opacity="0.3"/><rect x="376.6" y="54" width="24.3" height="22" fill="var(--a)" fill-opacity="0.3"/><rect x="400.9" y="54" width="72.8" height="22" fill="var(--bad)" fill-opacity="0.35"/><rect x="473.7" y="54" width="24.3" height="22" fill="var(--a)" fill-opacity="0.3"/></g><text x="437.3" y="70" text-anchor="middle" font-size="13" fill="var(--ink)">%43</text><text x="510" y="70" font-size="14" font-weight="700" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)">MAE = 1.4</text><text x="328" y="102" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)">(y − ŷ)²: 1+1+1+9+1 = 13</text><g stroke="var(--surface)" stroke-width="1.5"><rect x="328" y="110" width="13.1" height="22" fill="var(--a)" fill-opacity="0.3"/><rect x="341.1" y="110" width="13.1" height="22" fill="var(--a)" fill-opacity="0.3"/><rect x="354.2" y="110" width="13.1" height="22" fill="var(--a)" fill-opacity="0.3"/><rect x="367.3" y="110" width="117.6" height="22" fill="var(--bad)" fill-opacity="0.35"/><rect x="484.9" y="110" width="13.1" height="22" fill="var(--a)" fill-opacity="0.3"/></g><text x="426" y="126" text-anchor="middle" font-size="13" fill="var(--ink)">%69</text><g font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)"><text x="510" y="118" font-weight="700">MSE = 2.6</text><text x="510" y="138">RMSE ≈ 1.61</text></g><text x="328" y="166" font-size="14" font-weight="700" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)">R² = 1 − 13 / 26 = 0.50</text><rect x="328" y="176" width="85" height="16" fill="var(--bad)" fill-opacity="0.35"/><text x="421" y="189" font-size="13" fill="var(--ink-soft)">model Σ(y − ŷ)² = 13</text><rect x="328" y="198" width="170" height="16" fill="var(--b)" fill-opacity="0.4"/><text x="506" y="211" font-size="13" fill="var(--ink-soft)">temel 26</text><line x1="328" y1="230" x2="632" y2="230" stroke="var(--line)" stroke-width="1.5"/><text x="328" y="252" font-size="14" font-weight="700" fill="var(--ink)">9 yerine 30 yazılırsa (outlier)</text><g font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--bad)"><text x="328" y="274">MAE 1.4 → 4.4</text><text x="468" y="274">RMSE 1.61 → 8.10</text><text x="328" y="294">R² 0.50 → −0.30: temelden kötü</text></g></svg>`,
 "m-stat":`<svg viewBox="0 0 640 286" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sekiz sınav notu bir tahterevalli üstünde: ortalama 77.25, medyan 73, mod 68; altta aynı notların kutu grafiği, Q1 68, Q3 87.5, IQR 19.5 ve 38.75 ile 116.75'teki outlier sınırları."><text x="12" y="24" font-size="15" font-weight="700" fill="var(--ink)">sekiz not</text><line x1="318" y1="52" x2="318" y2="110" stroke="var(--good)" stroke-width="2" stroke-dasharray="5 4"/><line x1="343.5" y1="52" x2="343.5" y2="110" stroke="var(--accent)" stroke-width="2"/><text x="312" y="44" text-anchor="end" font-size="14" fill="var(--ink)">medyan 73</text><text x="350" y="44" font-size="14" fill="var(--accent)">ortalama 77.25</text><line x1="236" y1="110" x2="490" y2="110" stroke="var(--ink-soft)" stroke-width="2.5"/><polygon points="337.5,123 349.5,123 343.5,111" fill="var(--accent)"/><g fill="var(--a)"><circle cx="252" cy="103" r="6"/><circle cx="288" cy="103" r="6"/><circle cx="288" cy="90" r="6"/><circle cx="306" cy="103" r="6"/><circle cx="330" cy="103" r="6"/><circle cx="390" cy="103" r="6"/><circle cx="420" cy="103" r="6"/><circle cx="474" cy="103" r="6"/></g><text x="288" y="74" text-anchor="middle" font-size="13" fill="var(--ink-soft)">mod 68</text><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)" text-anchor="middle"><text x="252" y="138">62</text><text x="285" y="138">68</text><text x="309" y="138">71</text><text x="330" y="138">75</text><text x="390" y="138">85</text><text x="420" y="138">90</text><text x="474" y="138">99</text></g><text x="12" y="204" font-size="15" font-weight="700" fill="var(--ink)">kutu</text><g stroke="var(--bad)" stroke-width="2" stroke-dasharray="6 4"><line x1="112.5" y1="172" x2="112.5" y2="224"/><line x1="580.5" y1="172" x2="580.5" y2="224"/></g><text x="106" y="164" font-size="13" fill="var(--bad)">Q1 − 1.5·IQR = 38.75</text><text x="632" y="164" text-anchor="end" font-size="13" fill="var(--bad)">Q3 + 1.5·IQR = 116.75</text><path d="M288 176v-6h117v6" fill="none" stroke="var(--ink-soft)" stroke-width="1.5"/><text x="346.5" y="164" text-anchor="middle" font-size="14" fill="var(--ink)">IQR = 19.5</text><g stroke="var(--ink-soft)" stroke-width="2"><line x1="252" y1="198" x2="288" y2="198"/><line x1="405" y1="198" x2="474" y2="198"/><line x1="252" y1="188" x2="252" y2="208"/><line x1="474" y1="188" x2="474" y2="208"/></g><rect x="288" y="180" width="117" height="36" fill="var(--a)" fill-opacity="0.15" stroke="var(--a)" stroke-width="2"/><line x1="318" y1="180" x2="318" y2="216" stroke="var(--good)" stroke-width="2.5"/><g font-size="14" fill="var(--ink)" text-anchor="middle"><text x="288" y="236">Q1 = 68</text><text x="405" y="236">Q3 = 87.5</text></g><text x="527" y="236" text-anchor="middle" font-size="14" fill="var(--ink)">outlier yok</text><line x1="60" y1="252" x2="600" y2="252" stroke="var(--ink-soft)" stroke-width="1.5"/><path d="M120 252v6M180 252v6M240 252v6M300 252v6M360 252v6M420 252v6M480 252v6M540 252v6M600 252v6" stroke="var(--ink-soft)" stroke-width="1.5"/><g font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink-soft)" text-anchor="middle"><text x="120" y="274">40</text><text x="180" y="274">50</text><text x="240" y="274">60</text><text x="300" y="274">70</text><text x="360" y="274">80</text><text x="420" y="274">90</text><text x="480" y="274">100</text><text x="540" y="274">110</text><text x="600" y="274">120</text></g><text x="12" y="274" font-size="13" fill="var(--ink-soft)">puan</text></svg>`,
 "m-svm":`<svg viewBox="0 0 640 332" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dört noktalı SVM örneği: (3, 3) ve (4, 4) sınıf +1, (2, 0) ve (0, 2) sınıf −1; yolun orta çizgisi x₁ + x₂ = 4, kaldırımlar f = ±1, halkalı üç support vector ve 2.83 genişliğinde margin."><path d="M50 30V308.4M11.6 270H290M98 30V308.4M11.6 222H290M146 30V308.4M11.6 174H290M194 30V308.4M11.6 126H290M242 30V308.4M11.6 78H290M290 30V308.4M11.6 30H290" stroke="var(--grid)" stroke-width="1.5" fill="none"/><polygon points="11.6,135.6 184.4,308.4 290,308.4 290,222 98,30 11.6,30" fill="var(--ink-soft)" fill-opacity="0.13"/><path d="M11.6 135.6L184.4 308.4" stroke="var(--ink)" stroke-width="1.6" fill="none" stroke-dasharray="6 4"/><path d="M98 30L290 222" stroke="var(--ink)" stroke-width="1.6" fill="none" stroke-dasharray="6 4"/><path d="M11.6 39.6L280.4 308.4" stroke="var(--ink)" stroke-width="2.4" fill="none"/><g fill="var(--ink)" font-size="13" text-anchor="middle"><text x="184.4" y="324.4">f = −1</text><text x="280.4" y="324.4" font-weight="700">f = 0</text><text x="98" y="24">f = +1</text></g><path d="M105 215L187 133" stroke="var(--accent)" stroke-width="2.2"/><polygon points="194,126 190.5,136.6 183.4,129.5" fill="var(--accent)"/><polygon points="98,222 101.5,211.4 108.6,218.5" fill="var(--accent)"/><text x="95" y="246" text-anchor="end" fill="var(--accent)" font-size="13" font-weight="700">margin 2.83</text><circle cx="194" cy="126" r="11.5" fill="none" stroke="var(--bad)" stroke-width="2"/><circle cx="194" cy="126" r="6.5" fill="var(--a)"/><circle cx="242" cy="78" r="6.5" fill="var(--a)"/><circle cx="146" cy="270" r="11.5" fill="none" stroke="var(--bad)" stroke-width="2"/><rect x="140" y="264" width="12" height="12" fill="var(--b)"/><circle cx="50" cy="174" r="11.5" fill="none" stroke="var(--bad)" stroke-width="2"/><rect x="44" y="168" width="12" height="12" fill="var(--b)"/><g fill="var(--ink)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace"><text x="209" y="131">(3, 3)</text><text x="230" y="83" text-anchor="end">(4, 4)</text><text x="161" y="262">(2, 0)</text><text x="65" y="166">(0, 2)</text></g><circle cx="215.6" cy="48.2" r="5.5" fill="var(--a)"/><rect x="257.6" y="42.7" width="11" height="11" fill="var(--b)"/><g fill="var(--ink)" font-size="13"><text x="224.6" y="53.2">+1</text><text x="273.6" y="53.2">−1</text></g><circle cx="146" cy="222" r="6" fill="none" stroke="var(--a)" stroke-width="2" stroke-dasharray="3 2"/><text x="148" y="245" text-anchor="middle" fill="var(--ink-soft)" font-size="13" font-family="IBM Plex Mono, ui-monospace, monospace">(2, 1)</text><text x="287" y="264" text-anchor="end" fill="var(--ink-soft)" font-size="13">x₁ →</text><text x="55" y="45" fill="var(--ink-soft)" font-size="13">x₂ ↑</text><path d="M324 12V320" stroke="var(--line)" stroke-width="1.5"/><text x="340" y="28" fill="var(--ink)" font-size="15" font-weight="700" font-family="IBM Plex Mono, ui-monospace, monospace">f = 0.5x₁ + 0.5x₂ − 2</text><g fill="var(--ink-soft)" font-size="13"><text x="340" y="56">nokta</text><text x="422" y="56" text-anchor="end">y</text><text x="474" y="56" text-anchor="end">f</text><text x="524" y="56" text-anchor="end">y · f</text></g><g font-size="14" font-family="IBM Plex Mono, ui-monospace, monospace" fill="var(--ink)"><text x="340" y="82">(3, 3)</text><text x="422" y="82" text-anchor="end">+1</text><text x="474" y="82" text-anchor="end">1</text><text x="524" y="82" text-anchor="end">1</text><text x="340" y="107">(2, 0)</text><text x="422" y="107" text-anchor="end">−1</text><text x="474" y="107" text-anchor="end">−1</text><text x="524" y="107" text-anchor="end">1</text><text x="340" y="132">(0, 2)</text><text x="422" y="132" text-anchor="end">−1</text><text x="474" y="132" text-anchor="end">−1</text><text x="524" y="132" text-anchor="end">1</text><text x="340" y="157">(4, 4)</text><text x="422" y="157" text-anchor="end">+1</text><text x="474" y="157" text-anchor="end">2</text><text x="524" y="157" text-anchor="end">2</text><text x="340" y="192">(2, 1)</text><text x="422" y="192" text-anchor="end">+1</text><text x="474" y="192" text-anchor="end">−0.5</text><text x="524" y="192" text-anchor="end">−0.5</text></g><g font-size="13"><text x="532" y="82" fill="var(--bad)">support vector</text><text x="532" y="107" fill="var(--bad)">support vector</text><text x="532" y="132" fill="var(--bad)">support vector</text><text x="532" y="157" fill="var(--ink-soft)">yolun dışında</text><text x="532" y="192" fill="var(--accent)">hinge 1.5</text></g><path d="M340 169H628" stroke="var(--line)" stroke-width="1.5"/><g fill="var(--ink)" font-size="14"><text x="340" y="231">‖w‖ = √(0.5² + 0.5²) ≈ 0.7071</text><text x="340" y="255">margin = 2 / ‖w‖ ≈ <tspan fill="var(--accent)" font-weight="700">2.83</tspan></text><text x="340" y="279" fill="var(--ink-soft)" font-size="13">kaldırımda y · f = 1, yolun dışında &gt; 1</text></g></svg>`
 };
@@ -7561,6 +7656,327 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
   ],});
 })();
 
+/* ═════════════ 29 · Hata ölçütleri ve temel model ═════════════ */
+(function(){
+  const cv=$("#c-err"), {ctx,fit}=setupCanvas(cv);
+  /* Hafta 3'ün iki sabit örneği. Öğrenci yalnız TAHMİNLERİ (ŷ) değiştirir; gerçek değerler y
+     ve temel model ȳ yerinde kalır, her hareket yalnız modelin hatasını oynatır. Adlar ve
+     birimler CONTENT'te, sayılar burada. k: sağdaki kayıp eğrisinin birimi (Göreme'de bin kişi),
+     st: kaydırıcı ve sürükleme adımı, dp: ondalık, sel: açılışta seçili örnek (büyük hatalı D,
+     bayram cuması). Beş ev sunumun tablosu. Göreme sunumdaki üreteçten (default_rng(14), 730 gün)
+     haziran başındaki bir hafta; tahmin sunumdaki LinearRegression'dan (584 eğitim günü,
+     random_state 0), 10 kişiye yuvarlı. Yeniden üretim Python'la doğrulandı: temel MAE 1158,
+     model 523 / 635 / 0.812, yarın 5663 — sunumla aynı. */
+  const DATA={
+    ev:{y:[3.0,4.5,2.0,6.0,3.5], p:[2.6,4.8,2.1,4.4,3.6], sel:3, k:1, st:.1, dp:1, ymax:8, tick:2},
+    goreme:{y:[4223,5159,3757,4014,6605,5268,4364], p:[4430,4660,4550,3950,6790,5760,5240],
+            sel:4, k:1000, st:10, dp:0, ymax:9000, tick:3000}
+  };
+  const DS=SETS("m-err"); let dsi=0;
+  const S=()=>DS[dsi], D=()=>DATA[S().gen]||DATA.ev;
+  /* P: tahminler · out: veriden çıkarılanlar (ölçütlere ve ȳ'ye girmez) · view: sağ panel */
+  let P=[], out=[], sel=0, showSq=false, showBase=false, view="pay", delta=1, drag=-1;
+
+  /* Biçimler. Göstergeler ASCII eksiyle (behaviour.js num() onu okuyor), tuval gerçek eksiyle.
+     Büyük sayı tam ve binlik boşluklu (281 209 kişi²), küçük sayı sunumdaki gibi üç ondalık
+     (0.500 · 0.566 · 0.752); 0.1'in altı dört (D'siz MSE 0.0675). */
+  const grp=(s)=>s.length>4?s.replace(/\B(?=(\d{3})+(?!\d))/g," "):s;
+  const fu=(v)=>{ if(!Number.isFinite(v)) return "—"; const a=Math.abs(v);
+    const s=a>=100?grp(a.toFixed(0)):a>=10?a.toFixed(1):(a>=.1||a===0)?a.toFixed(3):a.toFixed(4);
+    return (v<0&&/[1-9]/.test(s)?"-":"")+s; };
+  const fv=(v)=>D().dp?v.toFixed(D().dp):String(Math.round(v));
+  const fm=(v)=>D().dp?String(+v.toFixed(D().dp+1)):String(Math.round(v));
+  const fe=(e)=>{ const s=fv(Math.abs(e)); return (/[1-9]/.test(s)?(e>0?"+":"−"):"")+s; };
+  const fs=(v)=>Math.abs(v)>=100?grp(Math.abs(v).toFixed(0)):v.toFixed(2);   // toplamlar: 2.83 · 9.30
+  const fp=(v)=>v>=10?v.toFixed(1):v.toFixed(3);                              // kayıp paneli
+  const pc=(a,b)=>b>0?Math.round(100*a/b):0;
+  /* Huber: |e| ≤ δ iken ½e², ötesinde δ(|e| − δ/2) — scikit-learn / PyTorch tanımı; e panel biriminde */
+  const hub=(e)=>{ const a=Math.abs(e); return a<=delta?.5*a*a:delta*(a-.5*delta); };
+
+  /* hesap çizimden ayrı: göstergeler dar yerleşimde de bundan yazılır */
+  function stats(){
+    const d=D(), Y=d.y, idx=P.map((_,i)=>i).filter(i=>!out[i]), n=idx.length;
+    const e=idx.map(i=>Y[i]-P[i]);
+    const sa=e.reduce((s,v)=>s+Math.abs(v),0), ss=e.reduce((s,v)=>s+v*v,0), sr=e.reduce((s,v)=>s+v,0);
+    const ym=idx.reduce((s,i)=>s+Y[i],0)/n, st=idx.reduce((s,i)=>s+(Y[i]-ym)**2,0);
+    const hj=e.reduce((s,v)=>s+hub(v/d.k),0)/n;
+    return {idx,n,e,sa,ss,sr,ym,st,hj, mae:sa/n, mse:ss/n, rmse:Math.sqrt(ss/n),
+            r2:st>1e-12?1-ss/st:NaN, tb:Math.sqrt(st/n)};
+  }
+  /* Sol: sütun grafiği. Sağ: hata payı ya da kayıp eğrisi (eşik 780: %110 zoom'da da iki panel).
+     Dar yerleşimde « Kayıp eğrisi » sol grafiğin yerine geçer. */
+  const geo=()=>{ const W=cv.__w, H=cv.__h, wide=W>=780, split=wide?Math.round(W*.56):W;
+    const L=54, R=split-(wide?16:12), T=H>=240?68:52, B=H-38;   // 240: rehber açıkken (720p ~270 px) de üç satır
+    return {W,H,wide,split,L,R,T,B,cw:(R-L)/Math.max(P.length,1)}; };
+
+  function diamond(x,y,r,on){
+    ctx.save(); ctx.beginPath(); ctx.moveTo(x,y-r); ctx.lineTo(x+r,y); ctx.lineTo(x,y+r); ctx.lineTo(x-r,y); ctx.closePath();
+    ctx.fillStyle=css("--accent"); ctx.fill();
+    ctx.lineWidth=on?2.5:1.5; ctx.strokeStyle=on?css("--ink"):css("--surface"); ctx.stroke(); ctx.restore();
+  }
+  function chart(g,m){
+    const d=D(), s=S(), Yp=(v)=>g.B-v/d.ymax*(g.B-g.T), cx=(i)=>g.L+(i+.5)*g.cw;
+    ctx.fillStyle=hexA("--accent",.07); ctx.fillRect(g.L+sel*g.cw+2,g.T-8,g.cw-4,g.B-g.T+8);
+    ctx.save(); ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    for(let v=0;v<=d.ymax+1e-9;v+=d.tick){ const y=Yp(v); ctx.beginPath(); ctx.moveTo(g.L,y); ctx.lineTo(g.R,y); ctx.stroke(); }
+    ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(g.L,g.T-8); ctx.lineTo(g.L,g.B); ctx.lineTo(g.R,g.B); ctx.stroke(); ctx.restore();
+    for(let v=0;v<=d.ymax+1e-9;v+=d.tick) label(ctx,String(v),g.L-6,Yp(v),css("--ink-soft"),"right",10.5);
+    ylabel(ctx,`${s.y} (${s.yu}) →`,13,g.T-8,g.B,css("--ink-soft"),11);
+
+    /* temel model: ȳ doğrusu ve hataları turuncu, sütunun 9 px solunda; kareleri de solda
+       (modelin kırmızı kareleri sağda) — m-lin'deki düzen */
+    const yb=Yp(m.ym);
+    if(showBase){
+      ctx.save();
+      m.idx.forEach(i=>{ const x=cx(i)-9, y0=Yp(d.y[i]), sd=Math.abs(yb-y0);
+        if(showSq&&sd>=1){ const x0=Math.max(g.L+1,x-sd);
+          ctx.fillStyle=hexA("--b",.12); ctx.fillRect(x0,Math.min(y0,yb),x-x0,sd);
+          ctx.strokeStyle=hexA("--b",.5); ctx.lineWidth=1; ctx.strokeRect(x0+.5,Math.min(y0,yb)+.5,Math.max(x-x0-1,0),sd-1); }
+        ctx.strokeStyle=hexA("--b",.8); ctx.lineWidth=2; ctx.setLineDash([4,3]);
+        ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(x,yb); ctx.stroke(); ctx.setLineDash([]); });
+      ctx.strokeStyle=css("--b"); ctx.lineWidth=2.4; ctx.setLineDash([9,5]);
+      ctx.beginPath(); ctx.moveTo(g.L,yb); ctx.lineTo(g.R,yb); ctx.stroke(); ctx.setLineDash([]);
+      ctx.restore();
+    }
+    /* model: kırmızı hata çizgisi (« Kareler » açıkken kenarı hata kadar kare), daire y, karo ŷ */
+    P.forEach((p,i)=>{
+      const x=cx(i), y0=Yp(d.y[i]), y1=Yp(p), off=out[i], on=i===sel, sd=Math.abs(y1-y0);
+      ctx.save(); if(off) ctx.globalAlpha=.3;
+      if(showSq&&!off&&sd>=1){ const x0=x+2, w=Math.max(1,Math.min(sd,g.R-x0));
+        ctx.fillStyle=hexA("--bad",.13); ctx.fillRect(x0,Math.min(y0,y1),w,sd);
+        ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=1; ctx.strokeRect(x0+.5,Math.min(y0,y1)+.5,Math.max(w-1,0),sd-1); }
+      ctx.strokeStyle=hexA("--bad",.8); ctx.lineWidth=on?4:3; ctx.lineCap="round";
+      ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(x,y1); ctx.stroke();
+      disc(ctx,x,y0,6.5,css("--a"),css("--surface"));
+      diamond(x,y1,on?9.5:8,on);
+      ctx.restore();
+      const tg=s.tag&&s.tag[i];
+      if(tg) label(ctx,tg,x,Math.max(g.T-2,Math.min(y0,y1)-17),css("--ink-soft"),"center",10.5);
+      if(on) label(ctx,s.lab[i],x,g.B+12,css("--accent"),"center",12.5);
+      else label(ctx,s.lab[i],x,g.B+12,css("--ink"),"center",12);
+      if(off) label(ctx,"çıkarıldı",x,g.B+28,css("--ink-soft"),"center",10.5);
+      else label(ctx,fe(d.y[i]-p),x,g.B+28,css("--bad"),"center",11.5);
+    });
+    /* üst şerit: seçili örneğin kaybı (loss), altında düz toplamın tuzağı ya da ȳ */
+    const eS=d.y[sel]-P[sel], narrow=g.R-g.L<430;
+    const l1=narrow?`${s.lab[sel]}: y ${fv(d.y[sel])} · ŷ ${fv(P[sel])} · hata ${fe(eS)}`
+                   :`seçili ${s.lab[sel]}: y = ${fv(d.y[sel])} · ŷ = ${fv(P[sel])} · hata y − ŷ = ${fe(eS)}`;
+    const l2=out[sel]?`${s.lab[sel]} veriden çıkarıldı: ölçütlere girmiyor`
+                     :`kayıp: |hata| = ${fv(Math.abs(eS))} · hata² = ${fs(eS*eS)} ${s.ys}`;
+    let l3="";
+    if(g.H>=240){
+      if(showBase) l3=`turuncu: temel model, herkese ȳ = ${fm(m.ym)}`;
+      else if(!g.wide&&!out[sel]) l3=`${s.lab[sel]} payı: mutlakta %${pc(Math.abs(eS),m.sa)} · karede %${pc(eS*eS,m.ss)}`;
+      else l3=`düz toplam Σ(y − ŷ) = ${fe(m.sr)}: artılar eksileri götürür`;
+    }
+    legend(ctx,g.L,16,[[l1,"--accent"],[l2,"--ink"],[l3,"--ink-soft"]],{size:narrow?10.5:12,lh:17});
+  }
+
+  /* Sağ panel · hata payı: her örneğin mutlak ve kare toplamdaki payı (seçili örnek pembe);
+     « Temel model » açıkken modelin ve temel modelin kare toplamları AYNI ölçekte (oran 1 − R²) */
+  function sharePanel(g,m){
+    const s=S(), d=D(), x0=g.split+18, x1=g.W-16, bw=x1-x0, tight=g.H<300;
+    let y=16;
+    label(ctx,s.pay,x0,y,css("--ink-soft"),"left",11.5);
+    y+=tight?18:22;
+    const bar=(vals,tot,title,sum)=>{
+      label(ctx,title,x0,y,css("--ink"),"left",12);
+      if(!out[sel]) label(ctx,`${s.lab[sel]} %${pc(vals[sel],tot)}`,x1,y,css("--accent"),"right",12.5);
+      const by=y+10, bh=tight?17:22; let x=x0;
+      m.idx.forEach((i,j)=>{ const w=tot>0?vals[i]/tot*bw:bw/m.n;
+        ctx.fillStyle=i===sel?hexA("--accent",.72):hexA("--a",j%2?.34:.2); ctx.fillRect(x,by,w,bh);
+        ctx.save(); ctx.strokeStyle=css("--surface"); ctx.lineWidth=1.5; ctx.strokeRect(x,by,w,bh); ctx.restore();
+        if(i!==sel&&w>=s.lab[i].length*7+6) label(ctx,s.lab[i],x+w/2,by+bh/2,css("--ink"),"center",10.5);
+        x+=w; });
+      y=by+bh;
+      if(!tight){ label(ctx,sum,x0,y+12,css("--ink-soft"),"left",11); y+=34; } else y+=20;
+    };
+    const va=P.map((p,i)=>Math.abs(d.y[i]-p)), vk=va.map(v=>v*v);
+    bar(va,m.sa,"mutlak |y − ŷ|",`Σ = ${fs(m.sa)} → MAE = ${fs(m.sa)} / ${m.n} = ${fu(m.mae)}`);
+    bar(vk,m.ss,"kare (y − ŷ)²",`Σ = ${fs(m.ss)} → MSE = ${fs(m.ss)} / ${m.n} = ${fu(m.mse)}`);
+    y+=tight?0:4;
+    if(!showBase){ label(ctx,"« Temel model » → R²'nin kıyas çıtası burada",x0,y+4,css("--ink-soft"),"left",11); return; }
+    label(ctx,"Σ(y − ŷ)² ile Σ(y − ȳ)², aynı ölçekte",x0,y,css("--ink-soft"),"left",11.5);
+    y+=tight?12:16;
+    const mx=Math.max(m.ss,m.st)||1, bx=x0+52, bmax=Math.max(20,bw-52-78), bh=tight?13:16;
+    label(ctx,"model",x0,y+bh/2,css("--ink"),"left",11.5);
+    ctx.fillStyle=hexA("--bad",.42); ctx.fillRect(bx,y,Math.max(1,m.ss/mx*bmax),bh);
+    label(ctx,fs(m.ss),bx+m.ss/mx*bmax+6,y+bh/2,css("--ink"),"left",11);
+    y+=bh+(tight?5:7);
+    label(ctx,"temel",x0,y+bh/2,css("--ink"),"left",11.5);
+    ctx.fillStyle=hexA("--b",.45); ctx.fillRect(bx,y,Math.max(1,m.st/mx*bmax),bh);
+    label(ctx,fs(m.st),bx+m.st/mx*bmax+6,y+bh/2,css("--ink"),"left",11);
+    y+=bh+(tight?14:20);
+    const r2=Number.isFinite(m.r2)?m.r2.toFixed(3).replace("-","−"):"—";
+    label(ctx,`R² = 1 − ${fs(m.ss)} / ${fs(m.st)} = ${r2}`,x0,y,css("--ink"),"left",12.5);
+  }
+
+  /* Sağ panel · kayıp eğrisi: üç loss function; noktalar örneklerin kaybı, kesikli yatay
+     çizgiler kayıpların ortalaması = cost J (karede MSE, mutlakta MAE). Eksen panel biriminde
+     (Göreme: bin kişi) ve en büyük hataya göre genişler; dikey eksen hep kare kaybın tavanı. */
+  function lossPanel(g,m){
+    const s=S(), d=D(), k=d.k, x0=g.split+46, x1=g.W-16, y0=12, y1=g.H-36;
+    const es=m.idx.map(i=>(d.y[i]-P[i])/k), eS=(d.y[sel]-P[sel])/k;
+    let R=Math.max(1,...es.map(Math.abs),Math.abs(eS))*1.15;
+    R=Math.max(Math.ceil(R*2)/2,Math.ceil(delta*1.3*2)/2);
+    const Lm=R*R, X=(e)=>x0+(e+R)/(2*R)*(x1-x0), Yl=(v)=>y1-Math.min(v/Lm,1.03)*(y1-y0);
+    ctx.save();
+    ctx.strokeStyle=css("--grid"); ctx.lineWidth=1;
+    for(let i=1;i<4;i++){ const yy=y0+i*(y1-y0)/4; ctx.beginPath(); ctx.moveTo(x0,yy); ctx.lineTo(x1,yy); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(X(0),y0); ctx.lineTo(X(0),y1); ctx.stroke();
+    ctx.strokeStyle=css("--line"); ctx.lineWidth=1.5; ctx.strokeRect(x0,y0,x1-x0,y1-y0);
+    ctx.strokeStyle=hexA("--bad",.45); ctx.lineWidth=1.2; ctx.setLineDash([2,4]);
+    for(const sg of [-1,1]){ ctx.beginPath(); ctx.moveTo(X(sg*delta),y0); ctx.lineTo(X(sg*delta),y1); ctx.stroke(); }
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.rect(x0,y0,x1-x0,y1-y0); ctx.clip();
+    const curve=(f,col,w,dash)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.setLineDash(dash); ctx.beginPath();
+      for(let j=0;j<=160;j++){ const e=-R+2*R*j/160, px=X(e), py=Yl(f(e)); if(j) ctx.lineTo(px,py); else ctx.moveTo(px,py); }
+      ctx.stroke(); ctx.setLineDash([]); };
+    curve(e=>e*e,css("--a"),2.6,[]); curve(Math.abs,css("--c"),2.6,[]); curve(hub,css("--bad"),2.2,[7,5]);
+    [[m.mse/k/k,"--a"],[m.mae/k,"--c"],[m.hj,"--bad"]].forEach(([v,t])=>{
+      ctx.strokeStyle=hexA(t,.8); ctx.lineWidth=1.6; ctx.setLineDash([5,4]);
+      ctx.beginPath(); ctx.moveTo(x0,Yl(v)); ctx.lineTo(x1,Yl(v)); ctx.stroke(); ctx.setLineDash([]); });
+    m.idx.forEach((i,j)=>{ const e=es[j], on=i===sel, r=on?6:4.2, ring=on?css("--ink"):css("--surface");
+      disc(ctx,X(e),Yl(e*e),r,css("--a"),ring); disc(ctx,X(e),Yl(Math.abs(e)),r,css("--c"),ring);
+      disc(ctx,X(e),Yl(hub(e)),on?5:3.6,css("--bad"),ring); });
+    ctx.restore();
+    /* seçili örneğin üç kaybı noktalarının yanında, zeminli (eğrilerin üstünde okunsun);
+       birbirine binecek olanlar çizilmez — değerler aria-label'da da var */
+    if(!out[sel]){
+      const xs=X(eS), right=xs<(x0+x1)/2, al=right?"left":"right", dx=right?12:-12, used=[];
+      const free=(yy)=>used.every(u=>Math.abs(u-yy)>=17)&&yy>y0+10&&yy<y1-6;
+      const ya=Yl(eS*eS), yc=Yl(Math.abs(eS)), yh=Yl(hub(eS));
+      if(free(ya)){ used.push(ya); legend(ctx,xs+dx,ya,[[fp(eS*eS),"--a"]],{size:11,align:al}); }
+      if(free(yc)){ used.push(yc); legend(ctx,xs+dx,yc,[[fp(Math.abs(eS)),"--c"]],{size:11,align:al}); }
+      if(free(yh)){ used.push(yh); legend(ctx,xs+dx,yh,[[fp(hub(eS)),"--bad"]],{size:11,align:al}); }
+    }
+    const rt=(v)=>Number.isInteger(v)?String(v):v.toFixed(1);
+    label(ctx,"−"+rt(R),x0,y1+12,css("--ink-soft"),"left",10.5);
+    label(ctx,"0",X(0),y1+12,css("--ink-soft"),"center",10.5);
+    label(ctx,"+"+rt(R),x1,y1+12,css("--ink-soft"),"right",10.5);
+    label(ctx,"δ",X(delta)+4,y1-9,css("--bad"),"left",11);
+    label(ctx,`hata y − ŷ (${s.lu}) →`,(x0+x1)/2,g.H-10,css("--ink-soft"),"center",11);
+    ylabel(ctx,"kayıp L →",g.split+14,y0,y1,css("--ink-soft"),11);
+    legend(ctx,(x0+x1)/2,y0+16,[[`kare (y − ŷ)² · J = ${fp(m.mse/k/k)}`,"--a"],[`mutlak |y − ŷ| · J = ${fp(m.mae/k)}`,"--c"],
+      [`Huber, δ = ${delta.toFixed(1)} · J = ${fp(m.hj)}`,"--bad"],["- - J: kayıpların ortalaması","--ink-soft"]],
+      {size:11,lh:16,align:"center"});
+  }
+
+  function draw(){
+    if(!fit()) return;
+    const g=geo(), m=stats(), s=S(), d=D();
+    ctx.clearRect(0,0,g.W,g.H); ctx.fillStyle=css("--surface"); ctx.fillRect(0,0,g.W,g.H);
+    if(g.wide){
+      chart(g,m);
+      ctx.save(); ctx.strokeStyle=css("--line"); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(g.split,10); ctx.lineTo(g.split,g.H-10); ctx.stroke(); ctx.restore();
+      if(view==="loss") lossPanel(g,m); else sharePanel(g,m);
+    } else if(view==="loss") lossPanel(Object.assign({},g,{split:0}),m);
+    else chart(g,m);
+
+    /* göstergeler her dalda yazılır: dar yerleşimde son geniş çizimin değerinde donmasınlar */
+    txt("#err-u1",s.yu); txt("#err-u2",s.ys); txt("#err-u3",s.yu);
+    txt("#err-mae",fu(m.mae)); txt("#err-mse",fu(m.mse)); txt("#err-rmse",fu(m.rmse));
+    const ratio=m.mae>0?(m.rmse/m.mae).toFixed(2):"—";
+    txt("#err-ratio",ratio);
+    const r2=$("#err-r2"), r2s=Number.isFinite(m.r2)?m.r2.toFixed(3):"—";
+    r2.textContent=r2s; r2.className="v"+(!Number.isFinite(m.r2)?"":m.r2<0?" bd":m.r2<.5?" wr":" ok");
+    txt("#err-tb",fu(m.tb));
+    /* tuvaldeki sayılar ekran okuyucuya da; behaviour.js payları ve kayıpları buradan okur */
+    const eS=d.y[sel]-P[sel], kS=eS/d.k;
+    let ib=m.idx[0], vb=-1; m.idx.forEach(i=>{ const v=(d.y[i]-m.ym)**2; if(v>vb){ vb=v; ib=i; } });
+    cv.setAttribute("aria-label",`Hata ölçütleri, ${s.name}: ${m.n} ${s.item} ölçülüyor. Hatalar y − ŷ: ${m.e.map(fe).join(", ")}; düz toplam ${fe(m.sr)}. `+
+      (out[sel]?`Seçili ${s.lab[sel]} veriden çıkarıldı. `
+               :`Seçili ${s.lab[sel]}: hata ${fe(eS)}, payı mutlak hatada %${pc(Math.abs(eS),m.sa)}, kare hatada %${pc(eS*eS,m.ss)}; `+
+                `kaybı (${s.lu}) kare ${fp(kS*kS)}, mutlak ${fp(Math.abs(kS))}, Huber ${fp(hub(kS))}. `)+
+      `MAE ${fu(m.mae)}, MSE ${fu(m.mse)}, RMSE ${fu(m.rmse)} ${s.yu}; RMSE / MAE ${ratio}. `+
+      `Temel model ȳ = ${fm(m.ym)}: Σ(y − ŷ)² ${fs(m.ss)}, Σ(y − ȳ)² ${fs(m.st)}, R² ${r2s}; temel model RMSE ${fu(m.tb)}; `+
+      `temel modelin en büyük payı ${s.lab[ib]} %${pc(vb,m.st)}. Huber δ = ${delta.toFixed(1)} ${s.lu}: J ${m.hj.toFixed(4)}.`);
+  }
+
+  /* fare / parmak: karoya yakın basış sürükler, sütunun başka yerine basış yalnız seçer.
+     Kaydırıcı ve Boşluk aynı seçimi kullanır (adımlar kaydırıcıyı sürer). */
+  const hit=(q)=>{ const g=geo(); if(!g.wide&&view==="loss") return null;
+    if(q.x<g.L||q.x>g.R||q.y<g.T-12||q.y>g.B+36) return null;
+    const d=D(), i=clamp(Math.floor((q.x-g.L)/g.cw),0,P.length-1);
+    const py=g.B-P[i]/d.ymax*(g.B-g.T), px=g.L+(i+.5)*g.cw;
+    return {i, near:Math.abs(q.y-py)<=16&&Math.abs(q.x-px)<=20}; };
+  const toVal=(y)=>{ const g=geo(), d=D(), v=(g.B-y)/(g.B-g.T)*d.ymax;
+    return clamp(+(Math.round(v/d.st)*d.st).toFixed(d.dp),0,d.ymax); };
+  cv.addEventListener("pointerdown",e=>{ if(e.button!==0) return;
+    const q=pointerPos(cv,e), h=hit(q); if(!h) return;
+    sel=h.i;
+    if(h.near){ drag=h.i; cv.style.cursor="grabbing"; try{cv.setPointerCapture(e.pointerId);}catch(_){} }
+    sync(); draw(); });
+  cv.addEventListener("pointermove",e=>{ const q=pointerPos(cv,e);
+    if(drag>=0){ P[drag]=toVal(q.y); sync(); draw(); return; }
+    const h=hit(q); cv.style.cursor=h?(h.near?"grab":"pointer"):""; });
+  const end=()=>{ if(drag>=0){ drag=-1; cv.style.cursor=""; } };
+  cv.addEventListener("pointerup",end); cv.addEventListener("pointercancel",end);
+
+  /* seçimi kontrollere yansıt: kaydırıcı seçili örneğin tahmini, « Veriden çıkar » onun durumu */
+  function sync(){
+    const d=D(), s=S(), el=$("#err-p");
+    txt("#err-pl",s.lab[sel]);
+    if(el){ el.max=String(Math.round(d.ymax/d.st)); el.value=String(Math.round(P[sel]/d.st)); }
+    txt("#err-po",fv(P[sel]));
+    const o=$("#err-out"); if(o) o.setAttribute("aria-pressed",String(!!out[sel]));
+  }
+  $("#err-p").oninput=e=>{ const d=D(); P[sel]=clamp(+(+e.target.value*d.st).toFixed(d.dp),0,d.ymax);
+    txt("#err-po",fv(P[sel])); draw(); };
+  $("#err-d").oninput=e=>{ delta=clamp(+e.target.value,1,30)/10; txt("#err-do",delta.toFixed(1)); draw(); };
+  $("#err-sq").onclick=e=>{ showSq=!showSq; e.currentTarget.setAttribute("aria-pressed",String(showSq)); draw(); };
+  $("#err-base").onclick=e=>{ showBase=!showBase; e.currentTarget.setAttribute("aria-pressed",String(showBase)); draw(); };
+  /* en az iki örnek kalır: tek örnekte ȳ = y, R²'nin paydası sıfır */
+  $("#err-out").onclick=()=>{ if(!out[sel]&&out.filter(v=>!v).length<=2) return; out[sel]=!out[sel]; sync(); draw(); };
+  const setView=(v)=>{ view=v;
+    $("#err-vpay").setAttribute("aria-pressed",String(v==="pay"));
+    $("#err-vloss").setAttribute("aria-pressed",String(v==="loss"));
+    $("#err-dc").hidden=v!=="loss"; draw(); };
+  $("#err-vpay").onclick=()=>setView("pay");
+  $("#err-vloss").onclick=()=>setView("loss");
+  /* « Sıfırla »: sunumdaki tahminler, çıkarılanlar geri, seçim büyük hatalı örneğe */
+  function reset(){ const d=D(); P=d.p.slice(); out=P.map(()=>false); sel=d.sel; drag=-1; sync(); draw(); }
+  $("#err-reset").onclick=reset;
+  function useSet(i){
+    dsi=clamp(i,0,DS.length-1); delta=1;
+    const dl=$("#err-d"); if(dl) dl.value="10"; txt("#err-do","1.0");
+    reset();
+  }
+  const next=()=>{ if(!P.length) return; sel=(sel+1)%P.length; sync(); draw(); };
+
+  reg({id:"m-err",draw,space:next,init:()=>useSet(0),
+    scenarioLabel:CONTENT["m-err"].pick,
+    scenarios:DS.map((d,i)=>({name:d.name,apply(){useSet(i);}})),
+    steps:[
+    {t:"Beş ev, beş hata",d:"Sunumun beş evi. Dolu daire gerçek fiyat y, pembe karo modelin tahmini ŷ, aradaki kırmızı çizgi hata: gerçek eksi tahmin, y − ŷ. Seçili D'nin hatası +1.6 milyon TL; tek bir örneğe kesilen bu cezaya <b>loss</b> denir. Hataları düz toplarsanız +1.5 çıkar: artılar eksileri götürür, hata saklanır.",
+     set:0, run(){press("#err-reset");setPressed("#err-sq",false);setPressed("#err-base",false);press("#err-vpay");}},
+    {t:"Loss ve cost",d:"« Kayıp eğrisi »: yatay eksen hata, dikey eksen ceza. Her nokta bir evin kaybı; kesikli yatay çizgi bunların ortalaması, yani <b>cost</b> J. Kare kayıpta J = MSE = 0.566, mutlak kayıpta J = MAE = 0.500. Eğitim, J'yi en küçük yapan θ'yı arar.",
+     hl:["#err-mse","#err-mae"], run(){press("#err-reset");press("#err-vloss");}},
+    {t:"MAE: ortalama hata",d:"Mutlak hatalar 0.4, 0.3, 0.1, 1.6, 0.1; toplam 2.5, beşe bölünce <b>MAE = 0.500</b>. Okunuşu kolay: model bir evin fiyatını ortalama 500 bin TL yanlış tahmin ediyor. Sağdaki üst şerit her evin bu toplamdaki payı.",
+     hl:["#err-mae"], run(){press("#err-reset");setPressed("#err-sq",false);press("#err-vpay");}},
+    {t:"MSE ve RMSE",d:"« Kareler » açıldı: her hata, kenarı kendisi kadar bir kare oldu. Karelerin toplamı 2.83, beşe bölünce <b>MSE = 0.566</b> milyon TL². Bu birim yorumlanmaz; karekök birimi geri getirir: <b>RMSE ≈ 0.752</b>. RMSE ortalama hata değildir, ortalama hata MAE'dir; RMSE büyük hatalara ağırlık veren tipik hata büyüklüğüdür.",
+     hl:["#err-sq","#err-mse","#err-rmse"], run(){press("#err-reset");setPressed("#err-sq",true);press("#err-vpay");}},
+    {t:"Kare büyük hatayı büyütür",d:"Sağdaki iki şeride bakın: D'nin payı mutlak hatada %64, kare hatada %90; öteki dört evin kareleri neredeyse kayboldu. Bu yüzden <b>RMSE / MAE = 1.50</b>. RMSE hiçbir zaman MAE'nin altına inmez; arası açıldıysa birkaç büyük hata var demektir.",
+     hl:["#err-ratio"], run(){press("#err-reset");setPressed("#err-sq",true);press("#err-vpay");}},
+    {t:"D olmasaydı",d:"Düşünce deneyi: D veriden çıkarıldı. MAE 0.500'den 0.225'e (%55), RMSE 0.752'den 0.260'a (%65) indi; oran 1.15. Büyük hata gidince RMSE daha çok düştü ve MAE'ye yaklaştı. Ama kötü tahmin edilen evi silmek modeli iyileştirmez, yalnız raporu güzelleştirir.",
+     hl:["#err-out","#err-mae","#err-rmse","#err-ratio"], run(){press("#err-reset");press("#err-vpay");setPressed("#err-out",true);}},
+    {t:"Huber: ikisinin ortası",d:"Kırmızı kesikli eğri <b>Huber loss</b>: δ'nın içinde kare gibi kıvrılır (½e²), dışında mutlak gibi düz gider. δ = 0.5'te D'nin 1.6'lık hatasına kesilen ceza 0.675; karede 2.56 olurdu. δ'yı büyütün, Huber'in J'si MSE'nin yarısına yaklaşır; küçültün, δ · MAE'ye.",
+     hl:["#err-d"], run(){press("#err-reset");press("#err-vloss");setR("#err-d",5);}},
+    {t:"Temel model",d:"« Temel model »: herkese ortalamayı, ȳ = 3.8 milyon TL'yi söyleyen turuncu çizgi. Hiçbir şey öğrenmez; her modelin geçmesi gereken çıta odur. Onun hata kareleri toplamı 9.30, bizimki 2.83: <b>R² = 1 − 2.83 / 9.30 = 0.696</b>. Temel modelin RMSE'si 1.364, bizimki 0.752: hata yaklaşık %45 azaldı.",
+     hl:["#err-base","#err-r2","#err-tb"], run(){press("#err-reset");setPressed("#err-sq",false);setPressed("#err-base",true);press("#err-vpay");}},
+    {t:"R² sıfırın altında",d:"D'nin tahmini 2.0'a indi, hatası 4.0. Modelin hata kareleri toplamı (16.27) temel modelinkini (9.30) geçti: <b>R² = −0.75</b>. RMSE 1.80, temel modelinki 1.36; bu model herkese ortalamayı söylemekten kötü. Tahmin 3.0'dayken R² neredeyse tam 0'dı.",
+     hl:["#err-p","#err-r2","#err-rmse","#err-tb"], run(){press("#err-reset");setPressed("#err-base",true);press("#err-vpay");setR("#err-p",20);}},
+    {t:"Göreme: dev hata yok",d:"Sunumdaki üretilmiş Göreme verisinden bir haziran haftası; tahminler sunumdaki doğrusal modelden. MAE 445 kişi, RMSE 530: <b>oran 1.19</b>. Hatalar birbirine yakın büyüklükte, tahmini bozan dev bir hata yok. Sunumun 146 günlük test sonucu da böyle: MAE 523, RMSE 635.",
+     set:1, hl:["#err-mae","#err-rmse","#err-ratio"], run(){setPressed("#err-sq",false);setPressed("#err-base",false);press("#err-vpay");}},
+    {t:"Bayram cuması",d:"« Temel model » açık: herkese ȳ = 4770 kişi. Bayram cuması 6605 kişi geldi; temel model 1835 kişi ıskalıyor, model yalnız 185. Temel modelin kare hatasının %58'i bu tek gün. Model bayramı öğrenmiş: <b>R² = 0.662</b>.",
+     set:1, hl:["#err-base","#err-r2"], run(){setPressed("#err-base",true);press("#err-vpay");}},
+    {t:"Kolay günü çıkarınca",d:"Bayram cuması veriden çıkarıldı. Model aynı, tahminler aynı; MAE 445'ten yalnız 489'a çıktı, ama <b>R² 0.662'den −0.02'ye</b> indi. Kalan altı günün yayılımı küçük: temel modelin RMSE'si 563, modelinki 568. R² bir kıyastır; kıyaslanan veri değişince o da değişir.",
+     set:1, hl:["#err-out","#err-r2","#err-tb"], run(){setPressed("#err-base",true);press("#err-vpay");setPressed("#err-out",true);}}
+  ]});
+})();
+
 /* ═════════════ 11 · Lojistik regresyon ═════════════ */
 (function(){
   const cv=$("#c-log"), {ctx,fit}=setupCanvas(cv);
@@ -11567,6 +11983,7 @@ const META=[
   ["24","m-lay",   "neural network playground: layer ve neuron","Katman ekle, nöron ekle","Ek · Sinir ağları","oyun alanı playground tensorflow playground katman layer gizli katman hidden layer nöron neuron derin deep ileri yayılım forward pass epoch eğitim training aktivasyon activation relu tanh sigmoid doğrusal linear learning rate öğrenme oranı öznitelik feature daire wi-fi xor ilaç etkileşimi iki öbek sarmal spiral test kaybı"],
   ["25","m-dig",   "MNIST: piksel girdisi ve softmax","Rakamı tanıyan ağ","Ek · Sinir ağları","rakam tanıma digit recognition mnist el yazısı handwriting piksel pixel resim image girdi input softmax çıkış katmanı output layer sınıflandırma classification çiz draw gizli katman hidden layer ağırlık resmi şablon template ortalama centering konum"],
   ["26","m-cn",    "convolution ve feature map","Filtre gezdirmek","Ek · Sinir ağları","konvolüsyon convolution çekirdek kernel filtre filter cnn öznitelik haritası feature map havuzlama pooling relu sobel hava fotoğrafı tarla parseli test deseni sobel"],
+  ["29","m-err",   "MAE, RMSE, R² ve temel model","Ne kadar yanıldık?","Hafta 3","hata ölçütü error metric kayıp fonksiyonu loss function maliyet fonksiyonu cost function j theta mae ortalama mutlak hata mean absolute error mse ortalama kare hata mean squared error rmse kök ortalama kare hata root mean squared error r2 r kare belirlilik katsayısı temel model baseline dummyregressor dummyclassifier en sık sınıf huber kaybı huber loss delta 0-1 kaybı büyük hata outlier aykırı değer beş ev ev fiyatı göreme ziyaretçi bayram müze hafta 3 doğruluk"],
 ];
 /* ders sırasına dizilmiş modüller — gezinme hep bunun üzerinden */
 const SEQ=META.map(r=>MODULES.find(m=>m.id===r[1])).filter(Boolean);
@@ -11731,6 +12148,16 @@ TH["m-scale"]=(c,w,h)=>{thumbBase(c,w,h);
   for(let i=0;i<10;i++)tdot(c,w*.62+(i%4)*11,(.28+Math.floor(i/4)*.20)*h,3.4,css(i%2?"--b":"--a"));
   c.strokeStyle=css("--accent");c.lineWidth=1.8;
   c.beginPath();c.moveTo(w*.44,h*.5);c.lineTo(w*.56,h*.5);c.lineTo(w*.52,h*.44);c.moveTo(w*.56,h*.5);c.lineTo(w*.52,h*.56);c.stroke();};
+/* beş ev: gerçek değer (daire), tahmin (karo), kırmızı hata, turuncu kesikli ȳ */
+TH["m-err"]=(c,w,h)=>{thumbBase(c,w,h);
+  const ys=[.43,.64,.29,.86,.5], ps=[.37,.69,.30,.63,.51], X=(i)=>w*(.14+i*.18), Y=(v)=>h*(.92-v*.8);
+  c.strokeStyle=css("--b");c.lineWidth=2;c.setLineDash([6,4]);
+  c.beginPath();c.moveTo(w*.05,Y(.54));c.lineTo(w*.95,Y(.54));c.stroke();c.setLineDash([]);
+  c.strokeStyle=css("--bad");c.lineWidth=3;
+  ys.forEach((v,i)=>{c.beginPath();c.moveTo(X(i),Y(v));c.lineTo(X(i),Y(ps[i]));c.stroke();});
+  ys.forEach((v,i)=>tdot(c,X(i),Y(v),4.2,css("--a")));
+  c.fillStyle=css("--accent");
+  ps.forEach((v,i)=>{const x=X(i),y=Y(v),r=5.5;c.beginPath();c.moveTo(x,y-r);c.lineTo(x+r,y);c.lineTo(x,y+r);c.lineTo(x-r,y);c.closePath();c.fill();});};
 TH["m-log"]=(c,w,h)=>{thumbBase(c,w,h);
   c.strokeStyle=css("--ink-soft");c.lineWidth=1.2;c.setLineDash([4,4]);
   c.beginPath();c.moveTo(0,h*.5);c.lineTo(w,h*.5);c.stroke();c.setLineDash([]);
