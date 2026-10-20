@@ -106,7 +106,7 @@ tools/contrast.js            tuval etiketlerinin ve figür yazılarının iki te
 tools/layout.js              (isteğe bağlı) gerçek Chromium'da projeksiyon yerleşimi + figür yazıları
 tools/figspec.md             ders notu figürlerinin kuralları (Codex'e verilen şartname)
 tools/figcheck.js            tek bir figür SVG'sini denetler, iki temada PNG çıkarır
-tools/mnist_train.py         Modül 25'in gömülü rakam ağını yeniden üretir (numpy, MNIST indirir)
+tools/mnist_train.py         Modül 31'in gömülü rakam ağını yeniden üretir (numpy, MNIST indirir)
 ```
 
 ## Ders içeriği: `CONTENT`
@@ -135,7 +135,7 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   paylaşır: aynı veri dört modülde, dört ayrı ders. `note` alanı ders notu kutusunda
   görünür, bu yüzden **ölçülmüş** olmalı — "en iyi derece çoğunlukla 5" gibi bir
   cümle `tools/behaviour.js`'te sınanır.
-- **Modül 06 (`m-lin`) cevabı gizli başlatır.** Least squares doğrusu (yeşil
+- **Modül 09 (`m-lin`) cevabı gizli başlatır.** Least squares doğrusu (yeşil
   kesikli) ve sağ paneldeki dip işareti yalnız « Least squares çözümü »nden sonra
   çizilir; yeni veri, veri kümesi değişimi ve « Temizle » cevabı yeniden gizler.
   Eskiden ikisi açılışta ekrandaydı ve öğrenci kaydırıcıya dokunmadan cevabı
@@ -152,19 +152,19 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   anda son değerde (m-km kuralı). Animasyonda ikinci basış sona atlar. Tuval metni sahte DOM'da okunmadığı için
   denklem ve "gizli mi" durumu tuvalin `aria-label`'ına da yazılır, `behaviour.js`
   oradan sınar.
-- **Modül 07 (`m-mlr`) m-lin'in iki öznitelikli hâli, aynı kurallarla:** cevap gizli
+- **Modül 10 (`m-mlr`) m-lin'in iki öznitelikli hâli, aynı kurallarla:** cevap gizli
   başlar, « Least squares çözümü » düzlemi ~0.9 sn'de yerine kaydırır (yalnız çizim;
   β₁, β₂ ve göstergeler hemen son değerde, ikinci basış sona atlar). Kesme terimi kaydırıcısı
   **yok**: düzlem hep ortalama noktadan geçer (β₀ = ȳ − β₁x̄₁ − β₂x̄₂), böylece iki sıfır
   = yatay düzlem = R² tam 0 ve SSE yalnız (β₁, β₂)'ye bağlı bir kase olur; sağ panel o
   kaseyi haritalar (tıkla → katsayı seç), içi boş halka β₂ = 0 çizgisinin en iyisi, yani
-  Modül 06'nın cevabı. Sol panel 3B; « fiyat–alan » bakışı tam yandan (φ = 0) gösterir:
+  Modül 09'un cevabı. Sol panel 3B; « fiyat–alan » bakışı tam yandan (φ = 0) gösterir:
   x₂'nin üç dilimindeki çizgiler paralel, eğimleri β₁ — "öteki sabitken"in resmi. 3B
   açı veri kümesine göre (`sets[].eq.v3`): düzlem izleyiciye doğru yükselince bakış
   açısıyla birbirini götürüp tek çizgiye iniyordu. Üç küme üç ders: bağımsız öznitelik
   (katsayı değişmez), birlikte büyüyen (yarısı ötekine geçer, katsayı oynar), karıştırıcı
   (işaret döner). "Tek başına" R²'si ve denklemler `aria-label`'da; `behaviour.js` oradan okur.
-- **Modül 09 (`m-poly`) x'i ölçekler:** ölçüm aralığı [lo, hi] → [−1, 1]; ham saatle x⁴
+- **Modül 12 (`m-poly`) x'i ölçekler:** ölçüm aralığı [lo, hi] → [−1, 1]; ham saatle x⁴
   100 bini geçer (ders notunun tuzağı). Derece kaydırıcıyla 1–10; çözücü QR (m-fit gibi):
   normal denklemler 10. derecede, gri kenara eklenmiş noktalarla (u¹⁰ ≈ 270) pivotu
   yitirip "nokta yetmiyor" diyordu. 5. dereceden sonra tablo ve köşedeki denklem ortadaki
@@ -184,7 +184,7 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   ~1.2 sn'de yerine indirir (40 tık × 30 ms; köşede RMSE düşüşü, önceki eğri kesikli gri).
   Yalnız çizim kayar; göstergeler basıldığı anda son değerde, ikinci basış sona atlar.
   Düğme en iyideyken basılırsa hiçbir şey yapmaz, adımlar bu yüzden her seferinde basabilir.
-- **Modül 12 (`m-reg`) en iyi α'yı test noktalarına bakmadan seçer:** eğitim noktalarında
+- **Modül 16 (`m-reg`) en iyi α'yı test noktalarına bakmadan seçer:** eğitim noktalarında
   5 katlı CV (yeşil kesikli eğri, yeşil bant, « En iyi α · CV »); kırmızı test eğrisi
   yalnız sonucu görmek için. Eskiden bant test eğrisinin dibiydi, yani modül kendi ders
   notunun "sık yapılan hata"sını yapıyordu (Hafta 8: "α yalnız eğitimde, CV ile seçilir").
@@ -234,8 +234,8 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
     (n_init), iterasyon = atama turu (n_iter_); « Altı nokta » iyi / kötü başlangıç, J veri biriminde.
   - **20 m-dbs** hierarchical'da dendrogram + Single | Complete | Average | Ward (Lance–Williams,
     önbellekte; k yalnız keser); eps / min_samples bu modda gizli. Hilalde single ayırır, Ward ~%80.
-- **Modül 21 (`m-neu`) nöronun içini açar:** ham değer → ölçekli girdi ([lo, hi] → [0, 1],
-  Modül 02) → ağırlıklı bağlantılar → Σ ve z → aktivasyon kutusu (eğri ve z'nin düştüğü
+- **Modül 27 (`m-neu`) nöronun içini açar:** ham değer → ölçekli girdi ([lo, hi] → [0, 1],
+  Modül 04) → ağırlıklı bağlantılar → Σ ve z → aktivasyon kutusu (eğri ve z'nin düştüğü
   nokta) → ŷ; en altta hesabın kendisi. Aktivasyon (basamak / sigmoid / ReLU / yok) kararı
   DEĞİŞTİRMEZ: karar hep z ≥ 0, haritadaki sınır z = 0; aktivasyon yalnız sınırın yanındaki
   geçişi değiştirir (dersin kendisi bu). Tablolar modülün içinde (`DATA`, satır =
@@ -252,8 +252,8 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   (`init`) akış YOK: sayfa yüklenirken zamanlayıcı başlatmak öteki modüllerin
   `behaviour.js`'teki "animasyon bitti mi" sayımını bozuyordu (canlı zamanlayıcıları
   sayıyor). Kısa tuvalde bağlantı etiketleri gizlenir; aynı sayılar alt satırda.
-  Pikseller burada değil, Modül 25'te.
-- **Modül 24 (`m-lay`) TensorFlow Playground'un sadeleştirilmiş eşi:** girdi (x₁, x₂;
+  Pikseller burada değil, Modül 31'de.
+- **Modül 30 (`m-lay`) TensorFlow Playground'un sadeleştirilmiş eşi:** girdi (x₁, x₂;
   « Kare öznitelikler » açıkken + x₁², x₂², x₁x₂) → 0–4 gizli katman (1–8 nöron; kaydırıcı
   hepsini birden, katmanın üstündeki − / + tek katmanı değiştirir) → sigmoid çıkış, log
   loss, mini-batch SGD (10). 200 nokta, yarısı eğitim (dolu), yarısı test (halka); veri
@@ -267,14 +267,14 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   800 epoch'ta %62–91 oynar; metin "çoğunlukla, bazen takılır" der. Eski elle kurulan
   çokgen ağ (« Çizgilerden şekle ») bunun yerine kalktı; figürü ve elle hesabı (üç
   nöronla üçgen) ders notunda duruyor.
-- **Modül 25 (`m-dig`) önceden eğitilmiş bir ağ taşır:** MNIST (60 000 rakam), 28 × 28'in
+- **Modül 31 (`m-dig`) önceden eğitilmiş bir ağ taşır:** MNIST (60 000 rakam), 28 × 28'in
   2 × 2 ortalamasıyla 14 × 14 = 196 girdi → 32 sigmoid → 10 softmax; numpy'la 30 epoch,
   test %96.2. Ağırlıklar int8 + katman başına ölçek, base64 (~9 KB); çözücü modülün içinde
   (`atob` sahte DOM'da yok). 22 test örneği 16 gri seviye, onaltılık (ikisinde ağ bilerek
   yanılıyor: 5 → 6 %89, 4 → 6). Çizim 28 × 28 tahtaya yumuşak fırçayla (~3 piksel) yapılır
   ve MNIST'in ön işlemesinden geçer: 20 px kutuya sığdır, ağırlık merkezinden ortala,
   14 × 14'e indir. « Ortala » kapatılınca yalnız indirilir: iki piksel kaymış örneklerde
-  0 / 22, ortalayınca 21 / 22 (konuma duyarlılık → Modül 26). Gizli nöronlar ağırlık
+  0 / 22, ortalayınca 21 / 22 (konuma duyarlılık → Modül 32). Gizli nöronlar ağırlık
   resimleriyle çizilir, yanma değeri saydamlık; tıklanan nöronun resmi girdinin altında
   büyür. `#c-dig{touch-action:none}`: telefonda parmakla çizmek sayfayı kaydırmasın.
   Ağı yeniden üretmek: `python3 tools/mnist_train.py` (MNIST'i indirir, aynı tohumla
@@ -330,7 +330,7 @@ FIGS["m-knn"] = `<svg viewBox="0 0 640 H" role="img" aria-label="…">…</svg>`
   Kutu `mountTools()`'un eklediği « Ders notu » düğmesi
   ya da klavyede `?` ile açılır; `Esc` kapatır (modal açıkken Esc modülü değil kutuyu
   kapatır), perdeye tıklamak da kapatır.
-- **Modül 26 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
+- **Modül 32 (`m-cn`) hiperparametreleri kontrolden yönetir:** girdi boyu (64/128/256),
   çekirdek boyu (3×3/5×5), padding (0/1/2) ve stride (1/2/3) segment düğmelerinde,
   sonuç `⌊(girdi+2·dolgu−çekirdek)/adım⌋+1` formülüyle göstergede. Konvolüsyon
   etikete göre önbellekli (`CACHE`): imlecin her hareketinde yeniden hesaplanırsa
@@ -502,7 +502,7 @@ IIFE, en sonda `META` / `GROUPS` / `TH` ve kabuk kodu.
    - Çalıştır düğmeleri de anahtardır: eğitim koşarken tekrar basmak onu DURDURUR.
      `tick(n)` yeterli değilse ölçüm yarı eğitilmiş modelden okunur. Bitişi düğme
      metninden doğrula (`"Eğit"`e döndü mü) ve dönmediyse sürmeye devam et —
-     `m-log`'un (Modül 10) iç sayacı 400 tık, `tick(400)` tam sınırda kalıp kırılganlık üretti.
+     `m-log`'un (Modül 13) iç sayacı 400 tık, `tick(400)` tam sınırda kalıp kırılganlık üretti.
 
 ## Doğrulama
 
