@@ -5932,7 +5932,7 @@ const SETS=(id)=>(CONTENT[id]&&CONTENT[id].sets)||[];
      set:0, hl:["#dt-t"], run(){press("#dt-gini");press("#dt-vt");press("#dt-au");setR("#dt-d",1);setR("#dt-t",50);}},
     {t:"Eşiği gezdirin",d:"Sağdaki eşik eğrisi basamaklı iniyor. Neden düz değil? Çünkü eşik iki komşu nokta arasında gezerken hiçbir noktanın tarafı değişmiyor.",
      hl:["#dt-g1"], run(){press("#dt-gini");press("#dt-vt");setR("#dt-t",22);}},
-    {t:"En iyi bölme",d:"Düğme iki ekseni de tarıyor ve eğrinin dibini buluyor. Bu veride kazanan hep sıcaklık: 21 °C civarında bir eşik, Gini kazancı burada en yüksek.",
+    {t:"En iyi bölme",d:"Düğme iki ekseni de tarıyor ve eğrinin dibini buluyor. Bu veride kazanan neredeyse hep sıcaklık: 21 °C civarında bir eşik, Gini kazancı burada en yüksek.",
      hl:["#dt-gain"], run(){press("#dt-gini");press("#dt-vt");press("#dt-best");}},
     {t:"Kurallar ağacı",d:"Sağ panel ağaca döndü, derinlik 2. Pembe kutu kök sorusu, altındakiler ikinci sorular; sol dal evet, sağ dal hayır. Kökten yaprağa inen her yol okunabilir bir kural: « sıcaklık ≥ 21 VE nem ≥ 62 ise → Mildiyö riski » gibi. Eşikler verinin kendi biriminde: derece ve yüzde.",
      hl:["#dt-tree","#dt-leaf"], run(){press("#dt-gini");press("#dt-tree");setR("#dt-d",2);}},
