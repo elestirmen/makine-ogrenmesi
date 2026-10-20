@@ -26,6 +26,104 @@ const head=(t)=>console.log(`\n=== ${t} ===`);
    düğmeyi her turda geri çeviriyor ve iki koşul birbirine karışıyor */
 const P=(el,id,on)=>{const e=el(id); if((e.getAttribute('aria-pressed')==='true')!==on) e.click();};
 
+/* ── 27 · Makine öğrenmesine giriş (Hafta 1): sunumun doğru eğitimi, α, test, sınıflandırma ──
+   « On öğrenci » ve « Altı öğrenci » sabit: sayılar BİREBİR sunumdaki gibi çıkmalı (sl. 33:
+   MSE 2095 → 230 → 6). « Balon turu » rastgele: ortalama ve pay ile. Tuval metni aria-label'da. */
+{
+  head("Modül 27 · Ayar düğmeli makine (Hafta 1)");
+  const {el,M,tick,TIMERS,CONTENT}=boot(F); const mod=M.find(m=>m.id==='m-intro');
+  const AR=()=>el('c-intro').getAttribute('aria-label')||'';
+  const alive=()=>TIMERS.filter(Boolean).length;
+  const sv=(s)=>parseFloat(String(s).replace(/−/g,'-'));
+  const line=(re)=>{const m=re.exec(AR()); return m?{b0:sv(m[1]), b1:(m[2]==='−'?-1:1)*sv(m[3])}:null;};
+  /* m-neu kuralı: açılışta zamanlayıcı başlamaz (öteki modüllerin "animasyon bitti mi" sayımı) */
+  chk(alive()===0, "açılışta zamanlayıcı yok (init eğitimi başlatmıyor)", `${alive()} canlı`);
+  mod.__pick(0); el('intro-lr1').click();
+  /* adım 2: "doğru ters eğik, herkese 30'un altında not biçiyor … MSE 2095" */
+  const L0=line(/Model: ŷ = (−?[\d.]+) ([+−]) ([\d.]+)x/);
+  chk(T(el,'intro-tr')==='2095'&&T(el,'intro-t')==='0', "tur 0: MSE 2095 (sl. 33, adım 2, not)", T(el,'intro-tr'));
+  chk(!!L0&&L0.b1<0&&[2,4,5,7,8,10,12,14,16,18].every(x=>L0.b0+L0.b1*x<30), "başlangıç doğrusu ters eğik, herkese 30'un altında not biçiyor (adım 2)", L0?`ŷ = ${L0.b0} ${L0.b1}x`:'okunamadı');
+  /* adım 3 ve 4: "MSE 2095'ten 1343'e" · "beş turda MSE 230" */
+  el('intro-step').click(); const t1=T(el,'intro-tr');
+  for(let i=0;i<4;i++) el('intro-step').click(); const t5=T(el,'intro-tr');
+  chk(t1==='1343', "bir turda MSE 2095 → 1343 (adım 3)", t1);
+  chk(t5==='230'&&T(el,'intro-t')==='5'&&/İniyor/.test(T(el,'intro-st')), "beş turda MSE 230, Durum « İniyor » (sl. 33, adım 4)", `${t5} · ${T(el,'intro-st')}`);
+  /* ders notu · Learning rate: "değiştirince eğitim baştan başlar" */
+  el('intro-lr1').click();
+  chk(T(el,'intro-t')==='0'&&T(el,'intro-tr')==='2095', "α düğmesi eğitimi baştan başlatıyor (ders notu · Learning rate)");
+  /* adım 5: "« Eğit » 60. tura kadar sürüyor … MSE 5.5 (sunum 6'ya yuvarlıyor) … « Azalmıyor »" */
+  el('intro-run').click(); const on=alive()>0; tick(59); const mid=alive()>0&&T(el,'intro-t')==='59'; tick(3);
+  chk(on&&mid&&alive()===0&&T(el,'intro-t')==='60', "« Eğit » 60. tura kadar sürüp kendiliğinden duruyor (adım 5)", `tur ${T(el,'intro-t')}`);
+  chk(T(el,'intro-tr')==='5.5'&&/Azalmıyor/.test(T(el,'intro-st')), "60 turda MSE 5.5 (sunumda 6), Durum « Azalmıyor » (adım 5, not)", `${T(el,'intro-tr')} · ${T(el,'intro-st')}`);
+  chk(/Model: ŷ = 35\.0 \+ 2\.73x\./.test(AR()), "60 turda doğru ŷ = 35.0 + 2.73x'e oturuyor (not)", (/ŷ = [^.]*\.\d+x/.exec(AR())||[''])[0]);
+  /* adım 8 ve not: "60 turda test MSE'si 11.1, eğitiminki 5.5: biraz yüksek ama aynı boyda" */
+  chk(T(el,'intro-te')==='11.1'&&V(el,'intro-te')>V(el,'intro-tr'), "60 turda test MSE 11.1, eğitiminkinden biraz yüksek (adım 8, not)", T(el,'intro-te'));
+  /* adım 6: "α = 0.02 ile aynı 60 tur: doğru hâlâ yolda, MSE 21" */
+  el('intro-lr0').click(); el('intro-run').click(); tick(62);
+  chk(T(el,'intro-t')==='60'&&Math.round(V(el,'intro-tr'))===21&&/İniyor/.test(T(el,'intro-st')), "α = 0.02: 60 turda MSE hâlâ 21, Durum « İniyor » (adım 6)", `${T(el,'intro-tr')} · ${T(el,'intro-st')}`);
+  /* adım 7: "α = 1.05 … MSE 2095'ten 2534'e, sonra daha da yukarı; Durum « Iraksadı »" */
+  el('intro-lr2').click(); const up=[];
+  for(let i=0;i<10;i++){ el('intro-step').click(); up.push(V(el,'intro-tr')); }
+  chk(up[0]===2534&&up.every((v,i)=>i===0||v>up[i-1]), "α = 1.05: ilk turda 2095 → 2534, sonra her turda daha yukarı (adım 7)", up.slice(0,4).join(' → '));
+  el('intro-lr2').click(); el('intro-run').click(); tick(80);
+  chk(/Iraksadı/.test(T(el,'intro-st'))&&alive()===0, "α = 1.05: Durum « Iraksadı » ve eğitim kendiliğinden duruyor (adım 7)", `${T(el,'intro-st')} · tur ${T(el,'intro-t')}`);
+  /* ders notu · Düğmeler ve .hint: "Elle de çevirebilirsin; o zaman eğitim o noktadan, tur 0'dan başlar" */
+  el('intro-lr1').click(); for(let i=0;i<5;i++) el('intro-step').click();
+  S(el,'intro-b0',350); S(el,'intro-b1',273);
+  const manual=T(el,'intro-t')==='0'&&/Elle/.test(T(el,'intro-st')), me=V(el,'intro-tr');
+  el('intro-step').click();
+  chk(manual&&T(el,'intro-t')==='1'&&me<6&&V(el,'intro-tr')<6, "kaydırıcı tur 0'dan yeni başlangıç; eğitim elle seçilen düğmelerden sürüyor (ders notu, .hint)", `elle MSE ${me} → ${T(el,'intro-tr')}`);
+  el('intro-reset').click();
+  chk(T(el,'intro-t')==='0'&&T(el,'intro-tr')==='2095', "« Sıfırla » başlangıç düğmelerine dönüyor (ders notu · Düğmeler)");
+  /* .ask: "Düğmeleri elle çevirip daha küçük bir hata bulabilir misin?" ve adım 5 "Hata neden sıfır
+     değil?": least squares dibi 5.5, elle hiçbir ayar altına inemiyor */
+  { let mn=Infinity;
+    for(let a=330;a<=370;a++){ S(el,'intro-b0',a); for(let b=250;b<=290;b++){ S(el,'intro-b1',b); mn=Math.min(mn,V(el,'intro-tr')); } }
+    chk(mn>=5.5&&mn<6, "elle çevrilen hiçbir düğme MSE 5.5'in altına inmiyor, hata sıfır olmuyor (.ask, adım 5)", `en küçük ${mn}`); }
+
+  /* « Altı öğrenci » (sl. 16 / 45) */
+  mod.__pick(1);
+  chk(T(el,'intro-tek')==='YENİ (7, 5)'&&T(el,'intro-trk')==='Eğitim doğruluğu', "« Altı öğrenci »de test yerine YENİ öğrencinin tahmini (ders notu · Göstergeler)", T(el,'intro-tek'));
+  const SIX=[[12,2,1],[3,9,0],[18,0,1],[5,7,0],[9,3,1],[2,11,0]];
+  const S0=line(/Sınır: devamsızlık = (−?[\d.]+) ([+−]) ([\d.]+) · saat/);
+  /* adım 9 ve not: "Başlangıçta herkese Geçti diyor, doğruluk %50" (sınırın altı Geçti) */
+  chk(!!S0&&SIX.every(([a,b])=>b<S0.b0+S0.b1*a)&&T(el,'intro-tr')==='%50', "başlangıçta altı öğrencinin hepsi sınırın altında (herkese Geçti), doğruluk %50 (adım 9, not)", S0?`devamsızlık = ${S0.b0} ${S0.b1}·saat · ${T(el,'intro-tr')}`:'okunamadı');
+  el('intro-run').click(); tick(62);
+  chk(T(el,'intro-tr')==='%100'&&/\(6\/6\)/.test(AR())&&/Azalmıyor/.test(T(el,'intro-st')), "60 turda altısı da doğru tarafta (adım 9, not)", `${T(el,'intro-tr')} · ${T(el,'intro-st')}`);
+  const pN=+((/P\(Geçti\) ([\d.]+)/.exec(AR())||[0,NaN])[1]), S1=line(/Sınır: devamsızlık = (−?[\d.]+) ([+−]) ([\d.]+) · saat/);
+  chk(Math.abs(pN-.5)<.05&&!!S1&&Math.abs(S1.b0+S1.b1*7-5)<.6, "YENİ (7, 5) sınırın neredeyse üstünde: P(Geçti) 0.5'e çok yakın (adım 10, not)", `P ${pN} · sınır x₁ = 7'de ${S1?(S1.b0+S1.b1*7).toFixed(2):'?'}`);
+  /* ex: sunumun elle KNN'i (sl. 47–48). Metindeki her uzaklık ve oy tablodan yeniden hesaplanır. */
+  { const ex=CONTENT['m-intro'].lesson.ex.s.join(' ').replace(/<[^>]+>/g,'');
+    const nm='ABCDEF', d=SIX.map(([a,b,y],i)=>({n:nm[i],y,d2:(7-a)**2+(5-b)**2}));
+    const miss=d.filter(r=>!ex.includes(`√${r.d2} ≈ ${Math.sqrt(r.d2).toFixed(2)}`)&&!ex.includes(`√${r.d2} ≈ ${Math.sqrt(r.d2).toFixed(2)}`.replace(/(\.\d)0$/,'$1')));
+    const ord=[...d].sort((p,q)=>p.d2-q.d2), k3=ord.slice(0,3), k5=ord.slice(0,5);
+    const fail3=k3.filter(r=>r.y===0).length, fail5=k5.filter(r=>r.y===0).length;
+    chk(miss.length===0, "ders notu · Elle hesapla: altı uzaklık tablodan yeniden hesaplanınca aynı (√34, √32, √146, √8, √8, √61)", miss.map(r=>r.n).join(',')||'hepsi');
+    chk(ord[0].d2===ord[1].d2&&ord[0].y!==ord[1].y&&/D \(Kaldı\) ile E \(Geçti\) tam olarak eşit/.test(ex), "k = 1: D ile E eşit uzaklıkta, sınıfları farklı (ex, figür)");
+    chk(k3.map(r=>r.n).sort().join('')==='BDE'&&fail3===2&&/Kaldı 2, Geçti 1/.test(ex)&&/2 \/ 3 ≈ 0\.67/.test(ex), "k = 3: D, E, B → Kaldı 2–1, olasılık 0.67 (ex, figür)");
+    chk(fail5===3&&/Kaldı 3 \(D, B, F\), Geçti 2 \(E, A\)/.test(ex), "k = 5: Kaldı 3, Geçti 2 (ex)"); }
+
+  /* « Balon turu » (sl. 59–61): 120 eğitim / 30 test, rastgele. Not ve adım 11: "eğitim ve test
+     doğruluğu ortalamada ikisi de %85 civarında … tek çekilişte %65 ile %95 arasında oynayabilir …
+     %100'e de çıkmıyor". 40 çekilişte ölçüldü: eğitim ort 84.5 (75–91), test 83.6 (63–97). */
+  mod.__pick(2);
+  const B={tr:[],te:[],st:[],split:0};
+  for(let t=0;t<48;t++){ el('intro-new').click();
+    if(/\(\d+\/120\)/.test(AR())&&/\(\d+\/30\)/.test(AR())) B.split++;
+    el('intro-run').click(); tick(62);
+    B.tr.push(sv(T(el,'intro-tr').slice(1))); B.te.push(sv(T(el,'intro-te').slice(1))); B.st.push(T(el,'intro-st')); }
+  const mtr=mean(B.tr), mte=mean(B.te), in95=B.te.filter(v=>v>=65&&v<=95).length/B.te.length;
+  console.log(`       balon, 48 çekiliş: eğitim ort %${mtr.toFixed(1)} (${Math.min(...B.tr)}–${Math.max(...B.tr)}) · test ort %${mte.toFixed(1)} (${Math.min(...B.te)}–${Math.max(...B.te)}) · test 65–95 içinde ${(100*in95).toFixed(0)}%`);
+  chk(B.split===48, "120 eğitim, 30 test sabahı (%80 / %20; not, adım 11)", `${B.split}/48`);
+  chk(Math.abs(mtr-85)<=4&&Math.abs(mte-85)<=4, "eğitim ve test doğruluğu ortalamada ikisi de %85 civarında (not, adım 11)", `%${mtr.toFixed(1)} / %${mte.toFixed(1)}`);
+  /* 48 çekilişin ortalama farkının std'si ~1.2 puan (7 koşuda −1.6…+2.6 görüldü): eşik 4 ≈ 3.5σ */
+  chk(Math.abs(mtr-mte)<=4, "eğitim ile test ortalamada birbirine yakın: ezber yok (not, adım 11, .ask)", `fark ${(mtr-mte).toFixed(1)} puan`);
+  chk(in95>=.85, "tek çekilişte test doğruluğu çoğunlukla %65–95 arasında (not)", `${(100*in95).toFixed(0)}%`);
+  chk(Math.max(...B.tr)<100, "tek doğru köşeyi çizemiyor: eğitim doğruluğu %100'e çıkmıyor (not, adım 11)", `en yüksek %${Math.max(...B.tr)}`);
+  chk(B.st.filter(s=>/Azalmıyor/.test(s)).length>=43, "60 turda kayıp düzleşmiş, Durum « Azalmıyor » (ders notu · Sağ panel)", `${B.st.filter(s=>/Azalmıyor/.test(s)).length}/48`);
+  mod.__pick(0);
+}
+
 /* ── 20 · Çok katmanlı ağ: h=1 XOR'u çözemez, h≥2 çözer ── */
 {
   console.log("=== Modül 23 · Gizli katman (XOR) ===");
