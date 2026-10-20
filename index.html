@@ -1996,8 +1996,10 @@ function setupCanvas(cv){
    Tuvaldeki nokta, çubuk, hücre, eğri ve çizgiler çizilirken tip(şekil, satırlar) ile kaydedilir;
    fare üstüne gelince değerleri küçük bir kutuda görünür (dokunmatikte dokununca).
    Şekil (tuval pikseli): {x,y,r} daire · {x,y,w,h} dikdörtgen · {x0,x1,fy,d} eğri, fy(mx) eğrinin
-   y'si, d yakalama payı (7) · {all:true} bütün tuval (zemin haritası). Öncelik z: daire 3, eğri 2,
-   dikdörtgen 1, zemin 0 (s.z ile değişir); eşitte dairede en yakın, ötekilerde SONRA çizilen.
+   y'si, d yakalama payı (7) · {x0,y0,x1,y1,d} doğru parçası (dik uzaklık; dik çizgide de yakalar)
+   · {all:true} bütün tuval (zemin haritası). Öncelik z: daire 3, eğri / parça 2, dikdörtgen 1,
+   zemin 0 (s.z ile değişir); eşitte dairede ve parçada en yakın, ötekilerde SONRA çizilen.
+   Satır fonksiyonu null dönerse sıradaki adaya geçilir (demetin boş yerinde alttaki öğe görünür).
    Satırlar: dizi ya da (mx,my)=>dizi (çok hücreli ızgarada tek dikdörtgen + fonksiyon); satır
    "metin" ya da ["metin","--token"], ilk satır başlık. Metin rengi --ink, --ink-soft, --accent,
    --a, --c, --good, --bad. Kutu HTML (tema token'larıyla): tuvale çizilmez, draw() bilmez.
@@ -2007,24 +2009,33 @@ function tipAnchor(s){
   if(s.all) return null;
   if(s.r!==undefined) return [s.x,s.y];
   if(s.fy){ const x=(s.x0+s.x1)/2; return [x,s.fy(x)]; }
+  if(s.y0!==undefined) return [(s.x0+s.x1)/2,(s.y0+s.y1)/2];
   return [s.x+s.w/2,s.y+s.h/2];
 }
-function tipHit(cv,mx,my){
-  let best=null, bz=-1, bd=Infinity;
-  (cv.__tips||[]).forEach(t=>{ const s=t.s; let z, d;
+/* imlecin altındaki adaylar, öncelik sırasıyla */
+function tipCands(cv,mx,my){
+  const C=[];
+  (cv.__tips||[]).forEach((t,i)=>{ const s=t.s; let z, d;
     if(s.all){ z=0; d=0; }
     else if(s.r!==undefined){ d=Math.hypot(mx-s.x,my-s.y); if(d>Math.max(s.r+4,9)) return; z=3; }
     else if(s.fy){ if(mx<s.x0||mx>s.x1) return; d=Math.abs(my-s.fy(mx)); if(!(d<=(s.d||7))) return; z=2; }
+    else if(s.y0!==undefined){ const vx=s.x1-s.x0, vy=s.y1-s.y0, L=vx*vx+vy*vy||1e-9;
+      const k=clamp(((mx-s.x0)*vx+(my-s.y0)*vy)/L,0,1); d=Math.hypot(mx-s.x0-k*vx,my-s.y0-k*vy);
+      if(!(d<=(s.d||6))) return; z=2; }
     else { if(mx<s.x||mx>s.x+s.w||my<s.y||my>s.y+s.h) return; z=1; d=0; }
     if(s.z!==undefined) z=s.z;
-    if(z>bz||(z===bz&&(z===3?d<bd:true))){ best=t; bz=z; bd=d; } });
-  return best;
+    C.push({t,z,d,i}); });
+  C.sort((a,b)=>b.z-a.z||(a.d!==b.d&&(a.t.s.r!==undefined||a.t.s.y0!==undefined)?a.d-b.d:b.i-a.i));
+  return C.map(c=>c.t);
 }
+function tipHit(cv,mx,my){ return tipCands(cv,mx,my)[0]||null; }
 function tipShow(cv,mx,my){
-  const t=tipHit(cv,mx,my); let rows=null;
-  if(t){ try{ rows=tipRows(t,mx,my); }catch(e){ rows=null; } }
+  let t=null, rows=null;
+  for(const c of tipCands(cv,mx,my)){
+    try{ rows=tipRows(c,mx,my); }catch(e){ rows=null; }
+    if(rows&&rows.length){ t=c; break; } }
   let el=cv.__tipEl;
-  if(!rows||!rows.length){ if(el) el.classList.remove("on"); cv.__tipOn=false; return; }
+  if(!t){ if(el) el.classList.remove("on"); cv.__tipOn=false; return; }
   const host=cv.parentNode; if(!host) return;
   if(!el){ el=document.createElement("div"); el.className="ptip"; el.setAttribute("aria-hidden","true"); host.appendChild(el); cv.__tipEl=el; }
   const esc=(v)=>String(v).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
